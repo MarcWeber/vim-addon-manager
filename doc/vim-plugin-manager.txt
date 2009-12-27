@@ -1,0 +1,79 @@
+*vim-plugin-manager.txt*
+Idea: let users install vim plugins with a minimum of work.
+
+------------------------------------------------------------------------------
+a plugin ~
+
+A plugin is directory NAME containing vim runtimefiles (-> :h vimruntime)
+Additionally it contains a file:
+  NAME/plugin-info.txt
+
+------------------------------------------------------------------------------
+NAME/plugin-info.txt ~
+is read by scriptmanager#ReadPluginInfo
+{
+'name' : NAME,
+'version' : "2.0",
+'author' : "surname lastname <email>",
+'maintainer' : "surname lastname <email>,
+'repository' : REPO,
+'dependencies' : { 'name' : REPO }
+'description': ''
+}
+
+where REPO =
+  { 'type' : 'git', 'url' : 'git://' ... }
+  or 
+  { 'type' : 'svn', 'url' : 'git://' ... }
+  or 
+  ..
+
+
+------------------------------------------------------------------------------
+INSTALLING THIS VIM PLUGIN ~
+
+Add to your .vimrc:
+
+  set vimruntimepath+=PATH_TO_vim-plugin-manager
+  call scriptmanager#Activate(["name1","name2"])
+
+  " if you execute this line before activating plugin/* scripts won't be run!
+  filetype plugin on
+
+
+
+------------------------------------------------------------------------------
+howto install & activate a plugin ~
+
+INSTALL:
+
+  way 1 (manual):
+    manually put the plugin contents in the directory which contains vim-repository-manager.
+
+  way 2 (automatic):
+
+    call scriptmanager#Install("name")
+    or
+    call scriptmanager#Install([PATH_OR_URL/plugin-info.txt])
+
+    " this will download the repository and its dependencies and put them into
+    " the directory containing vim-script-manager
+
+
+ACTIVATE:
+
+  call scriptmanager#Activate(["name1","name2"])
+ (before filetype plugin on)
+
+  " dependencies will be activated automatically
+
+
+------------------------------------------------------------------------------
+Example install list of all known repositories ~
+call scriptmanager#Install(["vim-plugin-manager-known-repositories"])
+
+------------------------------------------------------------------------------
+historical notes ~
+This is a KISS reimplementation of http://github.com/MarcWeber/theonevimlib
+
+vim:tw=78:fo=tcq2:isk=!-~,^*,^\|,^\":ts=8:ft=help:norl:
