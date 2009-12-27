@@ -1,7 +1,7 @@
 " see README
 
 fun! scriptmanager#DefineAndBind(local,global,default)
-  return 'if !exists('.string(a:global).') | let g:vim_script_manager = '.a:default.' | endif | let '.a:local.' = '.a:global
+  return 'if !exists('.string(a:global).') | let '.a:global.' = '.a:default.' | endif | let '.a:local.' = '.a:global
 endf
 exec scriptmanager#DefineAndBind('s:c','g:vim_script_manager','{}')
 
