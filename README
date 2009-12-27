@@ -25,12 +25,25 @@ where REPO =
   or 
   ..
 
-== howto install / activate a plugin ==
+
+== INSTALLING THIS VIM PLUGIN ==
+
+Add to your .vimrc:
+
+  set vimruntimepath+=PATH_TO_vim-plugin-manager
+  call scriptmanager#Activate(["name1","name2"])
+
+  " if you execute this line before activating plugin/* scripts won't be run!
+  filetype plugin on
+
+
+
+== howto install & activate a plugin ==
 
 INSTALL:
 
   way 1 (manual):
-  manually put the plugin contents in the directory which contains vim-repository-manager.
+    manually put the plugin contents in the directory which contains vim-repository-manager.
 
   way 2 (automatic):
 
@@ -38,19 +51,19 @@ INSTALL:
     or
     call scriptmanager#Install([PATH_OR_URL/plugin-info.txt])
 
-  this will download the repository and its dependencies and put them into the directory containing vim-script-manager
+    " this will download the repository and its dependencies and put them into
+    " the directory containing vim-script-manager
 
 
 ACTIVATE:
 
-  set vimruntimepath+=PATH_TO_vim-plugin-manager
-
   call scriptmanager#Activate(["name1","name2"])
+ (before filetype plugin on)
 
-  dependencies will be activated automatically
+  " dependencies will be activated automatically
 
 
-== known repositories: ==
+== Example install list of all known repositories ==
 call scriptmanager#Install(["vim-plugin-manager-known-repositories"])
 
 == historical notes ==
