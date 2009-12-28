@@ -30,7 +30,7 @@ endf
 fun! scriptmanager#Checkout(targetDir, repository)
   if a:repository['type'] == 'git'
     let parent = fnamemodify(a:targetDir,':h')
-    exec '!cd '.scriptmanager#ShellEscape(parent).'; git clone 'scriptmanager#ShellEscape(a:repository['url'])
+    exec '!cd '.scriptmanager#ShellEscape(parent).'; git clone '.scriptmanager#ShellEscape(a:repository['url']).' 'scriptmanager#ShellEscape(a:targetDir)
     if !isdirectory(a:targetDir)
       throw "failed checking out ".a:targetDir." \n".str
     endif
@@ -95,8 +95,10 @@ fun! scriptmanager#Activate(list_of_names, ...)
       if !filereadable(infoFile)
         call scriptmanager#Install([name], opts)
       endif
-      let info = scriptmanager#ReadPluginInfo(infoFile)
-      let dependencies = get(info,'dependencies', [])
+      let info = filereadable(infoFile)
+        \ ? scriptmanager#ReadPluginInfo(infoFile)
+        \ : {}
+      let dependencies = get(info,'dependencies', {})
 
       " activate dependencies merging opts with given repository sources
       " sources given in opts will win
