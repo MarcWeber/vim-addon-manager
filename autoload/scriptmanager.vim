@@ -66,7 +66,7 @@ fun! scriptmanager#Install(toBeInstalledList, ...)
       call scriptmanager#Checkout(pluginDir, repository)
       " install dependencies
       
-      let infoFile = pluginDir.'/'.name.'/plugin-info.txt'
+      let infoFile = pluginDir.'/plugin-info.txt'
       let info = scriptmanager#ReadPluginInfo(infoFile)
       let dependencies = get(info,'dependencies', [])
 
@@ -91,7 +91,7 @@ fun! scriptmanager#Activate(list_of_names, ...)
       " break circular dependencies..
       let s:c['activated_plugins'][name] = 0
 
-      let infoFile = s:c['plugin_root_dir'].'/'.name.'/plugin-info.txt'
+      let infoFile = s:c['plugin_root_dir'].'/plugin-info.txt'
       if !filereadable(infoFile)
         call scriptmanager#Install([name], opts)
       endif
