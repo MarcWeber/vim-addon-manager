@@ -78,10 +78,13 @@ fun! scriptmanager#Install(toBeInstalledList, ...)
       let pluginDir = scriptmanager#PluginDirByName(name)
       call scriptmanager#Checkout(pluginDir, repository)
       " install dependencies
-      
+     
       let infoFile = pluginDir.'/plugin-info.txt'
-      let info = scriptmanager#ReadPluginInfo(infoFile)
-      let dependencies = get(info,'dependencies', [])
+      let info = filereadable(infoFile)
+        \ ? scriptmanager#ReadPluginInfo(infoFile)
+        \ : {}
+
+      let dependencies = get(info,'dependencies', {})
 
       " install dependencies merging opts with given repository sources
       " sources given in opts will win
