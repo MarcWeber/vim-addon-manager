@@ -37,10 +37,8 @@ Add to your .vimrc:
   set vimruntimepath+=PATH_TO_vim-plugin-manager
   call scriptmanager#Activate(["name1","name2"])
 
-  " if you execute this line before activating plugin/* scripts won't be run!
-  filetype plugin on
-
-
+Note: care is taken that plugin/*.vim and after/plugin/*.vim scripts are
+sourced in this order no matter when you call Activate()
 
 ------------------------------------------------------------------------------
 howto install & activate a plugin ~

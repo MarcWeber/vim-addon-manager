@@ -99,7 +99,7 @@ endf
 "   'auto_install': when 1 overrides global setting, so you can autoinstall
 "   trusted repositories only
 " }
-fun! scriptmanager#Activate(list_of_names, ...)
+fun! scriptmanager#ActivateRecursively(list_of_names, ...)
   let opts = a:0 == 0 ? {} : a:1
 
   for name in a:list_of_names
@@ -123,6 +123,55 @@ fun! scriptmanager#Activate(list_of_names, ...)
     endif
     " source plugin/* files ?
     exec "set runtimepath+=".s:c['plugin_root_dir'].'/'.name
-    let s:c['activated_plugins'][name] = 1
+
+    if has_key(s:c, 'started_up')
+      call scriptmanager#GlobThenSource(scriptmanager#PluginDirByName(name).'/plugin/**/*.vim')
+    endif
+
+      let s:c['activated_plugins'][name] = 1
+  endfor
+endf
+
+" see also ActivateRecursively
+" Activate activates the plugins and their dependencies recursively.
+" I sources both: plugin/*.vim and after/plugin/*.vim files when called after
+" .vimrc has been sourced which happens when you activate plugins manually.
+fun! scriptmanager#Activate(...)
+  let active = copy(s:c['activated_plugins'])
+  call call('scriptmanager#ActivateRecursively', a:000)
+
+  if has_key(s:c, 'started_up')
+    " now source after/plugin/**/*.vim files explicitely. Vim doesn't do it (hack!)
+    for k in keys(s:c['activated_plugins'])
+      if !has_key(active, k)
+        call scriptmanager#GlobThenSource(scriptmanager#PluginDirByName(k).'/after/plugin/**/*.vim')
+      endif
+    endfor
+  endif
+endfun
+
+fun! scriptmanager#Update()
+  throw "to be implemented"
+endf
+
+fun! scriptmanager#GlobThenSource(glob)
+  for file in split(glob(a:glob),"\n")
+    exec 'source '.file
+  endfor
+endf
+
+augroup VIM_PLUGIN_MANAGER
+  autocmd VimEnter * call  scriptmanager#Hack()
+augroup end
+
+" hack: Vim sources plugin files after sourcing .vimrc
+"       Vim dosen't source the after/plugin/*.vim files in other runtime
+"       paths. So do this *after* plugin/* files have been sourced
+fun! scriptmanager#Hack()
+  let s:c['started_up'] = 1
+
+  " now source after/plugin/**/*.vim files explicitely. Vim doesn't do it (hack!)
+  for p in keys(s:c['activated_plugins'])
+      call scriptmanager#GlobThenSource(scriptmanager#PluginDirByName(p).'/after/plugin/**/*.vim')
   endfor
 endf
