@@ -32,12 +32,25 @@ fun! scriptmanager#Checkout(targetDir, repository)
     endif
   " can $VIMRUNTIME/autoload/getscript.vim be reused ? don't think so.. one
   " big function
-  elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '.zip$'
+  elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.zip$'
     call mkdir(a:targetDir)
     let aname = shellescape(a:repository['archive_name'])
     exec '!cd '.shellescape(a:targetDir).' &&'
        \ .'curl -o '.aname.' '.shellescape(a:repository['url']).' &&'
        \ .'unzip '.aname
+  elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.vba\%(\.gz\)\?$'
+    call mkdir(a:targetDir)
+    let a = a:repository['archive_name']
+    let aname = shellescape(a)
+    exec '!cd '.shellescape(a:targetDir).' &&'
+       \ .'curl -o '.aname.' '.shellescape(a:repository['url']).' &&'
+    if a =~ '\.gz'
+      " manually unzip .vba.gz as .gz isn't unpacked yet for some reason
+      exec '!gunzip '.a:targetDir.'/'.a
+      let a = a[:-4]
+    endif
+    exec 'sp '.a:targetDir.'/'.a
+    debug call vimball#Vimball(1,a:targetDir)
   else
     throw "don't know how to checkout source location: ".string(a:repository)
   endif
