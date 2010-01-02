@@ -37,6 +37,9 @@ Add to your .vimrc:
   set vimruntimepath+=PATH_TO_vim-plugin-manager
   call scriptmanager#Activate(["name1","name2"])
 
+This is enough to install and activate the plugins.
+activating means adding the plugin path to runtimepath.
+
 Note: care is taken that plugin/*.vim and after/plugin/*.vim scripts are
 sourced in this order no matter when you call Activate()
 
