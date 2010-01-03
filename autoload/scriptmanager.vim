@@ -30,6 +30,12 @@ fun! scriptmanager#Checkout(targetDir, repository)
     if !isdirectory(a:targetDir)
       throw "failed checking out ".a:targetDir." \n".str
     endif
+  elseif a:repository['type'] == 'svn'
+    let parent = fnamemodify(a:targetDir,':h')
+    exec '!cd '.shellescape(parent).'; svn checkout '.shellescape(a:repository['url']).' '.shellescape(a:targetDir)
+    if !isdirectory(a:targetDir)
+      throw "failed checking out ".a:targetDir." \n".str
+    endif
   " can $VIMRUNTIME/autoload/getscript.vim be reused ? don't think so.. one
   " big function
   elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.zip$'
