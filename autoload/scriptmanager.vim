@@ -1,5 +1,12 @@
 " see README
 
+augroup SCRIPT_MANAGER
+  autocmd BufRead,BufNewFile *-plugin-info.txt
+    \ setlocal ft=plugin-info
+    \ | setlocal syntax=json
+    \ | syn match Error "^\s*'"
+augroup end
+
 fun! scriptmanager#DefineAndBind(local,global,default)
   return 'if !exists('.string(a:global).') | let '.a:global.' = '.a:default.' | endif | let '.a:local.' = '.a:global
 endf
