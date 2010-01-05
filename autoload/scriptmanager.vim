@@ -5,6 +5,7 @@ augroup SCRIPT_MANAGER
     \ setlocal ft=plugin-info
     \ | setlocal syntax=json
     \ | syn match Error "^\s*'"
+  autocmd BufWritePost *-plugin-info.txt call scriptmanager#ReadPluginInfo(expand('%'))
 augroup end
 
 fun! scriptmanager#DefineAndBind(local,global,default)

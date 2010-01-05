@@ -1,7 +1,7 @@
 {
   "name" : "vim-plugin-manager",
   "version" : "0.0",
-  "author" : "Marc Weber <marco-oweber@gmx.de>',
+  "author" : "Marc Weber <marco-oweber@gmx.de>",
   "maintainer" : "Marc Weber <marco-oweber@gmx.de>",
   "repository" : {"type": "git", "url": "git://github.com/MarcWeber/vim-plugin-manager.git"},
   "dependencies" : {},
