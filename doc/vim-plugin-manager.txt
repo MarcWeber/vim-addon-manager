@@ -6,10 +6,10 @@ a plugin ~
 
 A plugin is directory NAME containing vim runtimefiles (-> :h vimruntime)
 Additionally it contains a file:
-  NAME/plugin-info.txt
+  NAME/NAME-info.txt
 
 ------------------------------------------------------------------------------
-NAME/plugin-info.txt ~
+NAME/NAME-info.txt ~
 is read by scriptmanager#ReadPluginInfo
 {
 'name' : NAME,
@@ -55,7 +55,7 @@ INSTALL:
 
     call scriptmanager#Install("name")
     or
-    call scriptmanager#Install([PATH_OR_URL/plugin-info.txt])
+    call scriptmanager#Install([PATH_OR_URL/NAME-info.txt])
 
     " this will download the repository and its dependencies and put them into
     " the directory containing vim-script-manager

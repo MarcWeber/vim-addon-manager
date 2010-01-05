@@ -98,7 +98,7 @@ fun! scriptmanager#Install(toBeInstalledList, ...)
       call scriptmanager#Checkout(pluginDir, repository)
       " install dependencies
      
-      let infoFile = pluginDir.'/plugin-info.txt'
+      let infoFile = scriptmanager#PluginInfo(name)
       let info = filereadable(infoFile)
         \ ? scriptmanager#ReadPluginInfo(infoFile)
         \ : {}
@@ -126,7 +126,7 @@ fun! scriptmanager#ActivateRecursively(list_of_names, ...)
       " break circular dependencies..
       let s:c['activated_plugins'][name] = 0
 
-      let infoFile = scriptmanager#PluginDirByName(name).'/plugin-info.txt'
+      let infoFile = scriptmanager#PluginInfo(name)
       if !filereadable(infoFile)
         call scriptmanager#Install([name], opts)
       endif
@@ -184,13 +184,23 @@ augroup VIM_PLUGIN_MANAGER
 augroup end
 
 " hack: Vim sources plugin files after sourcing .vimrc
-"       Vim dosen't source the after/plugin/*.vim files in other runtime
+"       Vim doesn't source the after/plugin/*.vim files in other runtime
 "       paths. So do this *after* plugin/* files have been sourced
 fun! scriptmanager#Hack()
   let s:c['started_up'] = 1
 
-  " now source after/plugin/**/*.vim files explicitely. Vim doesn't do it (hack!)
+  " now source after/plugin/**/*.vim files explicitly. Vim doesn't do it (hack!)
   for p in keys(s:c['activated_plugins'])
       call scriptmanager#GlobThenSource(scriptmanager#PluginDirByName(p).'/after/plugin/**/*.vim')
   endfor
+endf
+
+fun! scriptmanager#PluginInfo(name)
+  " this name is deprecated
+  let f = scriptmanager#PluginDirByName(a:name).'/plugin-info.txt'
+  if filereadable(f)
+    return f
+  else
+    return scriptmanager#PluginDirByName(a:name).'/'.a:name.'-info.txt'
+  endif
 endf
