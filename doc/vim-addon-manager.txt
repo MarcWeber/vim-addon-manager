@@ -1,4 +1,4 @@
-*vim-plugin-manager.txt*
+*vim-addon-manager.txt*
 Idea: let users install vim plugins with a minimum of work.
 
 ------------------------------------------------------------------------------
@@ -38,7 +38,7 @@ INSTALLING THIS VIM PLUGIN ~
 
 Add to your .vimrc:
 
-  set vimruntimepath+=PATH_TO_vim-plugin-manager
+  set vimruntimepath+=PATH_TO_vim-addon-manager
   call scriptmanager#Activate(["name1","name2"])
 
 This is enough to install and activate the plugins.
@@ -75,7 +75,7 @@ ACTIVATE:
 
 ------------------------------------------------------------------------------
 Example install list of all known repositories ~
-call scriptmanager#Install(["vim-plugin-manager-known-repositories"])
+call scriptmanager#Install(["vim-addon-manager-known-repositories"])
 
 ------------------------------------------------------------------------------
 historical notes ~

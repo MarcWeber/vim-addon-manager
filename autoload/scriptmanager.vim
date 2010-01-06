@@ -1,11 +1,11 @@
 " see README
 
 augroup SCRIPT_MANAGER
-  autocmd BufRead,BufNewFile *-plugin-info.txt
-    \ setlocal ft=plugin-info
+  autocmd BufRead,BufNewFile *-addon-info.txt
+    \ setlocal ft=addon-info
     \ | setlocal syntax=json
     \ | syn match Error "^\s*'"
-  autocmd BufWritePost *-plugin-info.txt call scriptmanager#ReadPluginInfo(expand('%'))
+  autocmd BufWritePost *-addon-info.txt call scriptmanager#ReadPluginInfo(expand('%'))
 augroup end
 
 fun! scriptmanager#DefineAndBind(local,global,default)
@@ -21,8 +21,8 @@ let s:c['activated_plugins'] = {}
 let s:c['plugin_root_dir'] = fnamemodify(expand('<sfile>'),':h:h:h')
 
 " additional plugin sources should go into your .vimrc or into the repository
-" called "vim-plugin-manager-known-repositories" referenced here:
-let s:c['plugin_sources']["vim-plugin-manager-known-repositories"] = { 'type' : 'git', 'url': 'git://github.com/MarcWeber/vim-plugin-manager-known-repositories.git' }
+" called "vim-addon-manager-known-repositories" referenced here:
+let s:c['plugin_sources']["vim-addon-manager-known-repositories"] = { 'type' : 'git', 'url': 'git://github.com/MarcWeber/vim-addon-manager-known-repositories.git' }
 
 " use join so that you can break the dict into multiple lines. This makes
 " reading it much easier
@@ -90,11 +90,11 @@ fun! scriptmanager#Install(toBeInstalledList, ...)
     " ask user for to confirm installation unless he set auto_install
     if s:c['auto_install'] || get(opts,'auto_install',0) || input('install plugin '.name.' ? [y/n]:','') == 'y'
 
-      let known = 'vim-plugin-manager-known-repositories'
+      let known = 'vim-addon-manager-known-repositories'
       if 0 == get(s:c['activated_plugins'], known, 0) && name != known && input('activate plugin '.known.' to get more plugin sources ? [y/n]:','') == 'y'
 	call scriptmanager#Activate([known])
 	" this should be done by Activate!
-	exec 'source '.scriptmanager#PluginDirByName(known).'/plugin/vim-plugin-manager-known-repositories.vim'
+	exec 'source '.scriptmanager#PluginDirByName(known).'/plugin/vim-addon-manager-known-repositories.vim'
       endif
 
       let repository = get(s:c['plugin_sources'], name, get(opts, name,0))
@@ -209,6 +209,6 @@ fun! scriptmanager#PluginInfo(name)
   if filereadable(f)
     return f
   else
-    return scriptmanager#PluginDirByName(a:name).'/'.a:name.'-info.txt'
+    return scriptmanager#PluginDirByName(a:name).'/'.a:name.'-addon-info.txt'
   endif
 endf
