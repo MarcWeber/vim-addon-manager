@@ -24,11 +24,29 @@ let s:c['plugin_root_dir'] = fnamemodify(expand('<sfile>'),':h:h:h')
 " called "vim-addon-manager-known-repositories" referenced here:
 let s:c['plugin_sources']["vim-addon-manager-known-repositories"] = { 'type' : 'git', 'url': 'git://github.com/MarcWeber/vim-addon-manager-known-repositories.git' }
 
+fun! scriptmanager#VerifyIsJSON(s)
+  let stringless_body = substitute(a:s,'"\%(\\.\|[^"\\]\)*"','','g')
+  return stringless_body !~# "[^,:{}\\[\\]0-9.\\-+Eaeflnr-u \t]"
+endf
+
 " use join so that you can break the dict into multiple lines. This makes
 " reading it much easier
 fun! scriptmanager#ReadPluginInfo(path)
- " using eval is evil!
- return eval(join(readfile(a:path),""))
+  if a:path =~ 'tlib/plugin-info.txt$'
+    " I'll ask Tom Link to change this when vim-addon-manager is more stable
+    return eval(join(readfile(a:path),""))
+  endif
+
+  " using eval is evil!
+  let body = join(readfile(a:path),"")
+
+  if scriptmanager#VerifyIsJSON(body)
+      " using eval is now safe!
+      return eval(body)
+  else
+      throw "Invalid JSON in ".a:path
+  endif
+
 endf
 
 fun! scriptmanager#Checkout(targetDir, repository)
@@ -36,7 +54,7 @@ fun! scriptmanager#Checkout(targetDir, repository)
     let parent = fnamemodify(a:targetDir,':h')
     exec '!cd '.shellescape(parent).'; git clone '.shellescape(a:repository['url']).' 'shellescape(a:targetDir)
     if !isdirectory(a:targetDir)
-      throw "failed checking out ".a:targetDir." \n".str
+      throw "failed checking out ".a:targetDir." \n"
     endif
   elseif a:repository['type'] == 'svn'
     let parent = fnamemodify(a:targetDir,':h')
