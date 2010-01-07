@@ -1,5 +1,7 @@
 " see README
 
+" don't need a plugin. If you want to use this plugin you call Activate once
+" anyway
 augroup SCRIPT_MANAGER
   autocmd BufRead,BufNewFile *-addon-info.txt
     \ setlocal ft=addon-info
@@ -7,6 +9,10 @@ augroup SCRIPT_MANAGER
     \ | syn match Error "^\s*'"
   autocmd BufWritePost *-addon-info.txt call scriptmanager#ReadPluginInfo(expand('%'))
 augroup end
+
+" TODO add completion:
+command! -nargs=* ActivateAddons :call scriptmanager#Activate([<f-args>])
+command! -nargs=* UpdateAddons :call scriptmanager#Update([<f-args>])
 
 fun! scriptmanager#DefineAndBind(local,global,default)
   return 'if !exists('.string(a:global).') | let '.a:global.' = '.a:default.' | endif | let '.a:local.' = '.a:global
@@ -228,5 +234,34 @@ fun! scriptmanager#PluginInfo(name)
     return f
   else
     return scriptmanager#PluginDirByName(a:name).'/'.a:name.'-addon-info.txt'
+  endif
+endf
+
+fun! scriptmanager#UpdateAddon(name)
+  let direcotry = scriptmanager#PluginDirByName(a:name)
+  if isdirectory(direcotry.'/.git')
+    exec '!cd '.shellescape(direcotry).'; git pull'
+    return !v:shell_error
+  elseif isdirectory(direcotry.'/.svn')
+    exec '!cd '.shellescape(direcotry).'; svn update'
+    return !v:shell_error
+  else
+    echoe "updating plugin ".a:name." not implemented yet"
+    return 0
+  endif
+endf
+
+
+fun! scriptmanager#Update(list)
+  let list = a:list
+  if empty(list) && input('update all loaded plugins? [y/n] ','y') == 'y'
+    let list = keys(s:c['activated_plugins'])
+  endif
+  let failed = []
+  for p in list
+    if !scriptmanager#UpdateAddon(p) | call add(failed,p) | endif
+  endfor
+  if !empty(failed)
+    echoe "failed updating plugins: ".string(failed)
   endif
 endf
