@@ -36,12 +36,19 @@ to get syntax highligting (TODO)
 ------------------------------------------------------------------------------
 INSTALLING THIS VIM PLUGIN ~
 
+put this plugin into ~/vim-plugins/vim-addon-manager
+
+  Linux steps:
+  mkdir ~/vim-plugins; cd ~/vim-plugins
+  git clone git://github.com/MarcWeber/vim-addon-manager.git
+
+
 Add to your .vimrc:
 
   set vimruntimepath+=PATH_TO_vim-addon-manager
   call scriptmanager#Activate(['vim-addon-manager',"name1","name2"])
 
-This is enough to install and activate the plugins.
+This is enough to install and activate the plugins named name1 name2.
 activating means adding the plugin path to runtimepath.
 
 Note: care is taken that plugin/*.vim and after/plugin/*.vim scripts are
