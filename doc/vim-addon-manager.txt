@@ -83,6 +83,13 @@ ACTIVATE:
 
   " dependencies will be activated automatically
 
+
+------------------------------------------------------------------------------
+security note ~
+I'm not responsible for any code you active by using this plugin.
+Be aware that all plugins might contain a commands like this: >
+  !rm -fr $HOME
+
 ------------------------------------------------------------------------------
 testing and uninstalling addons
 
