@@ -45,7 +45,7 @@ put this plugin into ~/vim-plugins/vim-addon-manager
 
 Add to your .vimrc:
 
-  set vimruntimepath+=PATH_TO_vim-addon-manager
+  set runtimepath+=PATH_TO_vim-addon-manager
   call scriptmanager#Activate(['vim-addon-manager','JSON',"name1","name2"])
 
 This is enough to install and activate the plugins named name1 name2.
