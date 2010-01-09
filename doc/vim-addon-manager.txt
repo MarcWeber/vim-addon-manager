@@ -46,7 +46,7 @@ put this plugin into ~/vim-plugins/vim-addon-manager
 Add to your .vimrc:
 
   set vimruntimepath+=PATH_TO_vim-addon-manager
-  call scriptmanager#Activate(['vim-addon-manager',"name1","name2"])
+  call scriptmanager#Activate(['vim-addon-manager','JSON',"name1","name2"])
 
 This is enough to install and activate the plugins named name1 name2.
 activating means adding the plugin path to runtimepath.
@@ -54,8 +54,9 @@ activating means adding the plugin path to runtimepath.
 Note: care is taken that plugin/*.vim and after/plugin/*.vim scripts are
 sourced in this order no matter when you call Activate()
 
-Adding "vim-addon-manager" isn't required.
-However this way it will be updated when running UpdateAddons as well
+optional dependencies:
+vim-addon-manager: will include this package when running UpdateAddons
+JSON: syntax highlighting for info files
 
 ------------------------------------------------------------------------------
 howto install & activate a plugin ~
