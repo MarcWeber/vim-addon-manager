@@ -82,6 +82,16 @@ ACTIVATE:
 
   " dependencies will be activated automatically
 
+------------------------------------------------------------------------------
+testing and uninstalling addons
+
+
+You can install using >
+  ActivateAddons <c-d>vim-latex
+<
+
+You can uninstall addons this way: >
+  :UninstallNotLoadedAddons vim-latex
 
 ------------------------------------------------------------------------------
 Example install list of all known repositories ~

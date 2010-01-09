@@ -10,10 +10,6 @@ augroup SCRIPT_MANAGER
   autocmd BufWritePost *-addon-info.txt call scriptmanager#ReadPluginInfo(expand('%'))
 augroup end
 
-" TODO add completion:
-command! -nargs=* ActivateAddons :call scriptmanager#Activate([<f-args>])
-command! -nargs=* UpdateAddons :call scriptmanager#Update([<f-args>])
-
 fun! scriptmanager#DefineAndBind(local,global,default)
   return 'if !exists('.string(a:global).') | let '.a:global.' = '.a:default.' | endif | let '.a:local.' = '.a:global
 endf
@@ -25,6 +21,7 @@ let s:c['auto_install'] = get(s:c,'auto_install', 0)
 let s:c['plugin_sources'] = get(s:c,'plugin_sources', {})
 let s:c['activated_plugins'] = {}
 let s:c['plugin_root_dir'] = fnamemodify(expand('<sfile>'),':h:h:h')
+let s:c['known'] = get(s:c,'known','vim-addon-manager-known-repositories')
 
 " additional plugin sources should go into your .vimrc or into the repository
 " called "vim-addon-manager-known-repositories" referenced here:
@@ -88,7 +85,7 @@ fun! scriptmanager#Checkout(targetDir, repository)
       let a = a[:-4]
     endif
     exec 'sp '.a:targetDir.'/'.a
-    debug call vimball#Vimball(1,a:targetDir)
+    call vimball#Vimball(1,a:targetDir)
   else
     throw "don't know how to checkout source location: ".string(a:repository)
   endif
@@ -103,6 +100,25 @@ fun! scriptmanager#IsPluginInstalled(name)
   return isdirectory(scriptmanager#PluginDirByName(a:name))
 endf
 
+fun! scriptmanager#LoadKownRepos()
+  let known = s:c['known']
+  if 0 == get(s:c['activated_plugins'], known, 0) && input('activate plugin '.known.' to get more plugin sources ? [y/n]:','') == 'y'
+    call scriptmanager#Activate([known])
+    " this should be done by Activate!
+    exec 'source '.scriptmanager#PluginDirByName(known).'/plugin/vim-addon-manager-known-repositories.vim'
+  endif
+endf
+
+fun! scriptmanager#UninstallAddons(list)
+  let list = a:list
+  call map(list, 'scriptmanager#PluginDirByName(v:val)')
+  if input('confirm running rm -fr on plugins:'.join(list,",").' [y/n]') == 'y'
+    for path in list
+      exec '! rm -fr '.path
+    endfor
+  endif
+endf
+
 " opts: same as Activate
 fun! scriptmanager#Install(toBeInstalledList, ...)
   let opts = a:0 == 0 ? {} : a:1
@@ -114,12 +130,7 @@ fun! scriptmanager#Install(toBeInstalledList, ...)
     " ask user for to confirm installation unless he set auto_install
     if s:c['auto_install'] || get(opts,'auto_install',0) || input('install plugin '.name.' ? [y/n]:','') == 'y'
 
-      let known = 'vim-addon-manager-known-repositories'
-      if 0 == get(s:c['activated_plugins'], known, 0) && name != known && input('activate plugin '.known.' to get more plugin sources ? [y/n]:','') == 'y'
-	call scriptmanager#Activate([known])
-	" this should be done by Activate!
-	exec 'source '.scriptmanager#PluginDirByName(known).'/plugin/vim-addon-manager-known-repositories.vim'
-      endif
+      if name != s:c['known'] | call scriptmanager#LoadKownRepos() | endif
 
       let repository = get(s:c['plugin_sources'], name, get(opts, name,0))
 
@@ -265,3 +276,58 @@ fun! scriptmanager#Update(list)
     echoe "failed updating plugins: ".string(failed)
   endif
 endf
+
+" completion {{{
+
+" optional arg = 0: only installed
+"          arg = 1: installed and names from known-repositories
+fun! scriptmanager#KnownAddons(...)
+  let installable = a:0 > 0 ? a:1 : 0
+  let list = map(split(glob(scriptmanager#PluginDirByName('*')),"\n"),"fnamemodify(v:val,':t')")
+  let list = filter(list, 'isdirectory(v:val)')
+  if installable == "installable"
+    call scriptmanager#LoadKownRepos()
+    call extend(list, keys(s:c['plugin_sources']))
+  endif
+  " uniq items:
+  let dict = {}
+  for name in list
+    let dict[name] = 1
+  endfor
+  return keys(dict)
+endf
+
+fun! s:DoCompletion(A,L,P,...)
+  let config = a:0 > 0 ? a:1 : 0
+  let names = scriptmanager#KnownAddons(config)
+
+  let beforeC= a:L[:a:P-1]
+  let word = matchstr(beforeC, '\zs\S*$')
+  " ollow glob patterns 
+  let word = substitute('\*','.*',word,'g')
+
+  let not_loaded = config == "uninstall"
+    \ ? " && index(keys(s:c['activated_plugins']), v:val) == -1"
+    \ : ''
+
+  return filter(names,'v:val =~ '.string(word) . not_loaded)
+endf
+
+fun! s:AddonCompletion(...)
+  return call('s:DoCompletion',a:000+["installable"])
+endf
+
+fun! s:InstalledAddonCompletion(...)
+  return call('s:DoCompletion',a:000)
+endf
+
+fun! s:UninstallCompletion(...)
+  return call('s:DoCompletion',a:000+["uninstall"])
+endf
+"}}}
+
+command! -nargs=* -complete=customlist,s:AddonCompletion ActivateAddons :call scriptmanager#Activate([<f-args>])
+command! -nargs=* -complete=customlist,s:InstalledAddonCompletion ActivateInstalledAddons :call scriptmanager#Activate([<f-args>])
+command! -nargs=* -complete=customlist,s:AddonCompletion UpdateAddons :call scriptmanager#Update([<f-args>])
+command! -nargs=* -complete=customlist,s:UninstallCompletion UninstallNotLoadedAddons :call scriptmanager#UninstallAddons([<f-args>])
+
