@@ -45,18 +45,18 @@ put this plugin into ~/vim-plugins/vim-addon-manager
 
 Add to your .vimrc:
 
-  set runtimepath+=PATH_TO_vim-addon-manager
+  " tell Vim where to find the autoload function:
+  set runtimepath+=~/vim-plugins/vim-addon-manager
+
+  " activate the addons called 'vim-addon-manager', 'JSON', 'name1', 'name2'
+  " This adds them to runtimepath and ensures that plugin/* and after/plugin/*
+  " files are sourced
   call scriptmanager#Activate(['vim-addon-manager','JSON',"name1","name2"])
 
-This is enough to install and activate the plugins named name1 name2.
-activating means adding the plugin path to runtimepath.
-
-Note: care is taken that plugin/*.vim and after/plugin/*.vim scripts are
-sourced in this order no matter when you call Activate()
-
-optional dependencies:
-vim-addon-manager: will include this package when running UpdateAddons
-JSON: syntax highlighting for info files
+Note: Both vim-addon-manager and JSON are optional.
+      They have been added because:
+      vim-addon-manager: UpdateAddons will update it
+      JSON: highlights the addon-info.txt files
 
 ------------------------------------------------------------------------------
 howto install & activate a plugin ~
@@ -68,7 +68,7 @@ INSTALL:
 
   way 2 (automatic):
 
-    call scriptmanager#Install("name")
+    call scriptmanager#Install(["name"])
     or
     call scriptmanager#Install([PATH_OR_URL/NAME-info.txt])
 
@@ -83,6 +83,10 @@ ACTIVATE:
 
   " dependencies will be activated automatically
 
+------------------------------------------------------------------------------
+BUGS ~
+- this help file must be tidied up
+- helptags isn't run for you (yet)
 
 ------------------------------------------------------------------------------
 security note ~
