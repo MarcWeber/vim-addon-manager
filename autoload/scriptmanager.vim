@@ -66,6 +66,7 @@ fun! scriptmanager#Checkout(targetDir, repository)
       throw "failed checking out ".a:targetDir." \n".str
     endif
 
+  " .vim file and type syntax?
   elseif has_key(a:repository, 'archive_name')
       \ && get(a:repository,'script-type','') == 'syntax'
       \ && a:repository['archive_name'] =~ '\.vim$'
@@ -73,6 +74,16 @@ fun! scriptmanager#Checkout(targetDir, repository)
     let aname = shellescape(a:repository['archive_name'])
     exec '!cd '.shellescape(a:targetDir).'/syntax &&'
        \ .'curl -o '.aname.' '.shellescape(a:repository['url'])
+
+  " .vim file? -> plugin
+  elseif has_key(a:repository, 'archive_name')
+      \ && a:repository['archive_name'] =~ '\.vim$'
+    call mkdir(a:targetDir.'/plugin','p')
+    let aname = shellescape(a:repository['archive_name'])
+    exec '!cd '.shellescape(a:targetDir).'/plugin &&'
+       \ .'curl -o '.aname.' '.shellescape(a:repository['url'])
+
+
   " can $VIMRUNTIME/autoload/getscript.vim be reused ? don't think so.. one
   " big function
   elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.zip$'
