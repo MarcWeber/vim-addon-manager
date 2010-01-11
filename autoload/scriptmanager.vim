@@ -58,13 +58,13 @@ endf
 fun! scriptmanager#Checkout(targetDir, repository)
   if a:repository['type'] == 'git'
     let parent = fnamemodify(a:targetDir,':h')
-    exec '!cd '.shellescape(parent).'; git clone '.shellescape(a:repository['url']).' 'shellescape(a:targetDir)
+    exec '!git clone '.shellescape(a:repository['url']).' 'shellescape(a:targetDir)
     if !isdirectory(a:targetDir)
       throw "failed checking out ".a:targetDir." \n"
     endif
   elseif a:repository['type'] == 'svn'
     let parent = fnamemodify(a:targetDir,':h')
-    exec '!cd '.shellescape(parent).'; svn checkout '.shellescape(a:repository['url']).' '.shellescape(a:targetDir)
+    exec '!cd '.shellescape(parent).'&& svn checkout '.shellescape(a:repository['url']).' '.shellescape(a:targetDir)
     if !isdirectory(a:targetDir)
       throw "failed checking out ".a:targetDir." \n".str
     endif
@@ -300,10 +300,10 @@ endf
 fun! scriptmanager#UpdateAddon(name)
   let direcotry = scriptmanager#PluginDirByName(a:name)
   if isdirectory(direcotry.'/.git')
-    exec '!cd '.shellescape(direcotry).'; git pull'
+    exec '!cd '.shellescape(direcotry).'&& git pull'
     return !v:shell_error
   elseif isdirectory(direcotry.'/.svn')
-    exec '!cd '.shellescape(direcotry).'; svn update'
+    exec '!cd '.shellescape(direcotry).'&& svn update'
     return !v:shell_error
   else
     echoe "updating plugin ".a:name." not implemented yet"
