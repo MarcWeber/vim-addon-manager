@@ -142,7 +142,8 @@ fun! scriptmanager#UninstallAddons(list)
 endf
 
 fun! scriptmanager#HelpTags(name)
-  exec 'helptags '.scriptmanager#PluginDirByName(a:name).'/doc'
+  let d=scriptmanager#PluginDirByName(a:name).'/doc'
+  if isdirectory(d) | exec 'helptags '.d | endif
 endf
 
 " opts: same as Activate
