@@ -26,9 +26,6 @@ let s:c['activated_plugins'] = {}
 let s:c['plugin_root_dir'] = fnamemodify(expand('<sfile>'),':h:h:h')
 let s:c['known'] = get(s:c,'known','vim-addon-manager-known-repositories')
 
-" there should be some kind of abstraction This will do it for now
-let s:c['cmd_sep'] = &shell =~ 'cmd.exe' ? '&' : ';'
-
 " additional plugin sources should go into your .vimrc or into the repository
 " called "vim-addon-manager-known-repositories" referenced here:
 let s:c['plugin_sources']["vim-addon-manager-known-repositories"] = { 'type' : 'git', 'url': 'git://github.com/MarcWeber/vim-addon-manager-known-repositories.git' }
@@ -61,13 +58,13 @@ endf
 fun! scriptmanager#Checkout(targetDir, repository)
   if a:repository['type'] == 'git'
     let parent = fnamemodify(a:targetDir,':h')
-    exec '!git clone '.shellescape(a:repository['url']).' '.shellescape(a:targetDir)
+    exec '!cd '.shellescape(parent).'; git clone '.shellescape(a:repository['url']).' 'shellescape(a:targetDir)
     if !isdirectory(a:targetDir)
       throw "failed checking out ".a:targetDir." \n"
     endif
   elseif a:repository['type'] == 'svn'
     let parent = fnamemodify(a:targetDir,':h')
-    exec '!svn checkout '.shellescape(a:repository['url']).' '.shellescape(a:targetDir)
+    exec '!cd '.shellescape(parent).'; svn checkout '.shellescape(a:repository['url']).' '.shellescape(a:targetDir)
     if !isdirectory(a:targetDir)
       throw "failed checking out ".a:targetDir." \n".str
     endif
@@ -303,10 +300,10 @@ endf
 fun! scriptmanager#UpdateAddon(name)
   let direcotry = scriptmanager#PluginDirByName(a:name)
   if isdirectory(direcotry.'/.git')
-    exec 'git pull --git-dir='.shellescape(direcotry)
+    exec '!cd '.shellescape(direcotry).'; git pull'
     return !v:shell_error
   elseif isdirectory(direcotry.'/.svn')
-    exec '!cd '.shellescape(direcotry).s:c['cmd_sep'].' svn update'
+    exec '!cd '.shellescape(direcotry).'; svn update'
     return !v:shell_error
   else
     echoe "updating plugin ".a:name." not implemented yet"

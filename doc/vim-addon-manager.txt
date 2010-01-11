@@ -88,8 +88,6 @@ ACTIVATE:
 BUGS ~
 - this help file must be tidied up
 - helptags isn't run for you (yet)
-- You have to install addditional tools such as curl, git and svn
-- not very well tested on Windows. However it should be easy to fix everything
 
 ------------------------------------------------------------------------------
 security note ~
