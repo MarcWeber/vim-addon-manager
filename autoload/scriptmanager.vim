@@ -86,15 +86,23 @@ fun! scriptmanager#Checkout(targetDir, repository)
     exec '!cd '.shellescape(a:targetDir).'/plugin &&'
        \ .'curl -o '.aname.' '.shellescape(a:repository['url'])
 
+  " .tar.gz
+  elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.tar.gz$'
+    call mkdir(a:targetDir)
+    let aname = shellescape(a:repository['archive_name'])
+    exec '!cd '.shellescape(a:targetDir).' &&'
+       \ .'curl -o '.aname.' '.shellescape(a:repository['url']).' &&'
+       \ .'tar --strip-components=1 -xzf '.aname
 
-  " can $VIMRUNTIME/autoload/getscript.vim be reused ? don't think so.. one
-  " big function
+  " .zip
   elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.zip$'
     call mkdir(a:targetDir)
     let aname = shellescape(a:repository['archive_name'])
     exec '!cd '.shellescape(a:targetDir).' &&'
        \ .'curl -o '.aname.' '.shellescape(a:repository['url']).' &&'
        \ .'unzip '.aname
+
+  " .vba reuse vimball#Vimball() function
   elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.vba\%(\.gz\)\?$'
     call mkdir(a:targetDir)
     let a = a:repository['archive_name']
