@@ -7,7 +7,7 @@ augroup SCRIPT_MANAGER
     \ setlocal ft=addon-info
     \ | setlocal syntax=json
     \ | syn match Error "^\s*'"
-  autocmd BufWritePost *-addon-info.txt call scriptmanager#ReadPluginInfo(expand('%'))
+  autocmd BufWritePost *-addon-info.txt call scriptmanager#ReadAddonInfo(expand('%'))
 augroup end
 
 fun! scriptmanager#DefineAndBind(local,global,default)
@@ -19,6 +19,10 @@ let s:c['config'] = get(s:c,'config',expand('$HOME').'/.vim-script-manager')
 let s:c['auto_install'] = get(s:c,'auto_install', 0)
 " repository locations:
 let s:c['plugin_sources'] = get(s:c,'plugin_sources', {})
+" if a plugin has an item here the dict value contents will be written as plugin info file
+let s:c['missing_addon_infos'] = get(s:c,'missing_addon_infos', {})
+" addon_infos cache, {} if file dosen't exist
+let s:c['addon_infos'] = get(s:c,'addon_infos', {})
 let s:c['activated_plugins'] = {}
 let s:c['plugin_root_dir'] = fnamemodify(expand('<sfile>'),':h:h:h')
 let s:c['known'] = get(s:c,'known','vim-addon-manager-known-repositories')
@@ -37,7 +41,7 @@ endf
 
 " use join so that you can break the dict into multiple lines. This makes
 " reading it much easier
-fun! scriptmanager#ReadPluginInfo(path)
+fun! scriptmanager#ReadAddonInfo(path)
   if a:path =~ 'tlib/plugin-info.txt$'
     " I'll ask Tom Link to change this when vim-addon-manager is more stable
     return eval(join(readfile(a:path),""))
@@ -124,6 +128,10 @@ endf
 fun! scriptmanager#PluginDirByName(name)
   return s:c['plugin_root_dir'].'/'.a:name
 endf
+fun! scriptmanager#PluginRuntimePath(name)
+  let info = scriptmanager#AddonInfo(a:name)
+  return s:c['plugin_root_dir'].'/'.a:name.(has_key(info, 'runtimepath') ? '/'.info['runtimepath'] : '')
+endf
 
 " doesn't check dependencies!
 fun! scriptmanager#IsPluginInstalled(name)
@@ -154,6 +162,15 @@ fun! scriptmanager#HelpTags(name)
   if isdirectory(d) | exec 'helptags '.d | endif
 endf
 
+" {} if file dosen't exist
+fun! scriptmanager#AddonInfo(name)
+  let infoFile = scriptmanager#AddonInfoFile(a:name)
+  let s:c['addon_infos'][a:name] = filereadable(infoFile)
+    \ ? scriptmanager#ReadAddonInfo(infoFile)
+    \ : {}
+ return get(s:c['addon_infos'],a:name, {})
+endf
+
 " opts: same as Activate
 fun! scriptmanager#Install(toBeInstalledList, ...)
   let opts = a:0 == 0 ? {} : a:1
@@ -173,13 +190,17 @@ fun! scriptmanager#Install(toBeInstalledList, ...)
         throw "no repository location info known for plugin ".name
       endif
       let pluginDir = scriptmanager#PluginDirByName(name)
+      let infoFile = scriptmanager#AddonInfoFile(name)
       call scriptmanager#Checkout(pluginDir, repository)
+
+      if !filereadable(infoFile) && has_key(s:c['missing_addon_infos'], name)
+        call writefile([s:c['missing_addon_infos'][name]], infoFile)
+      endif
+
       " install dependencies
      
-      let infoFile = scriptmanager#PluginInfo(name)
-      let info = filereadable(infoFile)
-        \ ? scriptmanager#ReadPluginInfo(infoFile)
-        \ : {}
+      let infoFile = scriptmanager#AddonInfoFile(name)
+      let info = scriptmanager#AddonInfo(name)
 
       let dependencies = get(info,'dependencies', {})
 
@@ -205,13 +226,11 @@ fun! scriptmanager#ActivateRecursively(list_of_names, ...)
       " break circular dependencies..
       let s:c['activated_plugins'][name] = 0
 
-      let infoFile = scriptmanager#PluginInfo(name)
+      let infoFile = scriptmanager#AddonInfoFile(name)
       if !filereadable(infoFile)
         call scriptmanager#Install([name], opts)
       endif
-      let info = filereadable(infoFile)
-        \ ? scriptmanager#ReadPluginInfo(infoFile)
-        \ : {}
+      let info = scriptmanager#AddonInfo(name)
       let dependencies = get(info,'dependencies', {})
 
       " activate dependencies merging opts with given repository sources
@@ -220,10 +239,11 @@ fun! scriptmanager#ActivateRecursively(list_of_names, ...)
         \ extend(copy(opts), { 'plugin_sources' : extend(copy(dependencies), get(opts, 'plugin_sources',{}))}))
     endif
     " source plugin/* files ?
-    exec "set runtimepath+=".s:c['plugin_root_dir'].'/'.name
+    let rtp = scriptmanager#PluginRuntimePath(name)
+    exec "set runtimepath+=".rtp
 
     if has_key(s:c, 'started_up')
-      call scriptmanager#GlobThenSource(scriptmanager#PluginDirByName(name).'/plugin/**/*.vim')
+      call scriptmanager#GlobThenSource(rtp.'/plugin/**/*.vim')
     endif
 
       let s:c['activated_plugins'][name] = 1
@@ -242,7 +262,8 @@ fun! scriptmanager#Activate(...)
     " now source after/plugin/**/*.vim files explicitely. Vim doesn't do it (hack!)
     for k in keys(s:c['activated_plugins'])
       if !has_key(active, k)
-        call scriptmanager#GlobThenSource(scriptmanager#PluginDirByName(k).'/after/plugin/**/*.vim')
+        let rtp = scriptmanager#PluginRuntimePath(k)
+        call scriptmanager#GlobThenSource(rtp.'/plugin/**/*.vim')
       endif
     endfor
   endif
@@ -270,7 +291,7 @@ fun! scriptmanager#Hack()
   endfor
 endf
 
-fun! scriptmanager#PluginInfo(name)
+fun! scriptmanager#AddonInfoFile(name)
   " this name is deprecated
   let f = scriptmanager#PluginDirByName(a:name).'/plugin-info.txt'
   if filereadable(f)

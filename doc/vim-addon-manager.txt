@@ -17,8 +17,9 @@ is read by scriptmanager#ReadPluginInfo
 "author" : "surname lastname <email>",
 "maintainer" : "surname lastname <email>,
 "repository" : REPO,
-"dependencies" : { "name" : REPO }
-"description": ""
+"dependencies" : { "name" : REPO },
+"description": "",
+[ "runtimepath": "subdir" ] " << this is optional and required only be a minority of plugins
 }
 
 where REPO =
