@@ -138,6 +138,10 @@ fun! scriptmanager#UninstallAddons(list)
   endif
 endf
 
+fun! scriptmanager#HelpTags(name)
+  exec 'helptags '.scriptmanager#PluginDirByName(a:name).'/doc'
+endf
+
 " opts: same as Activate
 fun! scriptmanager#Install(toBeInstalledList, ...)
   let opts = a:0 == 0 ? {} : a:1
@@ -172,6 +176,7 @@ fun! scriptmanager#Install(toBeInstalledList, ...)
       call scriptmanager#Install(keys(dependencies),
         \ extend(copy(opts), { 'plugin_sources' : extend(copy(dependencies), get(opts, 'plugin_sources',{}))}))
     endif
+    call scriptmanager#HelpTags(name)
   endfor
 endf
 
@@ -231,10 +236,6 @@ fun! scriptmanager#Activate(...)
   endif
 endfun
 
-fun! scriptmanager#Update()
-  throw "to be implemented"
-endf
-
 fun! scriptmanager#GlobThenSource(glob)
   for file in split(glob(a:glob),"\n")
     exec 'source '.file
@@ -289,7 +290,11 @@ fun! scriptmanager#Update(list)
   endif
   let failed = []
   for p in list
-    if !scriptmanager#UpdateAddon(p) | call add(failed,p) | endif
+    if scriptmanager#UpdateAddon(p)
+      call scriptmanager#HelpTags(p)
+    else
+      call add(failed,p)
+    endif
   endfor
   if !empty(failed)
     echoe "failed updating plugins: ".string(failed)
