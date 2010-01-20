@@ -1,5 +1,7 @@
 *vim-addon-manager.txt*
-Idea: let users install vim plugins with a minimum of work.
+Idea: let users install and uninstall vim plugins with a minimum of work:
+* each plugin is put into its own directory
+* dependencies are fetched automatically
 
 ------------------------------------------------------------------------------
 a plugin ~
