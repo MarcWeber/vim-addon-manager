@@ -3,6 +3,12 @@ Idea: let users install and uninstall vim plugins with a minimum of work:
 * each plugin is put into its own directory
 * dependencies are fetched automatically
 
+
+------------------------------------------------------------------------------
+related work: ~
+Send me a mail so that I can add your project
+http://github.com/c9s/Vimana
+
 ------------------------------------------------------------------------------
 a plugin ~
 
