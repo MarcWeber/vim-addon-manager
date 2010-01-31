@@ -284,6 +284,7 @@ fun! scriptmanager#Activate(...)
     " add paths after ~/.vim but before $VIMRUNTIME
     let rtp = split(&runtimepath,',')
     exec "set runtimepath=".join(rtp[:0] + s:new_runtime_paths + rtp[1:],",")
+    unlet rtp
 
     if has_key(s:c, 'started_up')
       for rtp in s:new_runtime_paths
