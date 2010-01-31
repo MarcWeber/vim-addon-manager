@@ -1,4 +1,9 @@
 " see README
+
+" TODO move code into extra file which is required ocassionally only such as
+" Install and UpdateAddons
+
+
 " don't need a plugin. If you want to use this plugin you call Activate once
 " anyway
 augroup SCRIPT_MANAGER
@@ -71,19 +76,16 @@ fun! scriptmanager#Checkout(targetDir, repository)
 
   " .vim file and type syntax?
   elseif has_key(a:repository, 'archive_name')
-      \ && get(a:repository,'script-type','') == 'syntax'
       \ && a:repository['archive_name'] =~ '\.vim$'
-    call mkdir(a:targetDir.'/syntax','p')
-    let aname = shellescape(a:repository['archive_name'])
-    exec '!cd '.shellescape(a:targetDir).'/syntax &&'
-       \ .'curl -o '.aname.' '.shellescape(a:repository['url'])
 
-  " .vim file? -> plugin
-  elseif has_key(a:repository, 'archive_name')
-      \ && a:repository['archive_name'] =~ '\.vim$'
-    call mkdir(a:targetDir.'/plugin','p')
+    if get(a:repository,'script-type','') == 'syntax'
+      let target = 'syntax'
+    else
+      let target = get(a:repository,'target_dir','plugin')
+    endif
+    call mkdir(a:targetDir.'/'.target,'p')
     let aname = shellescape(a:repository['archive_name'])
-    exec '!cd '.shellescape(a:targetDir).'/plugin &&'
+    exec '!cd '.shellescape(a:targetDir).'/'.target.' &&'
        \ .'curl -o '.aname.' '.shellescape(a:repository['url'])
 
   " .tar.gz
