@@ -255,11 +255,7 @@ fun! scriptmanager#ActivateRecursively(list_of_names, ...)
     let rtp = scriptmanager#PluginRuntimePath(name)
     call add(s:new_runtime_paths, rtp)
 
-    if has_key(s:c, 'started_up')
-      call scriptmanager#GlobThenSource(rtp.'/plugin/**/*.vim')
-    endif
-
-      let s:c['activated_plugins'][name] = 1
+    let s:c['activated_plugins'][name] = 1
   endfor
 endf
 
@@ -268,13 +264,33 @@ endf
 " I sources both: plugin/*.vim and after/plugin/*.vim files when called after
 " .vimrc has been sourced which happens when you activate plugins manually.
 fun! scriptmanager#Activate(...)
-  let s:new_runtime_paths = []
+  let args = copy(a:000)
+  let opts = get(args,1,{})
+  if len(args) <= 1
+    call add(args, opts)
+  endif
+  let topLevel = get(opts,'topLevel',1)
+  let opts['topLevel'] = 0
   let active = copy(s:c['activated_plugins'])
-  call call('scriptmanager#ActivateRecursively', a:000)
+  if topLevel | let s:new_runtime_paths = [] | endif
+  call call('scriptmanager#ActivateRecursively', args)
 
-  " add paths after ~/.vim but before $VIMRUNTIME
-  let rtp = split(&runtimepath,',')
-  exec "set runtimepath=".join(rtp[:0] + s:new_runtime_paths + rtp[1:],",")
+  if topLevel
+    " deferred tasks:
+    " - add addons to runtimepath
+    " - add source plugin/**/*.vim files in case Activate was called long
+    "   after .vimrc has been sourced
+
+    " add paths after ~/.vim but before $VIMRUNTIME
+    let rtp = split(&runtimepath,',')
+    exec "set runtimepath=".join(rtp[:0] + s:new_runtime_paths + rtp[1:],",")
+
+    if has_key(s:c, 'started_up')
+      for rtp in s:new_runtime_paths
+        call scriptmanager#GlobThenSource(rtp.'/plugin/**/*.vim')
+      endfor
+    endif
+  endif
 
   if has_key(s:c, 'started_up')
     " now source after/plugin/**/*.vim files explicitely. Vim doesn't do it (hack!)
