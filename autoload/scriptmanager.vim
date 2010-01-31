@@ -238,7 +238,7 @@ fun! scriptmanager#ActivateRecursively(list_of_names, ...)
     endif
     " source plugin/* files ?
     let rtp = scriptmanager#PluginRuntimePath(name)
-    exec "set runtimepath+=".rtp
+    call add(s:new_runtime_paths, rtp)
 
     if has_key(s:c, 'started_up')
       call scriptmanager#GlobThenSource(rtp.'/plugin/**/*.vim')
@@ -253,8 +253,13 @@ endf
 " I sources both: plugin/*.vim and after/plugin/*.vim files when called after
 " .vimrc has been sourced which happens when you activate plugins manually.
 fun! scriptmanager#Activate(...)
+  let s:new_runtime_paths = []
   let active = copy(s:c['activated_plugins'])
   call call('scriptmanager#ActivateRecursively', a:000)
+
+  " add paths after ~/.vim but before $VIMRUNTIME
+  let rtp = split(&runtimepath,',')
+  exec "set runtimepath=".join(rtp[:0] + s:new_runtime_paths + rtp[1:],",")
 
   if has_key(s:c, 'started_up')
     " now source after/plugin/**/*.vim files explicitely. Vim doesn't do it (hack!)
