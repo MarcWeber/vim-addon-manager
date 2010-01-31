@@ -60,6 +60,12 @@ fun! scriptmanager#ReadAddonInfo(path)
 
 endf
 
+" is there a library providing an OS abstraction? This breaks Winndows
+" xcopy or copy should be used there..
+fun! scriptmanager#Copy(f,t)
+  exec '!cp -r '.shellescape(a:f).' '.shellescape(a:t)
+endfun
+
 fun! scriptmanager#Checkout(targetDir, repository)
   if a:repository['type'] == 'git'
     let parent = fnamemodify(a:targetDir,':h')
@@ -87,6 +93,7 @@ fun! scriptmanager#Checkout(targetDir, repository)
     let aname = shellescape(a:repository['archive_name'])
     exec '!cd '.shellescape(a:targetDir).'/'.target.' &&'
        \ .'curl -o '.aname.' '.shellescape(a:repository['url'])
+    call scriptmanager#Copy(a:targetDir, a:targetDir.'.backup')
 
   " .tar.gz
   elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.tar.gz$'
@@ -95,6 +102,7 @@ fun! scriptmanager#Checkout(targetDir, repository)
     exec '!cd '.shellescape(a:targetDir).' &&'
        \ .'curl -o '.aname.' '.shellescape(a:repository['url']).' &&'
        \ .'tar --strip-components=1 -xzf '.aname
+    call scriptmanager#Copy(a:targetDir, a:targetDir.'.backup')
 
   " .zip
   elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.zip$'
@@ -103,6 +111,7 @@ fun! scriptmanager#Checkout(targetDir, repository)
     exec '!cd '.shellescape(a:targetDir).' &&'
        \ .'curl -o '.aname.' '.shellescape(a:repository['url']).' &&'
        \ .'unzip '.aname
+    call scriptmanager#Copy(a:targetDir, a:targetDir.'.backup')
 
   " .vba reuse vimball#Vimball() function
   elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.vba\%(\.gz\)\?$'
@@ -118,6 +127,7 @@ fun! scriptmanager#Checkout(targetDir, repository)
     endif
     exec 'sp '.a:targetDir.'/'.a
     call vimball#Vimball(1,a:targetDir)
+    call scriptmanager#Copy(a:targetDir, a:targetDir.'.backup')
   else
     throw "don't know how to checkout source location: ".string(a:repository)
   endif
