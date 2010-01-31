@@ -67,6 +67,7 @@ fun! scriptmanager#Copy(f,t)
 endfun
 
 fun! scriptmanager#Checkout(targetDir, repository)
+  let addVersionFile = 'call writefile([get(a:repository,"version","?")], a:targetDir."/version")'
   if a:repository['type'] == 'git'
     let parent = fnamemodify(a:targetDir,':h')
     exec '!git clone '.shellescape(a:repository['url']).' 'shellescape(a:targetDir)
@@ -93,6 +94,7 @@ fun! scriptmanager#Checkout(targetDir, repository)
     let aname = shellescape(a:repository['archive_name'])
     exec '!cd '.shellescape(a:targetDir).'/'.target.' &&'
        \ .'curl -o '.aname.' '.shellescape(a:repository['url'])
+    exec addVersionFile
     call scriptmanager#Copy(a:targetDir, a:targetDir.'.backup')
 
   " .tar.gz
@@ -102,6 +104,7 @@ fun! scriptmanager#Checkout(targetDir, repository)
     exec '!cd '.shellescape(a:targetDir).' &&'
        \ .'curl -o '.aname.' '.shellescape(a:repository['url']).' &&'
        \ .'tar --strip-components=1 -xzf '.aname
+    exec addVersionFile
     call scriptmanager#Copy(a:targetDir, a:targetDir.'.backup')
 
   " .zip
@@ -111,6 +114,7 @@ fun! scriptmanager#Checkout(targetDir, repository)
     exec '!cd '.shellescape(a:targetDir).' &&'
        \ .'curl -o '.aname.' '.shellescape(a:repository['url']).' &&'
        \ .'unzip '.aname
+    exec addVersionFile
     call scriptmanager#Copy(a:targetDir, a:targetDir.'.backup')
 
   " .vba reuse vimball#Vimball() function
@@ -127,6 +131,7 @@ fun! scriptmanager#Checkout(targetDir, repository)
     endif
     exec 'sp '.a:targetDir.'/'.a
     call vimball#Vimball(1,a:targetDir)
+    exec addVersionFile
     call scriptmanager#Copy(a:targetDir, a:targetDir.'.backup')
   else
     throw "don't know how to checkout source location: ".string(a:repository)
