@@ -105,6 +105,11 @@ BUGS ~
 - this help file must be tidied up
 - helptags isn't run for you (yet)
 
+There is an older project which has the same name:
+http://packages.debian.org/sid/vim-addon-manager
+Tom Link told me about it. What shall I do?
+I just leave this comment here for now
+
 ------------------------------------------------------------------------------
 security note ~
 I'm not responsible for any code you active by using this plugin.
