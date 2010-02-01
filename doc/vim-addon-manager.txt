@@ -93,6 +93,14 @@ ACTIVATE:
   " dependencies will be activated automatically
 
 ------------------------------------------------------------------------------
+DEPRECATION ~
+
+You can depreceate a package by defining the depreceate key in the repository
+dict. When installing such a addon user will be prompted for confirmation.
+The idea is to tell people to use addons which supersedes the ones they're
+trying to install
+
+------------------------------------------------------------------------------
 BUGS ~
 - this help file must be tidied up
 - helptags isn't run for you (yet)
