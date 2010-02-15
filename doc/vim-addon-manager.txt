@@ -110,6 +110,10 @@ http://packages.debian.org/sid/vim-addon-manager
 Tom Link told me about it. What shall I do?
 I just leave this comment here for now
 
+godlygeek suggested renaming this plugin to "vim-runtime-manager".
+So this may happen in the near future. However I also asked the Debian package
+maintainer Jamessan. He was fine with this plugin having the same name.
+
 ------------------------------------------------------------------------------
 security note ~
 I'm not responsible for any code you active by using this plugin.
