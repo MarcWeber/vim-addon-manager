@@ -289,13 +289,17 @@ fun! scriptmanager#Activate(...)
     "   after .vimrc has been sourced
 
     " add paths after ~/.vim but before $VIMRUNTIME
+    " don't miss the after directories if they exist and
+    " put them last! (Thanks to Oliver Teuliere)
     let rtp = split(&runtimepath,',')
-    exec "set runtimepath=".join(rtp[:0] + s:new_runtime_paths + rtp[1:],",")
+    exec "set runtimepath=".join(rtp[:0] + s:new_runtime_paths + rtp[1:]
+                                  \ + filter(map(copy(s:new_runtime_paths),'v:val."/after"'), 'isdirectory(v:val)') ,",")
     unlet rtp
 
     if has_key(s:c, 'started_up')
       for rtp in s:new_runtime_paths
         call scriptmanager#GlobThenSource(rtp.'/plugin/**/*.vim')
+        call scriptmanager#GlobThenSource(rtp.'/after/plugin/**/*.vim')
       endfor
     endif
   endif
@@ -306,6 +310,7 @@ fun! scriptmanager#Activate(...)
       if !has_key(active, k)
         let rtp = scriptmanager#PluginRuntimePath(k)
         call scriptmanager#GlobThenSource(rtp.'/plugin/**/*.vim')
+        call scriptmanager#GlobThenSource(rtp.'/after/plugin/**/*.vim')
       endif
     endfor
   endif
