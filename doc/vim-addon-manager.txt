@@ -140,3 +140,8 @@ historical notes ~
 This is a KISS reimplementation of http://github.com/MarcWeber/theonevimlib
 
 vim:tw=78:fo=tcq2:isk=!-~,^*,^\|,^\":ts=8:ft=help:norl:
+
+------------------------------------------------------------------------------
+TODO ~
+reuse this code?
+http://www.vim.org/scripts/script.php?script_id=3061

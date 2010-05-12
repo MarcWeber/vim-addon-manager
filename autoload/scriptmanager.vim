@@ -97,8 +97,8 @@ fun! scriptmanager#Checkout(targetDir, repository)
     exec addVersionFile
     call scriptmanager#Copy(a:targetDir, a:targetDir.'.backup')
 
-  " .tar.gz
-  elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.tar.gz$'
+  " .tar.gz or .tgz
+  elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.\%(tar.gz\|tgz\)$'
     call mkdir(a:targetDir)
     let aname = shellescape(a:repository['archive_name'])
     exec '!cd '.shellescape(a:targetDir).' &&'
