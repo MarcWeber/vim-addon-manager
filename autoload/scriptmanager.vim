@@ -107,6 +107,17 @@ fun! scriptmanager#Checkout(targetDir, repository)
     exec addVersionFile
     call scriptmanager#Copy(a:targetDir, a:targetDir.'.backup')
 
+
+  " .tar
+  elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.tar$'
+    call mkdir(a:targetDir)
+    let aname = shellescape(a:repository['archive_name'])
+    exec '!cd '.shellescape(a:targetDir).' &&'
+       \ .'curl -o '.aname.' '.shellescape(a:repository['url']).' &&'
+       \ .'tar --strip-components=1 -xf '.aname
+    exec addVersionFile
+    call scriptmanager#Copy(a:targetDir, a:targetDir.'.backup')
+
   " .zip
   elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.zip$'
     call mkdir(a:targetDir)
