@@ -5,11 +5,6 @@ Idea: let users install and uninstall vim plugins with a minimum of work:
 
 
 ------------------------------------------------------------------------------
-related work: ~
-Send me a mail so that I can add your project
-http://github.com/c9s/Vimana
-
-------------------------------------------------------------------------------
 a plugin ~
 
 A plugin is directory NAME containing vim runtimefiles (-> :h vimruntime)
@@ -139,9 +134,24 @@ call scriptmanager#Install(["vim-addon-manager-known-repositories"])
 historical notes ~
 This is a KISS reimplementation of http://github.com/MarcWeber/theonevimlib
 
-vim:tw=78:fo=tcq2:isk=!-~,^*,^\|,^\":ts=8:ft=help:norl:
+------------------------------------------------------------------------------
+related work: ~
+Send me a mail so that I can add your project
+  http://github.com/c9s/Vimana
+  http://snk.tuxfamily.org/log/vim-script-management-system.html
+
+  Are they better? Don't know. Unless they support specyfing dependencies I'm
+  not considering switching so its up to you to judge.
+
+  If I feel something else fits my needs better I'll deprecate this package as
+  I did for tovl.
+
 
 ------------------------------------------------------------------------------
 TODO ~
 reuse this code?
 http://www.vim.org/scripts/script.php?script_id=3061
+
+
+vim:tw=78:fo=tcq2:isk=!-~,^*,^\|,^\":ts=8:ft=help:norl:
+
