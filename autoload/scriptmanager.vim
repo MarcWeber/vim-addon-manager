@@ -101,9 +101,10 @@ fun! scriptmanager#Checkout(targetDir, repository)
   elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.\%(tar.gz\|tgz\)$'
     call mkdir(a:targetDir)
     let aname = shellescape(a:repository['archive_name'])
+    let s = get(a:repository,'strip-components',1)
     exec '!cd '.shellescape(a:targetDir).' &&'
        \ .'curl -o '.aname.' '.shellescape(a:repository['url']).' &&'
-       \ .'tar --strip-components=1 -xzf '.aname
+       \ .'tar --strip-components='.s.' -xzf '.aname
     exec addVersionFile
     call scriptmanager#Copy(a:targetDir, a:targetDir.'.backup')
 
