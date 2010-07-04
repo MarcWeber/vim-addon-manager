@@ -60,29 +60,33 @@ fun! scriptmanager#ReadAddonInfo(path)
 
 endf
 
+fun! s:shellescape(s)
+  return shellescape(a:s,1)
+endf
+
 " is there a library providing an OS abstraction? This breaks Winndows
 " xcopy or copy should be used there..
 fun! scriptmanager#Copy(f,t)
-  exec '!cp -r '.shellescape(a:f, 1).' '.shellescape(a:t, 1)
+  exec '!cp -r '.s:shellescape(a:f).' '.s:shellescape(a:t)
 endfun
 
 fun! scriptmanager#Checkout(targetDir, repository)
   let addVersionFile = 'call writefile([get(a:repository,"version","?")], a:targetDir."/version")'
   if a:repository['type'] == 'git'
     let parent = fnamemodify(a:targetDir,':h')
-    exec '!git clone '.shellescape(a:repository['url'], 1).' '.shellescape(a:targetDir, 1)
+    exec '!git clone '.s:shellescape(a:repository['url']).' '.s:shellescape(a:targetDir)
     if !isdirectory(a:targetDir)
       throw "failed checking out ".a:targetDir." \n"
     endif
   elseif a:repository['type'] == 'hg'
     let parent = fnamemodify(a:targetDir,':h')
-    exec '!hg clone '.shellescape(a:repository['url'], 1).' '.shellescape(a:targetDir, 1)
+    exec '!hg clone '.s:shellescape(a:repository['url']).' '.s:shellescape(a:targetDir)
     if !isdirectory(a:targetDir)
       throw "failed checking out ".a:targetDir." \n"
     endif
   elseif a:repository['type'] == 'svn'
     let parent = fnamemodify(a:targetDir,':h')
-    exec '!cd '.shellescape(parent, 1).'&& svn checkout '.shellescape(a:repository['url'], 1).' '.shellescape(a:targetDir, 1)
+    exec '!cd '.s:shellescape(parent).'&& svn checkout '.s:shellescape(a:repository['url']).' '.s:shellescape(a:targetDir)
     if !isdirectory(a:targetDir)
       throw "failed checking out ".a:targetDir." \n"
     endif
@@ -97,19 +101,19 @@ fun! scriptmanager#Checkout(targetDir, repository)
       let target = get(a:repository,'target_dir','plugin')
     endif
     call mkdir(a:targetDir.'/'.target,'p')
-    let aname = shellescape(a:repository['archive_name'], 1)
-    exec '!cd '.shellescape(a:targetDir, 1).'/'.target.' &&'
-       \ .'curl -o '.aname.' '.shellescape(a:repository['url'], 1)
+    let aname = s:shellescape(a:repository['archive_name'])
+    exec '!cd '.s:shellescape(a:targetDir).'/'.target.' &&'
+       \ .'curl -o '.aname.' '.s:shellescape(a:repository['url'])
     exec addVersionFile
     call scriptmanager#Copy(a:targetDir, a:targetDir.'.backup')
 
   " .tar.gz or .tgz
   elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.\%(tar.gz\|tgz\)$'
     call mkdir(a:targetDir)
-    let aname = shellescape(a:repository['archive_name'], 1)
+    let aname = s:shellescape(a:repository['archive_name'])
     let s = get(a:repository,'strip-components',1)
-    exec '!cd '.shellescape(a:targetDir, 1).' &&'
-       \ .'curl -o '.aname.' '.shellescape(a:repository['url'], 1).' &&'
+    exec '!cd '.s:shellescape(a:targetDir).' &&'
+       \ .'curl -o '.aname.' '.s:shellescape(a:repository['url']).' &&'
        \ .'tar --strip-components='.s.' -xzf '.aname
     exec addVersionFile
     call scriptmanager#Copy(a:targetDir, a:targetDir.'.backup')
@@ -118,9 +122,9 @@ fun! scriptmanager#Checkout(targetDir, repository)
   " .tar
   elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.tar$'
     call mkdir(a:targetDir)
-    let aname = shellescape(a:repository['archive_name'], 1)
-    exec '!cd '.shellescape(a:targetDir, 1).' &&'
-       \ .'curl -o '.aname.' '.shellescape(a:repository['url'], 1).' &&'
+    let aname = s:shellescape(a:repository['archive_name'])
+    exec '!cd '.s:shellescape(a:targetDir).' &&'
+       \ .'curl -o '.aname.' '.s:shellescape(a:repository['url']).' &&'
        \ .'tar --strip-components=1 -xf '.aname
     exec addVersionFile
     call scriptmanager#Copy(a:targetDir, a:targetDir.'.backup')
@@ -128,9 +132,9 @@ fun! scriptmanager#Checkout(targetDir, repository)
   " .zip
   elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.zip$'
     call mkdir(a:targetDir)
-    let aname = shellescape(a:repository['archive_name'], 1)
-    exec '!cd '.shellescape(a:targetDir, 1).' &&'
-       \ .'curl -o '.aname.' '.shellescape(a:repository['url'], 1).' &&'
+    let aname = s:shellescape(a:repository['archive_name'])
+    exec '!cd '.s:shellescape(a:targetDir).' &&'
+       \ .'curl -o '.aname.' '.s:shellescape(a:repository['url']).' &&'
        \ .'unzip '.aname
     exec addVersionFile
     call scriptmanager#Copy(a:targetDir, a:targetDir.'.backup')
@@ -139,9 +143,9 @@ fun! scriptmanager#Checkout(targetDir, repository)
   elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.vba\%(\.gz\)\?$'
     call mkdir(a:targetDir)
     let a = a:repository['archive_name']
-    let aname = shellescape(a, 1)
-    exec '!cd '.shellescape(a:targetDir, 1).' &&'
-       \ .'curl -o '.aname.' '.shellescape(a:repository['url'], 1)
+    let aname = s:shellescape(a)
+    exec '!cd '.s:shellescape(a:targetDir).' &&'
+       \ .'curl -o '.aname.' '.s:shellescape(a:repository['url'])
     if a =~ '\.gz'
       " manually unzip .vba.gz as .gz isn't unpacked yet for some reason
       exec '!gunzip '.a:targetDir.'/'.a
@@ -373,13 +377,13 @@ endf
 fun! scriptmanager#UpdateAddon(name)
   let directory = scriptmanager#PluginDirByName(a:name)
   if isdirectory(directory.'/.git')
-    exec '!cd '.shellescape(directory, 1).'&& git pull'
+    exec '!cd '.s:shellescape(directory).'&& git pull'
     return !v:shell_error
   elseif isdirectory(directory.'/.svn')
-    exec '!cd '.shellescape(directory, 1).'&& svn update'
+    exec '!cd '.s:shellescape(directory).'&& svn update'
     return !v:shell_error
   elseif isdirectory(directory.'/.hg')
-    exec '!cd '.shellescape(directory, 1).'&& hg pull'
+    exec '!cd '.s:shellescape(directory, 1).'&& hg pull'
     return !v:shell_error
   else
     echoe "updating plugin ".a:name." not implemented yet"
