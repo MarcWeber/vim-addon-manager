@@ -173,7 +173,7 @@ fun! scriptmanager#IsPluginInstalled(name)
   return isdirectory(scriptmanager#PluginDirByName(a:name))
 endf
 
-fun! scriptmanager#LoadKownRepos()
+fun! scriptmanager#LoadKnownRepos()
   let known = s:c['known']
   if 0 == get(s:c['activated_plugins'], known, 0) && input('activate plugin '.known.' to get more plugin sources ? [y/n]:','') == 'y'
     call scriptmanager#Activate([known])
@@ -185,7 +185,7 @@ endf
 fun! scriptmanager#UninstallAddons(list)
   let list = a:list
   if list == []
-    echo "no pluigns selected. If you ran UninstallNotLoadedAddons use <tab> or <c-d> to get a list of not loaded plugins"
+    echo "no plugins selected. If you ran UninstallNotLoadedAddons use <tab> or <c-d> to get a list of not loaded plugins"
     return
   endif
   call map(list, 'scriptmanager#PluginDirByName(v:val)')
@@ -221,7 +221,7 @@ fun! scriptmanager#Install(toBeInstalledList, ...)
     " ask user for to confirm installation unless he set auto_install
     if s:c['auto_install'] || get(opts,'auto_install',0) || input('install plugin '.name.' ? [y/n]:','') == 'y'
 
-      if name != s:c['known'] | call scriptmanager#LoadKownRepos() | endif
+      if name != s:c['known'] | call scriptmanager#LoadKnownRepos() | endif
 
       let repository = get(s:c['plugin_sources'], name, get(opts, name,0))
 
@@ -375,15 +375,15 @@ fun! scriptmanager#AddonInfoFile(name)
 endf
 
 fun! scriptmanager#UpdateAddon(name)
-  let direcotry = scriptmanager#PluginDirByName(a:name)
-  if isdirectory(direcotry.'/.git')
-    exec '!cd '.s:shellescape(direcotry).'&& git pull'
+  let directory = scriptmanager#PluginDirByName(a:name)
+  if isdirectory(directory.'/.git')
+    exec '!cd '.s:shellescape(directory).'&& git pull'
     return !v:shell_error
-  elseif isdirectory(direcotry.'/.svn')
-    exec '!cd '.s:shellescape(direcotry).'&& svn update'
+  elseif isdirectory(directory.'/.svn')
+    exec '!cd '.s:shellescape(directory).'&& svn update'
     return !v:shell_error
-  elseif isdirectory(direcotry.'/.hg')
-    exec '!cd '.s:shellescape(direcotry, 1).'&& hg pull'
+  elseif isdirectory(directory.'/.hg')
+    exec '!cd '.s:shellescape(directory, 1).'&& hg pull'
     return !v:shell_error
   else
     echoe "updating plugin ".a:name." not implemented yet"
@@ -419,7 +419,7 @@ fun! scriptmanager#KnownAddons(...)
   let list = map(split(glob(scriptmanager#PluginDirByName('*')),"\n"),"fnamemodify(v:val,':t')")
   let list = filter(list, 'isdirectory(v:val)')
   if installable == "installable"
-    call scriptmanager#LoadKownRepos()
+    call scriptmanager#LoadKnownRepos()
     call extend(list, keys(s:c['plugin_sources']))
   endif
   " uniq items:
