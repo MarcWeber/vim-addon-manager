@@ -45,11 +45,11 @@ endf
 fun! scriptmanager#ReadAddonInfo(path)
   if a:path =~ 'tlib/plugin-info.txt$'
     " I'll ask Tom Link to change this when vim-addon-manager is more stable
-    return eval(join(readfile(a:path),""))
+    return eval(join(readfile(a:path, "b"),""))
   endif
 
   " using eval is evil!
-  let body = join(readfile(a:path),"")
+  let body = join(readfile(a:path, "b"),"")
 
   if scriptmanager#VerifyIsJSON(body)
       " using eval is now safe!
