@@ -70,7 +70,7 @@ fun! scriptmanager#Checkout(targetDir, repository)
   let addVersionFile = 'call writefile([get(a:repository,"version","?")], a:targetDir."/version")'
   if a:repository['type'] == 'git'
     let parent = fnamemodify(a:targetDir,':h')
-    exec '!git clone '.shellescape(a:repository['url']).' 'shellescape(a:targetDir)
+    exec '!git clone '.shellescape(a:repository['url']).' '.shellescape(a:targetDir)
     if !isdirectory(a:targetDir)
       throw "failed checking out ".a:targetDir." \n"
     endif
