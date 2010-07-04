@@ -181,7 +181,7 @@ endf
 fun! scriptmanager#UninstallAddons(list)
   let list = a:list
   if list == []
-    echo "no pluigns selected. If you ran UninstallNotLoadedAddons use <tab> or <c-d> to get a list of not loaded plugins"
+    echo "no plugins selected. If you ran UninstallNotLoadedAddons use <tab> or <c-d> to get a list of not loaded plugins"
     return
   endif
   call map(list, 'scriptmanager#PluginDirByName(v:val)')
