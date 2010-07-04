@@ -84,7 +84,7 @@ fun! scriptmanager#Checkout(targetDir, repository)
     let parent = fnamemodify(a:targetDir,':h')
     exec '!cd '.shellescape(parent).'&& svn checkout '.shellescape(a:repository['url']).' '.shellescape(a:targetDir)
     if !isdirectory(a:targetDir)
-      throw "failed checking out ".a:targetDir." \n".str
+      throw "failed checking out ".a:targetDir." \n"
     endif
 
   " .vim file and type syntax?
