@@ -371,15 +371,15 @@ fun! scriptmanager#AddonInfoFile(name)
 endf
 
 fun! scriptmanager#UpdateAddon(name)
-  let direcotry = scriptmanager#PluginDirByName(a:name)
-  if isdirectory(direcotry.'/.git')
-    exec '!cd '.shellescape(direcotry, 1).'&& git pull'
+  let directory = scriptmanager#PluginDirByName(a:name)
+  if isdirectory(directory.'/.git')
+    exec '!cd '.shellescape(directory, 1).'&& git pull'
     return !v:shell_error
-  elseif isdirectory(direcotry.'/.svn')
-    exec '!cd '.shellescape(direcotry, 1).'&& svn update'
+  elseif isdirectory(directory.'/.svn')
+    exec '!cd '.shellescape(directory, 1).'&& svn update'
     return !v:shell_error
-  elseif isdirectory(direcotry.'/.hg')
-    exec '!cd '.shellescape(direcotry, 1).'&& hg pull'
+  elseif isdirectory(directory.'/.hg')
+    exec '!cd '.shellescape(directory, 1).'&& hg pull'
     return !v:shell_error
   else
     echoe "updating plugin ".a:name." not implemented yet"
