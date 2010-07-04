@@ -378,6 +378,9 @@ fun! scriptmanager#UpdateAddon(name)
   elseif isdirectory(direcotry.'/.svn')
     exec '!cd '.shellescape(direcotry, 1).'&& svn update'
     return !v:shell_error
+  elseif isdirectory(direcotry.'/.hg')
+    exec '!cd '.shellescape(direcotry, 1).'&& hg pull'
+    return !v:shell_error
   else
     echoe "updating plugin ".a:name." not implemented yet"
     return 0
