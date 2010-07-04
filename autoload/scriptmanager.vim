@@ -74,6 +74,12 @@ fun! scriptmanager#Checkout(targetDir, repository)
     if !isdirectory(a:targetDir)
       throw "failed checking out ".a:targetDir." \n"
     endif
+  elseif a:repository['type'] == 'hg'
+    let parent = fnamemodify(a:targetDir,':h')
+    exec '!hg clone '.shellescape(a:repository['url']).' '.shellescape(a:targetDir)
+    if !isdirectory(a:targetDir)
+      throw "failed checking out ".a:targetDir." \n"
+    endif
   elseif a:repository['type'] == 'svn'
     let parent = fnamemodify(a:targetDir,':h')
     exec '!cd '.shellescape(parent).'&& svn checkout '.shellescape(a:repository['url']).' '.shellescape(a:targetDir)
