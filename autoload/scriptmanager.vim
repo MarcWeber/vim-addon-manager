@@ -169,7 +169,7 @@ fun! scriptmanager#IsPluginInstalled(name)
   return isdirectory(scriptmanager#PluginDirByName(a:name))
 endf
 
-fun! scriptmanager#LoadKownRepos()
+fun! scriptmanager#LoadKnownRepos()
   let known = s:c['known']
   if 0 == get(s:c['activated_plugins'], known, 0) && input('activate plugin '.known.' to get more plugin sources ? [y/n]:','') == 'y'
     call scriptmanager#Activate([known])
@@ -217,7 +217,7 @@ fun! scriptmanager#Install(toBeInstalledList, ...)
     " ask user for to confirm installation unless he set auto_install
     if s:c['auto_install'] || get(opts,'auto_install',0) || input('install plugin '.name.' ? [y/n]:','') == 'y'
 
-      if name != s:c['known'] | call scriptmanager#LoadKownRepos() | endif
+      if name != s:c['known'] | call scriptmanager#LoadKnownRepos() | endif
 
       let repository = get(s:c['plugin_sources'], name, get(opts, name,0))
 
@@ -415,7 +415,7 @@ fun! scriptmanager#KnownAddons(...)
   let list = map(split(glob(scriptmanager#PluginDirByName('*')),"\n"),"fnamemodify(v:val,':t')")
   let list = filter(list, 'isdirectory(v:val)')
   if installable == "installable"
-    call scriptmanager#LoadKownRepos()
+    call scriptmanager#LoadKnownRepos()
     call extend(list, keys(s:c['plugin_sources']))
   endif
   " uniq items:
