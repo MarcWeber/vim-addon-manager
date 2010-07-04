@@ -74,7 +74,7 @@ fun! scriptmanager#Checkout(targetDir, repository)
   let addVersionFile = 'call writefile([get(a:repository,"version","?")], a:targetDir."/version")'
   if a:repository['type'] == 'git'
     let parent = fnamemodify(a:targetDir,':h')
-    exec '!git clone '.s:shellescape(a:repository['url']).' 's:shellescape(a:targetDir)
+    exec '!git clone '.s:shellescape(a:repository['url']).' '.s:shellescape(a:targetDir)
     if !isdirectory(a:targetDir)
       throw "failed checking out ".a:targetDir." \n"
     endif
@@ -88,7 +88,7 @@ fun! scriptmanager#Checkout(targetDir, repository)
     let parent = fnamemodify(a:targetDir,':h')
     exec '!cd '.s:shellescape(parent).'&& svn checkout '.s:shellescape(a:repository['url']).' '.s:shellescape(a:targetDir)
     if !isdirectory(a:targetDir)
-      throw "failed checking out ".a:targetDir." \n".str
+      throw "failed checking out ".a:targetDir." \n"
     endif
 
   " .vim file and type syntax?
