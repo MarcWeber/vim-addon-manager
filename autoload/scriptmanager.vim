@@ -175,7 +175,7 @@ endf
 
 fun! scriptmanager#LoadKnownRepos()
   let known = s:c['known']
-  if 0 == get(s:c['activated_plugins'], known, 0) && input('activate plugin '.known.' to get more plugin sources? [y/n]:','') == 'y'
+  if 0 == get(s:c['activated_plugins'], known, 0) && input('Activate plugin '.known.' to get more plugin sources? [y/n]:','') == 'y'
     call scriptmanager#Activate([known])
     " this should be done by Activate!
     exec 'source '.scriptmanager#PluginDirByName(known).'/plugin/vim-addon-manager-known-repositories.vim'
@@ -185,11 +185,11 @@ endf
 fun! scriptmanager#UninstallAddons(list)
   let list = a:list
   if list == []
-    echo "no plugins selected. If you ran UninstallNotLoadedAddons use <tab> or <c-d> to get a list of not loaded plugins"
+    echo "No plugins selected. If you ran UninstallNotLoadedAddons use <tab> or <c-d> to get a list of not loaded plugins"
     return
   endif
   call map(list, 'scriptmanager#PluginDirByName(v:val)')
-  if input('confirm running rm -fr on plugins:'.join(list,",").' [y/n]') == 'y'
+  if input('Confirm running rm -fr on plugins:'.join(list,",").' [y/n]') == 'y'
     for path in list
       exec '! rm -fr '.path
     endfor
@@ -219,7 +219,7 @@ fun! scriptmanager#Install(toBeInstalledList, ...)
     endif
 
     " ask user for to confirm installation unless he set auto_install
-    if s:c['auto_install'] || get(opts,'auto_install',0) || input('install plugin '.name.'? [y/n]:','') == 'y'
+    if s:c['auto_install'] || get(opts,'auto_install',0) || input('Install plugin '.name.'? [y/n]:','') == 'y'
 
       if name != s:c['known'] | call scriptmanager#LoadKnownRepos() | endif
 
@@ -227,9 +227,9 @@ fun! scriptmanager#Install(toBeInstalledList, ...)
 
       let d = get(repository, 'deprecated', '')
       if type(d) == type('') && d != ''
-        echom "deprecation warning package ".name. ":"
+        echom "Deprecation warning package ".name. ":"
         echom d
-        if 'y' != input(name.' is deprecated. See warning above. Install it [y/n]','n')
+        if 'y' != input('Plugin '.name.' is deprecated. See warning above. Install it [y/n]','n')
           continue
         endif
       endif
@@ -388,7 +388,7 @@ fun! scriptmanager#UpdateAddon(name)
     exec '!cd '.s:shellescape(directory, 1).'&& hg pull'
     return !v:shell_error
   else
-    echoe "updating plugin ".a:name." not implemented yet"
+    echoe "Updating plugin ".a:name." not implemented yet"
     return 0
   endif
 endf
@@ -396,7 +396,7 @@ endf
 
 fun! scriptmanager#Update(list)
   let list = a:list
-  if empty(list) && input('update all loaded plugins? [y/n] ','y') == 'y'
+  if empty(list) && input('Update all loaded plugins? [y/n] ','y') == 'y'
     let list = keys(s:c['activated_plugins'])
   endif
   let failed = []
@@ -408,7 +408,7 @@ fun! scriptmanager#Update(list)
     endif
   endfor
   if !empty(failed)
-    echoe "failed updating plugins: ".string(failed)
+    echoe "Failed updating plugins: ".string(failed)
   endif
 endf
 
