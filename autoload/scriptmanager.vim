@@ -185,11 +185,11 @@ endf
 fun! scriptmanager#UninstallAddons(list)
   let list = a:list
   if list == []
-    echo "No plugins selected. If you ran UninstallNotLoadedAddons use <tab> or <c-d> to get a list of not loaded plugins"
+    echo "No plugins selected. If you ran UninstallNotLoadedAddons use <tab> or <c-d> to get a list of not loaded plugins."
     return
   endif
   call map(list, 'scriptmanager#PluginDirByName(v:val)')
-  if input('Confirm running rm -fr on plugins:'.join(list,",").' [y/n]') == 'y'
+  if input('Confirm running rm -fr on plugins:'.join(list,",").'? [y/n]') == 'y'
     for path in list
       exec '! rm -fr '.path
     endfor
@@ -229,7 +229,7 @@ fun! scriptmanager#Install(toBeInstalledList, ...)
       if type(d) == type('') && d != ''
         echom "Deprecation warning package ".name. ":"
         echom d
-        if 'y' != input('Plugin '.name.' is deprecated. See warning above. Install it [y/n]','n')
+        if 'y' != input('Plugin '.name.' is deprecated. See warning above. Install it? [y/n]','n')
           continue
         endif
       endif
@@ -388,7 +388,7 @@ fun! scriptmanager#UpdateAddon(name)
     exec '!cd '.s:shellescape(directory, 1).'&& hg pull'
     return !v:shell_error
   else
-    echoe "Updating plugin ".a:name." not implemented yet"
+    echoe "Updating plugin ".a:name." not implemented yet."
     return 0
   endif
 endf
@@ -408,7 +408,7 @@ fun! scriptmanager#Update(list)
     endif
   endfor
   if !empty(failed)
-    echoe "Failed updating plugins: ".string(failed)
+    echoe "Failed updating plugins: ".string(failed)."."
   endif
 endf
 
