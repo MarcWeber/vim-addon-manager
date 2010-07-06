@@ -189,9 +189,9 @@ fun! scriptmanager#UninstallAddons(list)
     return
   endif
   call map(list, 'scriptmanager#PluginDirByName(v:val)')
-  if input('Confirm running rm -fr on plugins: '.join(list,", ").'? [y/n]') == 'y'
+  if input('Confirm running rm -fr on directories: '.join(list,", ").'? [y/n]') == 'y'
     for path in list
-      exec '! rm -fr '.path
+      exec '!rm -fr '.path
     endfor
   endif
 endf
