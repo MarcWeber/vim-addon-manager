@@ -55,7 +55,7 @@ fun! scriptmanager#ReadAddonInfo(path)
       " using eval is now safe!
       return eval(body)
   else
-      throw "Invalid JSON in ".a:path
+      throw "Invalid JSON in ".a:path."!"
   endif
 
 endf
@@ -76,19 +76,19 @@ fun! scriptmanager#Checkout(targetDir, repository)
     let parent = fnamemodify(a:targetDir,':h')
     exec '!git clone '.s:shellescape(a:repository['url']).' '.s:shellescape(a:targetDir)
     if !isdirectory(a:targetDir)
-      throw "failed checking out ".a:targetDir."\n"
+      throw "Failed checking out ".a:targetDir."!"
     endif
   elseif a:repository['type'] == 'hg'
     let parent = fnamemodify(a:targetDir,':h')
     exec '!hg clone '.s:shellescape(a:repository['url']).' '.s:shellescape(a:targetDir)
     if !isdirectory(a:targetDir)
-      throw "failed checking out ".a:targetDir."\n"
+      throw "Failed checking out ".a:targetDir."!"
     endif
   elseif a:repository['type'] == 'svn'
     let parent = fnamemodify(a:targetDir,':h')
     exec '!cd '.s:shellescape(parent).'&& svn checkout '.s:shellescape(a:repository['url']).' '.s:shellescape(a:targetDir)
     if !isdirectory(a:targetDir)
-      throw "failed checking out ".a:targetDir."\n"
+      throw "Failed checking out ".a:targetDir."!"
     endif
 
   " .vim file and type syntax?
@@ -156,7 +156,7 @@ fun! scriptmanager#Checkout(targetDir, repository)
     exec addVersionFile
     call scriptmanager#Copy(a:targetDir, a:targetDir.'.backup')
   else
-    throw "don't know how to checkout source location: ".string(a:repository)
+    throw "Don't know how to checkout source location: ".string(a:repository)."!"
   endif
 endf
 
@@ -226,7 +226,7 @@ fun! scriptmanager#Install(toBeInstalledList, ...)
       let repository = get(s:c['plugin_sources'], name, get(opts, name,0))
 
       if type(repository) == type(0) && repository == 0
-        throw "no repository location info known for plugin ".name
+        throw "No repository location info known for plugin ".name."!"
       endif
 
       let d = get(repository, 'deprecated', '')
