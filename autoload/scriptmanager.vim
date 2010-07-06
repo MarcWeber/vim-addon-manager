@@ -225,6 +225,10 @@ fun! scriptmanager#Install(toBeInstalledList, ...)
 
       let repository = get(s:c['plugin_sources'], name, get(opts, name,0))
 
+      if type(repository) == type(0) && repository == 0
+        throw "no repository location info known for plugin ".name
+      endif
+
       let d = get(repository, 'deprecated', '')
       if type(d) == type('') && d != ''
         echom "Deprecation warning package ".name. ":"
@@ -234,9 +238,6 @@ fun! scriptmanager#Install(toBeInstalledList, ...)
         endif
       endif
 
-      if type(repository) == type(0) && repository == 0
-        throw "no repository location info known for plugin ".name
-      endif
       let pluginDir = scriptmanager#PluginDirByName(name)
       let infoFile = scriptmanager#AddonInfoFile(name
       call scriptmanager#Checkout(pluginDir, repository)
