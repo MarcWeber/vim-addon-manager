@@ -351,8 +351,8 @@ fun! scriptmanager#Activate(...)
     " don't miss the after directories if they exist and
     " put them last! (Thanks to Oliver Teuliere)
     let rtp = split(&runtimepath,',')
-    exec "set runtimepath=".join(rtp[:0] + s:new_runtime_paths + rtp[1:]
-                                  \ + filter(map(copy(s:new_runtime_paths),'v:val."/after"'), 'isdirectory(v:val)') ,",")
+    exec "set runtimepath=".escape(join(rtp[:0] + s:new_runtime_paths + rtp[1:]
+                                  \ + filter(map(copy(s:new_runtime_paths),'v:val."/after"'), 'isdirectory(v:val)') ,","),' ')
     unlet rtp
 
     if has_key(s:c, 'started_up')
