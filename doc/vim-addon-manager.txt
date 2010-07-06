@@ -73,11 +73,15 @@ INSTALL:
   way 2 (automatic):
 
     call scriptmanager#Install(["name"])
-    or
-    call scriptmanager#Install([PATH_OR_URL/NAME-info.txt])
+    [ 
+      or
+      call scriptmanager#Install([PATH_OR_URL/NAME-info.txt])
 
-    " this will download the repository and its dependencies and put them into
-    " the directory containing vim-script-manager
+      " this will download the repository and its dependencies and put them into
+      " the directory containing vim-script-manager
+    ] << this is broken ZyX has a patch.
+         Thinking about whether we want this feature at all
+         Proposal: adding new command: InstallAddonByInfoFile
 
 
 ACTIVATE:
@@ -130,6 +134,13 @@ You can uninstall addons this way: >
 Example install list of all known repositories ~
 call scriptmanager#Install(["vim-addon-manager-known-repositories"])
 
+------------------------------------------------------------------------------
+How to add your own repository locations? ~
+Ask me to add it to vim-addon-manager-known-repositories or do what that
+plugin is doing: Add your own dicts to: >
+  g:vim_script_manager['plugin_sources']['your-plugin-name'] = { ... }
+<
+in your .vimrc or somewhere eles
 ------------------------------------------------------------------------------
 historical notes ~
 This is a KISS reimplementation of http://github.com/MarcWeber/theonevimlib
