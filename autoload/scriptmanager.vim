@@ -239,7 +239,7 @@ fun! scriptmanager#Install(toBeInstalledList, ...)
       endif
 
       let pluginDir = scriptmanager#PluginDirByName(name)
-      let infoFile = scriptmanager#AddonInfoFile(name
+      let infoFile = scriptmanager#AddonInfoFile(name)
       call scriptmanager#Checkout(pluginDir, repository)
 
       if !filereadable(infoFile) && has_key(s:c['missing_addon_infos'], name)
