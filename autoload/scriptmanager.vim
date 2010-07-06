@@ -226,10 +226,12 @@ fun! scriptmanager#Install(toBeInstalledList, ...)
       let repository = get(s:c['plugin_sources'], name, get(opts, name,0))
 
       let d = get(repository, 'deprecated', '')
-      echom "deprecation warning package ".name. ":"
-      echom d
-      if d != '' && 'y' != input(name.' is deprecated. See warning above. Install it [y/n]','n')
-        continue
+      if type(d) == type('') && d != ''
+        echom "deprecation warning package ".name. ":"
+        echom d
+        if 'y' != input(name.' is deprecated. See warning above. Install it [y/n]','n')
+          continue
+        endif
       endif
 
       if type(repository) == type(0) && repository == 0
