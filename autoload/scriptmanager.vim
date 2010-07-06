@@ -210,10 +210,40 @@ fun! scriptmanager#AddonInfo(name)
  return get(s:c['addon_infos'],a:name, {})
 endf
 
+" Install let's you install plugins by passing the url of a addon-info file
+" This preprocessor replaces the urls by the plugin-names putting the
+" repository information into the global dict
+fun! scriptmanager#ReplaceAndFetchUrls(list)
+  let l = a:list
+  let idx = 0
+  for idx in range(0, len(l)-1)
+    silent! unlet t
+    let n = l[idx]
+    " assume n is either an url or a path
+    if n =~ '^http://' && 'y' == input('Fetch plugin info from url '.n.' [y/n]')
+      let t = tempfile()
+      exec '!curl '.t.' > '.s:shellescape(t)
+    elseif n =~  '[/\\]' && filereadable(n)
+      let t = n
+    endif
+    if exists('t')
+      let dic = scriptmanager#ReadAddonInfo(t)
+      if !has_key(dic,'name') || !has_key(dic, 'repository')
+        echoe n." is no valid addon-info file. It must contain both keys: name and repository"
+        continue
+      endif
+      let s:c['plugin_sources'][dic['name']] = dic['repository']
+      let l[idx] = dic['name']
+    endif
+  endfor
+  return l
+endfun
+
 " opts: same as Activate
 fun! scriptmanager#Install(toBeInstalledList, ...)
+  let toBeInstalledList = scriptmanager#ReplaceAndFetchUrls(a:toBeInstalledList)
   let opts = a:0 == 0 ? {} : a:1
-  for name in a:toBeInstalledList
+  for name in toBeInstalledList
     if scriptmanager#IsPluginInstalled(name)
       continue
     endif

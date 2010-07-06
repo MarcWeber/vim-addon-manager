@@ -73,15 +73,12 @@ INSTALL:
   way 2 (automatic):
 
     call scriptmanager#Install(["name"])
-    [ 
-      or
-      call scriptmanager#Install([PATH_OR_URL/NAME-info.txt])
+    or
+    call scriptmanager#Install([PATH_OR_URL/NAME-info.txt])
 
-      " this will download the repository and its dependencies and put them into
-      " the directory containing vim-script-manager
-    ] << this is broken ZyX has a patch.
-         Thinking about whether we want this feature at all
-         Proposal: adding new command: InstallAddonByInfoFile
+    " this will download the repository and its dependencies and put them into
+    " the directory containing vim-script-manager
+    " note: if its a file it must contain a '/'. Eg use ./current-dir-info.txt
 
 
 ACTIVATE:
