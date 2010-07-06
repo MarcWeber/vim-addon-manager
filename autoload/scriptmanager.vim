@@ -327,9 +327,9 @@ fun! scriptmanager#Activate(...)
     " add paths after ~/.vim but before $VIMRUNTIME
     " don't miss the after directories if they exist and
     " put them last! (Thanks to Oliver Teuliere)
-    let rtp = split(&runtimepath,',')
-    exec "set runtimepath=".join(rtp[:0] + s:new_runtime_paths + rtp[1:]
-                                  \ + map(filter(map(copy(s:new_runtime_paths),'v:val."/after"'), 'isdirectory(v:val)'), 'fnameescape(v:val)'),",")
+    let rtp = split(&runtimepath,'\(\\\@<!\(\\.\)*\\\)\@<!,')
+    let &runtimepath=join(rtp[:0] + s:new_runtime_paths + rtp[1:]
+                                  \ + map(filter(map(copy(s:new_runtime_paths),'v:val."/after"'), 'isdirectory(v:val)'), 'escape(fnameescape(v:val), ",")'),",")
     unlet rtp
 
     if has_key(s:c, 'started_up')
