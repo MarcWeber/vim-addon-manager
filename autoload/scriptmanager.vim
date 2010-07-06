@@ -223,7 +223,14 @@ fun! scriptmanager#Install(toBeInstalledList, ...)
 
       if name != s:c['known'] | call scriptmanager#LoadKnownRepos() | endif
 
-      let repository = get(s:c['plugin_sources'], name, get(opts, name,0))
+      echo opts
+      if name =~ '/.*-addon-info.txt$'
+        let addonInfo = scriptmanager#ReadAddonInfo(name)
+        let repository = get(addonInfo, "repository", get(opts, name, 0))
+        let name = matchstr(name, '[^/]*\ze-addon-info.txt$')
+      else
+        let repository = get(s:c['plugin_sources'], name, get(opts, name,0))
+      endif
 
       if type(repository) == type(0) && repository == 0
         throw "No repository location info known for plugin ".name."!"
