@@ -148,10 +148,10 @@ fun! scriptmanager#Checkout(targetDir, repository)
        \ .'curl -o '.aname.' '.s:shellescape(a:repository['url'])
     if a =~ '\.gz'
       " manually unzip .vba.gz as .gz isn't unpacked yet for some reason
-      exec '!gunzip '.a:targetDir.'/'.a
+      exec '!gunzip '.s:shellescape(a:targetDir.'/'.a)
       let a = a[:-4]
     endif
-    exec 'sp '.a:targetDir.'/'.a
+    exec 'sp '.s:shellescape(a:targetDir.'/'.a)
     call vimball#Vimball(1,a:targetDir)
     exec addVersionFile
     call scriptmanager#Copy(a:targetDir, a:targetDir.'.backup')
@@ -178,7 +178,7 @@ fun! scriptmanager#LoadKnownRepos()
   if 0 == get(s:c['activated_plugins'], known, 0) && input('Activate plugin '.known.' to get more plugin sources? [y/n]:','') == 'y'
     call scriptmanager#Activate([known])
     " this should be done by Activate!
-    exec 'source '.scriptmanager#PluginDirByName(known).'/plugin/vim-addon-manager-known-repositories.vim'
+    exec 'source '.fnameescape(scriptmanager#PluginDirByName(known).'/plugin/vim-addon-manager-known-repositories.vim')
   endif
 endf
 
@@ -191,14 +191,14 @@ fun! scriptmanager#UninstallAddons(list)
   call map(list, 'scriptmanager#PluginDirByName(v:val)')
   if input('Confirm running rm -fr on directories: '.join(list,", ").'? [y/n]') == 'y'
     for path in list
-      exec '!rm -fr '.path
+      exec '!rm -fr '.s:shellescape(path)
     endfor
   endif
 endf
 
 fun! scriptmanager#HelpTags(name)
   let d=scriptmanager#PluginDirByName(a:name).'/doc'
-  if isdirectory(d) | exec 'helptags '.d | endif
+  if isdirectory(d) | exec 'helptags '.fnameescape(d) | endif
 endf
 
 " {} if file dosen't exist
@@ -322,7 +322,7 @@ fun! scriptmanager#Activate(...)
     " put them last! (Thanks to Oliver Teuliere)
     let rtp = split(&runtimepath,',')
     exec "set runtimepath=".join(rtp[:0] + s:new_runtime_paths + rtp[1:]
-                                  \ + filter(map(copy(s:new_runtime_paths),'v:val."/after"'), 'isdirectory(v:val)') ,",")
+                                  \ + map(filter(map(copy(s:new_runtime_paths),'v:val."/after"'), 'isdirectory(v:val)'), 'fnameescape(v:val)'),",")
     unlet rtp
 
     if has_key(s:c, 'started_up')
@@ -347,7 +347,7 @@ endfun
 
 fun! scriptmanager#GlobThenSource(glob)
   for file in split(glob(a:glob),"\n")
-    exec 'source '.file
+    exec 'source '.fnameescape(file)
   endfor
 endf
 
