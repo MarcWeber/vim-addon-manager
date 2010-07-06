@@ -163,6 +163,11 @@ TODO ~
 reuse this code?
 http://www.vim.org/scripts/script.php?script_id=3061
 
+------------------------------------------------------------------------------
+contributors ~
+(incomplete list):
+ZyX (Nikolay Pavlov, ZyX-I on github)
+
 
 vim:tw=78:fo=tcq2:isk=!-~,^*,^\|,^\":ts=8:ft=help:norl:
 
