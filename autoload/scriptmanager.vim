@@ -76,19 +76,19 @@ fun! scriptmanager#Checkout(targetDir, repository)
     let parent = fnamemodify(a:targetDir,':h')
     exec '!git clone '.s:shellescape(a:repository['url']).' '.s:shellescape(a:targetDir)
     if !isdirectory(a:targetDir)
-      throw "failed checking out ".a:targetDir." \n"
+      throw "failed checking out ".a:targetDir."\n"
     endif
   elseif a:repository['type'] == 'hg'
     let parent = fnamemodify(a:targetDir,':h')
     exec '!hg clone '.s:shellescape(a:repository['url']).' '.s:shellescape(a:targetDir)
     if !isdirectory(a:targetDir)
-      throw "failed checking out ".a:targetDir." \n"
+      throw "failed checking out ".a:targetDir."\n"
     endif
   elseif a:repository['type'] == 'svn'
     let parent = fnamemodify(a:targetDir,':h')
     exec '!cd '.s:shellescape(parent).'&& svn checkout '.s:shellescape(a:repository['url']).' '.s:shellescape(a:targetDir)
     if !isdirectory(a:targetDir)
-      throw "failed checking out ".a:targetDir." \n"
+      throw "failed checking out ".a:targetDir."\n"
     endif
 
   " .vim file and type syntax?
@@ -175,7 +175,7 @@ endf
 
 fun! scriptmanager#LoadKnownRepos()
   let known = s:c['known']
-  if 0 == get(s:c['activated_plugins'], known, 0) && input('activate plugin '.known.' to get more plugin sources ? [y/n]:','') == 'y'
+  if 0 == get(s:c['activated_plugins'], known, 0) && input('activate plugin '.known.' to get more plugin sources? [y/n]:','') == 'y'
     call scriptmanager#Activate([known])
     " this should be done by Activate!
     exec 'source '.scriptmanager#PluginDirByName(known).'/plugin/vim-addon-manager-known-repositories.vim'
@@ -219,7 +219,7 @@ fun! scriptmanager#Install(toBeInstalledList, ...)
     endif
 
     " ask user for to confirm installation unless he set auto_install
-    if s:c['auto_install'] || get(opts,'auto_install',0) || input('install plugin '.name.' ? [y/n]:','') == 'y'
+    if s:c['auto_install'] || get(opts,'auto_install',0) || input('install plugin '.name.'? [y/n]:','') == 'y'
 
       if name != s:c['known'] | call scriptmanager#LoadKnownRepos() | endif
 
@@ -238,7 +238,7 @@ fun! scriptmanager#Install(toBeInstalledList, ...)
         throw "no repository location info known for plugin ".name
       endif
       let pluginDir = scriptmanager#PluginDirByName(name)
-      let infoFile = scriptmanager#AddonInfoFile(name)
+      let infoFile = scriptmanager#AddonInfoFile(name
       call scriptmanager#Checkout(pluginDir, repository)
 
       if !filereadable(infoFile) && has_key(s:c['missing_addon_infos'], name)
