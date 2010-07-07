@@ -163,6 +163,7 @@ http://www.vim.org/scripts/script.php?script_id=3061
 ------------------------------------------------------------------------------
 contributors ~
 (incomplete list):
+Tim Pope (Json validation)
 ZyX (Nikolay Pavlov, ZyX-I on github)
 
 
