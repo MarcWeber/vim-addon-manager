@@ -416,7 +416,7 @@ fun! scriptmanager#UpdateAddon(name)
     exec '!cd '.s:shellescape(directory).'&& svn update'
     return !v:shell_error
   elseif isdirectory(directory.'/.hg')
-    exec '!cd '.s:shellescape(directory, 1).'&& hg pull'
+    exec '!cd '.s:shellescape(directory).'&& hg pull'
     return !v:shell_error
   else
     echoe "Updating plugin ".a:name." not implemented yet."
