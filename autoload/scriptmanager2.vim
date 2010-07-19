@@ -88,13 +88,13 @@ endf
 fun! scriptmanager2#UpdateAddon(name)
   let directory = scriptmanager#PluginDirByName(a:name)
   if isdirectory(directory.'/.git')
-    exec '!cd '.s:shellescape(directory).'&& git pull'
+    call s:exec_in_dir([{'d': a:directory, 'c': 'git pull'}])
     return !v:shell_error
   elseif isdirectory(directory.'/.svn')
-    exec '!cd '.s:shellescape(directory).'&& svn update'
+    call s:exec_in_dir([{'d': a:[directory, 'c': 'svn update'}])
     return !v:shell_error
   elseif isdirectory(directory.'/.hg')
-    exec '!cd '.s:shellescape(directory).'&& hg pull'
+    call s:exec_in_dir([{'d': a:directory, 'c': 'hg pull'}])
     return !v:shell_error
   else
     echoe "Updating plugin ".a:name." not implemented yet."
@@ -206,7 +206,7 @@ fun! scriptmanager2#Checkout(targetDir, repository)
     endif
   elseif a:repository['type'] == 'svn'
     let parent = fnamemodify(a:targetDir,':h')
-    exec '!cd '.s:shellescape(parent).'&& svn checkout '.s:shellescape(a:repository['url']).' '.s:shellescape(a:targetDir)
+    call s:exec_in_dir([{'d': parent, 'c': 'svn checkout '.s:shellescape(a:repository['url']}]).' '.s:shellescape(a:targetDir))
     if !isdirectory(a:targetDir)
       throw "Failed checking out ".a:targetDir."!"
     endif
@@ -222,8 +222,7 @@ fun! scriptmanager2#Checkout(targetDir, repository)
     endif
     call mkdir(a:targetDir.'/'.target,'p')
     let aname = s:shellescape(a:repository['archive_name'])
-    exec '!cd '.s:shellescape(a:targetDir).'/'.target.' &&'
-       \ .'curl -o '.aname.' '.s:shellescape(a:repository['url'])
+    s:exec_in_dir([{'d':  a:targetDir.'/'.target, 'c': 'curl -o '.aname.' '.s:shellescape(a:repository['url']}]))
     exec addVersionFile
     call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
 
@@ -232,9 +231,8 @@ fun! scriptmanager2#Checkout(targetDir, repository)
     call mkdir(a:targetDir)
     let aname = s:shellescape(a:repository['archive_name'])
     let s = get(a:repository,'strip-components',1)
-    exec '!cd '.s:shellescape(a:targetDir).' &&'
-       \ .'curl -o '.aname.' '.s:shellescape(a:repository['url']).' &&'
-       \ .'tar --strip-components='.s.' -xzf '.aname
+    call s:exec_in_dir([{'d':  a:targetDir, 'c': 'curl -o '.aname.' '.s:shellescape(a:repository['url']}
+          \ , {'c': 'tar --strip-components='.s.' -xzf '.aname}])
     exec addVersionFile
     call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
 
@@ -243,9 +241,8 @@ fun! scriptmanager2#Checkout(targetDir, repository)
   elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.tar$'
     call mkdir(a:targetDir)
     let aname = s:shellescape(a:repository['archive_name'])
-    exec '!cd '.s:shellescape(a:targetDir).' &&'
-       \ .'curl -o '.aname.' '.s:shellescape(a:repository['url']).' &&'
-       \ .'tar --strip-components=1 -xf '.aname
+    call s:exec_in_dir([{'d':  a:targetDir, 'c': 'curl -o '.aname.' '.s:shellescape(a:repository['url']}
+          \ , {'c': 'tar --strip-components='.s.' -xzf '.aname}])
     exec addVersionFile
     call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
 
@@ -253,9 +250,8 @@ fun! scriptmanager2#Checkout(targetDir, repository)
   elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.zip$'
     call mkdir(a:targetDir)
     let aname = s:shellescape(a:repository['archive_name'])
-    exec '!cd '.s:shellescape(a:targetDir).' &&'
-       \ .'curl -o '.s:shellescape(a:targetDir).'/'.aname.' '.s:shellescape(a:repository['url']).' &&'
-       \ .'unzip '.aname
+    call s:exec_in_dir([{'d':  a:targetDir, 'c': 'curl -o '.s:shellescape(a:targetDir).'/'.aname.' '.s:shellescape(a:repository['url'])}
+       \ , {'c': 'unzip '.aname } ])
     exec addVersionFile
     call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
 
@@ -264,8 +260,7 @@ fun! scriptmanager2#Checkout(targetDir, repository)
     call mkdir(a:targetDir)
     let a = a:repository['archive_name']
     let aname = s:shellescape(a)
-    exec '!cd '.s:shellescape(a:targetDir).' &&'
-       \ .'curl -o '.aname.' '.s:shellescape(a:repository['url'])
+    call s:exec_in_dir([{'d':  a:targetDir, 'c': 'curl -o '.aname.' '.s:shellescape(a:repository['url']}]))
     if a =~ '\.gz'
       " manually unzip .vba.gz as .gz isn't unpacked yet for some reason
       exec '!gunzip '.a:targetDir.'/'.a
@@ -282,6 +277,36 @@ endf
 
 fun! s:shellescape(s)
   return shellescape(a:s,1)
+endf
+
+" cmds = list of {'d':  dir to run command in, 'c': the command line to be run }
+fun! s:exec_in_dir(cmds)
+  let iswin = 
+  if has('win16') || has('win32') || has('win64')
+    " set different lcd in extra buffer:
+    split
+    let lcd=""
+    for c in a:cmds
+      if has_key(c, "d")
+        " TODO quoting
+        exec "lcd ".c.d
+      endif
+      exec '!'.c.c
+      " break if one of the pased commands failes:
+      if v:shell_error != 0
+        break
+      endif
+    endfor
+    " should lcd withou args be used instead?
+    q
+  else
+    " execute command sequences on linux
+    let cmds_str = []
+    for c in a:cmds
+      call add(cmds_str, (has_key(c,"d") ? "cd ".s:shellescape(c.d)." && " : "" ). c.c)
+    endfor
+    exec '!'.join(cmds_str," && ")
+  endif
 endf
 
 " is there a library providing an OS abstraction? This breaks Winndows

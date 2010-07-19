@@ -165,6 +165,7 @@ contributors ~
 (incomplete list):
 Tim Pope (Json validation)
 ZyX (Nikolay Pavlov, ZyX-I on github)
+Tux Tom (http://github.com/TuxTom) for heplign fixing a cd bug on Windows
 
 
 vim:tw=78:fo=tcq2:isk=!-~,^*,^\|,^\":ts=8:ft=help:norl:
