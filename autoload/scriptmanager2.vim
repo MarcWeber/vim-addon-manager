@@ -298,7 +298,7 @@ fun! s:exec_in_dir(cmds)
       endif
     endfor
     " should lcd withou args be used instead?
-    q
+    bw!
   else
     " execute command sequences on linux
     let cmds_str = []
