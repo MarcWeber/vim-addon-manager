@@ -88,13 +88,13 @@ endf
 fun! scriptmanager2#UpdateAddon(name)
   let directory = scriptmanager#PluginDirByName(a:name)
   if isdirectory(directory.'/.git')
-    call s:exec_in_dir([{'d': a:directory, 'c': 'git pull'}])
+    call s:exec_in_dir([{'d': directory, 'c': 'git pull'}])
     return !v:shell_error
   elseif isdirectory(directory.'/.svn')
-    call s:exec_in_dir([{'d': a:[directory, 'c': 'svn update'}])
+    call s:exec_in_dir([{'d': directory, 'c': 'svn update'}])
     return !v:shell_error
   elseif isdirectory(directory.'/.hg')
-    call s:exec_in_dir([{'d': a:directory, 'c': 'hg pull'}])
+    call s:exec_in_dir([{'d': directory, 'c': 'hg pull'}])
     return !v:shell_error
   else
     echoe "Updating plugin ".a:name." not implemented yet."
@@ -222,7 +222,7 @@ fun! scriptmanager2#Checkout(targetDir, repository)
     endif
     call mkdir(a:targetDir.'/'.target,'p')
     let aname = s:shellescape(a:repository['archive_name'])
-    s:exec_in_dir([{'d':  a:targetDir.'/'.target, 'c': 'curl -o '.aname.' '.s:shellescape(a:repository['url']}]))
+    call s:exec_in_dir([{'d':  a:targetDir.'/'.target, 'c': 'curl -o '.aname.' '.s:shellescape(a:repository['url']}]))
     exec addVersionFile
     call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
 
@@ -281,7 +281,6 @@ endf
 
 " cmds = list of {'d':  dir to run command in, 'c': the command line to be run }
 fun! s:exec_in_dir(cmds)
-  let iswin = 
   if has('win16') || has('win32') || has('win64')
     " set different lcd in extra buffer:
     split
