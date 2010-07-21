@@ -160,6 +160,21 @@ TODO ~
 reuse this code?
 http://www.vim.org/scripts/script.php?script_id=3061
 
+
+------------------------------------------------------------------------------
+running the test ~
+
+this should be all you have to do:
+sh vim-addon-manager-test.sh
+
+You should see
+1
+1
+1
+
+at the end. Written for Linux only. Code coverage is bad. Its a starting
+point.
+
 ------------------------------------------------------------------------------
 contributors ~
 (incomplete list):

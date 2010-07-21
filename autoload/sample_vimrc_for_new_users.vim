@@ -66,7 +66,8 @@ noremap \n :n<space>**/*
 " files are sourced. JSON is not that important. It highlights the
 " NAME-addon-info.txt files. Probably you want to substitude nameN by plugins
 " such as snipMate, tlib etc.
-call scriptmanager#Activate(['JSON',"name1","name2"])
+
+" call scriptmanager#Activate(['JSON',"name1","name2"])
 
 " foreign plugins tlib {{{1
 

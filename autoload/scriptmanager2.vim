@@ -87,19 +87,7 @@ endf
 
 fun! scriptmanager2#UpdateAddon(name)
   let directory = scriptmanager#PluginDirByName(a:name)
-  if isdirectory(directory.'/.git')
-    call s:exec_in_dir([{'d': directory, 'c': 'git pull'}])
-    return !v:shell_error
-  elseif isdirectory(directory.'/.svn')
-    call s:exec_in_dir([{'d': directory, 'c': 'svn update'}])
-    return !v:shell_error
-  elseif isdirectory(directory.'/.hg')
-    call s:exec_in_dir([{'d': directory, 'c': 'hg pull'}])
-    return !v:shell_error
-  else
-    echoe "Updating plugin ".a:name." not implemented yet."
-    return 0
-  endif
+  return vcs_checkouts#Update(directory)
 endf
 
 fun! scriptmanager2#Update(list)
@@ -192,24 +180,8 @@ endf
 
 fun! scriptmanager2#Checkout(targetDir, repository)
   let addVersionFile = 'call writefile([get(a:repository,"version","?")], a:targetDir."/version")'
-  if a:repository['type'] == 'git'
-    let parent = fnamemodify(a:targetDir,':h')
-    exec '!git clone '.s:shellescape(a:repository['url']).' '.s:shellescape(a:targetDir)
-    if !isdirectory(a:targetDir)
-      throw "Failed checking out ".a:targetDir."!"
-    endif
-  elseif a:repository['type'] == 'hg'
-    let parent = fnamemodify(a:targetDir,':h')
-    exec '!hg clone '.s:shellescape(a:repository['url']).' '.s:shellescape(a:targetDir)
-    if !isdirectory(a:targetDir)
-      throw "Failed checking out ".a:targetDir."!"
-    endif
-  elseif a:repository['type'] == 'svn'
-    let parent = fnamemodify(a:targetDir,':h')
-    call s:exec_in_dir([{'d': parent, 'c': 'svn checkout '.s:shellescape(a:repository['url']}]).' '.s:shellescape(a:targetDir))
-    if !isdirectory(a:targetDir)
-      throw "Failed checking out ".a:targetDir."!"
-    endif
+  if a:repository['type'] =~ 'git\|hg\|svn'
+    call vcs_checkouts#Checkout(a:targetDir, a:repository)
 
   " .vim file and type syntax?
   elseif has_key(a:repository, 'archive_name')
@@ -281,31 +253,7 @@ endf
 
 " cmds = list of {'d':  dir to run command in, 'c': the command line to be run }
 fun! s:exec_in_dir(cmds)
-  if has('win16') || has('win32') || has('win64')
-    " set different lcd in extra buffer:
-    split
-    let lcd=""
-    for c in a:cmds
-      if has_key(c, "d")
-        " TODO quoting
-        exec "lcd ".c.d
-      endif
-      exec '!'.c.c
-      " break if one of the pased commands failes:
-      if v:shell_error != 0
-        break
-      endif
-    endfor
-    " should lcd withou args be used instead?
-    bw!
-  else
-    " execute command sequences on linux
-    let cmds_str = []
-    for c in a:cmds
-      call add(cmds_str, (has_key(c,"d") ? "cd ".s:shellescape(c.d)." && " : "" ). c.c)
-    endfor
-    exec '!'.join(cmds_str," && ")
-  endif
+  call vcs_checkouts#ExecIndir(a:cmds)
 endf
 
 " is there a library providing an OS abstraction? This breaks Winndows
