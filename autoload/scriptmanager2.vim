@@ -286,7 +286,7 @@ endf
 "    so that its sourced automatically
 "
 " TODO: take after plugins int account?
-fun! scriptmanager2#MergePluginFiles(plugins)
+fun! scriptmanager2#MergePluginFiles(plugins, skip_pattern)
   if !filereadable('/bin/sh')
     throw "you should be using Linux.. This code is likely to break on other operating systems!"
   endif
@@ -314,6 +314,12 @@ fun! scriptmanager2#MergePluginFiles(plugins)
   let all_contents = ""
   for r in runtimepaths
     for file in split(glob(r.'/plugin/*.vim_merged'),"\n")
+
+      if file =~ a:skip_pattern
+        let all_contents .= "\" ignoring ".file."\n"
+        continue
+      endif
+
       let names_this_file = {}
       let contents =join(readfile(file, 'b'),"\n")
       for l in split("s:abc s:foobar",'\ze\<s:')[1:]
@@ -330,13 +336,56 @@ fun! scriptmanager2#MergePluginFiles(plugins)
           let file_local_vars[k] = 1
         endif
       endfor
+
+      " find finish which start at the end of a line.
+      " They are often used to separated Vim code from additional info such as
+      " history (eg tlib is using it). Comment remaining lines
+      let lines = split(contents,"\n")
+      let comment = 0
+      for i in range(0,len(lines)-1)
+        if lines[i] =~ '^finish'
+          let comment = 1
+        endif
+        if comment
+          let lines[i] = "\" ".lines[i]
+        endif
+      endfor
+      let contents = join(lines,"\n")
+
       " guards 4)
-      " comment finish. This does not catch if .. | finish | endif and such
+      " find guards replace them by if .. endif blocks
+      let lines = split(contents,"\n")
+      for i in range(2,len(lines)-1)
+        if lines[i] =~ '^\s*finish' && lines[i-1] =~ '^\s*if\s'
+          " found a guard
+          
+          " negate if, remove {{{ if present (I don't care)
+          let lines[i-1] = 'if !('.matchstr(substitute(lines[i-1],'"[^"]*{{{.*','',''),'if\s*\zs.*').')'
+          let j = i+1
+          while j < len(lines) && lines[j] !~ '^\s*endif'
+            let lines[j] = ''
+            let j = j+1
+          endwhile
+          let lines[j] = ''
+          " guards are never longer than 10 lines
+          if j - i > 10
+            throw "something probably has gone wrong while removing guard for file".file." start at line: ".i
+          endif
+          call add(lines,'endif')
+          let contents = join(lines,"\n")
+          break
+        endif
+      endfor
+
+
+      " comment remaining finish lines. This does not catch if .. | finish | endif and such
       " :-(
+      " adding additional \n because not all scripts have a final \n..
       let contents = substitute(contents, '\<finish\>','" finish','g')
       let all_contents .= "\n"
             \ ."\"merged: ".file."\n"
             \ .contents
+            \ ."\n"
             \ ."\"merged: ".file." end\n"
     endfor
   endfor

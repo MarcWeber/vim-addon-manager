@@ -130,9 +130,11 @@ You can uninstall addons this way: >
 ------------------------------------------------------------------------------
 speeding startup up on heavy IO load.. ~
 
+(Well.. feature is in alpha stage)
+
 Maybe you use as many plugins as I do? Starting up Vim can be a nightmare if
 system is under IO load. That's why I wrote this small helper function: >
-  command MergePluginFiles call scriptmanager2#MergePluginFiles(["vim-addon-git"])
+  command MergePluginFiles call scriptmanager2#MergePluginFiles(["vim-addon-git","no-match"])
 <
 It will rename all append _merged to all plugin/*.vim file names so that they
 are ignored. Then it'll merge file contents into this one >
@@ -142,7 +144,10 @@ faster. Of course there are some issues the function tries to take care off -
 But this can also break the scritps:
   - s:foobar file local vars have to be renamed if they are used in more than
     one plugin file
-  - finish is bad. So its commented (the gurads should be replaced by if ..
+  - guards are replaced by if .. endif which might be inneficient.
+    So if you want to disable plugins use the skip pattern like this: >
+    call scriptmanager2#MergePluginFiles(["vim-addon-git","tselectfile\.vim\|tselectbuffer\.vim"])
+< - finish is bad. So its commented (the gurads should be replaced by if ..
     endif blocks instead - Do you want to implement it?
 
 ------------------------------------------------------------------------------
