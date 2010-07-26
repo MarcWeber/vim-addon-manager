@@ -278,7 +278,7 @@ endf
 " This function tries to optimize this by reading all the plugin/*.vim
 " files joining them to one vim file.
 "
-" 1) rename plugin/*.vim to plugin/*.vim_merged (so that they are no longer sourced by Vim
+" 1) rename plugin to plugin-merged (so that they are no longer sourced by Vim)
 " 2) read plugin/*.vim_merged files
 " 3) replace clashing s:name vars by uniq names
 " 4) rewrite the guards (everything containing finish)
@@ -303,9 +303,9 @@ fun! scriptmanager2#MergePluginFiles(plugins, skip_pattern)
 
   " 1)
   for r in runtimepaths
-    for file in split(glob(r.'/plugin/*.vim'),"\n")
-      call s:exec_in_dir([{'c':'mv -i '.s:shellescape(file).' '.s:shellescape(file.'_merged')}])
-    endfor
+    if (isdirectory(r.'/plugin'))
+      call s:exec_in_dir([{'c':'mv '.s:shellescape(r.'/plugin').' '.s:shellescape(r.'/plugin-merged')}])
+    endif
   endfor
 
   " 2)
@@ -313,7 +313,7 @@ fun! scriptmanager2#MergePluginFiles(plugins, skip_pattern)
   let uniq = 1
   let all_contents = ""
   for r in runtimepaths
-    for file in split(glob(r.'/plugin/*.vim_merged'),"\n")
+    for file in split(glob(r.'/plugin-merged/*.vim'),"\n")
 
       if file =~ a:skip_pattern
         let all_contents .= "\" ignoring ".file."\n"
