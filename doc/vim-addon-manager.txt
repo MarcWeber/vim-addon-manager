@@ -128,6 +128,24 @@ You can uninstall addons this way: >
   :UninstallNotLoadedAddons vim-latex
 
 ------------------------------------------------------------------------------
+speeding startup up on heavy IO load.. ~
+
+Maybe you use as many plugins as I do? Starting up Vim can be a nightmare if
+system is under IO load. That's why I wrote this small helper function: >
+  command MergePluginFiles call scriptmanager2#MergePluginFiles(["vim-addon-git"])
+<
+It will rename all append _merged to all plugin/*.vim file names so that they
+are ignored. Then it'll merge file contents into this one >
+  ~/.vim/after/plugin/vim-addon-manager-merged.vim
+< file which should cause less IO stress to your system. Thus Vim will startup
+faster. Of course there are some issues the function tries to take care off -
+But this can also break the scritps:
+  - s:foobar file local vars have to be renamed if they are used in more than
+    one plugin file
+  - finish is bad. So its commented (the gurads should be replaced by if ..
+    endif blocks instead - Do you want to implement it?
+
+------------------------------------------------------------------------------
 Example install list of all known repositories ~
 call scriptmanager#Install(["vim-addon-manager-known-repositories"])
 

@@ -273,3 +273,76 @@ fun! scriptmanager2#LoadKnownRepos(...)
   endif
 endf
 
+
+" if you machine is under IO load starting up Vim can take some time
+" This function tries to optimize this by reading all the plugin/*.vim
+" files joining them to one vim file.
+"
+" 1) rename plugin/*.vim to plugin/*.vim_merged (so that they are no longer sourced by Vim
+" 2) read plugin/*.vim_merged files
+" 3) replace clashing s:name vars by uniq names
+" 4) rewrite the guards (everything containing finish)
+" 5) write final merged file to ~/.vim/after/plugin/vim-addon-manager-merged.vim
+"    so that its sourced automatically
+"
+" TODO: take after plugins int account?
+fun! scriptmanager2#MergePluginFiles(plugins)
+  if !filereadable('/bin/sh')
+    throw "you should be using Linux.. This code is likely to break on other operating systems!"
+  endif
+
+  let target = split(&runtimepath,",")[0].'/after/plugin/vim-addon-manager-merged.vim'
+
+  for r in a:plugins
+    if !has_key(s:c['activated_plugins'], r)
+      throw "JoinPluginFiles: all plugins must be activated (which ensures that they have been installed). This plugin is not active: ".r
+    endif
+  endfor
+
+  let runtimepaths = map(copy(a:plugins), 'scriptmanager#PluginRuntimePath(v:val)')
+
+  " 1)
+  for r in runtimepaths
+    for file in split(glob(r.'/plugin/*.vim'),"\n")
+      call s:exec_in_dir([{'c':'mv -i '.s:shellescape(file).' '.s:shellescape(file.'_merged')}])
+    endfor
+  endfor
+
+  " 2)
+  let file_local_vars = {}
+  let uniq = 1
+  let all_contents = ""
+  for r in runtimepaths
+    for file in split(glob(r.'/plugin/*.vim_merged'),"\n")
+      let names_this_file = {}
+      let contents =join(readfile(file, 'b'),"\n")
+      for l in split("s:abc s:foobar",'\ze\<s:')[1:]
+        let names_this_file[matchstr(l,'^s:\zs[^ [(=)\]]*')] = 1
+      endfor
+      " handle duplicate local vars: 3)
+      for k in keys(names_this_file)
+        if has_key(file_local_vars, k)
+          let new = 'uniq_'.uniq
+          let uniq += 1
+          let file_local_vars[new] = 1
+          let contents = "\" replaced: ".k." by ".new."\n".substitute(contents, 's:'.k,'s:'.new,'g')
+        else
+          let file_local_vars[k] = 1
+        endif
+      endfor
+      " guards 4)
+      " comment finish. This does not catch if .. | finish | endif and such
+      " :-(
+      let contents = substitute(contents, '\<finish\>','" finish','g')
+      let all_contents .= "\n"
+            \ ."\"merged: ".file."\n"
+            \ .contents
+            \ ."\"merged: ".file." end\n"
+    endfor
+  endfor
+
+  let d =fnamemodify(target,':h')
+  if !isdirectory(d) | call mkdir(d,'p') | endif
+  call writefile(split(all_contents,"\n"), target)
+
+endf
