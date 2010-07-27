@@ -48,7 +48,7 @@ endf
 fun! vcs_checkouts#ExecIndir(cmds)
   if has('win16') || has('win32') || has('win64')
     " set different lcd in extra buffer:
-    split
+    new
     let lcd=""
     for c in a:cmds
       if has_key(c, "d")
