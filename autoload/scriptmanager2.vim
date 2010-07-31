@@ -194,7 +194,7 @@ fun! scriptmanager2#Checkout(targetDir, repository)
     endif
     call mkdir(a:targetDir.'/'.target,'p')
     let aname = s:shellescape(a:repository['archive_name'])
-    call s:exec_in_dir([{'d':  a:targetDir.'/'.target, 'c': 'curl -o '.aname.' '.s:shellescape(a:repository['url']}]))
+    call s:exec_in_dir([{'d':  a:targetDir.'/'.target, 'c': 'curl -o '.aname.' '.s:shellescape(a:repository['url'])}])
     exec addVersionFile
     call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
 
