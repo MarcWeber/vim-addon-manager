@@ -274,6 +274,10 @@ fun! scriptmanager2#LoadKnownRepos(...)
 endf
 
 
+fun! scriptmanager2#MergeTarget()
+  return split(&runtimepath,",")[0].'/after/plugin/vim-addon-manager-merged.vim'
+endf
+
 " if you machine is under IO load starting up Vim can take some time
 " This function tries to optimize this by reading all the plugin/*.vim
 " files joining them to one vim file.
@@ -291,7 +295,7 @@ fun! scriptmanager2#MergePluginFiles(plugins, skip_pattern)
     throw "you should be using Linux.. This code is likely to break on other operating systems!"
   endif
 
-  let target = split(&runtimepath,",")[0].'/after/plugin/vim-addon-manager-merged.vim'
+  let target = scriptmanager2#MergeTarget()
 
   for r in a:plugins
     if !has_key(s:c['activated_plugins'], r)
@@ -395,3 +399,12 @@ fun! scriptmanager2#MergePluginFiles(plugins, skip_pattern)
   call writefile(split(all_contents,"\n"), target)
 
 endf
+
+fun! scriptmanager2#UnmergePluginFiles()
+  let path = fnamemodify(scriptmanager#PluginRuntimePath('vim-addon-manager'),':h')
+  for merged in split(glob(path.'/*/plugin-merged'),"\n")
+    echo "unmerging ".merged
+    call rename(merged, substitute(merged,'-merged$','',''))
+  endfor
+  call delete(scriptmanager2#MergeTarget())
+endfun
