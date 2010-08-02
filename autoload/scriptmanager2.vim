@@ -203,7 +203,7 @@ fun! scriptmanager2#Checkout(targetDir, repository)
     call mkdir(a:targetDir)
     let aname = s:shellescape(a:repository['archive_name'])
     let s = get(a:repository,'strip-components',1)
-    call s:exec_in_dir([{'d':  a:targetDir, 'c': 'curl -o '.aname.' '.s:shellescape(a:repository['url']}
+    call s:exec_in_dir([{'d':  a:targetDir, 'c': 'curl -o '.aname.' '.s:shellescape(a:repository['url'])}
           \ , {'c': 'tar --strip-components='.s.' -xzf '.aname}])
     exec addVersionFile
     call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
@@ -213,7 +213,7 @@ fun! scriptmanager2#Checkout(targetDir, repository)
   elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.tar$'
     call mkdir(a:targetDir)
     let aname = s:shellescape(a:repository['archive_name'])
-    call s:exec_in_dir([{'d':  a:targetDir, 'c': 'curl -o '.aname.' '.s:shellescape(a:repository['url']}
+    call s:exec_in_dir([{'d':  a:targetDir, 'c': 'curl -o '.aname.' '.s:shellescape(a:repository['url'])}
           \ , {'c': 'tar --strip-components='.s.' -xzf '.aname}])
     exec addVersionFile
     call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
@@ -232,10 +232,10 @@ fun! scriptmanager2#Checkout(targetDir, repository)
     call mkdir(a:targetDir)
     let a = a:repository['archive_name']
     let aname = s:shellescape(a)
-    call s:exec_in_dir([{'d':  a:targetDir, 'c': 'curl -o '.aname.' '.s:shellescape(a:repository['url']}]))
+    call s:exec_in_dir([{'d':  a:targetDir, 'c': 'curl -o '.aname.' '.s:shellescape(a:repository['url'])}])
     if a =~ '\.gz'
       " manually unzip .vba.gz as .gz isn't unpacked yet for some reason
-      exec '!gunzip '.a:targetDir.'/'.a
+      exec '!gunzip "'.a:targetDir.'/'.a.'"'
       let a = a[:-4]
     endif
     exec 'sp '.a:targetDir.'/'.a
