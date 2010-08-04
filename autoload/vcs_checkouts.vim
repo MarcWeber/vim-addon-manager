@@ -10,7 +10,11 @@ fun! vcs_checkouts#Update(dir)
     call s:exec_in_dir([{'d': directory, 'c': 'svn update'}])
     return !v:shell_error
   elseif isdirectory(directory.'/.hg')
-    call s:exec_in_dir([{'d': directory, 'c': 'hg pull'}])
+    call s:exec_in_dir([
+          \ {'d': directory, 'c': 'hg pull'},
+          \ {'d': directory, 'c': 'hg update'},
+          \ {'d': directory, 'c': 'hg merge'}
+          \ ])
     return !v:shell_error
   else
     echoe "Updating plugin ".a:name." not implemented yet."
