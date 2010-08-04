@@ -62,6 +62,8 @@ Note: Both vim-addon-manager and JSON are optional.
       vim-addon-manager: UpdateAddons will update it
       JSON: highlights the addon-info.txt files
 
+See next section to learn what will happen
+
 ------------------------------------------------------------------------------
 howto install & activate a plugin ~
 
@@ -87,6 +89,9 @@ ACTIVATE:
  (before filetype plugin on)
 
   " dependencies will be activated automatically
+
+scriptmanager#Activate will install plugins on startup. Press y<cr> for each
+plugin to be installed once then.
 
 ------------------------------------------------------------------------------
 DEPRECATION ~
