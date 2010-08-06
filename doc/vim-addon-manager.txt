@@ -40,6 +40,8 @@ to get syntax highligting (TODO)
 ------------------------------------------------------------------------------
 INSTALLING THIS VIM PLUGIN ~
 
+Windows users: please see additional hints at the bottom!
+
 put this plugin into ~/vim-plugins/vim-addon-manager
 
   Linux steps:
@@ -168,6 +170,48 @@ plugin is doing: Add your own dicts to: >
   g:vim_script_manager['plugin_sources']['your-plugin-name'] = { ... }
 <
 in your .vimrc or somewhere eles
+
+
+------------------------------------------------------------------------------
+FOR WINDOWS USERS ~
+
+section provided by creidiki:
+
+Win32 tools for vim-addon-manager
+
+Curl:
+Get Curl here: http://curl.haxx.se/download.html
+
+Scroll down to the end of the "Packages" list. You want (ideally) the latest version, of type 'binary' (not libcurl or devel). SSL is not necessary but won't hurt. If your OS is 64-bit, you can get the Win64 version if you want, but it won't be any faster ...
+Install it. Then point vim-addon-manager (and, incidentally, netrw) to it by putting something like this in your _vimrc:
+
+let g:netrw_http_cmd='{path_to_curl}\curl.exe -o'
+replace {path-to-curl} with the installation directory, including the brackets.
+
+Don't forget the -o at the end. :)
+
+Archives:
+Get Tar, Gzip and Unzip from the GnuWin32 project
+Gzip: http://gnuwin32.sourceforge.net/packages/gzip.htm
+Tar: http://gnuwin32.sourceforge.net/packages/gtar.htm
+Unzip: http://gnuwin32.sourceforge.net/packages/unzip.htm
+
+Either get the complete package setups, or the binary installers. All you need is the binaries.
+Install or unpack them somewhere.
+Either add them to your system or user path (google it!) or add them just to vim's path by putting something like this in _vimrc:
+
+let $PATH='{path-to-gnu-utils};'.$PATH
+
+
+Again, replace the whole of {blah} including brackets with the install/unpack directory.
+
+VCS:
+MSysGit (and TortoiseGit/GitExtensions) by default add the 'git' executable to your PATH. If you chose not to for whatever reason, you can use the trick above to let vim see them. TortoiseHG does the same with the mercurial 'hg' executable. TortoiseSVN does not include the commandline 'svn' executable, so if you need it install SilkSVN
+
+SilkSVN: http://www.sliksvn.com/en/download/
+MsysGit: http://code.google.com/p/msysgit/
+Mercurial: http://mercurial.selenic.com/
+
 ------------------------------------------------------------------------------
 historical notes ~
 This is a KISS reimplementation of http://github.com/MarcWeber/theonevimlib
@@ -210,8 +254,8 @@ contributors ~
 (incomplete list):
 Tim Pope (Json validation)
 ZyX (Nikolay Pavlov, ZyX-I on github)
-Tux Tom (http://github.com/TuxTom) for heplign fixing a cd bug on Windows
+Tux Tom (http://github.com/TuxTom) for helping fixing a cd bug on Windows
+creidiki (Leonardo Valeri Manera) for greatly improving Windows support
 
 
 vim:tw=78:fo=tcq2:isk=!-~,^*,^\|,^\":ts=8:ft=help:norl:
-
