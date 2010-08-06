@@ -262,7 +262,11 @@ endf
 " is there a library providing an OS abstraction? This breaks Winndows
 " xcopy or copy should be used there..
 fun! scriptmanager2#Copy(f,t)
-  exec '!cp -r '.s:shellescape(a:f).' '.s:shellescape(a:t)
+  if has('win16') || has('win32') || has('win64')
+    exec '!xcopy /e /i '.s:shellescape(a:f).' '.s:shellescape(a:t)
+  else
+    exec '!cp -r '.s:shellescape(a:f).' '.s:shellescape(a:t)
+  endif
 endfun
 
 
