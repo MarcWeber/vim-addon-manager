@@ -198,10 +198,14 @@ Unzip: http://gnuwin32.sourceforge.net/packages/unzip.htm
 
 Either get the complete package setups, or the binary installers. All you need is the binaries.
 Install or unpack them somewhere.
+
+Get xzdec here: http://nullprogram.com/blog/2010/04/16/
+or here: http://www.stats.ox.ac.uk/pub/Rtools/goodies/xzutils.zip
+You only need xzdec.exe. Put in the same place you put those other archive tools.
+
 Either add them to your system or user path (google it!) or add them just to vim's path by putting something like this in _vimrc:
 
 let $PATH='{path-to-gnu-utils};'.$PATH
-
 
 Again, replace the whole of {blah} including brackets with the install/unpack directory.
 
