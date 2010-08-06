@@ -5,6 +5,8 @@ exec scriptmanager#DefineAndBind('s:c','g:vim_script_manager','{}')
 " let users override curl command. Reuse netrw setting
 let s:curl = exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o'
 
+let s:is_win = has('win16') || has('win32') || has('win64')
+
 " Install let's you install plugins by passing the url of a addon-info file
 " This preprocessor replaces the urls by the plugin-names putting the
 " repository information into the global dict
@@ -181,6 +183,23 @@ fun! scriptmanager2#HelpTags(name)
   if isdirectory(d) | exec 'helptags '.d | endif
 endf
 
+" " if --strip-components fails finish this workaround:
+" " emulate it in VimL
+" fun! s:StripComponents(targetDir, num)
+"   let dostrip = 1*a:num
+"   while x in range(1, 1*a:num)
+"     let dirs = split(glob(a:targetDir.'/*'),"\n")
+"     if len(dirs) > 1
+"       throw "can't strip, multiple dirs found!"
+"     endif
+"     for f in split(glob(dirs[0].'/*'),"\n")
+"       call rename(file_or_dir, fnamemodify(f,':h:h').'/'.fnamemodify(f,':t'))
+"     endfor
+"     call remove_dir_or_file(fnamemodify(f,':h'))
+"   endwhile
+" endfun
+
+
 fun! scriptmanager2#Checkout(targetDir, repository)
   let addVersionFile = 'call writefile([get(a:repository,"version","?")], a:targetDir."/version")'
   if a:repository['type'] =~ 'git\|hg\|svn'
@@ -262,7 +281,7 @@ endf
 " is there a library providing an OS abstraction? This breaks Winndows
 " xcopy or copy should be used there..
 fun! scriptmanager2#Copy(f,t)
-  if has('win16') || has('win32') || has('win64')
+  if s:is_win
     exec '!xcopy /e /i '.s:shellescape(a:f).' '.s:shellescape(a:t)
   else
     exec '!cp -r '.s:shellescape(a:f).' '.s:shellescape(a:t)
