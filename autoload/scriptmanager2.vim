@@ -2,6 +2,9 @@
 
 exec scriptmanager#DefineAndBind('s:c','g:vim_script_manager','{}')
 
+" let users override curl command. Reuse netrw setting
+let s:curl = exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o'
+
 " Install let's you install plugins by passing the url of a addon-info file
 " This preprocessor replaces the urls by the plugin-names putting the
 " repository information into the global dict
@@ -14,7 +17,7 @@ fun! scriptmanager2#ReplaceAndFetchUrls(list)
     " assume n is either an url or a path
     if n =~ '^http://' && 'y' == input('Fetch plugin info from url '.n.' [y/n]')
       let t = tempfile()
-      exec '!curl '.t.' > '.s:shellescape(t)
+      exec '!'.s:curl.' '.t.' > '.s:shellescape(t)
     elseif n =~  '[/\\]' && filereadable(n)
       let t = n
     endif
@@ -194,7 +197,7 @@ fun! scriptmanager2#Checkout(targetDir, repository)
     endif
     call mkdir(a:targetDir.'/'.target,'p')
     let aname = s:shellescape(a:repository['archive_name'])
-    call s:exec_in_dir([{'d':  a:targetDir.'/'.target, 'c': 'curl -o '.aname.' '.s:shellescape(a:repository['url'])}])
+    call s:exec_in_dir([{'d':  a:targetDir.'/'.target, 'c': s:curl.' '.aname.' '.s:shellescape(a:repository['url'])}])
     exec addVersionFile
     call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
 
@@ -203,7 +206,7 @@ fun! scriptmanager2#Checkout(targetDir, repository)
     call mkdir(a:targetDir)
     let aname = s:shellescape(a:repository['archive_name'])
     let s = get(a:repository,'strip-components',1)
-    call s:exec_in_dir([{'d':  a:targetDir, 'c': 'curl -o '.aname.' '.s:shellescape(a:repository['url'])}
+    call s:exec_in_dir([{'d':  a:targetDir, 'c': s:curl.' '.aname.' '.s:shellescape(a:repository['url'])}
           \ , {'c': 'tar --strip-components='.s.' -xzf '.aname}])
     exec addVersionFile
     call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
@@ -213,7 +216,7 @@ fun! scriptmanager2#Checkout(targetDir, repository)
   elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.tar$'
     call mkdir(a:targetDir)
     let aname = s:shellescape(a:repository['archive_name'])
-    call s:exec_in_dir([{'d':  a:targetDir, 'c': 'curl -o '.aname.' '.s:shellescape(a:repository['url'])}
+    call s:exec_in_dir([{'d':  a:targetDir, 'c': s:curl.' '.aname.' '.s:shellescape(a:repository['url'])}
           \ , {'c': 'tar --strip-components='.s.' -xzf '.aname}])
     exec addVersionFile
     call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
@@ -222,7 +225,7 @@ fun! scriptmanager2#Checkout(targetDir, repository)
   elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.zip$'
     call mkdir(a:targetDir)
     let aname = s:shellescape(a:repository['archive_name'])
-    call s:exec_in_dir([{'d':  a:targetDir, 'c': 'curl -o '.s:shellescape(a:targetDir).'/'.aname.' '.s:shellescape(a:repository['url'])}
+    call s:exec_in_dir([{'d':  a:targetDir, 'c': s:curl.' '.s:shellescape(a:targetDir).'/'.aname.' '.s:shellescape(a:repository['url'])}
        \ , {'c': 'unzip '.aname } ])
     exec addVersionFile
     call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
@@ -232,7 +235,7 @@ fun! scriptmanager2#Checkout(targetDir, repository)
     call mkdir(a:targetDir)
     let a = a:repository['archive_name']
     let aname = s:shellescape(a)
-    call s:exec_in_dir([{'d':  a:targetDir, 'c': 'curl -o '.aname.' '.s:shellescape(a:repository['url'])}])
+    call s:exec_in_dir([{'d':  a:targetDir, 'c': s:curl.' '.aname.' '.s:shellescape(a:repository['url'])}])
     if a =~ '\.gz'
       " manually unzip .vba.gz as .gz isn't unpacked yet for some reason
       exec '!gunzip "'.a:targetDir.'/'.a.'"'
@@ -403,6 +406,7 @@ endf
 fun! scriptmanager2#UnmergePluginFiles()
   let path = fnamemodify(scriptmanager#PluginRuntimePath('vim-addon-manager'),':h')
   for merged in split(glob(path.'/*/plugin-merged'),"\n")
+            \ +split(glob(path.'/*/*/plugin-merged'),"\n")
     echo "unmerging ".merged
     call rename(merged, substitute(merged,'-merged$','',''))
   endfor
