@@ -76,6 +76,9 @@ UninstallNotLoadedAddons {name} ...              *:UninstallNotLoadedAddons*
         Unistall addons with given names. See 
         |scriptmanager2#UninstallAddons()| for more details.
 
+Note that commands are defined in autoload/scriptmanager.vim file, so you will 
+need to source it before using any of them.
+
 ------------------------------------------------------------------------------
 3.2. Functions                                 *vim-addon-manager-functions*
 
