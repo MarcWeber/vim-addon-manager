@@ -75,7 +75,7 @@ fun! scriptmanager#IsPluginInstalled(name)
   return isdirectory(scriptmanager#PluginDirByName(a:name))
 endf
 
-" {} if file dosen't exist
+" {} if file doesn't exist
 fun! scriptmanager#AddonInfo(name)
   let infoFile = scriptmanager#AddonInfoFile(a:name)
   let s:c['addon_infos'][a:name] = filereadable(infoFile)
