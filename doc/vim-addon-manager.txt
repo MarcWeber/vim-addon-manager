@@ -210,11 +210,12 @@ repository                                          *addon-info-repository*
                  Extension     How it is handled ~
                  .vim          This extension designates that plugin is a single 
                                file. So, if exists key `script-type' and it is 
-                               equal to `syntax', then this file is put under 
-                               {plugname}/syntax, otherwise it is put under 
+                               equal to `syntax' or `indent', then this file 
+                               is put under {plugname}/syntax or under 
+                               {plugname}/indent, otherwise it is put under 
                                directory described by {plugname}/{target_dir} 
-                               (where {target_dir} is described by `target_dir' 
-                               key, or is equal to `plugin' if it is absent).
+                               (where {target_dir} is a value of `target_dir' 
+                               key if it is present and `plugin' otherwise).
                 .tar.gz, .tgz  This extension designates that plugin is 
                                contained inside tar archive compressed by 
                                gzip. In this case, archive is unpacked to its 
