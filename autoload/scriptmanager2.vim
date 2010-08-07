@@ -209,8 +209,9 @@ fun! scriptmanager2#Checkout(targetDir, repository)
   elseif has_key(a:repository, 'archive_name')
       \ && a:repository['archive_name'] =~ '\.vim$'
 
-    if get(a:repository,'script-type','') == 'syntax'
-      let target = 'syntax'
+    let st = get(a:repository,'script-type','')
+    if st  =~ 'syntax\|indent'
+      let target = st
     else
       let target = get(a:repository,'target_dir','plugin')
     endif
