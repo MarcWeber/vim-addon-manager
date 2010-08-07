@@ -148,7 +148,14 @@ plugin_sources                           *vim-addon-manager-plugin_sources*
         this dictionary override corresponding values in |addon-info.txt| 
         files, so be careful when you extend it.
 plugin_root_dir                         *vim-addon-manager-plugin_root_dir*
-        Read-only, defines a directory where plugins will be installed to.
+        Defines a directory where plugins will be installed to. If 
+        autoload/scriptmanager.vim file that comes with this plugin is 
+        writeable by user, then it defaults to the directory three levels up 
+        relative to autoload/scriptmanager.vim (so, if user has installed 
+        vim-addon-manager to ~/vim-addons/vim-addon-manager, this will be 
+        equal to ~/vim-addons). If autoload/scriptmanager.vim is not writeable 
+        by the user, then it defaults to ~/vim-addons. Note that you must set 
+        this variable before calling any scriptmanager function.
 
 ==============================================================================
 5. Installing plugins                       *vim-addon-manager-new-plugins*
