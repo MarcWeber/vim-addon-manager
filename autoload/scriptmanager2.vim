@@ -237,7 +237,7 @@ fun! scriptmanager2#Checkout(targetDir, repository)
     let a = a:repository['archive_name']
     let aname = s:shellescape(a)
     call s:exec_in_dir([{'d':  a:targetDir, 'c': s:curl.' '.aname.' '.s:shellescape(a:repository['url'])}])
-    if a =~ '\.gz'
+    if a =~ '\.gz$'
       " manually unzip .vba.gz as .gz isn't unpacked yet for some reason
       exec '!gzip -d "'.a:targetDir.'/'.a.'"'
       let a = a[:-4]
