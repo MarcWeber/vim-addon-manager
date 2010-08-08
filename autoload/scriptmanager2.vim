@@ -261,7 +261,7 @@ fun! scriptmanager2#Checkout(targetDir, repository)
       " manually unzip .vba.gz as .gz isn't unpacked yet for some reason
       exec '!gzip -d "'.a:targetDir.'/'.a.'"'
       let a = a[:-4]
-    elseif a=~'\.bz2'
+    elseif a=~'\.bz2$'
       exec '!bunzip2 "'.a:targetDir.'/'.a.'"'
       let a = a[:-5]
     endif
