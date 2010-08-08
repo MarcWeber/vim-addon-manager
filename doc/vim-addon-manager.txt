@@ -241,7 +241,7 @@ repository                                          *addon-info-repository*
                                contained in a vimball archive. In this case 
                                vimball#Vimball() function is used, see 
                                |:UseVimball| for more details.
-                .vba           This extension designates that plugin is 
+                .vba.gz        This extension designates that plugin is 
                                contained in a vimball archive compressed by 
                                gzip. In this case archive is uncompressed and 
                                vimball#Vimball() function is used, see 
