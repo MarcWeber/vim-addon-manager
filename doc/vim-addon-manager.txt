@@ -246,6 +246,7 @@ repository                                          *addon-info-repository*
                                gzip. In this case archive is uncompressed and 
                                vimball#Vimball() function is used, see 
                                |:UseVimball| for more details.
+                .vba.bz2       Like .vba.bz2, but with bzip2 compression.
         deprecated
                 If this key is present and contains non-empty string, then 
                 every time when user tries to install this plugin he will see 
