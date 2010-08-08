@@ -35,7 +35,7 @@ let s:c['activated_plugins'] = get(s:c,'activaded_plugins', {})
 " installation
 let s:c['plugin_root_dir'] = get(s:c, 'plugin_root_dir', ((filewritable(expand('<sfile>')))?
             \                                               (fnamemodify(expand('<sfile>'),':h:h:h')):
-            \                                               ('~/vim-addons'))
+            \                                               ('~/vim-addons')))
 let s:c['known'] = get(s:c,'known','vim-addon-manager-known-repositories')
 
 " additional plugin sources should go into your .vimrc or into the repository

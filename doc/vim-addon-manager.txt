@@ -8,9 +8,10 @@ CONTENS                                         *vim-addon-manager-contents*
         3.1. Commands                  |vim-addon-manager-commands|
         3.2. Functions                 |vim-addon-manager-functions|
     4. Options                         |vim-addon-manager-options|
-    5. Installing plugins              |vim-addon-manager-new-plugins|
+    5. Installing plugins              |vim-addon-manager-install-plugins|
     6. Addon-info file                 |vim-addon-manager-addon-info|
     7. Author, credits, some notes     |vim-addon-manager-related|
+   10. trouble shooting & KNOWS BUGS   |vim-addon-manager-trouble-shooting|
 
 ==============================================================================
 1. Intro                                           *vim-addon-manager-intro*
@@ -33,12 +34,20 @@ Dependencies:
     - Vimball plugin (required for installing some addons) (in latest vim it 
       is included by default)
 
+------------------------------------------------------------------------------
+Getting started fast: ~
+Read:
+|vim-addon-manager-installation|
+|vim-addon-manager-install-plugins|
+
 ==============================================================================
 2. Installation                             *vim-addon-manager-installation*
 
+Windows users: See bottom.
+
 1. Create a separate directory that will hold your plugins, for example 
-   ~/vim-plugins. Note that you cannot use your .vim directory as 
-   scriptmanager installs each plugin to a separate directory.
+   ~/vim-addons The addon manager intentionally installs each addon
+   into its own directory which is not ~/.vim .
 2. Install vim-addon-manager to ~/vim-plugins/vim-addon-manager. If you use 
    git, you should do the following: >
         cd ~/vim-plugins
@@ -47,12 +56,9 @@ Dependencies:
 3. Add ~/vim-plugins/vim-addon-manager to your runtimepath by adding the 
    following lines to your vimrc: >
         set runtimepath+=~/vim-plugins/vim-addon-manager
-        call scriptmanager#Activate(["vim-addon-manager"])
-<  Every time you install plugin you will need to add its name to the list 
-   that is passed to Activate function, see |vim-addon-manager-new-plugins|. 
-   Note that you do not need to activate vim-addon-manager as you already 
-   added its directory to runtimepath, but activating it will let 
-   |:UpdateAddons| command update it.
+        call scriptmanager#Activate([])
+
+Continue reading|vim-addon-manager-install-plugins|.
 
 ==============================================================================
 3. Functionality provided                  *vim-addon-manager-functionality*
@@ -76,14 +82,13 @@ UninstallNotLoadedAddons {name} ...              *:UninstallNotLoadedAddons*
         Unistall addons with given names. See 
         |scriptmanager2#UninstallAddons()| for more details.
 
-Note that commands are defined in autoload/scriptmanager.vim file, so you will 
-need to source it before using any of them.
-
 ------------------------------------------------------------------------------
 3.2. Functions                                 *vim-addon-manager-functions*
 
 scriptmanager#Activate([{name}, ...])             *scriptmanager#Activate()*
-        Activates addons with given names. Activating means the following:
+        Activates addons with given names. Used by |:ActivateAddons|
+        Note: This is probably all you need.
+
         0. Check, whether requested addon is already installed. If not, 
            install it.
         1. Activate plugins that are mentioned in dependencies dictionary (see 
@@ -122,17 +127,29 @@ scriptmanager#AddonInfo({name})                  *scriptmanager#AddonInfo()*
         then it returns empty dictionary.
 
                                           *scriptmanage2#MergePluginFiles()*
-scriptmanager2#MergePluginFiles([{name}])
+scriptmanager2#MergePluginFiles([{name}] [, blacklist-regex ])
         Highly experimental function that may speed up vim start on heavy IO 
         load. This function renames all `plugin' directories to 
-        `plugin-merged', so they are ignored by vim. Then it will merge file 
         contents into `~/.vim/after/plugin/vim-addon-manager-merged.vim' which 
         should cause less IO stress to your system, thus Vim will startup 
-        faster. Known issues:
-            - s:... script global variables should be unique in all plugins
+        faster. This can scripts because:
+            - s:... script global variables are renamed automatically to
+              prevent name clashes
             - Guards are replaced by if ... endif which might be inefficient
             - `finish' statement that start line and every line after them are 
               just commented out
+
+        Using the blacklist-regex you can filter plugin/*.vim files and
+        prevent them from being included. For example this excludes many tlib
+        plugins.: >
+
+  let s:merge = [ "tlib" ]
+  call scriptmanager#Activate(s:merge)
+  command MergePluginFiles call scriptmanager2#MergePluginFiles(s:merge+["tlib"], '\%(cmdlinehelp\|concordance\|evalselection\|glark\|hookcursormoved\|linglang\|livetimestamp\|localvariables\|loremipsum\|my_tinymode\|pim\|quickfixsigns\|scalefont\|setsyntax\|shymenu\|spec\|tassert\|tbak\|tbibtools\|tcalc\|tcomment\|techopair\|tgpg\|tmarks\|tmboxbrowser\|tortoisesvn\|tregisters\|tselectbuffer\|tselectfile\|tsession\|tskeleton\|tstatus\|viki\|vikitasks\)\.vim_merged')
+  command UnmergePluginFiles call scriptmanager2#UnmergePluginFiles()
+<
+
+        Yes, thet info files should be cached as well (TODO)
 
 ==============================================================================
 4. Options                                      *vim-addon-manager-options*
@@ -161,19 +178,31 @@ plugin_root_dir                         *vim-addon-manager-plugin_root_dir*
         this variable before calling any scriptmanager function.
 
 ==============================================================================
-5. Installing plugins                       *vim-addon-manager-new-plugins*
+5. Installing plugins                       *vim-addon-manager-install-plugins*
 
-You may install a particular plugin either by manually putting the plugin 
-contents in the directory which contains vim-addon-manager or using 
-|scriptmanager2#Install()| function. After you have installed the plugin you 
-will need to add its name to the list that is passed to 
-|scriptmanager#Activate()| function in your vimrc, see 
-|vim-addon-manager-installation|.
+First read |vim-addon-manager-installation|.
 
-Note that you may omit using Install() function and just add the plugin name 
-to the list passed to Activate() function. In this case if you (re)start Vim, 
-you will be asked to confirm each plugin's installation. Just press y<CR> for 
-each prompt (see the <CR>, you may be prompted infinitely if you forget it).
+As documented |scriptmanager#Activate| or |:ActivateAddons| will fetch
+(=install) the plugin if there is no directory in your addons directory.
+
+You can use |:ActivateAddons|'s tab completion to find the plugin name fast.
+
+Usually you add the names of the addons this way to your .vimrc: >
+ set runtimepath+=~/vim-plugins/vim-addon-manager
+ call scriptmanager#Activate(["pluginA","pluginB"])
+< 
+You can use the Install function to install plugins only - however in practise
+you use the Activate command / function only.
+
+You can install plugins by URL. See |scriptmanager2#Install()|.
+I prefer you telling me about your repository location, though.
+Also see |vim-addon-manager-repository-locations|.
+
+implementation details: ~
+Vim does not source plugin/*.vim and after/plugin/*.vim automatically
+if you add pathes to runtimepath after Vim has startup. vim-addon-manager
+takes care of that for you.
+
 
 ==============================================================================
 6. Addon-info file                           *vim-addon-manager-addon-info*
@@ -195,6 +224,15 @@ repository                                          *addon-info-repository*
         plugin is installed using either the second or third form of 
         |scriptmanager2#Install()| call (see its description). This is 
         a dictionary with the following keys:
+
+         !! Note: As very common in extreme programming documentation may be
+         !! outdated. So may be this section. So refer to the code:
+         !! |scriptmanager2#Checkout()| to find out about all supported keys
+         !! Its easy to read and extend. Contact me if you're unsure. I'll help
+         !! you.
+         !! I'd even consider moving this section into the code only refering
+         |! to it - so that its kept in sync.
+
         Key      Description ~
         type     Required, must be either one of `hg', `git', `svn' or an 
                  empty string.
@@ -202,6 +240,9 @@ repository                                          *addon-info-repository*
                  then this key describes a url that will be passed to this 
                  VCS. If `type' key contains an empty string, then it should 
                  contain location of the archive.
+        script-type
+                one of plugin/syntax/indent. the .vim file will be moved into
+                the specific subdirectory.
         archive_name
                  If `type' key contains an empty string, then archive which 
                  location is described by the `url' key will be saved in file 
@@ -271,16 +312,30 @@ homepage                                              *addon-info-homepage*
 ==============================================================================
 7. Author, credits, some notes                  *vim-addon-manager-related*
 
+
+*vim-addon-manager-repository-locations* :
 List of known repositories is defined in a separate plugin called 
 |vim-addon-manager-known-repositories|. If you want your plugin to be added to 
 this list, then contact the author. Note that this list is populated 
 automatically from www.vim.org site, so sometimes you do not need to do 
 anything.
 
+As alternative you can specify them in your .vimrc
+plugin is doing: Add your own dicts to: >
+  g:vim_script_manager['plugin_sources']['your-plugin-name'] = { ... }
+<
+in your .vimrc or somewhere eles
+
+
+related work: ~
 There are also some other package managers for vim:
     http://github.com/c9s/Vimana
     http://snk.tuxfamily.org/log/vim-script-management-system.html
 You can try and see which is the best.
+
+There is another project which has the same name:
+http://packages.debian.org/sid/vim-addon-manager
+The author (Jamessan) is fine with this project sharing the same name.
 
 ------------------------------------------------------------------------------
 7.1. Author contacts                             *vim-addon-manager-author*
@@ -289,13 +344,103 @@ Github account: MarcWeber
 Email: marco-oweber@gmx.de
 
 ------------------------------------------------------------------------------
-7.2. Contributors                           *vim-addon-manage-contributors*
+7.2. Contributors                           *vim-addon-manager-contributors*
 
 (incomplete list):
 Tim Pope (Json validation)
-ZyX (Nikolay Pavlov, ZyX-I on github)
+ZyX (Nikolay Pavlov, ZyX-I on github) enhancing this vim documentation,
+                                      various fixes
 Tux Tom (http://github.com/TuxTom) for helping fixing a cd bug on Windows
 creidiki (Leonardo Valeri Manera) for greatly improving Windows support
+
+
+==============================================================================
+Running the small test suite: ~
+
+sh vim-addon-manager-test.sh
+
+You should see
+1
+1
+1
+
+at the end. Written for Linux only. Code coverage is bad. Its a starting
+point.
+
+==============================================================================
+FOR WINDOWS USERS ~
+
+section provided by creidiki:
+
+Win32 tools for vim-addon-manager
+
+Curl:
+Get Curl here: http://curl.haxx.se/download.html
+
+Scroll down to the end of the "Packages" list. You want (ideally) the latest
+version, of type 'binary' (not libcurl or devel). SSL is not necessary but
+won't hurt. If your OS is 64-bit, you can get the Win64 version if you want,
+but it won't be any faster ...
+Install it. Then point vim-addon-manager (and, incidentally, netrw) to it by
+putting something like this in your _vimrc:
+
+let g:netrw_http_cmd='{path_to_curl}\curl.exe -o'
+replace {path-to-curl} with the installation directory, including the brackets.
+
+Don't forget the -o at the end. :)
+
+Archives:
+Get Tar, Gzip and Unzip from the GnuWin32 project
+Gzip: http://gnuwin32.sourceforge.net/packages/gzip.htm
+Tar: http://gnuwin32.sourceforge.net/packages/gtar.htm
+Unzip: http://gnuwin32.sourceforge.net/packages/unzip.htm
+
+Either get the complete package setups, or the binary installers. All you need
+is the binaries.
+Install or unpack them somewhere.
+
+Get xzdec here: http://nullprogram.com/blog/2010/04/16/
+or here: http://www.stats.ox.ac.uk/pub/Rtools/goodies/xzutils.zip
+You only need xzdec.exe. Put in the same place you put those other archive tools.
+
+Either add them to your system or user path (google it!) or add them just to
+vim's path by putting something like this in _vimrc:
+
+let $PATH='{path-to-gnu-utils};'.$PATH
+
+Again, replace the whole of {blah} including brackets with the install/unpack
+directory.
+
+VCS:
+MSysGit (and TortoiseGit/GitExtensions) by default add the 'git' executable to
+your PATH. If you chose not to for whatever reason, you can use the trick
+above to let vim see them. TortoiseHG does the same with the mercurial 'hg'
+executable. TortoiseSVN does not include the commandline 'svn' executable, so
+if you need it install SilkSVN
+
+SilkSVN: http://www.sliksvn.com/en/download/
+MsysGit: http://code.google.com/p/msysgit/
+Mercurial: http://mercurial.selenic.com/
+
+==============================================================================
+10. trouble shooting & KNOWS BUGS *vim-addon-manage-trouble-shooting*
+
+Don't have those commands? See |vim-addon-manager-installation|
+Windows installation is more tedious than on Linux - yes.
+
+Still trouble? Get in touch, see |vim-addon-manager-author|
+
+You have to trust script aouthors:
+Because everybody can upload everything to the repositories (in particular
+www.vim.org) you must trust authors. I can't review all code - so expect code
+to steal your passwords, run sudo rm -fr / .. etc. (This never happened to me.
+But it *could* )
+Briefly: I'm not responsible for the code you get using vim-addon-manager.
+
+If something goes wrong - and if I don't reply within 24h:
+The following github users are collaborators. This means they have write
+access to the official repository:
+tpope, dertuxmalwieder, TuxTom.
 
 
 vim:tw=78:fo=tcq2:isk=!-~,^*,^\|,^\":ts=8:ft=help:norl:

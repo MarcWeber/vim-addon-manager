@@ -99,6 +99,8 @@ fun! scriptmanager2#Update(list)
   let list = a:list
   if empty(list) && input('Update all loaded plugins? [y/n] ','y') == 'y'
     call scriptmanager2#LoadKnownRepos(' so that its updated as well')
+    " include vim-addon-manager in list
+    call scriptmanager#Activate(['vim-addon-manager'])
     let list = keys(s:c['activated_plugins'])
   endif
   let failed = []
