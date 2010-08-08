@@ -252,7 +252,7 @@ fun! scriptmanager2#Checkout(targetDir, repository)
     call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
 
   " .vba reuse vimball#Vimball() function
-  elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.vba\%(\.gz\)\?$'
+  elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.vba\%(\.gz\|\.bz2\)\?$'
     call mkdir(a:targetDir)
     let a = a:repository['archive_name']
     let aname = s:shellescape(a)
@@ -261,6 +261,9 @@ fun! scriptmanager2#Checkout(targetDir, repository)
       " manually unzip .vba.gz as .gz isn't unpacked yet for some reason
       exec '!gzip -d "'.a:targetDir.'/'.a.'"'
       let a = a[:-4]
+    elseif a=~'\.bz2'
+      exec '!bunzip2 "'.a:targetDir.'/'.a.'"'
+      let a = a[:-5]
     endif
     exec 'sp '.a:targetDir.'/'.a
     call vimball#Vimball(1,a:targetDir)
