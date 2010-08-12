@@ -438,13 +438,13 @@ me. But it could)
 Briefly: I'm not responsible for the code you get using vim-addon-manager.
 
 If something goes wrong - and if I don't reply within 24h:
-The following github users are collaborators. This means they have write
+The following github users are collaborators. This means they have write 
 access to the official repository:
 tpope, dertuxmalwieder, TuxTom.
 
-If a plugin behaves strangely .. try
-http://github.com/dahu/VimLint/blob/master/plugin/vimlint.vim
-Maybe you have an uncommen Vim setting causing some plugins to fail.
+If a plugin behaves strangely then try 
+http://github.com/dahu/VimLint/blob/master/plugin/vimlint.vim.
+Maybe you have an uncommon Vim setting causing some plugins to fail.
 
 
 vim:tw=78:fo=tcq2:isk=!-~,^*,^\|,^\":ts=8:ft=help:norl:
