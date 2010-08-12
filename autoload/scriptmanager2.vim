@@ -54,7 +54,8 @@ fun! scriptmanager2#Install(toBeInstalledList, ...)
       let repository = get(s:c['plugin_sources'], name, get(opts, name,0))
 
       if type(repository) == type(0) && repository == 0
-        throw "No repository location info known for plugin ".name."!"
+        echoe "No repository location info known for plugin ".name."!"
+        return
       endif
 
       let d = get(repository, 'deprecated', '')
@@ -68,7 +69,9 @@ fun! scriptmanager2#Install(toBeInstalledList, ...)
 
       let pluginDir = scriptmanager#PluginDirByName(name)
       let infoFile = scriptmanager#AddonInfoFile(name)
-      call scriptmanager2#Checkout(pluginDir, repository)
+      if scriptmanager2#Checkout(pluginDir, repository)
+        return
+      endif
 
       if !filereadable(infoFile) && has_key(s:c['missing_addon_infos'], name)
         call writefile([s:c['missing_addon_infos'][name]], infoFile)
@@ -272,7 +275,8 @@ fun! scriptmanager2#Checkout(targetDir, repository)
     exec addVersionFile
     call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
   else
-    throw "Don't know how to checkout source location: ".string(a:repository)."!"
+    echoe "Don't know how to checkout source location: ".string(a:repository)."!"
+    return 1
   endif
 endf
 
