@@ -129,6 +129,15 @@ endf
 " .vimrc has been sourced which happens when you activate plugins manually.
 fun! scriptmanager#Activate(...)
   let args = copy(a:000)
+  " If we have "" as a first argument, then user probably forgot to make this 
+  " a list
+  if type(args[0])==type("")
+    let plugnames=[]
+    while type(args[0])==type("")
+      call add(plugnames, remove(args, 0))
+    endwhile
+    call insert(args, plugnames)
+  endif
   let opts = get(args,1,{})
   if len(args) <= 1
     call add(args, opts)
