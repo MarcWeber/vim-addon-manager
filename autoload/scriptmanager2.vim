@@ -5,7 +5,7 @@ exec scriptmanager#DefineAndBind('s:c','g:vim_script_manager','{}')
 " let users override curl command. Reuse netrw setting
 let s:curl = exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o'
 
-let s:is_win = has('win16') || has('win32') || has('win64')
+let s:is_win = has('win16') || has('win32') || has('win64') || has('win95')
 
 " Install let's you install plugins by passing the url of a addon-info file
 " This preprocessor replaces the urls by the plugin-names putting the
