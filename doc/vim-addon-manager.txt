@@ -11,6 +11,8 @@ CONTENS                                         *vim-addon-manager-contents*
     5. Installing plugins              |vim-addon-manager-install-plugins|
     6. Addon-info file                 |vim-addon-manager-addon-info|
     7. Author, credits, some notes     |vim-addon-manager-related|
+    8. Testing this plugin             |vim-addon-manager-testing|
+    9. Some notes for windows users    |vim-addon-manager-windows|
    10. Trouble shooting & KNOWS BUGS   |vim-addon-manager-trouble-shooting|
 
 ==============================================================================
@@ -43,7 +45,7 @@ Read:
 ==============================================================================
 2. Installation                             *vim-addon-manager-installation*
 
-Windows users: See bottom.
+Windows users: see |vim-addon-manager-windows|.
 
 1. Create a separate directory that will hold your plugins, for example 
    ~/vim-addons The addon manager intentionally installs each addon
@@ -355,72 +357,74 @@ creidiki (Leonardo Valeri Manera) for greatly improving Windows support
 
 
 ==============================================================================
-Running the small test suite: ~
+8. Testing this plugin                           *vim-addon-manager-testing*
 
-sh vim-addon-manager-test.sh
-
-You should see
-1
-1
-1
-
+Run >
+    # Replace ~/vim-addons/vim-addon-manager with the path you installed this 
+    # plugin to
+    cd ~/vim-addons/vim-addon-manager
+    sh vim-addon-manager-test.sh
+.
+You should see >
+    1
+    1
+    1
 at the end. Written for Linux only. Code coverage is bad. Its a starting
 point.
 
 ==============================================================================
-FOR WINDOWS USERS ~
+9. Some notes for windows users                  *vim-addon-manager-windows*
 
-section provided by creidiki:
+Section provided by creidiki:
 
 Win32 tools for vim-addon-manager
 
 Curl:
-Get Curl here: http://curl.haxx.se/download.html
+    Get Curl here: http://curl.haxx.se/download.html
 
-Scroll down to the end of the "Packages" list. You want (ideally) the latest
-version, of type 'binary' (not libcurl or devel). SSL is not necessary but
-won't hurt. If your OS is 64-bit, you can get the Win64 version if you want,
-but it won't be any faster ...
-Install it. Then point vim-addon-manager (and, incidentally, netrw) to it by
-putting something like this in your _vimrc:
+    1. Scroll down to the end of the "Packages" list. You want (ideally) the 
+    latest version, of type `binary' (not libcurl or devel). SSL is not 
+    necessary but won't hurt. If your OS is 64-bit, you can get the Win64 
+    version if you want, but it won't be any faster.
+    2. Install it. Then point vim-addon-manager (and, incidentally, netrw) to 
+    it by putting something like this in your _vimrc: >
+        let g:netrw_http_cmd='{path_to_curl}\curl.exe -o'
+<   (replace {path-to-curl} with the installation directory, including the 
+    brackets).
 
-let g:netrw_http_cmd='{path_to_curl}\curl.exe -o'
-replace {path-to-curl} with the installation directory, including the brackets.
-
-Don't forget the -o at the end. :)
+    Don't forget the -o argument at the end. :)
 
 Archives:
-Get Tar, Gzip and Unzip from the GnuWin32 project
-Gzip: http://gnuwin32.sourceforge.net/packages/gzip.htm
-Tar: http://gnuwin32.sourceforge.net/packages/gtar.htm
-Unzip: http://gnuwin32.sourceforge.net/packages/unzip.htm
+    Get Tar, Gzip and Unzip from the GnuWin32 project
+    Gzip: http://gnuwin32.sourceforge.net/packages/gzip.htm
+    Tar: http://gnuwin32.sourceforge.net/packages/gtar.htm
+    Unzip: http://gnuwin32.sourceforge.net/packages/unzip.htm
 
-Either get the complete package setups, or the binary installers. All you need
-is the binaries.
-Install or unpack them somewhere.
+    Either get the complete package setups, or the binary installers. All you 
+    need is the binaries.
+    Install or unpack them somewhere.
 
-Get xzdec here: http://nullprogram.com/blog/2010/04/16/
-or here: http://www.stats.ox.ac.uk/pub/Rtools/goodies/xzutils.zip
-You only need xzdec.exe. Put in the same place you put those other archive tools.
+    Get xzdec here: http://nullprogram.com/blog/2010/04/16/
+    or here: http://www.stats.ox.ac.uk/pub/Rtools/goodies/xzutils.zip
+    You only need xzdec.exe. Put in the same place you put those other archive 
+    tools.
 
-Either add them to your system or user path (google it!) or add them just to
-vim's path by putting something like this in _vimrc:
-
-let $PATH='{path-to-gnu-utils};'.$PATH
-
-Again, replace the whole of {blah} including brackets with the install/unpack
-directory.
+    Either add them to your system or user path (google it!) or add them just 
+    to vim's path by putting something like this in _vimrc: >
+        let $PATH='{path-to-gnu-utils};'.$PATH
+<   Again, replace the whole of {path-to-gnu-utils} including brackets with 
+    the directory you have installed/unpacked them to.
 
 VCS:
-MSysGit (and TortoiseGit/GitExtensions) by default add the 'git' executable to
-your PATH. If you chose not to for whatever reason, you can use the trick
-above to let vim see them. TortoiseHG does the same with the mercurial 'hg'
-executable. TortoiseSVN does not include the commandline 'svn' executable, so
-if you need it install SilkSVN
+    MSysGit (and TortoiseGit/GitExtensions) by default add the `git' 
+    executable to your PATH. If you chose not to for whatever reason, you can 
+    use the trick above to let vim see them. TortoiseHG does the same with the 
+    mercurial `hg' executable. TortoiseSVN does not include the commandline 
+    `svn' executable, so if you need it install SilkSVN
 
-SilkSVN: http://www.sliksvn.com/en/download/
-MsysGit: http://code.google.com/p/msysgit/
-Mercurial: http://mercurial.selenic.com/
+    SilkSVN: http://www.sliksvn.com/en/download/
+    MsysGit: http://code.google.com/p/msysgit/
+    Mercurial: http://mercurial.selenic.com/
 
 ==============================================================================
 10. Trouble shooting & KNOWS BUGS       *vim-addon-manage-trouble-shooting*
