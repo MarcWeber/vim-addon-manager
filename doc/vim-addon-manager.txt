@@ -13,7 +13,8 @@ CONTENS                                         *vim-addon-manager-contents*
     7. Author, credits, some notes     |vim-addon-manager-related|
     8. Testing this plugin             |vim-addon-manager-testing|
     9. Some notes for windows users    |vim-addon-manager-windows|
-   10. Trouble shooting & KNOWS BUGS   |vim-addon-manager-trouble-shooting|
+   10. Some notes for Gentoo users     |vim-addon-manager-gentoo|
+   11. Trouble shooting & KNOWS BUGS   |vim-addon-manager-trouble-shooting|
 
 ==============================================================================
 1. Intro                                           *vim-addon-manager-intro*
@@ -46,6 +47,7 @@ Read:
 2. Installation                             *vim-addon-manager-installation*
 
 Windows users: see |vim-addon-manager-windows|.
+Gentoo users: see |vim-addon-manager-gentoo|.
 
 1. Create a separate directory that will hold your plugins, for example 
    ~/vim-addons The addon manager intentionally installs each addon
@@ -383,14 +385,14 @@ Curl:
     Get Curl here: http://curl.haxx.se/download.html
 
     1. Scroll down to the end of the "Packages" list. You want (ideally) the 
-    latest version, of type `binary' (not libcurl or devel). SSL is not 
-    necessary but won't hurt. If your OS is 64-bit, you can get the Win64 
-    version if you want, but it won't be any faster.
+       latest version, of type `binary' (not libcurl or devel). SSL is not 
+       necessary but won't hurt. If your OS is 64-bit, you can get the Win64 
+       version if you want, but it won't be any faster.
     2. Install it. Then point vim-addon-manager (and, incidentally, netrw) to 
-    it by putting something like this in your _vimrc: >
-        let g:netrw_http_cmd='{path_to_curl}\curl.exe -o'
-<   (replace {path-to-curl} with the installation directory, including the 
-    brackets).
+       it by putting something like this in your _vimrc: >
+           let g:netrw_http_cmd='{path_to_curl}\curl.exe -o'
+<      (replace {path-to-curl} with the installation directory, including the 
+       brackets).
 
     Don't forget the -o argument at the end. :)
 
@@ -427,7 +429,51 @@ VCS:
     Mercurial: http://mercurial.selenic.com/
 
 ==============================================================================
-10. Trouble shooting & KNOWS BUGS       *vim-addon-manage-trouble-shooting*
+10. Some notes for Gentoo users                  *vim-addon-manager-gentoo*
+
+Gentoo users may consider installing this plugin from pluginloader overlay 
+which is accessible via mercurial, url: 
+http://vimpluginloader.hg.sourceforge.net:8000/hgroot/vimpluginloader/pluginloader-overlay
+
+In order to use this overlay paludis users can add the pluginloader.conf file 
+to /etc/paludis/repositories/ with the following contents: >
+    location = /var/paludis/repositories/pluginloader
+    format = e
+    sync = hg+http://vimpluginloader.hg.sourceforge.net:8000/hgroot/vimpluginloader/pluginloader-overlay
+
+    master_repository = gentoo
+    names_cache = ${location}/.cache/names
+    write_cache = /var/cache/paludis/metadata
+
+Then you should unmask app-vim/vim-addon-manager and run >
+    paludis --sync && paludis --install vim-addon-manager
+or >
+    cave sync && cave resolve -x vim-addon-manager
+and everything will probably be fine.
+
+For portage+layman users:
+1. Create a file /var/lib/layman/pluginloader-overlay.xml with the following 
+   contents: >
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE repositories SYSTEM "/dtd/repositories.dtd">
+        <repositories xmlns="" version="1.0">
+          <repo quality="experimental" status="unofficial">
+            <name>pluginloader-overlay</name>
+            <description>Overlay that contains some additional vim plugins</description>
+            <source type="mercurial">http://vimpluginloader.hg.sourceforge.net:8000/hgroot/vimpluginloader/pluginloader-overlay</source>
+          </repo>
+        </repositories>
+2. Add the following line to /etc/layman/layman.cfg just after the line that 
+   starts with `overlays' (do not forget to indent it, see comment above the 
+   target line): >
+                file:///var/lib/layman/pluginloader-overlay.xml
+3. Run >
+        layman -ka pluginloader-overlay
+4. Unmask vim-addon-manager and run >
+        emerge vim-addon-manager
+
+==============================================================================
+11. Trouble shooting & KNOWS BUGS       *vim-addon-manage-trouble-shooting*
 
 Don't have those commands? See |vim-addon-manager-installation|.
 Windows installation is more tedious than on Linux - yes.
