@@ -48,14 +48,14 @@ Windows users: See bottom.
 1. Create a separate directory that will hold your plugins, for example 
    ~/vim-addons The addon manager intentionally installs each addon
    into its own directory which is not ~/.vim .
-2. Install vim-addon-manager to ~/vim-plugins/vim-addon-manager. If you use 
+2. Install vim-addon-manager to ~/vim-addons/vim-addon-manager. If you use 
    git, you should do the following: >
-        cd ~/vim-plugins
+        cd ~/vim-addons
         git clone git://github.com/MarcWeber/vim-addon-manager.git
-<  Git will create ~/vim-plugins/vim-addon-manager for you.
-3. Add ~/vim-plugins/vim-addon-manager to your runtimepath by adding the 
+<  Git will create ~/vim-addons/vim-addon-manager for you.
+3. Add ~/vim-addons/vim-addon-manager to your runtimepath by adding the 
    following lines to your vimrc: >
-        set runtimepath+=~/vim-plugins/vim-addon-manager
+        set runtimepath+=~/vim-addons/vim-addon-manager
         call scriptmanager#Activate([])
 
 Continue reading|vim-addon-manager-install-plugins|.
@@ -189,7 +189,7 @@ directory.
 You can use |:ActivateAddons|'s tab completion to find the plugin name fast.
 
 Usually you add the names of the addons this way to your .vimrc: >
-   set runtimepath+=~/vim-plugins/vim-addon-manager
+   set runtimepath+=~/vim-addons/vim-addon-manager
    call scriptmanager#Activate(["pluginA","pluginB"])
 <
 You can use the Install function to install plugins only - however in practise
@@ -441,6 +441,10 @@ If something goes wrong - and if I don't reply within 24h:
 The following github users are collaborators. This means they have write
 access to the official repository:
 tpope, dertuxmalwieder, TuxTom.
+
+If a plugin behaves strangely .. try
+http://github.com/dahu/VimLint/blob/master/plugin/vimlint.vim
+Maybe you have an uncommen Vim setting causing some plugins to fail.
 
 
 vim:tw=78:fo=tcq2:isk=!-~,^*,^\|,^\":ts=8:ft=help:norl:
