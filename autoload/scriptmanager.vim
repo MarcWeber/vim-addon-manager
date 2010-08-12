@@ -62,7 +62,8 @@ fun! scriptmanager#ReadAddonInfo(path)
       " using eval is now safe!
       return eval(body)
   else
-      throw "Invalid JSON in ".a:path."!"
+      echoe "Invalid JSON in ".a:path."!"
+      return {}
   endif
 
 endf
