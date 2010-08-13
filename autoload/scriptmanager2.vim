@@ -236,6 +236,15 @@ fun! scriptmanager2#Checkout(targetDir, repository)
     exec addVersionFile
     call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
 
+  " .tar.bz2 or .tbz2
+  elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.\%(tar\.bz2\|tbz2\)$'
+    call mkdir(a:targetDir)
+    let aname = s:shellescape(a:repository['archive_name'])
+    let s = get(a:repository,'strip-components',1)
+    call s:exec_in_dir([{'d':  a:targetDir, 'c': s:curl.' '.aname.' '.s:shellescape(a:repository['url'])}
+          \ , {'c': 'tar --strip-components='.s.' -xjf '.aname}])
+    exec addVersionFile
+    call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
 
   " .tar
   elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.tar$'
