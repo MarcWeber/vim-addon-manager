@@ -185,7 +185,7 @@ What are the limitations causing greatest impact to software developers using Vi
   when interfacing with external tools.
   Impact: People tried writing debugger features. But all solutions are kind
   of doomed unless Vim gets a nice async communication interface.
-- Many coding hepers should not have been written in VimL. They should have
+- Many coding helpers should not have been written in VimL. They should have
   been written in a proper language so that all open source editors can
   benefit from their features. An Example is the broken PHP completion which
   doesn't even complete static member functions like A::foo();
@@ -196,6 +196,24 @@ What are the limitations causing greatest impact to software developers using Vi
   * codefellow (same for Scala).
 
 Vim can be one of the fastest editors you'll start to love (and hate)
+
+
+" additional resources - how to continue learning about Vim? {{{1
+The way to start learning Vim:
+vimtutor
+
+additional advanced info:
+http://github.com/dahu/LearnVim
+
+Vim Wiki:
+http://vim.wikia.com
+
+join #vim (irc.freenode.net)
+
+join the mailinglist (www.vim.org -> community)
+
+Tell me to add additional resources here
+
 
 " this modeline tells vim to enable folding {{{1
 " vim: fdm=marker 
