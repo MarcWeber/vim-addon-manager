@@ -265,6 +265,17 @@ fun! scriptmanager2#Checkout(targetDir, repository)
     exec addVersionFile
     call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
 
+  " .7z, .cab, .rar, .arj, .jar
+  " (I have actually seen only .7z and .rar, but 7z supports other formats 
+  " too)
+  elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.\%(7z\|cab\|arj\|rar\|jar\)$'
+    call mkdir(a:targetDir)
+    let aname = s:shellescape(a:repository['archive_name'])
+    call s:exec_in_dir([{'d':  a:targetDir, 'c': s:curl.' '.s:shellescape(a:targetDir).'/'.aname.' '.s:shellescape(a:repository['url'])}
+       \ , {'c': '7z x '.aname } ])
+    exec addVersionFile
+    call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
+
   " .vba reuse vimball#Vimball() function
   elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.vba\%(\.gz\|\.bz2\)\?$'
     call mkdir(a:targetDir)
