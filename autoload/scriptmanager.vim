@@ -128,24 +128,26 @@ endf
 " Activate activates the plugins and their dependencies recursively.
 " I sources both: plugin/*.vim and after/plugin/*.vim files when called after
 " .vimrc has been sourced which happens when you activate plugins manually.
-fun! scriptmanager#Activate(...)
+fun! scriptmanager#Activate(...) abort
   let args = copy(a:000)
-  " If we have "" as a first argument, then user probably forgot to make this 
-  " a list
-  if type(get(args, 0))==type("")
-    let plugnames=[]
-    while !empty(args) && type(args[0])==type("")
-      call add(plugnames, remove(args, 0))
-    endwhile
-    call insert(args, plugnames)
-  elseif type(get(args, 0))!=type([])
-    echoe "You must specify a list as a first argument"
-    return
+
+  if type(args[0])==type("")
+    " way of usage 1: pass addon names as function arguments
+    " Example: Activate("name1","name2")
+
+    let args=[args, {}]
+  else
+    " way of usage 2: pass addon names as list optionally passing options
+    " Example: Activate(["name1","name2"], { options })
+
+    let args=[args[0], get(args,1,{})]
   endif
-  let opts = get(args,1,{})
-  if len(args) <= 1
-    call add(args, opts)
-  endif
+
+  " now opts should be defined
+  " args[0] = plugin names
+  " args[1] = options
+
+  let opts = args[1]
   let topLevel = get(opts,'topLevel',1)
   let opts['topLevel'] = 0
   let active = copy(s:c['activated_plugins'])
