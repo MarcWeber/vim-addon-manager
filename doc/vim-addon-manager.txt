@@ -271,6 +271,10 @@ repository                                          *addon-info-repository*
                                `strip-components' key if it is present, 
                                default value 1. See tar man page for more 
                                information).
+                .tar.bz2, .tbz2
+                               Like .tar.gz, but with bzip2 compression. Note 
+                               that your tar must support -j option or it 
+                               won't work.
                 .tar           This extension designates that plugin is 
                                contained inside uncompressed tar archive. In 
                                this case, archive is unpacked to its directory 
@@ -283,6 +287,11 @@ repository                                          *addon-info-repository*
                                contained inside a zip archive. In this case 
                                archive is unpacked to its directory by 
                                `unzip'.
+                .7z, .rar, .cab, .arj, .jar
+                               This extension designates that plugin is 
+                               contained inside an archive that is supported 
+                               by p7zip archiver. In this case archive is 
+                               unpacked to its directory by `7z x'.
                 .vba           This extension designates that plugin is 
                                contained in a vimball archive. In this case 
                                vimball#Vimball() function is used, see 
