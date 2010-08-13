@@ -212,7 +212,7 @@ fun! scriptmanager2#Checkout(targetDir, repository)
 
   " .vim file and type syntax?
   elseif has_key(a:repository, 'archive_name')
-      \ && a:repository['archive_name'] =~ '\.vim$'
+      \ && a:repository['archive_name'] =~? '\.vim$'
 
     let st = get(a:repository,'script-type','')
     if st  =~# '^syntax\|indent$'
@@ -221,13 +221,13 @@ fun! scriptmanager2#Checkout(targetDir, repository)
       let target = get(a:repository,'target_dir','plugin')
     endif
     call mkdir(a:targetDir.'/'.target,'p')
-    let aname = s:shellescape(a:repository['archive_name'])
+    let aname = s:shellescape(substitute(a:repository['archive_name'], '\.\zsVIM$', 'vim', '')
     call s:exec_in_dir([{'d':  a:targetDir.'/'.target, 'c': s:curl.' '.aname.' '.s:shellescape(a:repository['url'])}])
     exec addVersionFile
     call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
 
   " .tar.gz or .tgz
-  elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.\%(tar\.gz\|tgz\)$'
+  elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~? '\.\%(tar\.gz\|tgz\)$'
     call mkdir(a:targetDir)
     let aname = s:shellescape(a:repository['archive_name'])
     let s = get(a:repository,'strip-components',1)
@@ -237,7 +237,7 @@ fun! scriptmanager2#Checkout(targetDir, repository)
     call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
 
   " .tar.bz2 or .tbz2
-  elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.\%(tar\.bz2\|tbz2\)$'
+  elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~? '\.\%(tar\.bz2\|tbz2\)$'
     call mkdir(a:targetDir)
     let aname = s:shellescape(a:repository['archive_name'])
     let s = get(a:repository,'strip-components',1)
@@ -247,7 +247,7 @@ fun! scriptmanager2#Checkout(targetDir, repository)
     call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
 
   " .tar
-  elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.tar$'
+  elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~? '\.tar$'
     call mkdir(a:targetDir)
     let aname = s:shellescape(a:repository['archive_name'])
     let s = get(a:repository,'strip-components',1)
@@ -257,7 +257,7 @@ fun! scriptmanager2#Checkout(targetDir, repository)
     call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
 
   " .zip
-  elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.zip$'
+  elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~? '\.zip$'
     call mkdir(a:targetDir)
     let aname = s:shellescape(a:repository['archive_name'])
     call s:exec_in_dir([{'d':  a:targetDir, 'c': s:curl.' '.s:shellescape(a:targetDir).'/'.aname.' '.s:shellescape(a:repository['url'])}
@@ -268,7 +268,7 @@ fun! scriptmanager2#Checkout(targetDir, repository)
   " .7z, .cab, .rar, .arj, .jar
   " (I have actually seen only .7z and .rar, but 7z supports other formats 
   " too)
-  elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.\%(7z\|cab\|arj\|rar\|jar\)$'
+  elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~? '\.\%(7z\|cab\|arj\|rar\|jar\)$'
     call mkdir(a:targetDir)
     let aname = s:shellescape(a:repository['archive_name'])
     call s:exec_in_dir([{'d':  a:targetDir, 'c': s:curl.' '.s:shellescape(a:targetDir).'/'.aname.' '.s:shellescape(a:repository['url'])}
@@ -277,16 +277,16 @@ fun! scriptmanager2#Checkout(targetDir, repository)
     call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
 
   " .vba reuse vimball#Vimball() function
-  elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~ '\.vba\%(\.gz\|\.bz2\)\?$'
+  elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~? '\.vba\%(\.gz\|\.bz2\)\?$'
     call mkdir(a:targetDir)
     let a = a:repository['archive_name']
     let aname = s:shellescape(a)
     call s:exec_in_dir([{'d':  a:targetDir, 'c': s:curl.' '.aname.' '.s:shellescape(a:repository['url'])}])
-    if a =~ '\.gz$'
+    if a =~? '\.gz$'
       " manually unzip .vba.gz as .gz isn't unpacked yet for some reason
       exec '!gzip -d "'.a:targetDir.'/'.a.'"'
       let a = a[:-4]
-    elseif a=~'\.bz2$'
+    elseif a=~?'\.bz2$'
       exec '!bunzip2 "'.a:targetDir.'/'.a.'"'
       let a = a[:-5]
     endif
