@@ -90,9 +90,15 @@ UninstallNotLoadedAddons {name} ...              *:UninstallNotLoadedAddons*
 3.2. Functions                                 *vim-addon-manager-functions*
 
 scriptmanager#Activate([{name}, ...])             *scriptmanager#Activate()*
-        Activates addons with given names. Used by |:ActivateAddons|
+        Activates addons with given names. Used by |:ActivateAddons|.
         Note: This is probably all you need.
-
+        Second note: [{name}, ...] in arguments means that you should pass 
+        a list of strings, not that {name} is optional. Typical calls (both 
+        are equivalent): >
+            call scriptmanager#Activate(["name1", "name2"])
+            call scriptmanager#Activate("name1", "name2")
+<
+        Activating a plugin means that function will do the following steps:
         0. Check, whether requested addon is already installed. If not, 
            install it.
         1. Activate plugins that are mentioned in dependencies dictionary (see 
