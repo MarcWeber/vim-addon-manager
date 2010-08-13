@@ -134,7 +134,7 @@ fun! scriptmanager#Activate(...)
   " a list
   if type(get(args, 0))==type("")
     let plugnames=[]
-    while type(args[0])==type("")
+    while !empty(args) && type(args[0])==type("")
       call add(plugnames, remove(args, 0))
     endwhile
     call insert(args, plugnames)
