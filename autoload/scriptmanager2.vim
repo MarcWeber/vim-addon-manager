@@ -7,7 +7,7 @@ let s:curl = exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o'
 
 let s:is_win = has('win16') || has('win32') || has('win64') || has('win95')
 
-let s:system_wide = filewritable(expand('<sfile>'))
+let s:system_wide = !filewritable(expand('<sfile>'))
 
 " Install let's you install plugins by passing the url of a addon-info file
 " This preprocessor replaces the urls by the plugin-names putting the
