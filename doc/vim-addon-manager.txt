@@ -95,8 +95,14 @@ scriptmanager#Activate([{name}, ...])             *scriptmanager#Activate()*
         Second note: [{name}, ...] in arguments means that you should pass 
         a list of strings, not that {name} is optional. Typical calls (both 
         are equivalent): >
-            call scriptmanager#Activate(["name1", "name2"])
-            call scriptmanager#Activate("name1", "name2")
+            call scriptmanager#Activate([
+              \ "name1",
+              \ "name2",
+              \ ])
+            call scriptmanager#Activate(
+              \ "name1",
+              \ "name2"
+              \ )
 <
         Activating a plugin means that function will do the following steps:
         0. Check, whether requested addon is already installed. If not, 
