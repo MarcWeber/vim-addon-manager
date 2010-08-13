@@ -420,6 +420,10 @@ Archives:
     You only need xzdec.exe. Put in the same place you put those other archive 
     tools.
 
+    Get p7zip here: http://7-zip.org/download.html. You need the full version 
+    with gui because package with command-line version contains only 7za 
+    executable, while you need 7z in order to support more archives.
+
     Either add them to your system or user path (google it!) or add them just 
     to vim's path by putting something like this in _vimrc: >
         let $PATH='{path-to-gnu-utils};'.$PATH
