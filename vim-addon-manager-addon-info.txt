@@ -5,5 +5,5 @@
   "maintainer" : "Marc Weber <marco-oweber@gmx.de>",
   "repository" : {"type": "git", "url": "git://github.com/MarcWeber/vim-addon-manager.git"},
   "dependencies" : {},
-  "description" : "manage vim plugins, see README file"
+  "description" : "Manage vim plugins"
 }
