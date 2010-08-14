@@ -17,7 +17,7 @@ fun! vcs_checkouts#Update(dir)
           \ ])
     return !v:shell_error
   else
-    echoe "Updating plugin ".a:name." not implemented yet."
+    echoe "Updating plugin ".fnamemodify(directory, ':h')." not implemented yet."
     return 0
   endif
 endf
