@@ -96,8 +96,31 @@ fun! scriptmanager2#Install(toBeInstalledList, ...)
 endf
 
 fun! scriptmanager2#UpdateAddon(name)
-  let directory = scriptmanager#PluginDirByName(a:name)
-  return vcs_checkouts#Update(directory)
+  let pluginDir = scriptmanager#PluginDirByName(a:name)
+  if !vcs_checkouts#Update(pluginDir)
+    let pluginDir = scriptmanager#PluginDirByName(a:name)
+    if filereadable(pluginDir.'/version')
+      let pluginversion = get(readfile(pluginDir.'/version'), 0, "?")
+      let repository = get(s:c['plugin_sources'], a:name, {})
+      if empty(repository)
+        echoe "Cannot update plugin ".a:name.": no repository locations known."
+        return
+      endif
+      let newpluginversion = get(repository, 'version', '?')
+      if newpluginversion==#'?'
+        echoe "Cannot update plugin ".a:name.": no version information is available."
+      elseif pluginversion==#newpluginversion
+        " Though we are not updating plugin, this is not an error
+        return 1
+      endif
+      if scriptmanager2#Checkout(pluginDir, repository)
+        return
+      endif
+      return 1
+    endif
+    return
+  endif
+  return 1
 endf
 
 fun! scriptmanager2#Update(list)
