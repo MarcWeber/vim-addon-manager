@@ -311,13 +311,13 @@ fun! scriptmanager2#Checkout(targetDir, repository)
     call s:exec_in_dir([{'d':  a:targetDir, 'c': s:curl.' '.aname.' '.s:shellescape(a:repository['url'])}])
     if a =~? '\.gz$'
       " manually unzip .vba.gz as .gz isn't unpacked yet for some reason
-      exec '!gzip -d "'.a:targetDir.'/'.a.'"'
+      exec '!gzip -d '.s:shellescape(a:targetDir.'/'.a)
       let a = a[:-4]
     elseif a=~?'\.bz2$'
-      exec '!bunzip2 "'.a:targetDir.'/'.a.'"'
+      exec '!bunzip2 '.s:shellescape(a:targetDir.'/'.a)
       let a = a[:-5]
     endif
-    exec 'sp '.a:targetDir.'/'.a
+    exec 'sp '.fnameescape(a:targetDir.'/'.a)
     call vimball#Vimball(1,a:targetDir)
     exec addVersionFile
     call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
