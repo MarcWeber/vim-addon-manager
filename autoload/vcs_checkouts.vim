@@ -17,7 +17,7 @@ fun! vcs_checkouts#Update(dir)
           \ ])
     return !v:shell_error
   else
-    echoe "Updating plugin ".fnamemodify(directory, ':h')." not implemented yet."
+    echoe "Plugin ".fnamemodify(directory, ':t')." is not controlled by any known SCM system."
     return 0
   endif
 endf
