@@ -30,35 +30,24 @@ fun! scriptmanager_test#Test()
 
 endf
 
-
 " scriptmanager_util#Unpack tests
 
 " test: . = all tests
 " tar$ = onnly the tar test
 fun! scriptmanager_test#TestUnpack(test) abort
   let tests = {
-      \  'tar':  ['autocorrect', ['/tmp/vim-addon-manager-test/README', '/tmp/vim-addon-manager-test/archive', '/tmp/vim-addon-manager-test/archive/autocorrect.tar', '/tmp/vim-addon-manager-test/autocorrect.dat', '/tmp/vim-addon-manager-test/autocorrect.vim', '/tmp/vim-addon-manager-test/generator.rb', '/tmp/vim-addon-manager-test/version'] ],
-      \  'tar.gz': ['ack', ['/tmp/vim-addon-manager-test/archive', '/tmp/vim-addon-manager-test/doc', '/tmp/vim-addon-manager-test/doc/ack.txt', '/tmp/vim-addon-manager-test/plugin', '/tmp/vim-addon-manager-test/plugin/ack.vim', '/tmp/vim-addon-manager-test/version']],
-      \  'tgz': ['VIlisp', ['/tmp/vim-addon-manager-test/README', '/tmp/vim-addon-manager-test/VIlisp-hyperspec.pl', '/tmp/vim-addon-manager-test/VIlisp.vim', '/tmp/vim-addon-manager-test/changelog', '/tmp/vim-addon-manager-test/funnel.pl', '/tmp/vim-addon-manager-test/lisp-thesaurus', '/tmp/vim-addon-manager-test/make-lisp-thes.pl', '/tmp/vim-addon-manager-test/archive', '/tmp/vim-addon-manager-test/version']],
-      \  'tar.bz2': ['DetectIndent',  ['/tmp/vim-addon-manager-test/archive', '/tmp/vim-addon-manager-test/doc', '/tmp/vim-addon-manager-test/doc/detectindent.txt', '/tmp/vim-addon-manager-test/plugin', '/tmp/vim-addon-manager-test/plugin/detectindent.vim', '/tmp/vim-addon-manager-test/version']],
-      \  'tbz2': ['xterm16', ['/tmp/vim-addon-manager-test/ChangeLog', '/tmp/vim-addon-manager-test/archive', '/tmp/vim-addon-manager-test/cpalette.pl', '/tmp/vim-addon-manager-test/version', '/tmp/vim-addon-manager-test/xterm16.ct', '/tmp/vim-addon-manager-test/xterm16.schema', '/tmp/vim-addon-manager-test/xterm16.txt', '/tmp/vim-addon-manager-test/xterm16.vim']],
-      \  'vim_ftplugin': ['srec1008', ['/tmp/vim-addon-manager-test/archive', '/tmp/vim-addon-manager-test/archive/srec.vim', '/tmp/vim-addon-manager-test/ftplugin', '/tmp/vim-addon-manager-test/ftplugin/srec.vim', '/tmp/vim-addon-manager-test/version']],
-      \  'vba': ['Templates_for_Files_and_Function_Groups',  ['/tmp/vim-addon-manager-test/archive', '/tmp/vim-addon-manager-test/archive/file_templates.vba', '/tmp/vim-addon-manager-test/plugin', '/tmp/vim-addon-manager-test/plugin/file_templates.vim', '/tmp/vim-addon-manager-test/templates', '/tmp/vim-addon-manager-test/templates/example.c', '/tmp/vim-addon-manager-test/version', '/tmp/vim-addon-manager-test/templates/example.h']],
-      \  'vba.gz': ['gitolite', ['/tmp/vim-addon-manager-test/archive', '/tmp/vim-addon-manager-test/ftdetect', '/tmp/vim-addon-manager-test/ftdetect/gitolite.vim', '/tmp/vim-addon-manager-test/syntax', '/tmp/vim-addon-manager-test/syntax/gitolite.vim', '/tmp/vim-addon-manager-test/version']],
-      \  'vba.bz2': ['winmanager1440',['/tmp/vim-addon-manager-test/archive', '/tmp/vim-addon-manager-test/doc', '/tmp/vim-addon-manager-test/doc/tags', '/tmp/vim-addon-manager-test/doc/winmanager.txt', '/tmp/vim-addon-manager-test/plugin', '/tmp/vim-addon-manager-test/plugin/start.gnome', '/tmp/vim-addon-manager-test/plugin/start.kde', '/tmp/vim-addon-manager-test/plugin/winfileexplorer.vim', '/tmp/vim-addon-manager-test/plugin/winmanager.vim', '/tmp/vim-addon-manager-test/plugin/wintagexplorer.vim', '/tmp/vim-addon-manager-test/version']]
+      \  'tar':  ['autocorrect', ['README', 'archive', 'archive/autocorrect.tar', 'autocorrect.dat', 'autocorrect.vim', 'generator.rb', 'version'] ],
+      \  'tar.gz': ['ack', ['archive', 'doc', 'doc/ack.txt', 'plugin', 'plugin/ack.vim', 'version']],
+      \  'tgz': ['VIlisp', ['README', 'VIlisp-hyperspec.pl', 'VIlisp.vim', 'changelog', 'funnel.pl', 'lisp-thesaurus', 'make-lisp-thes.pl', 'archive', 'version']],
+      \  'tar.bz2': ['DetectIndent',  ['archive', 'doc', 'doc/detectindent.txt', 'plugin', 'plugin/detectindent.vim', 'version']],
+      \  'tbz2': ['xterm16', ['ChangeLog', 'archive', 'cpalette.pl', 'version', 'xterm16.ct', 'xterm16.schema', 'xterm16.txt', 'xterm16.vim']],
+      \  'vim_ftplugin': ['srec1008', ['archive', 'archive/srec.vim', 'ftplugin', 'ftplugin/srec.vim', 'version']],
+      \  'vba': ['Templates_for_Files_and_Function_Groups',  ['archive', 'archive/file_templates.vba', 'plugin', 'plugin/file_templates.vim', 'templates', 'templates/example.c', 'version', 'templates/example.h']],
+      \  'vba.gz': ['gitolite', ['archive', 'ftdetect', 'ftdetect/gitolite.vim', 'syntax', 'syntax/gitolite.vim', 'version']],
+      \  'vba.bz2': ['winmanager1440',['archive', 'doc', 'doc/tags', 'doc/winmanager.txt', 'plugin', 'plugin/start.gnome', 'plugin/start.kde', 'plugin/winfileexplorer.vim', 'plugin/winmanager.vim', 'plugin/wintagexplorer.vim', 'version']]
       \  }
 
-  if has('win16') || has('win95') || has('win32') || has('win64') && (exists('$TMP') || exists('$TEMP'))
-    if exists('$TEMP')
-      let winTmp = substitute($TEMP, '\\', '/', 'g')
-      let tmpDir = $TEMP."\\tmp\\vim-addon-manager-test"
-    else
-      let winTmp = substitute($TMP, '\\', '/', 'g')
-      let tmpDir = $TMP."\\tmp\\vim-addon-manager-test"
-    endif
-  else
-    let tmpDir = "/tmp/vim-addon-manager-test"
-  endif
+  let tmpDir = scriptmanager_util#TempDir("vim-addon-manager-test")
 
   call scriptmanager2#LoadKnownRepos()
 
@@ -68,11 +57,9 @@ fun! scriptmanager_test#TestUnpack(test) abort
     let dict = g:vim_script_manager['plugin_sources'][v[0]]
     call scriptmanager2#Checkout(tmpDir, dict)
     let files = split(glob(tmpDir.'/**'),"\n")
-    call map(files, 'substitute(v:val,'.string('\').',"/","g")')
+    " replace \ by / on win and remove tmpDir prefix
+    call map(files, 'substitute(v:val,'.string('\').',"/","g")['.(len(tmpDir)+1).':]')
     call sort(files)
-    if exists('winTmp')
-      call map(v[1], '"'.winTmp.'".v:val')
-    endif
     call sort(v[1])
     if v[1] != files
       echoe "test failure :".k

@@ -3,8 +3,6 @@
 exec scriptmanager#DefineAndBind('s:c','g:vim_script_manager','{}')
 
 
-let s:is_win = has('win16') || has('win32') || has('win64') || has('win95')
-
 let s:system_wide = !filewritable(expand('<sfile>'))
 
 " Install let's you install plugins by passing the url of a addon-info file
@@ -286,7 +284,7 @@ endf
 " is there a library providing an OS abstraction? This breaks Winndows
 " xcopy or copy should be used there..
 fun! scriptmanager2#Copy(f,t)
-  if s:is_win
+  if g:is_win
     exec '!xcopy /e /i '.s:shellescape(a:f).' '.s:shellescape(a:t)
   else
     exec '!cp -r '.s:shellescape(a:f).' '.s:shellescape(a:t)

@@ -99,21 +99,27 @@ fun! scriptmanager_util#Download(url, targetFile)
 endf
 
 fun! scriptmanager_util#RmFR(dir_or_file)
+  let cmd = ""
   if has('win32') || has('win64')
     if getftype(a:dir_or_file) == 'dir'
-      exec '!'.s:shellescape('rmdir /S /Q $',a:dir_or_file)
+      let cmd = 'rmdir /S /Q'
     else
-      exec '!'.s:shellescape('erase /F $',a:dir_or_file)
+      let cmd = 'erase /F'
     endif
   elseif has('win16') || has('win95')
     " Dos-style COMMAND.COM. These are _UNTESTED_
     if getftype(a:dir_or_file) == 'dir'
-      exec '!'.s:shellescape('deltree /Y $',a:dir_or_file)
+      let cmd = 'deltree /Y'
     else
-      exec '!'.s:shellescape('erase /F $',a:dir_or_file)
+      let cmd = 'erase /F'
     endif
   else
-    exec '!'.s:shellescape('rm -fr $',a:dir_or_file)
+    let cmd = "rm -fr"
+  endif
+  if cmd == ""
+    throw "don't know how to RmFR on this system: ".g:os
+  else
+    exec '!'.s:shellescape(cmd.' $', a:dir_or_file)
   endif
 endf
 
@@ -139,4 +145,20 @@ fun! scriptmanager_util#DownloadFromMirrors(url, targetDir)
     let t = t .'/'.fnamemodify(url,':t')
   endif
   call scriptmanager_util#Download(url, t)
+endf
+
+
+let s:tmpDir = ""
+" this is not cleaned up on shutdown yet !
+" tmpname():
+" on windows C:\Users\NAME\AppData\Local\Temp\VIG3DB6.tmp
+" on linux /tmp/v106312/111
+"
+" on linux this returns /tmp/a:name
+" on windows it returns C:\Users\NAME\AppData\Local\Temp/a:name
+fun! scriptmanager_util#TempDir(name)
+  if s:tmpDir == ""
+    let s:tmpDir = fnamemodify(tempname(), ":h".(g:is_win ? '': ':h'))
+  endif
+  return s:tmpDir.'/'.a:name
 endf

@@ -50,7 +50,7 @@ fun! s:exec_in_dir(cmds)
 endf
 
 fun! vcs_checkouts#ExecIndir(cmds) abort
-  if has('win16') || has('win32') || has('win64')
+  if g:is_win
     " set different lcd in extra buffer:
     new
     let lcd=""
