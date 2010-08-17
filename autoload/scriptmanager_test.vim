@@ -48,7 +48,17 @@ fun! scriptmanager_test#TestUnpack(test) abort
       \  'vba.bz2': ['winmanager1440',['/tmp/vim-addon-manager-test/archive', '/tmp/vim-addon-manager-test/doc', '/tmp/vim-addon-manager-test/doc/tags', '/tmp/vim-addon-manager-test/doc/winmanager.txt', '/tmp/vim-addon-manager-test/plugin', '/tmp/vim-addon-manager-test/plugin/start.gnome', '/tmp/vim-addon-manager-test/plugin/start.kde', '/tmp/vim-addon-manager-test/plugin/winfileexplorer.vim', '/tmp/vim-addon-manager-test/plugin/winmanager.vim', '/tmp/vim-addon-manager-test/plugin/wintagexplorer.vim', '/tmp/vim-addon-manager-test/version']]
       \  }
 
-  let tmpDir = "/tmp/vim-addon-manager-test"
+  if has('win16') || has('win95') || has('win32') || has('win64') && (exists('$TMP') || exists('$TEMP'))
+    if exists('$TEMP')
+      let winTmp = substitute($TEMP, '\\', '/', 'g')
+      let tmpDir = $TEMP."\\tmp\\vim-addon-manager-test"
+    else
+      let winTmp = substitute($TMP, '\\', '/', 'g')
+      let tmpDir = $TMP."\\tmp\\vim-addon-manager-test"
+    endif
+  else
+    let tmpDir = "/tmp/vim-addon-manager-test"
+  endif
 
   call scriptmanager2#LoadKnownRepos()
 
@@ -60,6 +70,9 @@ fun! scriptmanager_test#TestUnpack(test) abort
     let files = split(glob(tmpDir.'/**'),"\n")
     call map(files, 'substitute(v:val,'.string('\').',"/","g")')
     call sort(files)
+    if exists('winTmp')
+      call map(v[1], '"'.winTmp.'".v:val')
+    endif
     call sort(v[1])
     if v[1] != files
       echoe "test failure :".k
