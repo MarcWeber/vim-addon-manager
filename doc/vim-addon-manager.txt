@@ -384,12 +384,11 @@ ZyX (Nikolay Pavlov, ZyX-I on github)
   - discussing implementation details
   - initial implementation for updating plugins which were installed by
     archive
-Taverius (Leonardo Valeri Manera) -
-  - working around the tar issues on Windows
 Tux Tom (http://github.com/TuxTom)
   - helping fixing a cd bug on Windows
 creidiki (Leonardo Valeri Manera)
   - greatly improving Windows support
+  - working around the tar issues on Windows
 
 
 ==============================================================================
