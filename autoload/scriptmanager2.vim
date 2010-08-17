@@ -91,6 +91,7 @@ fun! scriptmanager2#Install(toBeInstalledList, ...)
   endfor
 endf
 
+" this function will be refactored slightly soon by either me or Zyx.
 fun! scriptmanager2#UpdateAddon(name)
   let pluginDir = scriptmanager#PluginDirByName(a:name)
   if !vcs_checkouts#Update(pluginDir)

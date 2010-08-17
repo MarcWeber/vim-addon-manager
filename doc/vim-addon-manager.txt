@@ -376,12 +376,20 @@ Email: marco-oweber@gmx.de
 7.2. Contributors                           *vim-addon-manager-contributors*
 
 (Incomplete list):
-Tim Pope (Json validation)
-ZyX (Nikolay Pavlov, ZyX-I on github) enhancing this vim documentation,
-                                      various fixes
-Taverius (Leonardo Valeri Manera) for working around the tar issues on Windows
-Tux Tom (http://github.com/TuxTom) for helping fixing a cd bug on Windows
-creidiki (Leonardo Valeri Manera) for greatly improving Windows support
+Tim Pope 
+  - Json validation
+ZyX (Nikolay Pavlov, ZyX-I on github)
+  - enhancing this vim documentation
+  - various fixes
+  - discussing implementation details
+  - initial implementation for updating plugins which were installed by
+    archive
+Taverius (Leonardo Valeri Manera) -
+  - working around the tar issues on Windows
+Tux Tom (http://github.com/TuxTom)
+  - helping fixing a cd bug on Windows
+creidiki (Leonardo Valeri Manera)
+  - greatly improving Windows support
 
 
 ==============================================================================
