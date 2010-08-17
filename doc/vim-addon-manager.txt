@@ -60,7 +60,11 @@ Gentoo users: see |vim-addon-manager-gentoo|.
 3. Add ~/vim-addons/vim-addon-manager to your runtimepath by adding the 
    following lines to your vimrc: >
         set runtimepath+=~/vim-addons/vim-addon-manager
-        call scriptmanager#Activate([])
+        try
+          call scriptmanager#Activate([])
+        catch /.*/
+          echoe v:exception
+        endtry
 
 Continue reading|vim-addon-manager-install-plugins|.
 
