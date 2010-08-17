@@ -49,7 +49,7 @@ fun! s:exec_in_dir(cmds)
   call vcs_checkouts#ExecIndir(a:cmds)
 endf
 
-fun! vcs_checkouts#ExecIndir(cmds)
+fun! vcs_checkouts#ExecIndir(cmds) abort
   if has('win16') || has('win32') || has('win64')
     " set different lcd in extra buffer:
     new
@@ -59,7 +59,9 @@ fun! vcs_checkouts#ExecIndir(cmds)
         " TODO quoting
         exec "lcd ".c.d
       endif
-      exec '!'.c.c
+      if has_key(c, "c")
+        exec '!'.c.c
+      endif
       " break if one of the pased commands failes:
       if v:shell_error != 0
         break
@@ -71,7 +73,12 @@ fun! vcs_checkouts#ExecIndir(cmds)
     " execute command sequences on linux
     let cmds_str = []
     for c in a:cmds
-      call add(cmds_str, (has_key(c,"d") ? "cd ".s:shellescape(c.d)." && " : "" ). c.c)
+      if has_key(c,"d")
+        call add(cmds_str, "cd ".s:shellescape(c.d))
+      endif
+      if has_key(c,"c")
+        call add(cmds_str, c.c)
+      endif
     endfor
     exec '!'.join(cmds_str," && ")
   endif

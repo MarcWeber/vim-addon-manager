@@ -2,8 +2,6 @@
 
 exec scriptmanager#DefineAndBind('s:c','g:vim_script_manager','{}')
 
-" let users override curl command. Reuse netrw setting
-let s:curl = exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o'
 
 let s:is_win = has('win16') || has('win32') || has('win64') || has('win95')
 
@@ -98,7 +96,18 @@ endf
 fun! scriptmanager2#UpdateAddon(name)
   let pluginDir = scriptmanager#PluginDirByName(a:name)
   if !vcs_checkouts#Update(pluginDir)
+    " try updating plugin by archive
+    
+    " dose the user have made any changes? :
     let pluginDir = scriptmanager#PluginDirByName(a:name)
+    let backup = scriptmanager#PluginDirByName(a:name).'.backup'
+    let container = fnamemodify(backup,':h')
+    let diff_file = containing.'/'.a:name.'.diff-orig'
+
+    if executable('diff') && isdirectory(backup)
+      call s:exec_in_dir([{'c':'diff -r '.s:shellescape(r.'/plugin').' '.s:shellescape(r.'/plugin-merged')}])
+    endif
+    
     if filereadable(pluginDir.'/version')
       let pluginversion = get(readfile(pluginDir.'/version'), 0, "?")
       let repository = get(s:c['plugin_sources'], a:name, {})
@@ -232,100 +241,39 @@ endf
 " endfun
 
 
-fun! scriptmanager2#Checkout(targetDir, repository)
-  let addVersionFile = 'call writefile([get(a:repository,"version","?")], a:targetDir."/version")'
+" may throw EXCEPTION_UNPACK
+fun! scriptmanager2#Checkout(targetDir, repository) abort
   if a:repository['type'] =~ 'git\|hg\|svn'
     call vcs_checkouts#Checkout(a:targetDir, a:repository)
-
-  " .vim file and type syntax?
-  elseif has_key(a:repository, 'archive_name')
-      \ && a:repository['archive_name'] =~? '\.vim$'
-
-    let st = get(a:repository,'script-type','')
-    if st  =~# '^syntax\|indent$'
-      let target = st
-    else
-      let target = get(a:repository,'target_dir','plugin')
-    endif
-    call mkdir(a:targetDir.'/'.target,'p')
-    let aname = s:shellescape(substitute(a:repository['archive_name'], '\.\zsVIM$', 'vim', '')
-    call s:exec_in_dir([{'d':  a:targetDir.'/'.target, 'c': s:curl.' '.aname.' '.s:shellescape(a:repository['url'])}])
-    exec addVersionFile
-    call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
-
-  " .tar.gz or .tgz
-  elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~? '\.\%(tar\.gz\|tgz\)$'
-    call mkdir(a:targetDir)
-    let aname = s:shellescape(a:repository['archive_name'])
-    let s = get(a:repository,'strip-components',1)
-    call s:exec_in_dir([{'d':  a:targetDir, 'c': s:curl.' '.aname.' '.s:shellescape(a:repository['url'])}
-          \ , {'c': 'tar --strip-components='.s.' -xzf '.aname}])
-    exec addVersionFile
-    call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
-
-  " .tar.bz2 or .tbz2
-  elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~? '\.\%(tar\.bz2\|tbz2\)$'
-    call mkdir(a:targetDir)
-    let aname = s:shellescape(a:repository['archive_name'])
-    let s = get(a:repository,'strip-components',1)
-    call s:exec_in_dir([{'d':  a:targetDir, 'c': s:curl.' '.aname.' '.s:shellescape(a:repository['url'])}
-          \ , {'c': 'tar --strip-components='.s.' -xjf '.aname}])
-    exec addVersionFile
-    call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
-
-  " .tar
-  elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~? '\.tar$'
-    call mkdir(a:targetDir)
-    let aname = s:shellescape(a:repository['archive_name'])
-    let s = get(a:repository,'strip-components',1)
-    call s:exec_in_dir([{'d':  a:targetDir, 'c': s:curl.' '.aname.' '.s:shellescape(a:repository['url'])}
-          \ , {'c': 'tar --strip-components='.s.' -xzf '.aname}])
-    exec addVersionFile
-    call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
-
-  " .zip
-  elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~? '\.zip$'
-    call mkdir(a:targetDir)
-    let aname = s:shellescape(a:repository['archive_name'])
-    call s:exec_in_dir([{'d':  a:targetDir, 'c': s:curl.' '.s:shellescape(a:targetDir).'/'.aname.' '.s:shellescape(a:repository['url'])}
-       \ , {'c': 'unzip '.aname } ])
-    exec addVersionFile
-    call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
-
-  " .7z, .cab, .rar, .arj, .jar
-  " (I have actually seen only .7z and .rar, but 7z supports other formats 
-  " too)
-  elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~? '\.\%(7z\|cab\|arj\|rar\|jar\)$'
-    call mkdir(a:targetDir)
-    let aname = s:shellescape(a:repository['archive_name'])
-    call s:exec_in_dir([{'d':  a:targetDir, 'c': s:curl.' '.s:shellescape(a:targetDir).'/'.aname.' '.s:shellescape(a:repository['url'])}
-       \ , {'c': '7z x '.aname } ])
-    exec addVersionFile
-    call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
-
-  " .vba reuse vimball#Vimball() function
-  elseif has_key(a:repository, 'archive_name') && a:repository['archive_name'] =~? '\.vba\%(\.gz\|\.bz2\)\?$'
-    call mkdir(a:targetDir)
-    let a = a:repository['archive_name']
-    let aname = s:shellescape(a)
-    call s:exec_in_dir([{'d':  a:targetDir, 'c': s:curl.' '.aname.' '.s:shellescape(a:repository['url'])}])
-    if a =~? '\.gz$'
-      " manually unzip .vba.gz as .gz isn't unpacked yet for some reason
-      exec '!gzip -d '.s:shellescape(a:targetDir.'/'.a)
-      let a = a[:-4]
-    elseif a=~?'\.bz2$'
-      exec '!bunzip2 '.s:shellescape(a:targetDir.'/'.a)
-      let a = a[:-5]
-    endif
-    exec 'sp '.fnameescape(a:targetDir.'/'.a)
-    call vimball#Vimball(1,a:targetDir)
-    exec addVersionFile
-    call scriptmanager2#Copy(a:targetDir, a:targetDir.'.backup')
   else
-    echoe "Don't know how to checkout source location: ".string(a:repository)."!"
-    return 1
+    " archive based repositories - no VCS
+    " must have a:repository['archive_name']
+
+    if !isdirectory(a:targetDir) | call mkdir(a:targetDir.'/archive','p') | endif
+
+    " basename VIM -> vim
+    let archiveName = fnamemodify(substitute(get(a:repository,'archive_name',''), '\.\zsVIM$', 'vim', ''),':t')
+
+    " archive will be downloaded to this location
+    let archiveFile = a:targetDir.'/archive/'.archiveName
+
+    call scriptmanager_util#Download(a:repository['url'], archiveFile)
+
+    call scriptmanager_util#Unpack(archiveFile, a:targetDir, get(a:repository,'strip-components',1))
+
+    call writefile([get(a:repository,"version","?")], a:targetDir."/version")
+
+    " hook for plugin / syntax files: Move into the correct direcotry:
+    if a:repository['archive_name'] =~? '\.vim$' 
+      let type = tolower(get(a:repository,'script-type',''))
+      if type  =~# '^syntax\|indent\|ftplugin$'
+        let dir = a:targetDir.'/'.type
+        call mkdir(dir)
+        call rename(a:targetDir.'/'.archiveName, dir.'/'.archiveName)
+      endif
+    endif
   endif
-endf
+endfun
 
 fun! s:shellescape(s)
   return shellescape(a:s,1)
