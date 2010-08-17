@@ -99,8 +99,22 @@ fun! scriptmanager_util#Download(url, targetFile)
 endf
 
 fun! scriptmanager_util#RmFR(dir_or_file)
-  " TODO windows implementation
-  exec '!'.s:shellescape('rm -fr $',a:dir_or_file)
+  if has('win32') || has('win64')
+    if getftype(a:dir_or_file) == 'dir'
+      exec '!'.s:shellescape('rmdir /S /Q $',a:dir_or_file)
+    else
+      exec '!'.s:shellescape('erase /F $',a:dir_or_file)
+    endif
+  elseif has('win16') || has('win95')
+    " Dos-style COMMAND.COM. These are _UNTESTED_
+    if getftype(a:dir_or_file) == 'dir'
+      exec '!'.s:shellescape('deltree /Y $',a:dir_or_file)
+    else
+      exec '!'.s:shellescape('erase /F $',a:dir_or_file)
+    endif
+  else
+    exec '!'.s:shellescape('rm -fr $',a:dir_or_file)
+  endif
 endf
 
 
