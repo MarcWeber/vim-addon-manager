@@ -102,3 +102,27 @@ fun! scriptmanager_util#RmFR(dir_or_file)
   " TODO windows implementation
   exec '!'.s:shellescape('rm -fr $',a:dir_or_file)
 endf
+
+
+" a "direct link" (found on the downrload page)
+" such as "http://downloads.sourceforge.net/project/gnuwin32/gzip/1.3.12-1/gzip-1.3.12-1-bin.zip"
+" can be downloaded this way:
+" call scriptmanager_util#DownloadFromMirrors("mirror://sourceforge/gnuwin32/gzip/1.3.12-1/gzip-1.3.12-1-bin.zip","/tmp")
+fun! scriptmanager_util#DownloadFromMirrors(url, targetDir)
+  let mirrors_sourceforge = [
+        \   'http://heanet.dl.sourceforge.net/sourceforge/',
+        \   'http://surfnet.dl.sourceforge.net/sourceforge/',
+        \ ]
+
+  let m = matchlist(a:url, '^mirror:\/\/\([^/\\]\+\)\/\(.*\)')
+
+  if len(m) > 3
+    let url =  mirrors_{m[1]}[0].m[2]
+  endif
+  " if target is a directory append basename of url
+  let t = a:targetDir
+  if isdirectory(t)
+    let t = t .'/'.fnamemodify(url,':t')
+  endif
+  call scriptmanager_util#Download(url, t)
+endf
