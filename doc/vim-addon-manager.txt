@@ -390,6 +390,20 @@ creidiki (Leonardo Valeri Manera)
   - greatly improving Windows support
   - working around the tar issues on Windows
 
+------------------------------------------------------------------------------
+ROADMAP:
+
+What features are missing?
+
+- When updating archive based plugins create diffs so that you can patch
+  those files without changes being lost. I expect users to customize mappings
+  and such
+
+- add a command like AddonManagerFetchUtils which does all the work listed in
+  9. for you putting the tar etc into a directory and adding it to PATH
+
+- suggestions?
+
 
 ==============================================================================
 8. Testing this plugin                           *vim-addon-manager-testing*
@@ -411,6 +425,8 @@ point.
 9. Some notes for windows users                  *vim-addon-manager-windows*
 
 Section provided by creidiki:
+
+Also see ROADMAP.
 
 Win32 tools for vim-addon-manager
 
