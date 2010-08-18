@@ -162,5 +162,6 @@ fun! scriptmanager_util#TempDir(name)
   if s:tmpDir == ""
     let s:tmpDir = fnamemodify(tempname(), ":h".(g:is_win ? '': ':h'))
   endif
-  return s:tmpDir.'/'.a:name
+  " expand make \ out of / on Windows
+  return expand(s:tmpDir.'/'.a:name)
 endf
