@@ -42,7 +42,18 @@ let s:c['activated_plugins'] = get(s:c,'activaded_plugins', {})
 let s:c['plugin_root_dir'] = get(s:c, 'plugin_root_dir', ((filewritable(expand('<sfile>')))?
             \                                               (fnamemodify(expand('<sfile>'),':h:h:h')):
             \                                               ('~/vim-addons')))
+" ensure we have absolute paths (windows doesn't like ~/.. ) :
+let s:c['plugin_root_dir'] = expand(s:c['plugin_root_dir'])
 let s:c['known'] = get(s:c,'known','vim-addon-manager-known-repositories')
+
+if g:is_win
+  " if binary-utils path exists then add it to PATH
+  let s:c['binary_utils'] = get(s:c,'binary_utils',s:c['plugin_root_dir'].'\binary-utils')
+  let s:c['binary_utils_bin'] = s:c['binary_utils'].'\dist\bin'
+  if isdirectory(s:c['binary_utils'])
+    let $PATH=$PATH.';'.s:c['binary_utils_bin']
+  endif
+endif
 
 " additional plugin sources should go into your .vimrc or into the repository
 " called "vim-addon-manager-known-repositories" referenced here:

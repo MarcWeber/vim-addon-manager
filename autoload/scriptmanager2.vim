@@ -1,5 +1,6 @@
 " scriptmanager2 contains code which is used when install plugins only
 
+let s:curl = exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o'
 exec scriptmanager#DefineAndBind('s:c','g:vim_script_manager','{}')
 
 
@@ -438,3 +439,57 @@ fun! scriptmanager2#UnmergePluginFiles()
   endfor
   call delete(scriptmanager2#MergeTarget())
 endfun
+
+
+if g:is_win
+  fun! scriptmanager2#FetchAdditionalWindowsTools() abort
+    if !executable("curl") && s:curl == "curl -o"
+      throw "No curl found. Either set g:netrw_http_cmd='path/curl -o' or put it in PATH"
+    endif
+    if !isdirectory(s:c['binary_utils'].'\dist')
+      call mkdir(s:c['binary_utils'].'\dist','p')
+    endif
+    " we have curl, so we can fetch remaingin deps using Download and Unpack
+    let tools = {
+      \ 'gzip': ['mirror://sourceforge/gnuwin32/gzip/1.3.12-1/', "gzip-1.3.12-1-bin.zip", "gzip"],
+      \ 'bzip2':['mirror://sourceforge/gnuwin32/bzip2/1.0.5/', "bzip2-1.0.5-bin.zip", "bzip2" ],
+      \ 'tar':  ['mirror://sourceforge/gnuwin32/tar/1.13-1/',"tar-1.13-1-bin.zip", "tar"],
+      \ 'zip':  ['mirror://sourceforge/gnuwin32/unzip/5.51-1/', "unzip-5.51-1-bin.zip", "unzip"],
+      \ 'diffutils': ['mirror://sourceforge/gnuwin32/diffutils/2.8.7-1/',"diffutils-2.8.7-1-bin.zip", "diff"],
+      \ 'patch': [ 'mirror://sourceforge/gnuwin32/patch/2.5.9-7/',"patch-2.5.9-7-bin.zip", "patch"]
+      \ }
+    for v in values(tools)
+      echo "downloading ".v[1]
+      if !executable(v[2]) && !filereadable(s:c['binary_utils'].'\'.v[1])
+        " call scriptmanager_util#DownloadFromMirrors(v[0].v[1], s:c['binary_utils'])
+      endif
+    endfor
+
+    if !executable('unzip')
+      " colorize this?
+      echo "__ its your turn: __"
+      echom "__ move all files of the zip directory into ".s:c['binary_utils'].'/dist . Close the Explorer window and the shell window to continue. Press any key'
+      call getchar()
+      exec "!".expand(s:c['binary_utils'].'/'. tools.zip[1])
+      let $PATH=$PATH.';'.s:c['binary_utils_bin']
+      if !executable('unzip')
+        throw "can't execute unzip. Something failed!"
+      endif
+    endif
+
+    " now we have unzip and can do rest
+    for k in ["gzip","bzip2","tar","diffutils","patch"]
+      if !executable(tools[k][2])
+        call scriptmanager_util#Unpack(s:c['binary_utils'].'\'.tools[k][1], s:c['binary_utils'].'\dist', 0)
+      endif
+    endfor
+
+  "if executable("7z")
+    "echo "you already have 7z in PATH. Nothing to be done"
+    "return
+  "endif
+  "let _7zurl = 'mirror://sourceforge/sevenzip/7-Zip/4.65/7z465.exe'
+  "call scriptmanager_util#DownloadFromMirrors(_7zurl, s:c['binary_utils'].'/7z.exe')
+
+  endf
+endif

@@ -95,7 +95,9 @@ fun! scriptmanager_util#Unpack(archive, targetdir, strip_components)
 endf
 
 fun! scriptmanager_util#Download(url, targetFile)
-  call s:exec_in_dir([{'c': s:shellescape(s:curl.' $ $', a:targetFile, a:url)}])
+  " allow redirection because of sourceforge mirrors:
+  let c = substitute(s:curl, 'curl','curl --location --max-redirs 40','')
+  call s:exec_in_dir([{'c': s:shellescape(c.' $ $', a:targetFile, a:url)}])
 endf
 
 fun! scriptmanager_util#RmFR(dir_or_file)

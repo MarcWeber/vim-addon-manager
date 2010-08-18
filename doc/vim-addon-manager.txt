@@ -424,11 +424,18 @@ point.
 ==============================================================================
 9. Some notes for windows users                  *vim-addon-manager-windows*
 
-Section provided by creidiki:
-
-Also see ROADMAP.
 
 Win32 tools for vim-addon-manager
+
+Fast: put curl into ~/vim-addons/binary-utils/dist then call this function
+to setup the remaining tools (tar, bzip, gzip, unzip) >
+    call scriptmanager2#FetchAdditionalWindowsTools()
+<
+Does it make sense to support svn and git this way as well?
+Is it even possible?
+At least we can fetch and execute the installers..
+
+Section provided by creidiki:
 
 Curl:
     Get Curl here: http://curl.haxx.se/download.html
