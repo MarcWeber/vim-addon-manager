@@ -59,12 +59,19 @@ Gentoo users: see |vim-addon-manager-gentoo|.
 <  Git will create ~/vim-addons/vim-addon-manager for you.
 3. Add ~/vim-addons/vim-addon-manager to your runtimepath by adding the 
    following lines to your vimrc: >
-        set runtimepath+=~/vim-addons/vim-addon-manager
-        try
-          call scriptmanager#Activate([])
-        catch /.*/
-          echoe v:exception
-        endtry
+        fun ActivateAddons()
+          set runtimepath+=~/vim-addons/vim-addon-manager
+          try
+            call scriptmanager#Activate([])
+          catch /.*/
+            echoe v:exception
+          endtry
+        endf
+        call ActivateAddons()
+        " experimental: run after gui has been started
+        " report breakage in this case, please
+        " au GUIEnter * call Activate()
+
 
 Continue reading|vim-addon-manager-install-plugins|.
 
@@ -389,6 +396,11 @@ Tux Tom (http://github.com/TuxTom)
 creidiki (Leonardo Valeri Manera)
   - greatly improving Windows support
   - working around the tar issues on Windows
+..
+Mike Smullin:
+ - for asking to find a way to source plugins in gvim.
+   There is a hint now. This is important if you don't start vim from console
+
 
 ------------------------------------------------------------------------------
 ROADMAP:
