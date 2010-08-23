@@ -7,17 +7,31 @@ fun! s:exec_in_dir(cmds)
 endf
 
 " insert arguments at placeholders $ shell escaping the value
-" usage: s:shellescape("rm -fr $ $ $", [file1, file2, file3])
+" usage: s:shellescape("rm --arg $ -fr $p $p $p", [string, file1, file2, file3])
+"
+" the / \ annoyance of Windows is fixed by calling expand which replaces / by
+" \ on Windows. This only happens by the $p substitution
 fun! s:shellescape(cmd, ...)
   let list = copy(a:000)
   let r = ''
   let l = split(a:cmd, '\$', 1)
   let r = l[0]
   for x in l[1:]
-    let r .= shellescape(remove(list, 0),1).x
+    let i = remove(list, 0)
+    if x[0] == 'p'
+      let x = x[1:]
+      let i = expand(i)
+    endif
+    let r .= shellescape(i,1).x
   endfor
   return r
 endf
+
+" TODO improve this and move somewhere else?
+fun! scriptmanager_util#ShellDSL(...)
+  return call('s:shellescape', a:000)
+endf
+
 
 fun! s:EndsWith(name, ...)
   return  a:name =~? '\%('.substitute(join(a:000,'\|'),'\.','\\.','g').'\)$'
@@ -97,7 +111,7 @@ endf
 fun! scriptmanager_util#Download(url, targetFile)
   " allow redirection because of sourceforge mirrors:
   let c = substitute(s:curl, 'curl','curl --location --max-redirs 40','')
-  call s:exec_in_dir([{'c': s:shellescape(c.' $ $', a:targetFile, a:url)}])
+  call s:exec_in_dir([{'c': s:shellescape(c.' $p $', a:targetFile, a:url)}])
 endf
 
 fun! scriptmanager_util#RmFR(dir_or_file)
