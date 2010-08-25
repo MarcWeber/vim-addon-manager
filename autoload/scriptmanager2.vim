@@ -255,9 +255,13 @@ fun! scriptmanager2#Checkout(targetDir, repository) abort
     " archive will be downloaded to this location
     let archiveFile = a:targetDir.'/archive/'.archiveName
 
-    call scriptmanager_util#Download(a:repository['url'], archiveFile)
+    call fileutils#Get(a:repository['url'], archiveFile)
 
-    call scriptmanager_util#Unpack(archiveFile, a:targetDir, get(a:repository,'strip-components',1))
+    let defaultstrip = (archiveFile=~?'\.\(t\(ar\.\=\)\=\(\(gz\|bz2\|xz\)\=\)\)$')
+    call scriptmanager_util#Unpack(archiveFile, a:targetDir, get(a:repository,'strip-components',defaultstrip))
+    if isdirectory(a:targetDir.'/archive')
+      call fileutils#Rm(a:targetDir.'/archive')
+    endif
 
     call writefile([get(a:repository,"version","?")], a:targetDir."/version")
 

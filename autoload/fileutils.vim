@@ -1,12 +1,15 @@
-
-" let users override curl command. Reuse netrw setting
-let  s:curl = split(exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o')
 function! s:getoption(option, default)
     if exists('g:fileutilsOptions') && type(g:fileutilsOptions)==type({})
         return get(g:fileutilsOptions, a:option, a:default)
     endif
     return a:default
 endfunction
+" let users override curl command. Reuse netrw setting
+let  s:curl = split(exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o')
+if s:curl[0]==#"curl"
+    call extend(s:curl, ['--location', '--max-redirs', 40], 1)
+endif
+let s:curl=s:getoption('curl', s:curl)
 let s:cmddir=s:getoption("cmddir", "")
 if !empty(s:cmddir)
     let s:cmddir=fileutils#Joinpath(s:cmddir, "")
@@ -128,16 +131,18 @@ endfunction
 function! fileutils#ListMovedFiles(source, number)
     let files=fileutils#GetDirContents(a:source)
     if a:number==1
-        return files
+        return [[], files]
     endif
     let dirs=filter(copy(files), 'isdirectory(v:val)')
     call filter(files, 'filereadable(v:val)') " Filter out directories and unreadable files
-    call map(dirs, 'extend(files, fileutils#ListMovedFiles(v:val, a:number-1))')
-    return files
+    call map(copy(dirs), 'extend(files, fileutils#ListMovedFiles(v:val, a:number-1)[1])')
+    return [dirs, files]
 endfunction
 function! fileutils#StripComponents(source, number, destination)
-    call map(fileutils#ListMovedFiles(a:source, a:number),
-                \'fileutils#Mv(v:val, a:destination)')
+    let [toremove, tomove]=fileutils#ListMovedFiles(a:source, a:number)
+    echo toremove
+    call map(tomove, 'fileutils#Mv(v:val, a:destination)')
+    call map(toremove, 'fileutils#Rm(v:val)')
 endfunction
 
 function! fileutils#Get(url, target)
@@ -227,6 +232,7 @@ function! s:UnpackFunctions.vimball(archive, destination)
     execute "view ".fnameescape(a:archive)
     call vimball#Vimball(1, a:destination)
     bwipeout
+    return [a:archive]
 endfunction
 let s:UnpackFunctions['application/x-vimball']=s:UnpackFunctions.vimball
 unlet s:UnpackFunctions.vimball
