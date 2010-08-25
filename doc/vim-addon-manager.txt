@@ -271,60 +271,61 @@ repository                                          *addon-info-repository*
                  If `type' key contains an empty string, then archive which 
                  location is described by the `url' key will be saved in file 
                  with name {archive_name} and processed according to its 
-                 extension. Supported extensions:
-                 Extension     How it is handled ~
-                 .vim          This extension designates that plugin is a single 
-                               file. So, if exists key `script-type' and it is 
-                               equal to `syntax' or `indent', then this file 
-                               is put under {plugname}/syntax or under 
-                               {plugname}/indent, otherwise it is put under 
-                               directory described by {plugname}/{target_dir} 
-                               (where {target_dir} is a value of `target_dir' 
-                               key if it is present and `plugin' otherwise).
-                .tar.gz, .tgz  This extension designates that plugin is 
-                               contained inside tar archive compressed by 
-                               gzip. In this case, archive is unpacked to its 
-                               directory by `tar' (note that it must support 
-                               -z option), {N} components are stripped before 
-                               unpacking (here {N} is defined by 
-                               `strip-components' key if it is present, 
-                               default value 1. See tar man page for more 
-                               information).
-                .tar.bz2, .tbz2
-                               Like .tar.gz, but with bzip2 compression. Note 
-                               that your tar must support -j option or it 
-                               won't work.
-                .tar           This extension designates that plugin is 
-                               contained inside uncompressed tar archive. In 
-                               this case, archive is unpacked to its directory 
-                               by `tar', {N} components are stripped before 
-                               unpacking (here {N} is defined by 
-                               `strip-components' key if it is present, 
-                               default value 1. See tar man page for more 
-                               information).
-                .zip           This extension designates that plugin is 
-                               contained inside a zip archive. In this case 
-                               archive is unpacked to its directory by 
-                               `unzip'.
-                .7z, .rar, .cab, .arj, .jar
-                               This extension designates that plugin is 
-                               contained inside an archive that is supported 
-                               by p7zip archiver. In this case archive is 
-                               unpacked to its directory by `7z x'.
-                .vba           This extension designates that plugin is 
-                               contained in a vimball archive. In this case 
-                               vimball#Vimball() function is used, see 
-                               |:UseVimball| for more details.
-                .vba.gz        This extension designates that plugin is 
-                               contained in a vimball archive compressed by 
-                               gzip. In this case archive is uncompressed and 
-                               vimball#Vimball() function is used, see 
-                               |:UseVimball| for more details.
-                .vba.bz2       Like .vba.bz2, but with bzip2 compression.
+                 type. Supported types:
+                 Type          How it is handled ~
+                 tar            Plugin is assumed to be contained in a tar 
+                                archive. So, it is unpacked (with either tar 
+                                or 7z) to the plugin directory. After 
+                                unpacking, it tries to strip 1 path component, 
+                                failing if there is more then one directory.
+                 zip            Plugin is assumed to be contained in a zip 
+                                archive. So, it is unpacked (with either unzip 
+                                or 7z) to the plugin directory.
+                 rar            Plugin is assumed to be contained in a rar 
+                                archive. So, it is unpacked (with unrar, rar 
+                                or 7z) to the plugin directory.
+                 7z, cab, arj, jar, exe
+                                Plugin is assumed to be contained in an 
+                                archive which is unpacked by 7z to the plugin 
+                                directory.
+                 gz, xz, bz2, lzma
+                                Plugin is assumed to be contained in a single 
+                                file, compressed with either gzip, xz, bzip2 
+                                or lzma. So, it is uncompressed and moved to 
+                                the plugin directory.
+                 * (any)        Plugin is assumed to be contained in an 
+                                archive that can be unpacked by 7z. So, it is 
+                                unpacked by 7z to the plugin directory.
+                 vba            Plugin is assumed to be contained in a vimball 
+                                archive. So, it is unpacked by 
+                                vimball#Vimball() function to the plugin 
+                                directory.
+                 vim            Plugin is assumed to be contained in a single 
+                                file. So, if exists key `script-type' and it 
+                                is equal to `syntax' or `indent', then this 
+                                file is put under {plugname}/syntax or under 
+                                {plugname}/indent, otherwise it is put under 
+                                directory described by {plugname}/{target_dir} 
+                                (where {target_dir} is a value of `target_dir' 
+                                key if it is present and `plugin' otherwise).
+                 Here is the order in which vim-addon-manager unpacks given 
+                 plugin:
+                 1. It tries to obtain a MIME type using `file' utility (not 
+                    in windows).
+                 2. If MIME type is unknown (or gives no useful information), 
+                    it tries to guess MIME type based on extension. All 
+                    non-archive MIME types are ignored.
+                 3. It tries to unpack file according to obtained MIME.
+                 3.1. If unpack failed, then it just moves file to the 
+                      plugin directory.
+                 3.2. If it successfully unpacked file {file}.{ext}, it checks 
+                      whether either {file} or {file}.tar is readable. If one 
+                      of these is, then it tries to unpack it starting from 
+                      the first step.
         deprecated
-                If this key is present and contains non-empty string, then 
-                every time when user tries to install this plugin he will see 
-                this message and will have to confirm installation.
+                 If this key is present and contains non-empty string, then 
+                 every time when user tries to install this plugin he will see 
+                 this message and will have to confirm installation.
 
 dependencies                                      *addon-info-dependencies*
         Describes plugins that are required for the plugin, must contain 
