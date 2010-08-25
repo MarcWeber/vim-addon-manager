@@ -1,11 +1,11 @@
 let s:is_win = has('win16') || has('win32') || has('win64') || has('win95')
 if s:is_win
     function! fileutils#Joinpath(...)
-        return join(map(copy(a:000), 'substitute(v:val, "/", ''\\'', "g")'), '\')
+        return substitute(join(map(copy(a:000), 'substitute(v:val, "/", ''\\'', "g")'), '\'), '\\\zs\\\+', '', 'g')
     endfunction
 else
     function! fileutils#Joinpath(...)
-        return join(a:000, "/")
+        return substitute(join(a:000, "/"), '/\zs/\+', '', 'g')
     endfunction
 endif
 function! s:getoption(option, default)
