@@ -115,9 +115,10 @@ function! fileutils#Rm(what)
 endfunction
 function! fileutils#GetDirContents(directory)
     let pattern=substitute(escape(fileutils#Joinpath(a:directory, '*'), '[]?`\'), '\ze\*.', '\\', 'g')
-    let files=split(glob(pattern), "\n", 1)
-    let dotfiles=split(glob(pattern[:-2].'.*'), "\n", 1)
-    if dotfiles!=[""]
+    let files=split(glob(pattern), "\n")
+    let dotfiles=split(glob(pattern[:-2].'.*'), "\n")
+    call filter(dotfiles, 'v:val!~#'''.((s:is_win)?('\\'):('/')).'\.\.\=$''')
+    if dotfiles!=[]
         let files+=dotfiles
     endif
     call sort(files)
@@ -129,7 +130,7 @@ function! fileutils#GetDirContents(directory)
             let i+=1
         endif
     endwhile
-    if files==#[""]
+    if files==#[]
         return []
     else "if s:is_win
         return files
