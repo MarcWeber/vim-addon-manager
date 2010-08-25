@@ -257,6 +257,13 @@ fun! scriptmanager2#Checkout(targetDir, repository) abort
     let archiveFile = s:c["download_directory"].archiveName
 
     call fileutils#Get(a:repository['url'], archiveFile)
+    if !empty(s:c.backup_directory)
+      try
+        call writefile(readfile(archiveFile, 'b'), s:c.backup_directory.'/'.archiveName, 'b')
+      catch
+        echoe "Failed to backup archive ".archiveName." to ".s:c.backup_directory."\nReason: ".v:exception
+      endtry
+    endif
 
     let defaultstrip = (archiveFile=~?'\.\(t\(ar\.\=\)\=\(\(gz\|bz2\|xz\)\=\)\)$')
     call scriptmanager_util#Unpack(archiveFile, a:targetDir, get(a:repository,'strip-components',defaultstrip))

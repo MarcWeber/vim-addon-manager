@@ -46,6 +46,7 @@ let s:c['plugin_root_dir'] = get(s:c, 'plugin_root_dir', ((filewritable(expand('
 let s:c['plugin_root_dir'] = fnamemodify(s:c['plugin_root_dir'], ':p')
 let s:c['known'] = get(s:c,'known','vim-addon-manager-known-repositories')
 let s:c['download_directory'] = get(s:c,'download_directory',fnamemodify(s:c.plugin_root_dir.'/.archives', ':p'))
+let s:c['backup_directory'] = get(s:c,'backup_directory',fnamemodify(s:c.plugin_root_dir.'/.backup', ':p'))
 
 if g:is_win
   " if binary-utils path exists then add it to PATH
