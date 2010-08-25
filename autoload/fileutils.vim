@@ -97,6 +97,45 @@ function! fileutils#Rm(what)
     endif
     return 1
 endfunction
+function! fileutils#GetDirContents(directory)
+    let files=split(
+                \glob(
+                \   substitute(
+                \       escape(
+                \           fileutils#Joinpath(a:directory, "*"),
+                \           '[]?`\'),
+                \   '\ze\*.', '\\', 'g')),
+                \"\n", 1)
+    if files==#[""]
+        return []
+    elseif s:is_win
+        return files
+    endif
+    let r=[fileutils#Joinpath(a:directory, "")]
+    while !empty(files)
+        let curfile=remove(files, 0)
+        while (!(filereadable(curfile) || isdirectory(curfile)) || index(r, curfile)!=-1) && !empty(files)
+            let curfile.="\n".remove(files, 0)
+        endwhile
+        call add(r, curfile)
+    endwhile
+    call remove(r, 0)
+    return r
+endfunction
+function! fileutils#ListMovedFiles(source, number)
+    let files=fileutils#GetDirContents(a:source)
+    if a:number==1
+        return files
+    endif
+    let dirs=filter(copy(files), 'isdirectory(v:val)')
+    call filter(files, 'filereadable(v:val)') " Filter out directories and unreadable files
+    call map(dirs, 'extend(files, fileutils#ListMovedFiles(v:val, a:number-1))')
+    return files
+endfunction
+function! fileutils#StripComponents(source, number, destination)
+    call map(fileutils#ListMovedFiles(a:source, a:number),
+                \'fileutils#Mv(v:val, a:destination)')
+endfunction
 
 function! fileutils#Get(url, target)
     let targetdirectory=fnamemodify(a:target, ':h')
