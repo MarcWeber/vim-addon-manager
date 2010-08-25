@@ -78,10 +78,13 @@ else
     endfunction
 endif
 function! fileutils#Mv(file, destination)
-    if getftype(a:file)=="dir"
+    if fnamemodify(a:file, ':p'.((isdirectory(a:destination))?(':h'):('')))==#fnamemodify(a:destination, ':p')
+        return 1
+    endif
+    if isdirectory(a:file)
         return fileutils#Execute([s:mv+[a:file, a:destination]])
     else
-        if getftype(a:destination)=="dir"
+        if isdirectory(a:destination)
             let destination=fileutils#Joinpath(a:destination, fnamemodify(a:file, ":t"))
         else
             let destination=a:destination
@@ -90,7 +93,7 @@ function! fileutils#Mv(file, destination)
     endif
 endfunction
 function! fileutils#Rm(what)
-    if getftype(a:what)=="dir"
+    if isdirectory(a:what)
         call fileutils#Execute([s:deltree+[a:what]])
     else
         call delete(a:what)
