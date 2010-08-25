@@ -58,7 +58,6 @@ fun! scriptmanager_test#TestUnpack(test) abort
     call scriptmanager2#Checkout(tmpDir, dict)
     let files = split(glob(tmpDir.'/**'),"\n")
     " replace \ by / on win and remove tmpDir prefix
-    echo files
     call map(files, 'substitute(v:val,'.string('\').',"/","g")['.(len(tmpDir)+1).':]')
     call sort(files)
     call sort(v[1])

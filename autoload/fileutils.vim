@@ -114,17 +114,24 @@ function! fileutils#Rm(what)
     return 1
 endfunction
 function! fileutils#GetDirContents(directory)
-    let files=split(
-                \glob(
-                \   substitute(
-                \       escape(
-                \           fileutils#Joinpath(a:directory, "*"),
-                \           '[]?`\'),
-                \   '\ze\*.', '\\', 'g')),
-                \"\n", 1)
+    let pattern=substitute(escape(fileutils#Joinpath(a:directory, '*'), '[]?`\'), '\ze\*.', '\\', 'g')
+    let files=split(glob(pattern), "\n", 1)
+    let dotfiles=split(glob(pattern[:-2].'.*'), "\n", 1)
+    if dotfiles!=[""]
+        let files+=dotfiles
+    endif
+    call sort(files)
+    let i=1
+    while i<len(files)
+        if files[i-1]==#files[i]
+            call remove(files, i)
+        else
+            let i+=1
+        endif
+    endwhile
     if files==#[""]
         return []
-    elseif s:is_win
+    else "if s:is_win
         return files
     endif
     let r=[fileutils#Joinpath(a:directory, "")]
