@@ -69,6 +69,10 @@ let s:tmpDir = ""
 " on windows it returns C:\Users\NAME\AppData\Local\Temp/a:name
 fun! scriptmanager_util#TempDir(name)
   if s:tmpDir == ""
+    " in order to get is_win we must ensure that scriptmanager is loaded
+    if !exists("g:is_win")
+      runtime autoload/scriptmanager.vim
+    endif
     let s:tmpDir = fnamemodify(tempname(), ":h".(g:is_win ? '': ':h'))
   endif
   " expand make \ out of / on Windows
