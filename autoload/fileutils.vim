@@ -1,3 +1,13 @@
+let s:is_win = has('win16') || has('win32') || has('win64') || has('win95')
+if s:is_win
+    function! fileutils#Joinpath(...)
+        return join(map(copy(a:000), 'substitute(v:val, "/", ''\\'', "g")'), '\')
+    endfunction
+else
+    function! fileutils#Joinpath(...)
+        return join(a:000, "/")
+    endfunction
+endif
 function! s:getoption(option, default)
     if exists('g:fileutilsOptions') && type(g:fileutilsOptions)==type({})
         let option=get(g:fileutilsOptions, a:option, a:default)
@@ -35,7 +45,6 @@ let   s:tar = s:getoption('tar', ['tar', '-xf'])
 let   s:p7z = s:getoption('7z', ['7z', 'x'])
 let s:unzip = s:getoption('unzip', ['unzip'])
 let s:unrar = s:getoption('unrar', [((executable("unrar"))?('unrar'):('rar')), 'x'])
-let s:is_win = has('win16') || has('win32') || has('win64') || has('win95')
 let s:prefer7z = s:getoption('prefer7z', 0)
 
 function! s:shellescape(s)
@@ -66,9 +75,6 @@ if s:is_win
         redraw!
         return !v:shell_error
     endfunction
-    function! fileutils#Joinpath(...)
-        return join(a:000, '\')
-    endfunction
 else
     let s:deltree=["rm", "-rf"]
     let s:mv=["mv"]
@@ -82,9 +88,6 @@ else
         silent execute '!'.cmd
         redraw!
         return !v:shell_error
-    endfunction
-    function! fileutils#Joinpath(...)
-        return join(a:000, "/")
     endfunction
 endif
 function! fileutils#Mv(file, destination)
