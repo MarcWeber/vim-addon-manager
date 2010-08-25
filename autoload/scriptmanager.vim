@@ -27,7 +27,7 @@ endfor
 let g:is_win = g:os[:2] == 'win'
 
 exec scriptmanager#DefineAndBind('s:c','g:vim_script_manager','{}')
-let s:c['config'] = get(s:c,'config',fnamemodify('~', ':p').'/.vim-script-manager')
+let s:c['config'] = get(s:c,'config',fnamemodify('~/.vim-script-manager', ':p'))
 let s:c['auto_install'] = get(s:c,'auto_install', 0)
 " repository locations:
 let s:c['plugin_sources'] = get(s:c,'plugin_sources', {})
@@ -45,8 +45,8 @@ let s:c['plugin_root_dir'] = get(s:c, 'plugin_root_dir', ((filewritable(expand('
 " ensure we have absolute paths (windows doesn't like ~/.. ) :
 let s:c['plugin_root_dir'] = fnamemodify(s:c['plugin_root_dir'], ':p')
 let s:c['known'] = get(s:c,'known','vim-addon-manager-known-repositories')
-let s:c['download_directory'] = get(s:c,'download_directory',fnamemodify(s:c.plugin_root_dir.'/.archives', ':p'))
-let s:c['backup_directory'] = get(s:c,'backup_directory',fnamemodify(s:c.plugin_root_dir.'/.backup', ':p'))
+let s:c['download_directory'] = get(s:c,'download_directory',fnamemodify(fileutils#Joinpath(s:c.plugin_root_dir, '.archives'), ':p'))
+let s:c['backup_directory'] = get(s:c,'backup_directory',fnamemodify(fileutils#Joinpath(s:c.plugin_root_dir, '.backup'), ':p'))
 
 if g:is_win
   " if binary-utils path exists then add it to PATH
@@ -69,7 +69,7 @@ endf
 " use join so that you can break the dict into multiple lines. This makes
 " reading it much easier
 fun! scriptmanager#ReadAddonInfo(path)
-  if a:path =~ 'tlib/plugin-info.txt$'
+  if a:path =~ 'tlib[/\\]plugin-info.txt$'
     " I'll ask Tom Link to change this when vim-addon-manager is more stable
     return eval(join(readfile(a:path, "b"),""))
   endif
@@ -88,11 +88,14 @@ fun! scriptmanager#ReadAddonInfo(path)
 endf
 
 fun! scriptmanager#PluginDirByName(name)
-  return s:c['plugin_root_dir'].'/'.a:name
+  return fileutils#Joinpath(s:c['plugin_root_dir'], a:name)
 endf
 fun! scriptmanager#PluginRuntimePath(name)
   let info = scriptmanager#AddonInfo(a:name)
-  return s:c['plugin_root_dir'].'/'.a:name.(has_key(info, 'runtimepath') ? '/'.info['runtimepath'] : '')
+  let path=fileutils#Joinpath(s:c['plugin_root_dir'], a:name)
+  if has_key(info, 'runtimepath')
+    return fileutils#Joinpath(path, info.runtimepath)
+  endif
 endf
 
 " doesn't check dependencies!
@@ -184,7 +187,7 @@ fun! scriptmanager#Activate(...) abort
     " put them last! (Thanks to Oliver Teuliere)
     let rtp = split(&runtimepath,'\(\\\@<!\(\\.\)*\\\)\@<!,')
     let &runtimepath=join(rtp[:0] + s:new_runtime_paths + rtp[1:]
-                                  \ + filter(map(copy(s:new_runtime_paths),'v:val."/after"'), 'isdirectory(v:val)') ,",")
+                                  \ + filter(map(copy(s:new_runtime_paths),'fileutils#Joinpath(v:val, "after")'), 'isdirectory(v:val)') ,",")
     unlet rtp
 
     if has_key(s:c, 'started_up')
@@ -231,11 +234,11 @@ endf
 
 fun! scriptmanager#AddonInfoFile(name)
   " this name is deprecated
-  let f = scriptmanager#PluginDirByName(a:name).'/plugin-info.txt'
+  let f = fileutils#Joinpath(scriptmanager#PluginDirByName(a:name), 'plugin-info.txt')
   if filereadable(f)
     return f
   else
-    return scriptmanager#PluginDirByName(a:name).'/'.a:name.'-addon-info.txt'
+    return fileutils#Joinpath(scriptmanager#PluginDirByName(a:name), a:name.'-addon-info.txt')
   endif
 endf
 

@@ -53,7 +53,7 @@ fun! scriptmanager_util#DownloadFromMirrors(url, targetDir)
   " if target is a directory append basename of url
   let t = a:targetDir
   if isdirectory(t)
-    let t = t .'/'.fnamemodify(url,':t')
+    let t = fileutils#Joinpath(t, fnamemodify(url,':t'))
   endif
   call fileutils#Get(url, t)
 endf
@@ -72,5 +72,5 @@ fun! scriptmanager_util#TempDir(name)
     let s:tmpDir = fnamemodify(tempname(), ":h".(g:is_win ? '': ':h'))
   endif
   " expand make \ out of / on Windows
-  return expand(s:tmpDir.'/'.a:name)
+  return fileutils#Joinpath(s:tmpDir, a:name)
 endf

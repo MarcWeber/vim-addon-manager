@@ -100,14 +100,15 @@ fun! scriptmanager2#UpdateAddon(name)
     let pluginDir = scriptmanager#PluginDirByName(a:name)
     let backup = scriptmanager#PluginDirByName(a:name).'.backup'
     let container = fnamemodify(backup,':h')
-    let diff_file = containing.'/'.a:name.'.diff-orig'
+    let diff_file = fileutils#Joinpath(containing, a:name.'.diff-orig')
 
     if executable('diff') && isdirectory(backup)
-      call s:exec_in_dir([{'c':'diff -r '.s:shellescape(r.'/plugin').' '.s:shellescape(r.'/plugin-merged')}])
+      call s:exec_in_dir([{'c': 'diff -r '.s:shellescape(fileutils#Joinpath(r, 'plugin')).' '.s:shellescape(fileutils#Joinpath(r, 'plugin-merged'))}])
     endif
-    
-    if filereadable(pluginDir.'/version')
-      let pluginversion = get(readfile(pluginDir.'/version'), 0, "?")
+
+    let versionfile=fileutils#Joinpath(pluginDir, 'version')
+    if filereadable(versionfile)
+      let pluginversion = get(readfile(versionfile), 0, "?")
       let repository = get(s:c['plugin_sources'], a:name, {})
       if empty(repository)
         echoe "Cannot update plugin ".a:name.": no repository locations known."
@@ -218,7 +219,7 @@ fun! scriptmanager2#UninstallAddons(list)
 endf
 
 fun! scriptmanager2#HelpTags(name)
-  let d=scriptmanager#PluginDirByName(a:name).'/doc'
+  let d=fileutils#Joinpath(scriptmanager#PluginDirByName(a:name), 'doc')
   if isdirectory(d) | exec 'helptags '.d | endif
 endf
 
@@ -254,12 +255,16 @@ fun! scriptmanager2#Checkout(targetDir, repository) abort
     let archiveName = fnamemodify(substitute(get(a:repository,'archive_name',''), '\.\zsVIM$', 'vim', ''),':t')
 
     " archive will be downloaded to this location
-    let archiveFile = s:c["download_directory"].archiveName
+    let archiveFile = fileutils#Joinpath(s:c["download_directory"], archiveName)
 
     call fileutils#Get(a:repository['url'], archiveFile)
+    if !filereadable(archiveFile)
+      echohl Error
+      echo "Failed"
+    endif
     if !empty(s:c.backup_directory)
       try
-        call writefile(readfile(archiveFile, 'b'), fnamemodify(s:c.backup_directory.'/'.archiveName, ':p'), 'b')
+        call writefile(readfile(archiveFile, 'b'), fnamemodify(fileutils#Joinpath(s:c.backup_directory, archiveName), ':p'), 'b')
       catch
         echohl Error
         echo "Failed to backup archive ".archiveName." to ".s:c.backup_directory."\nReason: ".v:exception
@@ -270,15 +275,15 @@ fun! scriptmanager2#Checkout(targetDir, repository) abort
     let defaultstrip = (archiveFile=~?'\.\(t\(ar\.\=\)\=\(\(gz\|bz2\|xz\)\=\)\)$')
     call scriptmanager_util#Unpack(archiveFile, a:targetDir, get(a:repository,'strip-components',defaultstrip))
 
-    call writefile([get(a:repository,"version","?")], a:targetDir."/version")
+    call writefile([get(a:repository,"version","?")], fileutils#Joinpath(a:targetDir, "version"))
 
     " hook for plugin / syntax files: Move into the correct direcotry:
     if a:repository['archive_name'] =~? '\.vim$' 
       let type = tolower(get(a:repository,'script-type',''))
       if type  =~# '^syntax\|indent\|ftplugin$'
-        let dir = a:targetDir.'/'.type
+        let dir = fileutils#Joinpath(a:targetDir, type)
         call mkdir(dir)
-        call rename(a:targetDir.'/'.archiveName, dir.'/'.archiveName)
+        call fileutils#Mv(fileutils#Joinpath(a:targetDir, archiveName), fileutils#Joinpath(dir, archiveName))
       endif
     endif
   endif
@@ -310,13 +315,13 @@ fun! scriptmanager2#LoadKnownRepos(...)
   if 0 == get(s:c['activated_plugins'], known, 0) && input('Activate plugin '.known.' to '.reason.'? [y/n]:','') == 'y'
     call scriptmanager#Activate([known])
     " this should be done by Activate!
-    exec 'source '.scriptmanager#PluginDirByName(known).'/plugin/vim-addon-manager-known-repositories.vim'
+    exec 'source '.fnameescape(fileutils#Joinpath(scriptmanager#PluginDirByName(known), 'plugin', 'vim-addon-manager-known-repositories.vim'))
   endif
 endf
 
 
 fun! scriptmanager2#MergeTarget()
-  return split(&runtimepath,",")[0].'/after/plugin/vim-addon-manager-merged.vim'
+  return fileutils#Joinpath(split(&runtimepath,",")[0], 'after', 'plugin', 'vim-addon-manager-merged.vim')
 endf
 
 " if you machine is under IO load starting up Vim can take some time
@@ -481,7 +486,7 @@ if g:is_win
       echo "__ its your turn: __"
       echom "__ move all files of the zip directory into ".s:c['binary_utils'].'/dist . Close the Explorer window and the shell window to continue. Press any key'
       call getchar()
-      exec "!".expand(s:c['binary_utils'].'/'. tools.zip[1])
+      exec "!".fnamemodify(fileutils#Joinpath(s:c['binary_utils'], tools.zip[1]), ':p')
       let $PATH=$PATH.';'.s:c['binary_utils_bin']
       if !executable('unzip')
         throw "can't execute unzip. Something failed!"
