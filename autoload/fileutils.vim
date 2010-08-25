@@ -1,6 +1,20 @@
 function! s:getoption(option, default)
     if exists('g:fileutilsOptions') && type(g:fileutilsOptions)==type({})
-        return get(g:fileutilsOptions, a:option, a:default)
+        let option=get(g:fileutilsOptions, a:option, a:default)
+        if option is a:default
+            return option
+        elseif type(option)!=type(a:default)
+            if type(a:default)==type([]) && type(option)==type("")
+                return [option]
+            endif
+            return a:default
+        elseif type(a:default)==type([])
+            let option=filter(copy(option), 'type(v:val)=='.type(""))
+            if empty(option)
+                return a:default
+            endif
+        endif
+        return option
     endif
     return a:default
 endfunction
@@ -52,9 +66,6 @@ if s:is_win
         redraw!
         return !v:shell_error
     endfunction
-    function! fileutils#GetMIME(file)
-        return "application/octet-stream"
-    endfunction
     function! fileutils#Joinpath(...)
         return join(a:000, '\')
     endfunction
@@ -71,10 +82,6 @@ else
         silent execute '!'.cmd
         redraw!
         return !v:shell_error
-    endfunction
-    function! fileutils#GetMIME(file)
-        return substitute(system("file --mime-type --brief ".s:shellescape(a:file)),
-                    \     '\_s', '', 'g')
     endfunction
     function! fileutils#Joinpath(...)
         return join(a:000, "/")
@@ -286,10 +293,7 @@ endfor
 unlet s:m s:al s:a
 
 function! fileutils#Unpack(archive, destination)
-    let mime=fileutils#GetMIME(a:archive)
-    if !has_key(s:UnpackFunctions, mime)
-        let mime="application/octet-stream"
-    endif
+    let mime="application/octet-stream"
     let r=s:UnpackFunctions[mime](a:archive, a:destination)
     if type(r)==type([])
         let newarchive=fileutils#Joinpath(a:destination, fnamemodify(a:archive, ":t:r"))
