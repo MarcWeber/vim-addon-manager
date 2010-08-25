@@ -1,16 +1,25 @@
 
 " let users override curl command. Reuse netrw setting
 let  s:curl = split(exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o')
-let  s:gzip = 'gzip'
-let s:bzip2 = 'bzip2'
-let    s:xz = 'xz'
-let  s:lzma = 'lzma'
-let   s:p7z = '7z'
-let   s:tar = 'tar'
-let s:unzip = 'unzip'
-let s:unrar = 'unrar'
+function! s:getoption(option, default)
+    if exists('g:fileutilsOptions') && type(g:fileutilsOptions)==type({})
+        return get(g:fileutilsOptions, a:option, a:default)
+    endif
+    return a:default
+endfunction
+let s:cmddir=s:getoption("cmddir", "")
+if !empty(s:cmddir)
+    let s:cmddir=fileutils#Joinpath(s:cmddir, "")
+endif
+for s:a in ["gzip", "bzip2", "xz", "lzma"]
+    let s:{s:a}=s:getoption(s:a, [s:cmddir.s:a, '-d'])
+endfor
+let   s:tar = s:getoption('tar', ['tar', '-xf'])
+let   s:p7z = s:getoption('7z', ['7z', 'x'])
+let s:unzip = s:getoption('unzip', ['unzip'])
+let s:unrar = s:getoption('unrar', [((executable("unrar"))?('unrar'):('rar')), 'x'])
 let s:is_win = has('win16') || has('win32') || has('win64') || has('win95')
-let s:prefer7z = s:is_win
+let s:prefer7z = s:getoption('prefer7z', 0)
 
 function! s:shellescape(s)
     return shellescape(a:s, 1)
@@ -44,7 +53,7 @@ if s:is_win
         return "application/octet-stream"
     endfunction
     function! fileutils#Joinpath(...)
-        return expand(join(a:000, "/"))
+        return join(a:000, '\')
     endfunction
 else
     let s:deltree=["rm", "-rf"]
@@ -100,7 +109,7 @@ endfunction
 let s:UnpackFunctions={}
 
 if !s:prefer7z
-    function! s:Unzip(program, archive, destination)
+    function! s:Unzip(cmd, archive, destination)
         let adir=fnamemodify(a:archive, ':p:h')
         let afile=fnamemodify(a:archive, ':t')
         let suf=fnamemodify(a:archive, ':t:e')
@@ -108,7 +117,7 @@ if !s:prefer7z
             let suf=".".suf
         endif
         let r=[]
-        if fileutils#Execute([[a:program, '-d', afile]], adir)
+        if fileutils#Execute([a:cmd+[afile]], adir)
             let destination=fnamemodify(a:destination, ':p')
             if destination!=#adir
                 let ufile=fileutils#Joinpath(adir, fnamemodify(a:archive, ":t:r"))
@@ -127,7 +136,7 @@ endif
 function! s:Un7zip(archive, destination)
     let afile=fnamemodify(a:archive, ':p')
     let r=[]
-    if fileutils#Execute([[s:p7z, "x", afile]], a:destination)
+    if fileutils#Execute([s:p7z+[afile]], a:destination)
         return [a:archive]
     endif
 endfunction
@@ -135,7 +144,7 @@ let s:UnpackFunctions["application/x-7z"]=function("s:Un7zip")
 let s:UnpackFunctions["application/x-compressed"]=function("s:Un7zip")
 
 for s:a in ['gzip', 'bzip2', 'xz', 'lzma']
-    if s:prefer7z
+    if s:prefer7z || !executable(s:{s:a}[0])
         let s:UnpackFunctions["application/x-".s:a]=function("s:Un7zip")
     else
         execute "function! s:UnpackFunctions.last(archive, destination)\n".
@@ -147,31 +156,30 @@ for s:a in ['gzip', 'bzip2', 'xz', 'lzma']
 endfor
 unlet s:a
 
-if s:prefer7z
-    let s:UnpackFunctions["application/x-tar"]=function("s:Un7zip")
-    let s:UnpackFunctions["application/zip"]  =function("s:Un7zip")
-    let s:UnpackFunctions["application/x-rar"]=function("s:Un7zip")
-else
-    let s:unpackcommands={
-                \"application/x-tar": "s:tar,'-xf'",
-                \"application/zip":   "s:unzip",
-                \"application/x-rar": "s:unrar,'x'",
-            \}
-    for [s:m, s:c] in items(s:unpackcommands)
+let s:unpackcommands={
+            \"application/tar": s:tar,
+            \"application/zip":   s:unzip,
+            \"application/x-rar": s:unrar,
+        \}
+for [s:m, s:c] in items(s:unpackcommands)
+    if s:prefer7z || !executable(s:c[0])
+        let s:UnpackFunctions[s:m]=function("s:Un7zip")
+    else
         execute "function! s:UnpackFunctions.last(archive, destination)\n".
                     \"let archive=fnamemodify(a:archive, ':p')\n".
-                    \"if fileutils#Execute([[".s:c.",archive]], a:destination)\n".
+                    \"if fileutils#Execute([".string(s:c)."+[archive]], a:destination)\n".
                     \"    return [archive]\n".
                     \"endif\n".
                     \"endfunction"
         let s:UnpackFunctions[s:m]=s:UnpackFunctions.last
         unlet s:UnpackFunctions.last
-    endfor
-    unlet s:m s:c
-endif
+    endif
+endfor
+unlet s:m s:c
 let s:UnpackFunctions["application/x-exe"]=function("s:Un7zip")
 let s:UnpackFunctions["application/java-archive"]=function("s:Un7zip")
 let s:UnpackFunctions["application/vnd.ms-cab-compressed"]=function("s:Un7zip")
+let s:UnpackFunctions["application/arj"]=function("s:Un7zip")
 
 function! s:UnpackFunctions.vimball(archive, destination)
     execute "view ".fnameescape(a:archive)
