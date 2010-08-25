@@ -151,8 +151,7 @@ endfunction
 function! fileutils#Get(url, target)
     let targetdirectory=fnamemodify(a:target, ':h')
     let targetfile=fnamemodify(a:target, ':t')
-    call fileutils#Execute([s:curl+[targetfile, a:url]], targetdirectory)
-    return !v:shell_error
+    return fileutils#Execute([s:curl+[targetfile, a:url]], targetdirectory)
 endfunction
 
 " All functions return list of files that should be deleted on success
