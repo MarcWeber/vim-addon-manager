@@ -31,7 +31,7 @@ fun! scriptmanager_util#Unpack(archive, targetdir, strip_components)
   endif
   call map(filestoremove, 'fileutils#Rm(v:val)')
   if a:strip_components
-    call fileutils#StripComponents(a:targetdir, a:strip_components+1, a:targetdir)
+    call fileutils#StripComponents(a:targetdir, a:strip_components+1, a:targetdir, 1)
   endif
 endf
 

@@ -27,7 +27,7 @@ endfor
 let g:is_win = g:os[:2] == 'win'
 
 exec scriptmanager#DefineAndBind('s:c','g:vim_script_manager','{}')
-let s:c['config'] = get(s:c,'config',expand('$HOME').'/.vim-script-manager')
+let s:c['config'] = get(s:c,'config',fnamemodify('~', ':p').'/.vim-script-manager')
 let s:c['auto_install'] = get(s:c,'auto_install', 0)
 " repository locations:
 let s:c['plugin_sources'] = get(s:c,'plugin_sources', {})
@@ -41,10 +41,11 @@ let s:c['activated_plugins'] = get(s:c,'activaded_plugins', {})
 " installation
 let s:c['plugin_root_dir'] = get(s:c, 'plugin_root_dir', ((filewritable(expand('<sfile>')))?
             \                                               (fnamemodify(expand('<sfile>'),':h:h:h')):
-            \                                               ('~/vim-addons')))
+            \                                               (fnamemodify('~/vim-addons', ':p'))))
 " ensure we have absolute paths (windows doesn't like ~/.. ) :
-let s:c['plugin_root_dir'] = expand(s:c['plugin_root_dir'])
+let s:c['plugin_root_dir'] = fnamemodify(s:c['plugin_root_dir'], ':p')
 let s:c['known'] = get(s:c,'known','vim-addon-manager-known-repositories')
+let s:c['download_directory'] = get(s:c,'download_directory',fnamemodify(s:c.plugin_root_dir.'/.archives', ':p'))
 
 if g:is_win
   " if binary-utils path exists then add it to PATH

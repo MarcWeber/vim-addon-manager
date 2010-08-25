@@ -247,21 +247,19 @@ fun! scriptmanager2#Checkout(targetDir, repository) abort
     " archive based repositories - no VCS
     " must have a:repository['archive_name']
 
-    if !isdirectory(a:targetDir) | call mkdir(a:targetDir.'/archive','p') | endif
+    if !isdirectory(a:targetDir) | call mkdir(a:targetDir,'p') | endif
+    if !isdirectory(s:c.download_directory) | call mkdir(s:c.download_directory, 'p') | endif
 
     " basename VIM -> vim
     let archiveName = fnamemodify(substitute(get(a:repository,'archive_name',''), '\.\zsVIM$', 'vim', ''),':t')
 
     " archive will be downloaded to this location
-    let archiveFile = a:targetDir.'/archive/'.archiveName
+    let archiveFile = s:c["download_directory"].archiveName
 
     call fileutils#Get(a:repository['url'], archiveFile)
 
     let defaultstrip = (archiveFile=~?'\.\(t\(ar\.\=\)\=\(\(gz\|bz2\|xz\)\=\)\)$')
     call scriptmanager_util#Unpack(archiveFile, a:targetDir, get(a:repository,'strip-components',defaultstrip))
-    if isdirectory(a:targetDir.'/archive')
-      call fileutils#Rm(a:targetDir.'/archive')
-    endif
 
     call writefile([get(a:repository,"version","?")], a:targetDir."/version")
 

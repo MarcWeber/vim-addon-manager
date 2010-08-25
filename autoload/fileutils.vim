@@ -138,11 +138,14 @@ function! fileutils#ListMovedFiles(source, number)
     call map(copy(dirs), 'extend(files, fileutils#ListMovedFiles(v:val, a:number-1)[1])')
     return [dirs, files]
 endfunction
-function! fileutils#StripComponents(source, number, destination)
+function! fileutils#StripComponents(source, number, destination, ...)
     let [toremove, tomove]=fileutils#ListMovedFiles(a:source, a:number)
-    echo toremove
+    if get(a:000, 0) && len(toremove)>1
+        return 0
+    endif
     call map(tomove, 'fileutils#Mv(v:val, a:destination)')
     call map(toremove, 'fileutils#Rm(v:val)')
+    return index(tomove+toremove, 0)==-1
 endfunction
 
 function! fileutils#Get(url, target)
