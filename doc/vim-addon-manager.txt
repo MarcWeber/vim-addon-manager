@@ -206,6 +206,10 @@ plugin_root_dir                         *vim-addon-manager-plugin_root_dir*
 download_directory                   *vim-addon-manager-download_directory*
         Defines a directory where files will be temporary downloaded. Defaults 
         to {plugin-root-dir}/.archives.
+backup_directory                       *vim-addon-manager-backup_directory*
+        Defines a directory where archives will be copied after downloading. 
+        Defaults to {plugin-root-dir}/.backup. If it is empty, then no backup 
+        is done.
 
 ==============================================================================
 5. Installing plugins                   *vim-addon-manager-install-plugins*
@@ -469,6 +473,9 @@ Curl:
     Don't forget the -o argument at the end. :)
 
 Archives:
+    Note that instead of downloading tar, gzip, unzip, rar, ... you may 
+    install single p7zip archiver and everything should work.
+
     Get Tar, Gzip and Unzip from the GnuWin32 project
     Gzip: http://gnuwin32.sourceforge.net/packages/gzip.htm
     Tar: http://gnuwin32.sourceforge.net/packages/gtar.htm
