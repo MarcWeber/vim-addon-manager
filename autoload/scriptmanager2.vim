@@ -259,9 +259,11 @@ fun! scriptmanager2#Checkout(targetDir, repository) abort
     call fileutils#Get(a:repository['url'], archiveFile)
     if !empty(s:c.backup_directory)
       try
-        call writefile(readfile(archiveFile, 'b'), s:c.backup_directory.'/'.archiveName, 'b')
+        call writefile(readfile(archiveFile, 'b'), fnamemodify(s:c.backup_directory.'/'.archiveName, ':p'), 'b')
       catch
-        echoe "Failed to backup archive ".archiveName." to ".s:c.backup_directory."\nReason: ".v:exception
+        echohl Error
+        echo "Failed to backup archive ".archiveName." to ".s:c.backup_directory."\nReason: ".v:exception
+        echohl None
       endtry
     endif
 
