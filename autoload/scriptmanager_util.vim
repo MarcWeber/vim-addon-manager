@@ -168,8 +168,18 @@ fun! scriptmanager_util#Glob(path)
   + filter(split(glob(substitute(a:path,'\*','.*','g')),"\n"),'v:val != "." && v:val != ".."')
 endf
 
-" move paths out of dir, then removes dir
-" this function exists 7z does not support stripping of path
+" move */* one level up, then remove first * matches
+" if you don't want all dirs to be removed add them to keepdirRegex
+" Example:
+"
+" A/activte/file.tar
+" A/the-plugin/ftplugin/...
+" A/the-plugin/autoload/...
+" StripComponents(A, 1, "^activate")
+" will yield strip the-plugin directory off.
+"
+" This emulatios tar --strip-components option (which is not present in 7z or
+" unzip)
 fun! scriptmanager_util#StripComponents(dir, num, keepdirRegex)
   let num = a:num
   for i in range(0, a:num -1)
