@@ -364,6 +364,11 @@ In your .vimrc or somewhere else (see |vim-addon-manager-plugin_sources|).
 
 
 Related work: ~
+
+ZyX branch:
+    http://github.com/ZyX-I/vim-addon-manager
+    See |marc-weber-vim-addon-manager-design-notes|
+
 There are also some other package managers for vim:
     http://github.com/c9s/Vimana
     http://snk.tuxfamily.org/log/vim-script-management-system.html
@@ -552,6 +557,22 @@ For portage+layman users:
         layman -ka pluginloader-overlay
 4. Unmask vim-addon-manager and run >
         emerge vim-addon-manager
+
+
+==============================================================================
+*marc-weber-vim-addon-manager-design-notes*
+
+Until now I tried following the "New Jersey", KISS, MIT principles:
+- Try to achieve 80% of value by spending 20% of effort
+- I consider this piece of code being perfect if there is nothing you can
+  remove.
+- If it behaves ok in 95% of all use cases its good enough (for me)
+  because I prefer a minimal code base.
+
+ZyX created a branch which tries to be accurate summarrized by quoting him:
+"I am trying to get rid of as much future errors as possible".
+See related work to get it instead of this. Lets watch it and be curious about
+what's going to happen.
 
 ==============================================================================
 11. Trouble shooting & KNOWS BUGS       *vim-addon-manage-trouble-shooting*
