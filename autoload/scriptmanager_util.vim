@@ -32,12 +32,10 @@ fun! scriptmanager_util#ShellDSL(...)
   return call('s:shellescape', a:000)
 endf
 
-
+"Usages: EndsWith('name.tar',   '.tar', '.txt') returns 1 even if .tar was .txt
 fun! s:EndsWith(name, ...)
   return  a:name =~? '\%('.substitute(join(a:000,'\|'),'\.','\\.','g').'\)$'
 endf
-
-
 
 " may throw EXCEPTION_UNPACK.*
 " most packages are shipped in a directory. Eg ADDON/plugin/*
@@ -162,7 +160,7 @@ fun! scriptmanager_util#Unpack(archive, targetdir, ...)
 
 endf
 
-" same as glob but returns list and finds hidden files
+" Usage: Glob($HOME.'/*') will list hidden files as well
 fun! scriptmanager_util#Glob(path)
   return split(glob(a:path),"\n")
   + filter(split(glob(substitute(a:path,'\*','.*','g')),"\n"),'v:val != "." && v:val != ".."')
@@ -236,7 +234,7 @@ fun! scriptmanager_util#RmFR(dir_or_file)
 endf
 
 
-" a "direct link" (found on the downrload page)
+" a "direct link" (found on the download page)
 " such as "http://downloads.sourceforge.net/project/gnuwin32/gzip/1.3.12-1/gzip-1.3.12-1-bin.zip"
 " can be downloaded this way:
 " call scriptmanager_util#DownloadFromMirrors("mirror://sourceforge/gnuwin32/gzip/1.3.12-1/gzip-1.3.12-1-bin.zip","/tmp")
