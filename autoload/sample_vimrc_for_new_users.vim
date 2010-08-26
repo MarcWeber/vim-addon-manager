@@ -126,6 +126,54 @@ endf
 
 finish
 
+DON'T MISS THESE {{{1
+
+c-x c-f : file completion
+c-x c-l : line completion
+c-n     : kind of keyword completion - completes everything found in all opened buffers.
+          So maybe even consider openining many files uing :n **/*.ext
+all: :h ins-completion
+
+
+movements:
+
+hjkl - Yes, its the Vim way - but also the slowest:
+
+Skim :h motion.txt
+
+use search / ? to place cursor. Remember that typing a word is not always the
+              most efficient way. Eg try /ys t this. And you'll get excatly
+              one match in the whole document.
+
+c-o c-i : jump list history
+
+g;      : where did I edit last (current buffer) - you can repeat it
+
+Learn about w vs W. Try it CURSOR_HERE.then.type.it (same for e,E)
+
+f,F,t,T : move to char or just before it forward / backward current line. (A
+          must)
+
+How to get O(1) access to your files {{{1
+
+Yes :b name is fine, cause it matches HeHiname.ext. Still too much to type.
+Usually you work with only a set of buffers. Open them in tabs. Add something
+like this to your .vimrc so that you can switch buffers using m-1 m-2 etc:
+
+  " m-X key jump to tab X
+  for i in range(1,8)
+    exec 'map <m-'.i.'> '.i.'gt'
+  endfor
+
+  " faster novigation in windows:
+  for i in ["i","j","k","l","q"]
+    exec 'noremap <m-s-'.i.'> <c-w>'.i
+  endfor
+
+The ways to optimize code navigation are endless. Watch yourself.
+If you think something takes too long - optimize it.
+
+
 MY COMMENTS ABOUT VIM AND ITS USAGE {{{1
 ========================================
 Vim is ignoring this text after finish.
