@@ -54,6 +54,10 @@ noremap \e :e<space>**/*
 " :bn = :bnext  @: repeats last command
 noremap \n :n<space>**/*
 
+" open a filetype file. Those files are sourced by Vim to setup filetype
+" specific mappings
+noremap \ft :exec 'e ~/.vim/ftplugin/'.&filetype.'_you.vim'<cr>
+
 " foreign plugin vim-addon-manager {{{1
 
 " commenting this code because I assume you already have it in your ~/.vimrc:
