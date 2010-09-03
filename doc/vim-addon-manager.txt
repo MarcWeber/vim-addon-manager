@@ -374,6 +374,9 @@ There are also some other package managers for vim:
     http://snk.tuxfamily.org/log/vim-script-management-system.html
 You can try and see which is the best.
 
+Emacs install scripts manager:
+  el-get http://github.com/dimitri/el-get/blob/master/el-get.el
+
 There is another project which has the same name:
 http://packages.debian.org/sid/vim-addon-manager
 The author (Jamessan) is fine with this project sharing the same name.
