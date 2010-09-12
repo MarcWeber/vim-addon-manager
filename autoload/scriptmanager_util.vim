@@ -50,17 +50,19 @@ endf
 " !! If you change this run the test, please: call vim_addon_manager_tests#Tests('.')
 fun! scriptmanager_util#Unpack(archive, targetdir, ...)
   let opts = a:0 > 0 ? a:1 : {}
-  let strip_components = get(opts, 'strip-components', 0)
+  let strip_components = get(opts, 'strip-components', -1)
   let delSource = get(opts, 'del-source', 0)
 
   let esc_archive = s:shellescape('$', a:archive)
   let tgt = [{'d': a:targetdir}]
 
-  if strip_components > 0
+  if strip_components > 0 || strip_components == -1
     " when stripping don' strip which was there before unpacking
-    let keep = join(map(scriptmanager_util#Glob(a:targetdir.'/*'),'"^".v:val."$"'),'\|')
+    let keep = scriptmanager_util#Glob(a:targetdir.'/*')
+    let strip = 'call scriptmanager_util#StripComponents(a:targetdir, strip_components, keep)'
+  else
+    let strip = ''
   endif
-  let strip = 'call scriptmanager_util#StripComponents(a:targetdir, strip_components, keep)'
 
   " [ ending, chars to strip, chars to add, command to do the unpacking ]
   let gzbzip2 = {
@@ -125,10 +127,10 @@ fun! scriptmanager_util#Unpack(archive, targetdir, ...)
   elseif s:EndsWith(a:archive, '.tar')
     if executable('7z')
       call s:exec_in_dir(tgt + [{'c': '7z x '.esc_archive }])
-      exec strip
     else
-      call s:exec_in_dir(tgt + [{'c': 'tar '.'--strip-components='.strip_components.' -xf '.esc_archive }])
+      call s:exec_in_dir(tgt + [{'c': 'tar -xf '.esc_archive }])
     endif
+    exec strip
 
     " .zip
   elseif s:EndsWith(a:archive, '.zip')
@@ -167,7 +169,7 @@ fun! scriptmanager_util#Glob(path)
 endf
 
 " move */* one level up, then remove first * matches
-" if you don't want all dirs to be removed add them to keepdirRegex
+" if you don't want all dirs to be removed add them to keepdirs
 " Example:
 "
 " A/activte/file.tar
@@ -178,20 +180,35 @@ endf
 "
 " This emulatios tar --strip-components option (which is not present in 7z or
 " unzip)
-fun! scriptmanager_util#StripComponents(dir, num, keepdirRegex)
+"
+" If num==-1, then StripComponents will strip only if it finds that there is 
+" only one directory that needs stripping
+fun! scriptmanager_util#StripComponents(dir, num, keepdirs)
   let num = a:num
-  for i in range(0, a:num -1)
+  let doifonly = 0
+  if num == -1
+    let num = 1
+    let doifonly = 1
+  endif
+  let tomove = []
+  let toremove = []
+  for i in range(0, num-1)
     " for each a:dir/*
     for gdir in filter(scriptmanager_util#Glob(a:dir.'/*'),'isdirectory(v:val)')
-      if fnamemodify(gdir, ':t') =~ a:keepdirRegex | continue | endif
+      if index(a:keepdirs, gdir)!=-1 | continue | endif
+      if doifonly && len(toremove)==1
+        return
+      endif
       " for each gdir/*
       for path in scriptmanager_util#Glob(gdir.'/*')
         " move out of dir
-        call rename(path, a:dir.'/'.fnamemodify(path,':t'))
+        call add(tomove, [path, a:dir.'/'.fnamemodify(path, ':t')])
       endfor
-      call scriptmanager_util#RmFR(gdir)
+      call add(toremove, gdir)
     endfor
   endfor
+  call map(tomove, 'rename(v:val[0], v:val[1])')
+  call map(toremove, 'scriptmanager_util#RmFR(v:val)')
 endf
 
 " also copies 0. May throw an exception on failure

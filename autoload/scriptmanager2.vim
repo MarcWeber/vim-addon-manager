@@ -257,7 +257,7 @@ fun! scriptmanager2#Checkout(targetDir, repository) abort
 
     call scriptmanager_util#Download(a:repository['url'], archiveFile)
 
-    call scriptmanager_util#Unpack(archiveFile, a:targetDir,{ 'strip-components': get(a:repository,'strip-components',1) })
+    call scriptmanager_util#Unpack(archiveFile, a:targetDir,{ 'strip-components': get(a:repository,'strip-components',-1) })
 
     call writefile([get(a:repository,"version","?")], a:targetDir."/version")
 
