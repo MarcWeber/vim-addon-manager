@@ -27,7 +27,7 @@ endfor
 let g:is_win = g:os[:2] == 'win'
 
 exec scriptmanager#DefineAndBind('s:c','g:vim_script_manager','{}')
-let s:c['config'] = get(s:c,'config',fnamemodify('~/.vim-script-manager', ':p'))
+let s:c['config'] = get(s:c,'config',expand('$HOME').'/.vim-script-manager')
 let s:c['auto_install'] = get(s:c,'auto_install', 0)
 " repository locations:
 let s:c['plugin_sources'] = get(s:c,'plugin_sources', {})
@@ -41,12 +41,10 @@ let s:c['activated_plugins'] = get(s:c,'activaded_plugins', {})
 " installation
 let s:c['plugin_root_dir'] = get(s:c, 'plugin_root_dir', ((filewritable(expand('<sfile>')))?
             \                                               (fnamemodify(expand('<sfile>'),':h:h:h')):
-            \                                               (fnamemodify('~/vim-addons', ':p'))))
+            \                                               ('~/vim-addons')))
 " ensure we have absolute paths (windows doesn't like ~/.. ) :
-let s:c['plugin_root_dir'] = fnamemodify(s:c['plugin_root_dir'], ':p')
+let s:c['plugin_root_dir'] = expand(s:c['plugin_root_dir'])
 let s:c['known'] = get(s:c,'known','vim-addon-manager-known-repositories')
-let s:c['download_directory'] = get(s:c,'download_directory',fnamemodify(fileutils#Joinpath(s:c.plugin_root_dir, '.archives'), ':p'))
-let s:c['backup_directory'] = get(s:c,'backup_directory',fnamemodify(fileutils#Joinpath(s:c.plugin_root_dir, '.backup'), ':p'))
 
 if g:is_win
   " if binary-utils path exists then add it to PATH
@@ -69,35 +67,30 @@ endf
 " use join so that you can break the dict into multiple lines. This makes
 " reading it much easier
 fun! scriptmanager#ReadAddonInfo(path)
-  if a:path =~ 'tlib[/\\]plugin-info.txt$'
+  if a:path =~ 'tlib/plugin-info.txt$'
     " I'll ask Tom Link to change this when vim-addon-manager is more stable
-    return eval(substitute(join(readfile(a:path, "b"),""), '\r', '', 'g'))
+    return eval(join(readfile(a:path, "b"),""))
   endif
 
   " using eval is evil!
-  " If I am not mistaking, msysgit is adding "\r" to the end of text files. At 
-  " least there is "\r" which cannot be passed to eval
-  let body = substitute(join(readfile(a:path, "b"),""), '\r', '', 'g')
+  let body = join(readfile(a:path, "b"),"")
 
   if scriptmanager#VerifyIsJSON(body)
-    " using eval is now safe!
-    return eval(body)
+      " using eval is now safe!
+      return eval(body)
   else
-    echoe "Invalid JSON in ".a:path."!"
-    return {}
+      echoe "Invalid JSON in ".a:path."!"
+      return {}
   endif
 
 endf
 
 fun! scriptmanager#PluginDirByName(name)
-  return fileutils#Joinpath(s:c['plugin_root_dir'], a:name)
+  return s:c['plugin_root_dir'].'/'.a:name
 endf
 fun! scriptmanager#PluginRuntimePath(name)
   let info = scriptmanager#AddonInfo(a:name)
-  let path=fileutils#Joinpath(s:c['plugin_root_dir'], a:name)
-  if has_key(info, 'runtimepath')
-    return fileutils#Joinpath(path, info.runtimepath)
-  endif
+  return s:c['plugin_root_dir'].'/'.a:name.(has_key(info, 'runtimepath') ? '/'.info['runtimepath'] : '')
 endf
 
 " doesn't check dependencies!
@@ -189,7 +182,7 @@ fun! scriptmanager#Activate(...) abort
     " put them last! (Thanks to Oliver Teuliere)
     let rtp = split(&runtimepath,'\(\\\@<!\(\\.\)*\\\)\@<!,')
     let &runtimepath=join(rtp[:0] + s:new_runtime_paths + rtp[1:]
-                                  \ + filter(map(copy(s:new_runtime_paths),'fileutils#Joinpath(v:val, "after")'), 'isdirectory(v:val)') ,",")
+                                  \ + filter(map(copy(s:new_runtime_paths),'v:val."/after"'), 'isdirectory(v:val)') ,",")
     unlet rtp
 
     if has_key(s:c, 'started_up')
@@ -236,11 +229,11 @@ endf
 
 fun! scriptmanager#AddonInfoFile(name)
   " this name is deprecated
-  let f = fileutils#Joinpath(scriptmanager#PluginDirByName(a:name), 'plugin-info.txt')
+  let f = scriptmanager#PluginDirByName(a:name).'/plugin-info.txt'
   if filereadable(f)
     return f
   else
-    return fileutils#Joinpath(scriptmanager#PluginDirByName(a:name), a:name.'-addon-info.txt')
+    return scriptmanager#PluginDirByName(a:name).'/'.a:name.'-addon-info.txt'
   endif
 endf
 

@@ -2,22 +2,22 @@
 " Thus move checking .hg .svn etc into a different file
 
 fun! vcs_checkouts#Update(dir)
-  let dirprefix = fileutils#Joinpath(a:dir, '.')
-  if isdirectory(dirprefix.'git')
-    call s:exec_in_dir([{'d': a:dir, 'c': 'git pull'}])
+  let directory = a:dir
+  if isdirectory(directory.'/.git')
+    call s:exec_in_dir([{'d': directory, 'c': 'git pull'}])
     return !v:shell_error
-  elseif isdirectory(dirprefix.'svn')
-    call s:exec_in_dir([{'d': a:dir, 'c': 'svn update'}])
+  elseif isdirectory(directory.'/.svn')
+    call s:exec_in_dir([{'d': directory, 'c': 'svn update'}])
     return !v:shell_error
-  elseif isdirectory(dirprefix.'hg')
+  elseif isdirectory(directory.'/.hg')
     call s:exec_in_dir([
-          \ {'d': a:dir, 'c': 'hg pull'},
-          \ {'d': a:dir, 'c': 'hg update'},
-          \ {'d': a:dir, 'c': 'hg merge'}
+          \ {'d': directory, 'c': 'hg pull'},
+          \ {'d': directory, 'c': 'hg update'},
+          \ {'d': directory, 'c': 'hg merge'}
           \ ])
     return !v:shell_error
   else
-    echoe "Plugin ".fnamemodify(a:dir, ':t')." is not controlled by any known SCM system."
+    echoe "Plugin ".fnamemodify(directory, ':t')." is not controlled by any known SCM system."
     return 0
   endif
 endf
