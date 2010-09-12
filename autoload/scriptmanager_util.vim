@@ -133,7 +133,7 @@ fun! scriptmanager_util#Unpack(archive, targetdir, ...)
     " .zip
   elseif s:EndsWith(a:archive, '.zip')
     if executable('7z')
-      call s:exec_in_dir(tgt + [{'c': '7z x'.esc_archive }])
+      call s:exec_in_dir(tgt + [{'c': '7z x '.esc_archive }])
     else
       call s:exec_in_dir(tgt + [{'c': 'unzip '.esc_archive }])
     endif
