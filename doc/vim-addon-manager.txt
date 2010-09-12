@@ -364,10 +364,18 @@ In your .vimrc or somewhere else (see |vim-addon-manager-plugin_sources|).
 
 
 Related work: ~
+
+ZyX branch:
+    http://github.com/ZyX-I/vim-addon-manager
+    See |marc-weber-vim-addon-manager-design-notes|
+
 There are also some other package managers for vim:
     http://github.com/c9s/Vimana
     http://snk.tuxfamily.org/log/vim-script-management-system.html
 You can try and see which is the best.
+
+Emacs install scripts manager:
+  el-get http://github.com/dimitri/el-get/blob/master/el-get.el
 
 There is another project which has the same name:
 http://packages.debian.org/sid/vim-addon-manager
@@ -391,6 +399,7 @@ ZyX (Nikolay Pavlov, ZyX-I on github)
   - discussing implementation details
   - initial implementation for updating plugins which were installed by
     archive
+  - pushing 7z and providing a refrence implementation
 Tux Tom (http://github.com/TuxTom)
   - helping fixing a cd bug on Windows
 creidiki (Leonardo Valeri Manera)
@@ -398,7 +407,7 @@ creidiki (Leonardo Valeri Manera)
   - working around the tar issues on Windows
 ..
 Mike Smullin:
- - for asking to find a way to source plugins in gvim.
+ - for asking to find a way to source addons when gui is running.
    There is a hint now. This is important if you don't start vim from console
 
 
@@ -437,12 +446,20 @@ point.
 9. Some notes for windows users                  *vim-addon-manager-windows*
 
 
+
 Win32 tools for vim-addon-manager
 
 Fast: put curl into ~/vim-addons/binary-utils/dist then call this function
 to setup the remaining tools (tar, bzip, gzip, unzip) >
     call scriptmanager2#FetchAdditionalWindowsTools()
 <
+If 7z is in PATH bzip, unzip, gzip are not pulled. So consider installing that
+and add it to PATH by >
+      let $PATH=$PATH.';'.PATH_TO_7z
+<
+
+( TODO: test it, provide a way to install 7z instead? )
+
 Does it make sense to support svn and git this way as well?
 Is it even possible?
 At least we can fetch and execute the installers..
@@ -543,6 +560,22 @@ For portage+layman users:
         layman -ka pluginloader-overlay
 4. Unmask vim-addon-manager and run >
         emerge vim-addon-manager
+
+
+==============================================================================
+*marc-weber-vim-addon-manager-design-notes*
+
+Until now I tried following the "New Jersey", KISS, MIT principles:
+- Try to achieve 80% of value by spending 20% of effort
+- I consider this piece of code being perfect if there is nothing you can
+  remove.
+- If it behaves ok in 95% of all use cases its good enough (for me)
+  because I prefer a minimal code base.
+
+ZyX created a branch which tries to be accurate summarrized by quoting him:
+"I am trying to get rid of as much future errors as possible".
+See related work to get it instead of this. Lets watch it and be curious about
+what's going to happen.
 
 ==============================================================================
 11. Trouble shooting & KNOWS BUGS       *vim-addon-manage-trouble-shooting*

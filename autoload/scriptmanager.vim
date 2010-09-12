@@ -185,7 +185,7 @@ fun! scriptmanager#Activate(...) abort
                                   \ + filter(map(copy(s:new_runtime_paths),'v:val."/after"'), 'isdirectory(v:val)') ,",")
     unlet rtp
 
-    if has_key(s:c, 'started_up')
+    if !has('vim_starting')
       for rtp in s:new_runtime_paths
         call scriptmanager#GlobThenSource(rtp.'/plugin/**/*.vim')
         call scriptmanager#GlobThenSource(rtp.'/after/plugin/**/*.vim')
@@ -193,7 +193,7 @@ fun! scriptmanager#Activate(...) abort
     endif
   endif
 
-  if has_key(s:c, 'started_up')
+  if !has('vim_starting')
     " now source after/plugin/**/*.vim files explicitely. Vim doesn't do it (hack!)
     for k in keys(s:c['activated_plugins'])
       if !has_key(active, k)
@@ -219,8 +219,6 @@ augroup end
 "       Vim doesn't source the after/plugin/*.vim files in other runtime
 "       paths. So do this *after* plugin/* files have been sourced
 fun! scriptmanager#Hack()
-  let s:c['started_up'] = 1
-
   " now source after/plugin/**/*.vim files explicitly. Vim doesn't do it (hack!)
   for p in keys(s:c['activated_plugins'])
       call scriptmanager#GlobThenSource(scriptmanager#PluginDirByName(p).'/after/plugin/**/*.vim')

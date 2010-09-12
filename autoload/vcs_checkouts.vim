@@ -64,7 +64,7 @@ fun! vcs_checkouts#ExecIndir(cmds) abort
       endif
       " break if one of the pased commands failes:
       if v:shell_error != 0
-        break
+        throw "error executing ".c.c
       endif
     endfor
     " should lcd withou args be used instead?
@@ -81,6 +81,9 @@ fun! vcs_checkouts#ExecIndir(cmds) abort
       endif
     endfor
     exec '!'.join(cmds_str," && ")
+    if v:shell_error != 0
+      throw "error executing ".cmds_str
+    endif
   endif
 endf
 

@@ -32,23 +32,37 @@ fun! scriptmanager_util#ShellDSL(...)
   return call('s:shellescape', a:000)
 endf
 
-
+"Usages: EndsWith('name.tar',   '.tar', '.txt') returns 1 even if .tar was .txt
 fun! s:EndsWith(name, ...)
   return  a:name =~? '\%('.substitute(join(a:000,'\|'),'\.','\\.','g').'\)$'
 endf
 
-
-
 " may throw EXCEPTION_UNPACK.*
 " most packages are shipped in a directory. Eg ADDON/plugin/*
-" strip_components=1 strips of this ADDON directory (implemented for tar.* " archives only)
+" strip-components=1 strips of this ADDON directory (implemented for tar.* " archives only)
+"
+" assumes the dir containing archive is writable to place tmp files in. eg
+" .tar when unpacking .tar.gz. because gunzip and bunzip2 remove the original
+" file a backup is made if del-source is not set. However file permissions may
+" no tbe preserved. I don't think its worth fixing. If you think different
+" contact me.
 
 " !! If you change this run the test, please: call vim_addon_manager_tests#Tests('.')
-fun! scriptmanager_util#Unpack(archive, targetdir, strip_components)
+fun! scriptmanager_util#Unpack(archive, targetdir, ...)
+  let opts = a:0 > 0 ? a:1 : {}
+  let strip_components = get(opts, 'strip-components', 0)
+  let delSource = get(opts, 'del-source', 0)
 
   let esc_archive = s:shellescape('$', a:archive)
   let tgt = [{'d': a:targetdir}]
 
+  if strip_components > 0
+    " when stripping don' strip which was there before unpacking
+    let keep = join(map(glob#Glob(a:targetdir.'/*'),'"^".v:val."$"'),'\|')
+  endif
+  let strip = 'call scriptmanager_util#StripComponents(a:targetdir, strip_components, keep)'
+
+  " [ ending, chars to strip, chars to add, command to do the unpacking ]
   let gzbzip2 = {
         \ '.gz':   [-4, '','gzip -d'],
         \ '.tgz':   [-3,'ar','gzip -d'],
@@ -67,16 +81,40 @@ fun! scriptmanager_util#Unpack(archive, targetdir, strip_components)
 
     for [k,z] in items(gzbzip2)
       if s:EndsWith(a:archive, k)
+        " without ext
         let unpacked = a:archive[:z[0]]
+        " correct ext
         let renameTo = unpacked.z[1]
-        call s:exec_in_dir([{'c': z[2].' '.esc_archive }])
+
+        " PHASE (1): gunzip or bunzip using gzip,bzip2 or 7z:
+        if executable('7z') && !exists('g:prefer_tar')
+          echoe "using 7z"
+          " defaulting to 7z why or why not?
+          call s:exec_in_dir([{'d': fnamemodify(a:archive, ':h'), 'c': '7z x '.esc_archive }])
+          " 7z renames tgz to tar
+        else
+          " make a backup. gunzip etc rm the original file
+          if !delSource
+            let b = a:archive.'.bak'
+            call scriptmanager_util#CopyFile(a:archive, b)
+          endif
+
+          " unpack
+          call s:exec_in_dir([{'c': z[2].' '.esc_archive }])
+
+          " copy backup back:
+          if !delSource | call rename(b, a:archive) | endif
+        endif
+
         if !filereadable(renameTo)
           " windows tar does not rename .tgz to .tar ?
           call rename(unpacked, renameTo)
         endif
-        " now unpack .tar or .vba file and tidy up temp file:
-        call scriptmanager_util#Unpack(renameTo, a:targetdir, a:strip_components)
+
+        " PHASE (2): now unpack .tar or .vba file and tidy up temp file:
+        call scriptmanager_util#Unpack(renameTo, a:targetdir, { 'strip-components': strip_components, 'del-source': 1 })
         call delete(renameTo)
+        break
       endif
       unlet k z
     endfor
@@ -85,18 +123,28 @@ fun! scriptmanager_util#Unpack(archive, targetdir, strip_components)
 
     " .tar
   elseif s:EndsWith(a:archive, '.tar')
-    call s:exec_in_dir(tgt + [{'c': 'tar '.'--strip-components='.a:strip_components.' -xf '.esc_archive }])
+    if executable('7z')
+      call s:exec_in_dir(tgt + [{'c': '7z x '.esc_archive }])
+      exec strip
+    else
+      call s:exec_in_dir(tgt + [{'c': 'tar '.'--strip-components='.strip_components.' -xf '.esc_archive }])
+    endif
 
     " .zip
   elseif s:EndsWith(a:archive, '.zip')
-    call s:exec_in_dir(tgt + [{'c': 'unzip '.esc_archive }])
+    if executable('7z')
+      call s:exec_in_dir(tgt + [{'c': '7z x'.esc_archive }])
+    else
+      call s:exec_in_dir(tgt + [{'c': 'unzip '.esc_archive }])
+    endif
+    exec strip
 
     " .7z, .cab, .rar, .arj, .jar
     " (I have actually seen only .7z and .rar, but 7z supports other formats 
     " too)
   elseif s:EndsWith(a:archive,  '.7z','.cab','.arj','.rar','.jar')
     call s:exec_in_dir(tgt + [{'c': '7z x '.esc_archive }])
-
+    exec strip
 
   elseif s:EndsWith(a:archive, '.vba')
     " .vba reuse vimball#Vimball() function
@@ -106,6 +154,52 @@ fun! scriptmanager_util#Unpack(archive, targetdir, strip_components)
     throw "EXCEPTION_UNPACK: don't know how to unpack ". a:archive
   endif
 
+  if delSource && !filereadable(a:archive)
+    call delete(a:archive)
+  endif
+
+endf
+
+" Usage: Glob($HOME.'/*') will list hidden files as well
+fun! scriptmanager_util#Glob(path)
+  return split(glob(a:path),"\n")
+  + filter(split(glob(substitute(a:path,'\*','.*','g')),"\n"),'v:val != "." && v:val != ".."')
+endf
+
+" move */* one level up, then remove first * matches
+" if you don't want all dirs to be removed add them to keepdirRegex
+" Example:
+"
+" A/activte/file.tar
+" A/the-plugin/ftplugin/...
+" A/the-plugin/autoload/...
+" StripComponents(A, 1, "^activate")
+" will yield strip the-plugin directory off.
+"
+" This emulatios tar --strip-components option (which is not present in 7z or
+" unzip)
+fun! scriptmanager_util#StripComponents(dir, num, keepdirRegex)
+  let num = a:num
+  for i in range(0, a:num -1)
+    " for each a:dir/*
+    for gdir in filter(scriptmanager_util#Glob(a:dir.'/*'),'isdirectory(v:val)')
+      if fnamemodify(gdir, ':t') =~ a:keepdirRegex | continue | endif
+      " for each gdir/*
+      for path in glob#Glob(gdir.'/*')
+        " move out of dir
+        call rename(path, a:dir.'/'.fnamemodify(path,':t'))
+      endfor
+      call scriptmanager_util#RmFR(gdir)
+    endfor
+  endfor
+endf
+
+" also copies 0. May throw an exception on failure
+fun! scriptmanager_util#CopyFile(a,b)
+  let fc = readfile(a:a, 'b')
+  if writefile(fc, a:b, 'b') != 0
+    throw "copying file ".a:a." to ".a:b." failed"
+  endif
 endf
 
 fun! scriptmanager_util#Download(url, targetFile)
@@ -140,7 +234,7 @@ fun! scriptmanager_util#RmFR(dir_or_file)
 endf
 
 
-" a "direct link" (found on the downrload page)
+" a "direct link" (found on the download page)
 " such as "http://downloads.sourceforge.net/project/gnuwin32/gzip/1.3.12-1/gzip-1.3.12-1-bin.zip"
 " can be downloaded this way:
 " call scriptmanager_util#DownloadFromMirrors("mirror://sourceforge/gnuwin32/gzip/1.3.12-1/gzip-1.3.12-1-bin.zip","/tmp")

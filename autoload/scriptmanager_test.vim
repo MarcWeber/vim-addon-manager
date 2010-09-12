@@ -37,14 +37,14 @@ endf
 fun! scriptmanager_test#TestUnpack(test) abort
   let tests = {
       \  'tar':  ['autocorrect', ['README', 'archive', 'archive/autocorrect.tar', 'autocorrect.dat', 'autocorrect.vim', 'generator.rb', 'version'] ],
-      \  'tar.gz': ['ack', ['archive', 'doc', 'doc/ack.txt', 'plugin', 'plugin/ack.vim', 'version']],
-      \  'tgz': ['VIlisp', ['README', 'VIlisp-hyperspec.pl', 'VIlisp.vim', 'changelog', 'funnel.pl', 'lisp-thesaurus', 'make-lisp-thes.pl', 'archive', 'version']],
-      \  'tar.bz2': ['DetectIndent',  ['archive', 'doc', 'doc/detectindent.txt', 'plugin', 'plugin/detectindent.vim', 'version']],
-      \  'tbz2': ['xterm16', ['ChangeLog', 'archive', 'cpalette.pl', 'version', 'xterm16.ct', 'xterm16.schema', 'xterm16.txt', 'xterm16.vim']],
+      \  'tar.gz': ['ack', ['archive', 'archive/ack.tar.gz', 'doc', 'doc/ack.txt', 'plugin', 'plugin/ack.vim', 'version']],
+      \  'tgz': ['VIlisp', ['README', 'VIlisp-hyperspec.pl', 'VIlisp.vim', 'changelog', 'funnel.pl', 'lisp-thesaurus', 'make-lisp-thes.pl', 'archive', 'archive/VIlisp.2.3.tgz', 'version']],
+      \  'tar.bz2': ['DetectIndent',  ['archive', 'archive/detectindent-1.0.tar.bz2', 'doc', 'doc/detectindent.txt', 'plugin', 'plugin/detectindent.vim', 'version']],
+      \  'tbz2': ['xterm16', ['ChangeLog', 'archive', 'archive/xterm16-2.43.tbz2', 'cpalette.pl', 'version', 'xterm16.ct', 'xterm16.schema', 'xterm16.txt', 'xterm16.vim']],
       \  'vim_ftplugin': ['srec1008', ['archive', 'archive/srec.vim', 'ftplugin', 'ftplugin/srec.vim', 'version']],
       \  'vba': ['Templates_for_Files_and_Function_Groups',  ['archive', 'archive/file_templates.vba', 'plugin', 'plugin/file_templates.vim', 'templates', 'templates/example.c', 'version', 'templates/example.h']],
-      \  'vba.gz': ['gitolite', ['archive', 'ftdetect', 'ftdetect/gitolite.vim', 'syntax', 'syntax/gitolite.vim', 'version']],
-      \  'vba.bz2': ['winmanager1440',['archive', 'doc', 'doc/tags', 'doc/winmanager.txt', 'plugin', 'plugin/start.gnome', 'plugin/start.kde', 'plugin/winfileexplorer.vim', 'plugin/winmanager.vim', 'plugin/wintagexplorer.vim', 'version']]
+      \  'vba.gz': ['gitolite', ['archive', 'archive/gitolite.vba.gz', 'ftdetect', 'ftdetect/gitolite.vim', 'syntax', 'syntax/gitolite.vim', 'version']],
+      \  'vba.bz2': ['winmanager1440',['archive', 'archive/winmanager.vba.bz2', 'doc', 'doc/tags', 'doc/winmanager.txt', 'plugin', 'plugin/start.gnome', 'plugin/start.kde', 'plugin/winfileexplorer.vim', 'plugin/winmanager.vim', 'plugin/wintagexplorer.vim', 'version']]
       \  }
 
   let tmpDir = scriptmanager_util#TempDir("vim-addon-manager-test")

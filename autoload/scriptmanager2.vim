@@ -257,7 +257,7 @@ fun! scriptmanager2#Checkout(targetDir, repository) abort
 
     call scriptmanager_util#Download(a:repository['url'], archiveFile)
 
-    call scriptmanager_util#Unpack(archiveFile, a:targetDir, get(a:repository,'strip-components',1))
+    call scriptmanager_util#Unpack(archiveFile, a:targetDir,{ 'strip-components': get(a:repository,'strip-components',1) })
 
     call writefile([get(a:repository,"version","?")], a:targetDir."/version")
 
@@ -451,17 +451,20 @@ if g:is_win
     endif
     " we have curl, so we can fetch remaingin deps using Download and Unpack
     let tools = {
-      \ 'gzip': ['mirror://sourceforge/gnuwin32/gzip/1.3.12-1/', "gzip-1.3.12-1-bin.zip", "gzip"],
-      \ 'bzip2':['mirror://sourceforge/gnuwin32/bzip2/1.0.5/', "bzip2-1.0.5-bin.zip", "bzip2" ],
-      \ 'tar':  ['mirror://sourceforge/gnuwin32/tar/1.13-1/',"tar-1.13-1-bin.zip", "tar"],
-      \ 'zip':  ['mirror://sourceforge/gnuwin32/unzip/5.51-1/', "unzip-5.51-1-bin.zip", "unzip"],
+      \ 'gzip': ['mirror://sourceforge/gnuwin32/gzip/1.3.12-1/', "gzip-1.3.12-1-bin.zip", ["gzip", "7z"]],
+      \ 'bzip2':['mirror://sourceforge/gnuwin32/bzip2/1.0.5/', "bzip2-1.0.5-bin.zip", ["bzip2", "7z"] ],
+      \ 'tar':  ['mirror://sourceforge/gnuwin32/tar/1.13-1/',"tar-1.13-1-bin.zip", ["tar", "7z"] ],
+      \ 'zip':  ['mirror://sourceforge/gnuwin32/unzip/5.51-1/', "unzip-5.51-1-bin.zip", ["unzip","7z"] ],
       \ 'diffutils': ['mirror://sourceforge/gnuwin32/diffutils/2.8.7-1/',"diffutils-2.8.7-1-bin.zip", "diff"],
       \ 'patch': [ 'mirror://sourceforge/gnuwin32/patch/2.5.9-7/',"patch-2.5.9-7-bin.zip", "patch"]
       \ }
     for v in values(tools)
       echo "downloading ".v[1]
-      if !executable(v[2]) && !filereadable(s:c['binary_utils'].'\'.v[1])
-        " call scriptmanager_util#DownloadFromMirrors(v[0].v[1], s:c['binary_utils'])
+      for ex in v[2]
+        if executable(ex) | continue | endif
+      endfor
+      if !filereadable(s:c['binary_utils'].'\'.v[1])
+        call scriptmanager_util#DownloadFromMirrors(v[0].v[1], s:c['binary_utils'])
       endif
     endfor
 
@@ -480,7 +483,7 @@ if g:is_win
     " now we have unzip and can do rest
     for k in ["gzip","bzip2","tar","diffutils","patch"]
       if !executable(tools[k][2])
-        call scriptmanager_util#Unpack(s:c['binary_utils'].'\'.tools[k][1], s:c['binary_utils'].'\dist', 0)
+        call scriptmanager_util#Unpack(s:c['binary_utils'].'\'.tools[k][1], s:c['binary_utils'].'\dist')
       endif
     endfor
 
