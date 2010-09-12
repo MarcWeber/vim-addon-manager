@@ -58,7 +58,7 @@ fun! scriptmanager_util#Unpack(archive, targetdir, ...)
 
   if strip_components > 0
     " when stripping don' strip which was there before unpacking
-    let keep = join(map(glob#Glob(a:targetdir.'/*'),'"^".v:val."$"'),'\|')
+    let keep = join(map(scriptmanager_util#Glob(a:targetdir.'/*'),'"^".v:val."$"'),'\|')
   endif
   let strip = 'call scriptmanager_util#StripComponents(a:targetdir, strip_components, keep)'
 
@@ -185,7 +185,7 @@ fun! scriptmanager_util#StripComponents(dir, num, keepdirRegex)
     for gdir in filter(scriptmanager_util#Glob(a:dir.'/*'),'isdirectory(v:val)')
       if fnamemodify(gdir, ':t') =~ a:keepdirRegex | continue | endif
       " for each gdir/*
-      for path in glob#Glob(gdir.'/*')
+      for path in scriptmanager_util#Glob(gdir.'/*')
         " move out of dir
         call rename(path, a:dir.'/'.fnamemodify(path,':t'))
       endfor
