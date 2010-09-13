@@ -185,18 +185,19 @@ endf
 " only one directory that needs stripping
 fun! scriptmanager_util#StripComponents(dir, num, keepdirs)
   let num = a:num
-  let doifonly = 0
+  let strip_single_dir = 0
   if num == -1
     let num = 1
-    let doifonly = 1
+    let strip_single_dir = 1
   endif
-  let tomove = []
-  let toremove = []
   for i in range(0, num-1)
+    let tomove = []
+    let toremove = []
     " for each a:dir/*
     for gdir in filter(scriptmanager_util#Glob(a:dir.'/*'),'isdirectory(v:val)')
       if index(a:keepdirs, gdir)!=-1 | continue | endif
-      if doifonly && len(toremove)==1
+      call add(toremove, gdir)
+      if strip_single_dir && len(toremove)>=2
         return
       endif
       " for each gdir/*
@@ -204,11 +205,10 @@ fun! scriptmanager_util#StripComponents(dir, num, keepdirs)
         " move out of dir
         call add(tomove, [path, a:dir.'/'.fnamemodify(path, ':t')])
       endfor
-      call add(toremove, gdir)
     endfor
+    call map(tomove, 'rename(v:val[0], v:val[1])')
+    call map(toremove, 'scriptmanager_util#RmFR(v:val)')
   endfor
-  call map(tomove, 'rename(v:val[0], v:val[1])')
-  call map(toremove, 'scriptmanager_util#RmFR(v:val)')
 endf
 
 " also copies 0. May throw an exception on failure
