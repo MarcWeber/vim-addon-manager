@@ -399,7 +399,8 @@ ZyX (Nikolay Pavlov, ZyX-I on github)
   - discussing implementation details
   - initial implementation for updating plugins which were installed by
     archive
-  - pushing 7z and providing a refrence implementation
+  - pushing 7z and providing a reference implementation
+  - smart strip components implementation
 Tux Tom (http://github.com/TuxTom)
   - helping fixing a cd bug on Windows
 creidiki (Leonardo Valeri Manera)
