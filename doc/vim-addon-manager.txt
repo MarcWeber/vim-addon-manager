@@ -581,6 +581,12 @@ what's going to happen.
 ==============================================================================
 11. Trouble shooting & KNOWS BUGS       *vim-addon-manage-trouble-shooting*
 
+tianyicui : Actually I think the name [vim-addon-manager] is too long
+(github)    and totally uncool.
+Marc Weber: Your suggestion VAM as abbreviation is fine. Let's use that.
+            Switching the name means a lot of work and many dead links.
+            I'm not going to switch the name for 'uncoolness' reasons soon.
+
 Don't have those commands? See |vim-addon-manager-installation|.
 Windows installation is more tedious than on Linux - yes.
 
