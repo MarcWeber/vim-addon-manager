@@ -71,13 +71,23 @@ noremap \ft :exec 'e ~/.vim/ftplugin/'.&filetype.'_you.vim'<cr>
 " NAME-addon-info.txt files. Probably you want to substitude nameN by plugins
 " such as snipMate, tlib etc.
 
-" call scriptmanager#Activate(['JSON',"name1","name2"])
+" call scriptmanager#Activate(['JSON',"tmru","matchit.zip","vim-dev-plugin","name1","name2"])
+" JSON: syntax highlighting for the *info* files
+" tmru: list of most recentely used files
+" matchit.zip: make % (match to mathing items such as opening closing parenthesis) even smarter
+" vim-dev-plugin: smarter omni completion and goto autoload function for VimL scripts
 
 " foreign plugins tlib {{{1
 
 " this is from tlib. I highly recommend having a look at that library.
+" Eg its plugin tmru (most recently used files) provides the command
+" TRecentlyUsedFiles you can map to easily:
 noremap \r :TRecentlyUsedFiles<cr>
+
 " disable some plugins. Maybe you don't want all..
+" (Maybe this step is no longer necessary. Tom Link split the library of the
+" plugins. So you have to activate the plugins individually istead of
+" disabling those you don't want.
 let loaded_cmdlinehelp=1
 let loaded_concordance=1
 let loaded_evalselection=1
@@ -141,7 +151,8 @@ all: :h ins-completion
 
 movements:
 
-hjkl - Yes, its the Vim way - but also the slowest:
+vimtutor tells you to use hjkl. But the speedup using Vim comes using the
+appropriate movement command - which is seldomly hjkl.
 
 Skim :h motion.txt
 
@@ -158,7 +169,7 @@ Learn about w vs W. Try it CURSOR_HERE.then.type.it (same for e,E)
 f,F,t,T : move to char or just before it forward / backward current line. (A
           must)
 
-How to get O(1) access to your files {{{1
+How to get O(1) access to your files you're editing at the moment {{{1
 
 Yes :b name is fine, cause it matches HeHiname.ext. Still too much to type.
 Usually you work with only a set of buffers. Open them in tabs. Add something
@@ -187,8 +198,8 @@ I like Vim cause its that fast and easy to extend.
 I also learned that VimL is a nice language. It was ahead of time when it
 was invented. However today it can be considered limiting in various ways.
 Eg you don't want to write parsers in it. Its too slow for those use cases.
-Yet its powerful enough to make everyday easier - even competitive to bloated
-IDEs. Example plugins you should know about:
+Yet its powerful enough to make everydays work easier - even competitive to
+bloated IDEs. Example plugins you should know about:
 
 - tlib library
 
@@ -237,6 +248,9 @@ What are the limitations causing greatest impact to software developers using Vi
   when interfacing with external tools.
   Impact: People tried writing debugger features. But all solutions are kind
   of doomed unless Vim gets a nice async communication interface.
+  There is a patch: http://github.com/bartman/vim/wiki/_pages. But I'm not
+  sure its complete yet
+  
 - Many coding helpers should not have been written in VimL. They should have
   been written in a proper language so that all open source editors can
   benefit from their features. An Example is the broken PHP completion which
@@ -247,7 +261,8 @@ What are the limitations causing greatest impact to software developers using Vi
     is only a coding editor backend)
   * codefellow (same for Scala).
 
-Vim can be one of the fastest editors you'll start to love (and hate)
+Vim can be one of the fastest editors you'll start to love (and hate for some
+of the shortcomings)
 
 
 " additional resources - how to continue learning about Vim? {{{1
