@@ -45,8 +45,9 @@ fun! scriptmanager2#Install(toBeInstalledList, ...)
       continue
     endif
 
+    let pluginDir = scriptmanager#PluginDirByName(name)
     " ask user for to confirm installation unless he set auto_install
-    if s:c['auto_install'] || get(opts,'auto_install',0) || input('Install plugin '.name.'? [y/n]:','') == 'y'
+    if s:c['auto_install'] || get(opts,'auto_install',0) || input('Install plugin "'.name.'" into "'.s:c['plugin_root_dir'].'" ? [y/n]:','') == 'y'
 
       if name != s:c['known'] | call scriptmanager2#LoadKnownRepos() | endif
 
@@ -66,7 +67,6 @@ fun! scriptmanager2#Install(toBeInstalledList, ...)
         endif
       endif
 
-      let pluginDir = scriptmanager#PluginDirByName(name)
       let infoFile = scriptmanager#AddonInfoFile(name)
       call scriptmanager2#Checkout(pluginDir, repository)
 
