@@ -241,7 +241,7 @@ endf
 
 " may throw EXCEPTION_UNPACK
 fun! scriptmanager2#Checkout(targetDir, repository) abort
-  if a:repository['type'] =~ 'git\|hg\|svn'
+  if get(a:repository,'type','') =~ 'git\|hg\|svn'
     call vcs_checkouts#Checkout(a:targetDir, a:repository)
   else
     " archive based repositories - no VCS
@@ -251,6 +251,9 @@ fun! scriptmanager2#Checkout(targetDir, repository) abort
 
     " basename VIM -> vim
     let archiveName = fnamemodify(substitute(get(a:repository,'archive_name',''), '\.\zsVIM$', 'vim', ''),':t')
+    if archiveName == ''
+      let archiveName = fnamemodify(a:repository['url'],':t')
+    endif
 
     " archive will be downloaded to this location
     let archiveFile = a:targetDir.'/archive/'.archiveName

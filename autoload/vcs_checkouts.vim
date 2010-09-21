@@ -24,7 +24,7 @@ endf
 
 " repository = {'type': svn|hg|git, 'url': .. }
 fun! vcs_checkouts#Checkout(targetDir, repository)
-  if a:repository['type'] == 'git'
+  if get(a:repository['type'] == 'git'
     let parent = fnamemodify(a:targetDir,':h')
     exec '!git clone '.s:shellescape(a:repository['url']).' '.s:shellescape(a:targetDir)
     if !isdirectory(a:targetDir)
@@ -82,7 +82,7 @@ fun! vcs_checkouts#ExecIndir(cmds) abort
     endfor
     exec '!'.join(cmds_str," && ")
     if v:shell_error != 0
-      throw "error executing ".cmds_str
+      throw "error executing ".string(cmds_str)
     endif
   endif
 endf
