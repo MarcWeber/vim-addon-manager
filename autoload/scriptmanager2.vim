@@ -267,7 +267,7 @@ fun! scriptmanager2#Checkout(targetDir, repository) abort
     " hook for plugin / syntax files: Move into the correct direcotry:
     if a:repository['archive_name'] =~? '\.vim$' 
       let type = tolower(get(a:repository,'script-type',''))
-      if type  =~# '^syntax\|indent\|ftplugin\|plugin\|autoload$'
+      if type  =~# '^\%(syntax\|indent\|ftplugin\|plugin\|autoload\)$'
         let dir = a:targetDir.'/'.type
         call mkdir(dir)
         call rename(a:targetDir.'/'.archiveName, dir.'/'.archiveName)
