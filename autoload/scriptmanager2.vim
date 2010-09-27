@@ -100,7 +100,7 @@ fun! scriptmanager2#UpdateAddon(name)
     let pluginDir = scriptmanager#PluginDirByName(a:name)
     let backup = scriptmanager#PluginDirByName(a:name).'.backup'
     let container = fnamemodify(backup,':h')
-    let diff_file = containing.'/'.a:name.'.diff-orig'
+    let diff_file = container.'/'.a:name.'.diff-orig'
 
     if executable('diff') && isdirectory(backup)
       call s:exec_in_dir([{'c':'diff -r '.s:shellescape(r.'/plugin').' '.s:shellescape(r.'/plugin-merged')}])
