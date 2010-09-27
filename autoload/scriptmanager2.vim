@@ -299,10 +299,14 @@ endfun
 fun! scriptmanager2#LoadKnownRepos(...)
   let known = s:c['known']
   let reason = a:0 > 0 ? a:1 : 'get more plugin sources'
-  if 0 == get(s:c['activated_plugins'], known, 0) && input('Activate plugin '.known.' to '.reason.'? [y/n]:','') == 'y'
-    call scriptmanager#Activate([known])
-    " this should be done by Activate!
-    exec 'source '.scriptmanager#PluginDirByName(known).'/plugin/vim-addon-manager-known-repositories.vim'
+  if 0 == get(s:c['activated_plugins'], known, 0) && get(s:c,'dont_activate_known_repos', 0) == 0
+    let s:reply = input('Activate plugin '.known.' to '.reason."? [y/n/N=don't ask again this (session)]:",'')
+    if s:reply == 'N' | let s:c.dont_activate_known_repos = 1 | endif
+    if s:reply == 'y'
+      call scriptmanager#Activate([known])
+      " this should be done by Activate!
+      exec 'source '.scriptmanager#PluginDirByName(known).'/plugin/vim-addon-manager-known-repositories.vim'
+    endif
   endif
 endf
 
