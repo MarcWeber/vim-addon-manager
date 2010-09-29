@@ -518,6 +518,14 @@ VCS:
     MsysGit: http://code.google.com/p/msysgit/
     Mercurial: http://mercurial.selenic.com/
 
+
+We tried thinking about making using vim-addon-manager easier for Windows
+users. One idea was introducing a proxy which asks a linux server to package
+git/svn/mercurial as zip file on the fly. This would mean you don't have to
+install svn,hg,.. to use plugins only.
+
+If you want something like this to happen contact me.
+
 ==============================================================================
 10. Some notes for Gentoo users                  *vim-addon-manager-gentoo*
 
@@ -592,6 +600,9 @@ Windows installation is more tedious than on Linux - yes.
 
 Still trouble? Get in touch, see |vim-addon-manager-author|
 
+The help file should be using VAM. (Yes - but its too much work to get it
+right for now)
+
 You have to trust script authors:
 Because everybody can upload everything to the repositories (in particular 
 www.vim.org) you must trust authors. I can't review all code - so expect code 
@@ -608,5 +619,7 @@ If a plugin behaves strangely then try
 http://github.com/dahu/VimLint/blob/master/plugin/vimlint.vim.
 Maybe you have an uncommon Vim setting causing some plugins to fail.
 
+I only act uppon feedback. So if you want changes you have to contact me.
+Don't expect me to know what you dream about.
 
 vim:tw=78:fo=tcq2:isk=!-~,^*,^\|,^\":ts=8:ft=help:norl:
