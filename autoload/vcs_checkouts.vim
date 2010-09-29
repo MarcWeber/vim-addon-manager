@@ -12,8 +12,7 @@ fun! vcs_checkouts#Update(dir)
   elseif isdirectory(directory.'/.hg')
     call s:exec_in_dir([
           \ {'d': directory, 'c': 'hg pull'},
-          \ {'d': directory, 'c': 'hg update'},
-          \ {'d': directory, 'c': 'hg merge'}
+          \ {'d': directory, 'c': 'hg update'}
           \ ])
     return !v:shell_error
   else
