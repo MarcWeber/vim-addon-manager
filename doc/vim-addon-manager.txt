@@ -203,12 +203,21 @@ plugin_root_dir                         *vim-addon-manager-plugin_root_dir*
         equal to ~/vim-addons). If autoload/scriptmanager.vim is not writeable 
         by the user, then it defaults to ~/vim-addons. Note that you must set 
         this variable before calling any scriptmanager function.
-forbid_scm                                   *vim-addon-manager-forbid_scm*
-        String, valid values: `none' (default), `released' and `all'. Defines, 
-        whether SCM sources should be used instead of www.vim.org. `none' 
-        means `prefer SCM sources', `released' means `use SCM sources only if 
-        no info from www.vim.org is available', `all' means `do not use SCM at 
-        all'.
+scm_merge_stategy                      *vim-addon-manager-scm_merge_stategy*
+        String, valid values: `force' (default), `keep' and `never'. Defines, 
+        whether SCM sources should be used instead of www.vim.org sources: 
+        `forces' stands for prefering SCM over www.vim.org, `keep' means that 
+        SCM sources will be used only if the plugin is not available from 
+        www.vim.org, `never' means that SCM sources will be never used.
+MergeSources                               *vim-addon-manager-MergeSources*
+        Function reference, defines a function that will be used to merge 
+        user, |vim-addon-manager-known-repositories| and SCM sources. 
+        Overrides |vim-addon-manager-scm_merge_stategy|. Will be called with 
+        three arguments: user sources (most of time it is an empty 
+        dictionary), non-SCM sources defined in 
+        |vim-addon-manager-known-repositories| and SCM sources also defined 
+        there. If MergeSources function is a dictionary function, it will be 
+        provided an empty dictionary as |self| dictionary.
 
 ==============================================================================
 5. Installing plugins                   *vim-addon-manager-install-plugins*
