@@ -96,36 +96,81 @@ fun! scriptmanager2#UpdateAddon(name)
   if !vcs_checkouts#Update(pluginDir)
     " try updating plugin by archive
     
-    " dose the user have made any changes? :
-    let pluginDir = scriptmanager#PluginDirByName(a:name)
-    let backup = scriptmanager#PluginDirByName(a:name).'.backup'
-    let container = fnamemodify(backup,':h')
-    let diff_file = container.'/'.a:name.'.diff-orig'
-
-    if executable('diff') && isdirectory(backup)
-      call s:exec_in_dir([{'c':'diff -r '.s:shellescape(r.'/plugin').' '.s:shellescape(r.'/plugin-merged')}])
+    " we have to find out whether there is a new version:
+    call scriptmanager2#LoadKnownRepos()
+    let repository = get(s:c['plugin_sources'], a:name, {})
+    if empty(repository)
+      echom "don't know how to update ".a:name." because its (no longer?) contained in plugin_sources"
+      return
     endif
+    let newVersion = get(repository,'version','?')
     
-    if filereadable(pluginDir.'/version')
-      let pluginversion = get(readfile(pluginDir.'/version'), 0, "?")
-      let repository = get(s:c['plugin_sources'], a:name, {})
-      if empty(repository)
-        echoe "Cannot update plugin ".a:name.": no repository locations known."
-        return
+    let versionFile = pluginDir.'/version'
+    let oldVersion = filereadable(versionFile) ? readfile(versionFile, true)[0] : "?"
+    if oldVersion != newVersion || newVersion⎈ == '?'
+      " update plugin
+      echom "updating plugin ".a:name." because ".(newVersion == '?' ? 'version is unkown' : 'there is a different version')
+      let has_diff = executable('diff')
+
+      " move plugin to backup destination:
+      let pluginDirBackup = pluginDir.'-'.oldVersion
+      if isdirectory(pluginDirBackup) || filereadable(pluginDirBackup)
+	if "y" == input("old plugin backup directory found: ".pluginDirBackup.", remove? [y/n]")
+	  call scriptmanager_util#RmFR(pluginDirBackup)
+	else
+	  throw "user abort: remove ".pluginDirBackup." manually"
+	endif
       endif
-      let newpluginversion = get(repository, 'version', '?')
-      if newpluginversion==#'?'
-        echoe "Cannot update plugin ".a:name.": no version information is available."
-      elseif pluginversion==#newpluginversion
-        " Though we are not updating plugin, this is not an error
-        return 1
+      call rename(pluginDir, pluginDirBackup)
+
+      " try creating diff by checking out old version again
+      if has_diff
+	let diff_file = fnamemodify(pluginDir.'-'.oldVersion.'.diff')
+	" try to create a diff
+	let archiveName = s:ArchiveNameFromDict(a:repository)
+	let archiveFileBackup = pluginDirBackup.'/archive/'.archiveName
+	if !filereadable(archiveFileBackup)
+	  echom "old archive file ".archiveFileBackup." is gone, can't try to create diff."
+	else
+	  let archiveFile = pluginDir.'/archive/'.archiveName
+	  call mkdir(pluginDir.'/archive',1)
+
+	  call scriptmanager_util#CopyFile(archiveFileBackup, archiveFile)
+	  call scriptmanager_util#Unpack(archiveFile, a:targetDir,{ 'strip-components': get(repository,'strip-components',-1) })
+	  let diff = system(scriptmanager_util#ShellDSL('diff -U3 -r $p $p', pluginDirBackup, pluginDir)
+	  if diff != "" | call writefile([diff], diff_file, 1) | endif
+	  call scriptmanager_util#RmFR(pluginDir)
+	endif
       endif
-      if scriptmanager2#Checkout(pluginDir, repository)
-        return
+
+      " checkout new version (checkout into empty location - same as installing):
+      call scriptmanager2#Checkout(pluginDir, repository)
+
+      " try applying patch
+      let patch_failure = 0
+      if exists('diff') && diff != ""
+	if executable("patch")
+	  call system(scriptmanager_util#ShellDSL('patch -d $p $p', pluginDir, diff_file))
+	  let patch_failure = v:shell_error
+	else
+	  let patch_failure = 1
+	  echom "failed trying to apply diff. patch exectubale not found"
+	endif
+	if !patch_failure
+	  echom "patching suceeded"
+	  call delete(diff_file)
+	else
+	  echom "failed applying patch ".diff_file
+	endif
       endif
-      return 1
+
+      " tidy up - if user didn't provide diff we remove old directory
+      if !patch_failure
+	call scriptmanager_util#RmFR(pluginDirBackup)
+      endif
+    else
+      echom "not updating plugin ".a:name." because there is no version according to version key"
     endif
-    return
   endif
   return 1
 endf
@@ -238,6 +283,14 @@ endf
 "   endwhile
 " endfun
 
+fun! scriptmanager2#ArchiveNameFromDict(repository)
+    let archiveName = fnamemodify(substitute(get(a:repository,'archive_name',''), '\.\zsVIM$', 'vim', ''),':t')
+    if archiveName == ''
+      let archiveName = fnamemodify(a:repository['url'],':t')
+    endif
+    return archiveName
+endf
+
 
 " may throw EXCEPTION_UNPACK
 fun! scriptmanager2#Checkout(targetDir, repository) abort
@@ -250,10 +303,7 @@ fun! scriptmanager2#Checkout(targetDir, repository) abort
     if !isdirectory(a:targetDir) | call mkdir(a:targetDir.'/archive','p') | endif
 
     " basename VIM -> vim
-    let archiveName = fnamemodify(substitute(get(a:repository,'archive_name',''), '\.\zsVIM$', 'vim', ''),':t')
-    if archiveName == ''
-      let archiveName = fnamemodify(a:repository['url'],':t')
-    endif
+    let archiveName = s:ArchiveNameFromDict(a:repository)
 
     " archive will be downloaded to this location
     let archiveFile = a:targetDir.'/archive/'.archiveName
