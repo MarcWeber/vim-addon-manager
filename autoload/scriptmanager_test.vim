@@ -69,3 +69,39 @@ fun! scriptmanager_test#TestUnpack(test) abort
     endif
   endfor
 endf
+
+fun! scriptmanager_test#TestUpdate()
+  call scriptmanager2#LoadKnownRepos()
+  let tmpDir = scriptmanager_util#TempDir("vim-addon-manager-test")
+  let plugin_name = "www_vim_org_update_test"
+  let plugin_source_file = tmpDir.'/'.plugin_name.'.vim'
+  let installDir = scriptmanager#PluginDirByName(plugin_name)
+  let installCompareDir = scriptmanager#PluginDirByName(plugin_name.'-1.0') 
+  for dir in [tmpDir, installDir, installCompareDir]
+    if isdirectory(dir) | scriptmanager_util#RmFR(dir) | endif
+  endfor
+  call mkdir(tmpDir.'/plugin',1)
+
+  let file_v1          = ["version 1.0, "1", "2", "3", "4", "5" ]
+  let file_v1_patched  = ["version 1.0, "1", "2", "3", "4", "patched" ]
+  let file_v2          = ["version 2.0, "1", "2", "3", "4", "5" ]
+  let file_v2_patched  = ["version 2.0, "1", "2", "3", "4", "patched" ] 
+
+  " install v1
+  call writefile( file_v1, plugin_source_file, 1)
+  let g:vim_script_manager['plugin_sources'][plugin_name] = {'type': 'archive', 'url': 'file://'.plugin_source_file, 'version' : '1.0' , 'srcipt-type': 'plugin' }
+  exec 'ActivateAddons '.plugin_name
+
+  " patch
+  call writefile( file_v1, installDir.'/plugin/'.plugin_name.'.vim', 1)
+  
+  " update to v2
+  call writefile( file_v2, plugin_source_file, 1)
+  let g:vim_script_manager['plugin_sources'][plugin_name] = {'type': 'archive', 'url': 'file://'.plugin_source_file, 'version' : '2.0' , 'srcipt-type': 'plugin' }
+  exec 'UpdateAddons '.plugin_name
+
+
+  if file_v2_patched != readfile( installDir.'/plugin/'.plugin_name.'.vim', 1)
+    echoe "test failed"
+  endif
+endfun
