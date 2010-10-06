@@ -248,8 +248,35 @@ What are the limitations causing greatest impact to software developers using Vi
   when interfacing with external tools.
   Impact: People tried writing debugger features. But all solutions are kind
   of doomed unless Vim gets a nice async communication interface.
-  There is a patch: http://github.com/bartman/vim/wiki/_pages. But I'm not
-  sure its complete yet
+
+  Possible known ways to work around it?
+
+        - implement windows version of this patch
+          http://github.com/bartman/vim.git (which still can be improved a lot)
+          and make it it poll file handlers when not typing. Implement a shell 
+          like interface. doc: http://github.com/bartman/vim/wiki/_pages
+                         
+        - There is a patch which let's you start a shell in Vim. I don't think
+          it got updated (which is linux only)                                
+          http://www.wana.at/vimshell/        
+          (Maybe cygwin or such ?) - I never tried it.
+
+        - vimshell (www.vim.org). You have to get a dell or such. I think this
+          could satisfy you.                                                  
+          (vcs: http://github.com/Shougo/vimshell)
+
+        - screen (see other mail)
+          c-a S splits the window
+          c-a tab switches focus 
+                                
+          if you run interpreter this way: tcl | tee log
+                                                        
+          you may have a chance getting errors into quickfix or such
+                                                                    
+          (requires cygwin or such - I never tried it on Windows ?) 
+
+          use Emacs and vimpulse (I hate to say it)
+
   
 - Many coding helpers should not have been written in VimL. They should have
   been written in a proper language so that all open source editors can
