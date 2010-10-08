@@ -54,8 +54,7 @@ fun! vcs_checkouts#ExecIndir(cmds) abort
     let lcd=""
     for c in a:cmds
       if has_key(c, "d")
-        " TODO quoting
-        exec "lcd ".c.d
+        exec "lcd ".fnameescape(c.d)
       endif
       if has_key(c, "c")
         exec '!'.c.c

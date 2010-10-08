@@ -221,7 +221,7 @@ endf
 
 fun! scriptmanager_util#Download(url, targetFile)
   " allow redirection because of sourceforge mirrors:
-  let c = substitute(s:curl, 'curl\(\c\.exe\)','curl\1 --location --max-redirs 40','')
+  let c = substitute(s:curl, '\ccurl\(\.exe\)\?','curl\1 --location --max-redirs 40','')
   call s:exec_in_dir([{'c': s:shellescape(c.' $p $', a:targetFile, a:url)}])
 endf
 
