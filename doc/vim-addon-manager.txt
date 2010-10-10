@@ -1,6 +1,6 @@
 *vim-addon-manager.txt* Package manager for Vim
 ==============================================================================
-CONTENS                                         *vim-addon-manager-contents*
+CONTENTS                                        *vim-addon-manager-contents*
 
     1. Intro                           |vim-addon-manager-intro|
     2. Installation                    |vim-addon-manager-installation|
@@ -14,7 +14,7 @@ CONTENS                                         *vim-addon-manager-contents*
     8. Testing this plugin             |vim-addon-manager-testing|
     9. Some notes for windows users    |vim-addon-manager-windows|
    10. Some notes for Gentoo users     |vim-addon-manager-gentoo|
-   11. Trouble shooting & KNOWS BUGS   |vim-addon-manager-trouble-shooting|
+   11. Troubleshooting & KNOWS BUGS    |vim-addon-manager-trouble-shooting|
 
 ==============================================================================
 1. Intro                                           *vim-addon-manager-intro*
@@ -62,7 +62,7 @@ Gentoo users: see |vim-addon-manager-gentoo|.
         fun ActivateAddons()
           set runtimepath+=~/vim-addons/vim-addon-manager
           try
-            call scriptmanager#Activate([])
+            call scriptmanager#Activate(['pluginA', 'pluginB'])
           catch /.*/
             echoe v:exception
           endtry
@@ -73,7 +73,7 @@ Gentoo users: see |vim-addon-manager-gentoo|.
         " au GUIEnter * call Activate()
 
 
-Continue reading|vim-addon-manager-install-plugins|.
+Continue reading |vim-addon-manager-install-plugins|.
 
 ==============================================================================
 3. Functionality provided                  *vim-addon-manager-functionality*
@@ -601,7 +601,7 @@ See related work to get it instead of this. Lets watch it and be curious about
 what's going to happen.
 
 ==============================================================================
-11. Trouble shooting & KNOWS BUGS       *vim-addon-manage-trouble-shooting*
+11. Troubleshooting & KNOWS BUGS        *vim-addon-manage-trouble-shooting*
 
 tianyicui : Actually I think the name [vim-addon-manager] is too long
 (github)    and totally uncool.
