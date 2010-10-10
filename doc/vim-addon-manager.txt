@@ -601,7 +601,7 @@ See related work to get it instead of this. Lets watch it and be curious about
 what's going to happen.
 
 ==============================================================================
-11. Troubleshooting & KNOWS BUGS        *vim-addon-manage-trouble-shooting*
+11. Troubleshooting & KNOWS BUGS        *vim-addon-manager-trouble-shooting*
 
 tianyicui : Actually I think the name [vim-addon-manager] is too long
 (github)    and totally uncool.
