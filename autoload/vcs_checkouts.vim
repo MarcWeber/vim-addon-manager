@@ -57,7 +57,10 @@ fun! vcs_checkouts#ExecIndir(cmds) abort
         exec "lcd ".fnameescape(c.d)
       endif
       if has_key(c, "c")
-        exec '!'.c.c
+        " http://stackoverflow.com/questions/355988/how-do-i-deal-with-quote-characters-when-using-cmd-exe
+        " cmd should neither have have /c nor /K (?)
+        " Silex (irc) helped finding this
+        exec '!"'.c.c.'"'
       endif
       " break if one of the pased commands failes:
       if v:shell_error != 0
