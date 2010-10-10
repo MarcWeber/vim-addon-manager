@@ -71,8 +71,9 @@ Gentoo users: see |vim-addon-manager-gentoo|.
         " experimental: run after gui has been started
         " report breakage in this case, please
         " au GUIEnter * call Activate()
-
-
+4. Optionally genrate helptags: >
+       UpdateAddon vim-addon-manager
+>
 Continue reading|vim-addon-manager-install-plugins|.
 
 ==============================================================================
