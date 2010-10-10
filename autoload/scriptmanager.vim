@@ -147,8 +147,9 @@ endf
 " .vimrc has been sourced which happens when you activate plugins manually.
 fun! scriptmanager#Activate(...) abort
   let args = copy(a:000)
+  if a:0 == 0 | return | endif
 
-  if type(args[0])==type("")
+  if  type(args[0])==type("")
     " way of usage 1: pass addon names as function arguments
     " Example: Activate("name1","name2")
 
