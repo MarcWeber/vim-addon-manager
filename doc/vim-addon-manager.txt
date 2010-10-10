@@ -1,6 +1,6 @@
 *vim-addon-manager.txt* Package manager for Vim
 ==============================================================================
-CONTENS                                         *vim-addon-manager-contents*
+CONTENTS                                        *vim-addon-manager-contents*
 
     1. Intro                           |vim-addon-manager-intro|
     2. Installation                    |vim-addon-manager-installation|
