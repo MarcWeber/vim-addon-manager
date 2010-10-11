@@ -106,8 +106,8 @@ fun! scriptmanager2#UpdateAddon(name)
     let newVersion = get(repository,'version','?')
     
     let versionFile = pluginDir.'/version'
-    let oldVersion = filereadable(versionFile) ? readfile(versionFile, true)[0] : "?"
-    if oldVersion != newVersion || newVersion⎈ == '?'
+    let oldVersion = filereadable(versionFile) ? readfile(versionFile, 1)[0] : "?"
+    if oldVersion != newVersion || newVersion == '?'
       " update plugin
       echom "updating plugin ".a:name." because ".(newVersion == '?' ? 'version is unkown' : 'there is a different version')
       let has_diff = executable('diff')
@@ -122,24 +122,37 @@ fun! scriptmanager2#UpdateAddon(name)
 	endif
       endif
       call rename(pluginDir, pluginDirBackup)
+      " can be romved. old version is encoded in tmp dir. Removing makes
+      " diffing easier
+      silent! call delete(pluginDirBackup.'/version')
 
       " try creating diff by checking out old version again
       if has_diff
-	let diff_file = fnamemodify(pluginDir.'-'.oldVersion.'.diff')
+	let diff_file = s:c['plugin_root_dir'].'/'.a:name.'-'.oldVersion.'.diff'
 	" try to create a diff
-	let archiveName = s:ArchiveNameFromDict(a:repository)
+	let archiveName = scriptmanager2#ArchiveNameFromDict(repository)
 	let archiveFileBackup = pluginDirBackup.'/archive/'.archiveName
 	if !filereadable(archiveFileBackup)
 	  echom "old archive file ".archiveFileBackup." is gone, can't try to create diff."
 	else
 	  let archiveFile = pluginDir.'/archive/'.archiveName
-	  call mkdir(pluginDir.'/archive',1)
+	  call mkdir(pluginDir.'/archive','p')
 
 	  call scriptmanager_util#CopyFile(archiveFileBackup, archiveFile)
-	  call scriptmanager_util#Unpack(archiveFile, a:targetDir,{ 'strip-components': get(repository,'strip-components',-1) })
-	  let diff = system(scriptmanager_util#ShellDSL('diff -U3 -r $p $p', pluginDirBackup, pluginDir)
-	  if diff != "" | call writefile([diff], diff_file, 1) | endif
+
+          let rep_copy = deepcopy(repository)
+          let rep_copy['url'] = 'file://'.expand(archiveFile)
+	  call scriptmanager2#Checkout(pluginDir, rep_copy)
+          silent! call delete(pluginDir.'/version')
+          try
+            call vcs_checkouts#ExecIndir([{'d': s:c['plugin_root_dir'], 'c': scriptmanager_util#ShellDSL('diff -U3 -r $p $p', fnamemodify(pluginDir,':t'), fnamemodify(pluginDirBackup,':t')).' > '.diff_file}])
+            silent! call delete(diff_file)
+          catch /.*/
+            " :-( this is expected. diff returns non zero exit status. This is hacky
+            let diff=1
+          endtry
 	  call scriptmanager_util#RmFR(pluginDir)
+          echo 6
 	endif
       endif
 
@@ -148,20 +161,22 @@ fun! scriptmanager2#UpdateAddon(name)
 
       " try applying patch
       let patch_failure = 0
-      if exists('diff') && diff != ""
+      if exists('diff')
 	if executable("patch")
-	  call system(scriptmanager_util#ShellDSL('patch -d $p $p', pluginDir, diff_file))
-	  let patch_failure = v:shell_error
-	else
-	  let patch_failure = 1
-	  echom "failed trying to apply diff. patch exectubale not found"
-	endif
-	if !patch_failure
-	  echom "patching suceeded"
-	  call delete(diff_file)
-	else
-	  echom "failed applying patch ".diff_file
-	endif
+          try
+            call vcs_checkouts#ExecIndir([{'d': pluginDir, 'c': 'patch -p1 < '. diff_file }])
+            echom "patching suceeded"
+            let patch_failure = 0
+            call delete(diff_file)
+            let patch_failure = 0
+          catch /.*/
+            let patch_failure = 1
+            echom "failed applying patch ".diff_file." kept old dir in ".pluginDirBackup
+          endtry
+        else
+          echom "failed trying to apply diff. patch exectubale not found"
+          let patch_failure = 1
+        endif
       endif
 
       " tidy up - if user didn't provide diff we remove old directory
@@ -283,6 +298,7 @@ endf
 "   endwhile
 " endfun
 
+" basename of url. if archive_name is given use that instead
 fun! scriptmanager2#ArchiveNameFromDict(repository)
     let archiveName = fnamemodify(substitute(get(a:repository,'archive_name',''), '\.\zsVIM$', 'vim', ''),':t')
     if archiveName == ''
@@ -298,12 +314,11 @@ fun! scriptmanager2#Checkout(targetDir, repository) abort
     call vcs_checkouts#Checkout(a:targetDir, a:repository)
   else
     " archive based repositories - no VCS
-    " must have a:repository['archive_name']
 
     if !isdirectory(a:targetDir) | call mkdir(a:targetDir.'/archive','p') | endif
 
     " basename VIM -> vim
-    let archiveName = s:ArchiveNameFromDict(a:repository)
+    let archiveName = scriptmanager2#ArchiveNameFromDict(a:repository)
 
     " archive will be downloaded to this location
     let archiveFile = a:targetDir.'/archive/'.archiveName
@@ -315,8 +330,9 @@ fun! scriptmanager2#Checkout(targetDir, repository) abort
     call writefile([get(a:repository,"version","?")], a:targetDir."/version")
 
     " hook for plugin / syntax files: Move into the correct direcotry:
-    if a:repository['archive_name'] =~? '\.vim$' 
-      let type = tolower(get(a:repository,'script-type',''))
+    let scriptType = get(a:repository, 'script-type','')
+    if scriptType != ""
+      let type = tolower(scriptType)
       if type  =~# '^\%(syntax\|indent\|ftplugin\|plugin\|autoload\)$'
         let dir = a:targetDir.'/'.type
         call mkdir(dir)
