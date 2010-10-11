@@ -14,9 +14,11 @@ fun! vcs_checkouts#Update(dir)
           \ {'d': directory, 'c': 'hg pull'},
           \ {'d': directory, 'c': 'hg update'}
           \ ])
-    return !v:shell_error
+    if v:shell_error
+      throw "updating ".a:dir." falied. Got exit code: ".v:shell_error
+    endif
   else
-    echoe "Plugin ".fnamemodify(directory, ':t')." is not controlled by any known SCM system."
+    " not knowing how to update a repo is not a failure
     return 0
   endif
 endf
