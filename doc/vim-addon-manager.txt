@@ -14,7 +14,7 @@ CONTENTS                                        *vim-addon-manager-contents*
     8. Testing this plugin             |vim-addon-manager-testing|
     9. Some notes for windows users    |vim-addon-manager-windows|
    10. Some notes for Gentoo users     |vim-addon-manager-gentoo|
-   11. Troubleshooting & KNOWS BUGS    |vim-addon-manager-trouble-shooting|
+   11. Troubleshooting and known bugs  |vim-addon-manager-trouble-shooting|
 
 ==============================================================================
 1. Intro                                           *vim-addon-manager-intro*
@@ -33,15 +33,13 @@ Dependencies:
     - Mercurial, Git and Subversion (if you want to install plugins from 
       appropriate repositories)
     - vcs_checkouts plugin (comes with this addon)
-    - Tar, gzip and zip (required for unpacking some addons)
+    - Either tar, gzip and zip or 7-zip (required for unpacking some addons)
     - Vimball plugin (required for installing some addons) (in latest vim it 
       is included by default)
 
 ------------------------------------------------------------------------------
 Getting started fast: ~
-Read:
-|vim-addon-manager-installation|
-|vim-addon-manager-install-plugins|
+Read: |vim-addon-manager-installation| and |vim-addon-manager-install-plugins|
 
 ==============================================================================
 2. Installation                             *vim-addon-manager-installation*
@@ -50,7 +48,7 @@ Windows users: see |vim-addon-manager-windows|.
 Gentoo users: see |vim-addon-manager-gentoo|.
 
 1. Create a separate directory that will hold your plugins, for example 
-   ~/vim-addons The addon manager intentionally installs each addon
+   ~/vim-addons. The addon manager intentionally installs each addon
    into its own directory which is not ~/.vim .
 2. Install vim-addon-manager to ~/vim-addons/vim-addon-manager. If you use 
    git, you should do the following: >
@@ -71,6 +69,9 @@ Gentoo users: see |vim-addon-manager-gentoo|.
         " experimental: run after gui has been started
         " report breakage in this case, please
         " au GUIEnter * call Activate()
+4. Optionally genrate helptags: >
+       UpdateAddon vim-addon-manager
+<
 
 
 Continue reading |vim-addon-manager-install-plugins|.
@@ -116,11 +117,11 @@ scriptmanager#Activate([{name}, ...])             *scriptmanager#Activate()*
               \ )
 <
         Activating a plugin means that function will do the following steps:
-        0. Check, whether requested addon is already installed. If not, 
-           install it.
+        0. Check, whether requested addon is already installed. If it is not, 
+           vim-addon-manager will install it.
         1. Activate plugins that are mentioned in dependencies dictionary (see 
-           |addon-info-dependencies|)
-        2. Add plugin runtime directory to 'runtimepath' option
+           |addon-info-dependencies|).
+        2. Add plugin runtime directory to 'runtimepath' option.
         3. Check whether vim has already started. If it was then source first 
            all files under addon's plugin directory, then under after/plugin 
            directory. If it was not, then wait until vim loads and source 
@@ -290,41 +291,33 @@ repository                                          *addon-info-repository*
                  If `type' key contains an empty string, then archive which 
                  location is described by the `url' key will be saved in file 
                  with name {archive_name} and processed according to its 
-                 extension. Supported extensions:
+                 extension. Supported extensions (note that if you have 7-zip 
+                 installed no other archive tools are required):
                  Extension     How it is handled ~
-                 .vim          This extension designates that plugin is a single 
-                               file. So, if exists key `script-type' and it is 
-                               equal to `syntax' or `indent', then this file 
-                               is put under {plugname}/syntax or under 
-                               {plugname}/indent, otherwise it is put under 
-                               directory described by {plugname}/{target_dir} 
-                               (where {target_dir} is a value of `target_dir' 
-                               key if it is present and `plugin' otherwise).
+                 .vim          This extension designates that plugin is 
+                               a single file. So, if exists key `script-type' 
+                               and it is equal to `syntax' or `indent', then 
+                               this file is put under {plugname}/syntax or 
+                               under {plugname}/indent, otherwise it is put 
+                               under directory described by 
+                               {plugname}/{target_dir} (where {target_dir} is 
+                               a value of `target_dir' key if it is present 
+                               and `plugin' otherwise).
                 .tar.gz, .tgz  This extension designates that plugin is 
                                contained inside tar archive compressed by 
-                               gzip. In this case, archive is unpacked to its 
-                               directory by `tar' (note that it must support 
-                               -z option), {N} components are stripped before 
-                               unpacking (here {N} is defined by 
-                               `strip-components' key if it is present, 
-                               default value 1. See tar man page for more 
-                               information).
+                               gzip. In this case, archive is uncompressed by 
+                               `gzip' and unpacked to its directory by `tar' 
+                               (both utilities may be replaced with `7z x').
                 .tar.bz2, .tbz2
-                               Like .tar.gz, but with bzip2 compression. Note 
-                               that your tar must support -j option or it 
-                               won't work.
+                               Like .tar.gz, but with bzip2 compression.
                 .tar           This extension designates that plugin is 
                                contained inside uncompressed tar archive. In 
                                this case, archive is unpacked to its directory 
-                               by `tar', {N} components are stripped before 
-                               unpacking (here {N} is defined by 
-                               `strip-components' key if it is present, 
-                               default value 1. See tar man page for more 
-                               information).
+                               by `tar'.
                 .zip           This extension designates that plugin is 
                                contained inside a zip archive. In this case 
                                archive is unpacked to its directory by 
-                               `unzip'.
+                               `unzip' (may be replaced by `7z x').
                 .7z, .rar, .cab, .arj, .jar
                                This extension designates that plugin is 
                                contained inside an archive that is supported 
@@ -344,6 +337,11 @@ repository                                          *addon-info-repository*
                 If this key is present and contains non-empty string, then 
                 every time when user tries to install this plugin he will see 
                 this message and will have to confirm installation.
+        strip-components
+                Strip first {strip-components} directories after unpacking an 
+                archive. If it is equal to special value `-1' (default value), 
+                then it will strip either one directory (if archive contains 
+                the only directory) or will not strip anything at all.
 
 dependencies                                      *addon-info-dependencies*
         Describes plugins that are required for the plugin, must contain 
@@ -601,7 +599,7 @@ See related work to get it instead of this. Lets watch it and be curious about
 what's going to happen.
 
 ==============================================================================
-11. Troubleshooting & KNOWS BUGS        *vim-addon-manager-trouble-shooting*
+11. Troubleshooting and known bugs       *vim-addon-manager-trouble-shooting*
 
 tianyicui : Actually I think the name [vim-addon-manager] is too long
 (github)    and totally uncool.
