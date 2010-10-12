@@ -370,10 +370,17 @@ fun! scriptmanager2#LoadKnownRepos(...)
 
   let known = s:c['known']
   let reason = a:0 > 0 ? a:1 : 'get more plugin sources'
-  if 0 == get(s:c['activated_plugins'], known, 0) && get(s:c,'dont_activate_known_repos', 0) == 0
-    let s:reply = input('Activate plugin '.known.' to '.reason."? [y/n/N=don't ask again this (session)]:",'')
-    if s:reply == 'N' | let s:c.dont_activate_known_repos = 1 | endif
-    if s:reply == 'y'
+  if 0 == get(s:c['activated_plugins'], known, 0)
+    let policy=get(s:c, 'known_repos_activation_policy', 'autoload')
+    if policy==?"ask"
+      let s:reply = input('Activate plugin '.known.' to '.reason."? [y/n/N=don't ask again this (session)]:",'')
+    elseif policy==?"never"
+      let s:reply="n"
+    else
+      let s:reply='y'
+    endif
+    if s:reply ==# 'N' | let s:c.known_repos_activation_policy = "never" | endif
+    if s:reply ==? 'y'
       call scriptmanager#Activate([known])
       " This is not done in .vimrc because Vim loads plugin/*.vim files after
       " having finished processing .vimrc. So do it manually

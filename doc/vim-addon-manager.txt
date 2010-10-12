@@ -210,7 +210,15 @@ scm_merge_stategy                      *vim-addon-manager-scm_merge_stategy*
         `forces' stands for prefering SCM over www.vim.org, `keep' means that 
         SCM sources will be used only if the plugin is not available from 
         www.vim.org, `never' means that SCM sources will be never used.
-MergeSources                               *vim-addon-manager-MergeSources*
+                           *vim-addon-manager-known_repos_activation_policy*
+known_repos_activation_policy
+        String, valid values: `ask', `never' and `autoload' (default). Defines 
+        when |vim-addon-manager-known-repositories| plugin should be loaded. 
+        `Ask' means that user will be prompted when this option is required. 
+        `Never' means that |vim-addon-manager-known-repositories| will not be 
+        loaded and the user will not get any prompts. `Autoload' means that it 
+        will be loaded when it is required, user also won't get asked.
+MergeSources                                *vim-addon-manager-MergeSources*
         Function reference, defines a function that will be used to merge 
         user, |vim-addon-manager-known-repositories| and SCM sources. 
         Overrides |vim-addon-manager-scm_merge_stategy|. Will be called with 
