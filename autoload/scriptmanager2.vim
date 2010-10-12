@@ -363,6 +363,11 @@ endfun
 
 
 fun! scriptmanager2#LoadKnownRepos(...)
+  " this could be done better: see BUGS section in documantation "force".
+  " Unletting in case of failure is not important because this only
+  " deactivates a warning
+  let g:in_load_known_repositories = 1
+
   let known = s:c['known']
   let reason = a:0 > 0 ? a:1 : 'get more plugin sources'
   if 0 == get(s:c['activated_plugins'], known, 0) && get(s:c,'dont_activate_known_repos', 0) == 0
@@ -370,10 +375,12 @@ fun! scriptmanager2#LoadKnownRepos(...)
     if s:reply == 'N' | let s:c.dont_activate_known_repos = 1 | endif
     if s:reply == 'y'
       call scriptmanager#Activate([known])
-      " this should be done by Activate!
+      " This is not done in .vimrc because Vim loads plugin/*.vim files after
+      " having finished processing .vimrc. So do it manually
       exec 'source '.scriptmanager#PluginDirByName(known).'/plugin/vim-addon-manager-known-repositories.vim'
     endif
   endif
+  unlet g:in_load_known_repositories
 endf
 
 
