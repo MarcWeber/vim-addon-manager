@@ -601,6 +601,14 @@ what's going to happen.
 ==============================================================================
 11. Troubleshooting and known bugs       *vim-addon-manager-trouble-shooting*
 
+Sometimes it happens that some small bugs appear. Most of the time they are
+easy to identify and trivial fix. Usually fixes happen very fast (within less
+than 2 days)
+If you don't want to wait try running >
+  git checkout HEAD^
+< in the vim-addon-manager directory up to 10 times to checkout older
+revisions and retry.
+
 tianyicui : Actually I think the name [vim-addon-manager] is too long
 (github)    and totally uncool.
 Marc Weber: Your suggestion VAM as abbreviation is fine. Let's use that.
