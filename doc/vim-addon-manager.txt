@@ -385,6 +385,13 @@ In your .vimrc or somewhere else (see |vim-addon-manager-plugin_sources|).
 
 Related work: ~
 
+PATHOGEN:
+    Until now I thought it was only about manipulating runtimepath.
+    But the most recent announcement about mirroring all vim scripts
+    shows that it may become a competitive VAM alternative?
+    http://www.vim.org/scripts/script.php?script_id=2332
+    http://vim-scripts.org/index.html
+
 ZyX branch:
     http://github.com/ZyX-I/vim-addon-manager
     See |marc-weber-vim-addon-manager-design-notes|
