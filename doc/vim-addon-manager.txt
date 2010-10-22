@@ -14,7 +14,8 @@ CONTENTS                                        *vim-addon-manager-contents*
     8. Testing this plugin             |vim-addon-manager-testing|
     9. Some notes for windows users    |vim-addon-manager-windows|
    10. Some notes for Gentoo users     |vim-addon-manager-gentoo|
-   11. Troubleshooting and known bugs  |vim-addon-manager-trouble-shooting|
+   11. Troubleshooting and known bug  |vim-addon-manager-trouble-shooting|
+       and TODOs
 
 ==============================================================================
 1. Intro                                           *vim-addon-manager-intro*
@@ -615,6 +616,14 @@ what's going to happen.
 
 ==============================================================================
 11. Troubleshooting and known bugs       *vim-addon-manager-trouble-shooting*
+
+TODOs:
+- support vim-scripts.org. This will let you get all www.vim.org scripts using
+  git repositories only. I think the general idea is great. However we have to
+  take care to keep patches which were written for git/hg in sync.
+
+  If you want this feature tell me. I'll add the sources to
+  |vim-addon-manager-known-repositories| then.
 
 Sometimes it happens that some small bugs appear. Most of the time they are
 easy to identify and trivial fix. Usually fixes happen very fast (within less
