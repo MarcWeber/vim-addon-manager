@@ -335,8 +335,10 @@ fun! scriptmanager2#Checkout(targetDir, repository) abort
       let type = tolower(scriptType)
       if type  =~# '^\%(syntax\|indent\|ftplugin\|plugin\|autoload\)$'
         let dir = a:targetDir.'/'.type
-        call mkdir(dir)
-        call rename(a:targetDir.'/'.archiveName, dir.'/'.archiveName)
+        if (!isdirectory(dir))
+          call mkdir(dir)
+          call rename(a:targetDir.'/'.archiveName, dir.'/'.archiveName)
+        endif
       endif
     endif
   endif
