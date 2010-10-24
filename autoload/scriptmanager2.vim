@@ -218,9 +218,9 @@ endf
 " optional arg = 0: only installed
 "          arg = 1: installed and names from known-repositories
 fun! scriptmanager2#KnownAddons(...)
-  let installable = a:0 > 0 ? a:1 : 0
   let list = map(split(glob(scriptmanager#PluginDirByName('*')),"\n"),"fnamemodify(v:val,':t')")
   let list = filter(list, 'isdirectory(v:val)')
+  let installable = a:0 > 0 ? a:1 : ''
   if installable == "installable"
     call scriptmanager2#LoadKnownRepos()
     call extend(list, keys(s:c['plugin_sources']))
@@ -234,7 +234,7 @@ fun! scriptmanager2#KnownAddons(...)
 endf
 
 fun! scriptmanager2#DoCompletion(A,L,P,...)
-  let config = a:0 > 0 ? a:1 : 0
+  let config = a:0 > 0 ? a:1 : ''
   let names = scriptmanager2#KnownAddons(config)
 
   let beforeC= a:L[:a:P-1]
