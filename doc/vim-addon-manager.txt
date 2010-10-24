@@ -438,7 +438,8 @@ creidiki (Leonardo Valeri Manera)
 Mike Smullin:
  - for asking to find a way to source addons when gui is running.
    There is a hint now. This is important if you don't start vim from console
-
+Israel Chauca Fuentes:
+ - reporting and fixing some bugs
 
 ------------------------------------------------------------------------------
 ROADMAP:
