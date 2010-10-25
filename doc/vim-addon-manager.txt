@@ -400,7 +400,10 @@ ZyX branch:
 There are also some other package managers for vim:
     http://github.com/c9s/Vimana
     http://snk.tuxfamily.org/log/vim-script-management-system.html
+    http://github.com/gmarik/vundle (git support only, VimL)
 You can try and see which is the best.
+
+another list: http://vim-scripts.org/tools.html
 
 Emacs install scripts manager:
   el-get http://github.com/dimitri/el-get/blob/master/el-get.el
