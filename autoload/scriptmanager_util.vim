@@ -152,6 +152,8 @@ fun! scriptmanager_util#Unpack(archive, targetdir, ...)
     " .vba reuse vimball#Vimball() function
     exec 'sp '.fnameescape(a:archive)
     call vimball#Vimball(1,a:targetdir)
+    " wipe out buffer
+    bw!
   else
     throw "EXCEPTION_UNPACK: don't know how to unpack ". a:archive
   endif
