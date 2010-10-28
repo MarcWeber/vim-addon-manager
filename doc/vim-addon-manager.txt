@@ -677,6 +677,13 @@ This leads to some hacks such as defining g:in_load_known_repositories.
 Forcing loading a plugin earlier (including dependencies !) would allow us to 
 get rid of this hack.
 
+Its a bug that VAM supports ',' in path items of runtimepath.
+Most other plugins do not. IMHO the true fix would be fixing Vim:
+call add(g:runtimepath, "newpath") and all the trouble would be gone.
+But vim does not use g:runtimpath, it uses an option with strange quoting.
+Same applies to errorformat.
+So don't use ',' in paths and everyone is happy.
+
 I only act uppon feedback. So if you want changes you have to contact me.
 Don't expect me to know what you dream about.
 
