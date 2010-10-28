@@ -257,6 +257,13 @@ fun! scriptmanager_util#RmFR(dir_or_file)
 endf
 
 
+" Prepare a list of runtimepaths as stored in the addon package data
+" for inclusion in &runtimepath.
+fun! scriptmanager_util#EscapeRuntimePaths(paths)
+  return map(copy(a:paths), 'substitute(v:val, '','', ''\\,'', ''g'')')
+endf
+
+
 " a "direct link" (found on the download page)
 " such as "http://downloads.sourceforge.net/project/gnuwin32/gzip/1.3.12-1/gzip-1.3.12-1-bin.zip"
 " can be downloaded this way:

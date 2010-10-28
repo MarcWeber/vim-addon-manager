@@ -422,7 +422,8 @@ fun! scriptmanager2#MergePluginFiles(plugins, skip_pattern)
     endif
   endfor
 
-  let runtimepaths = map(copy(a:plugins), 'substitute('','',''\\,'', scriptmanager#PluginRuntimePath(v:val),''g'')')
+  let runtimepaths = map(copy(a:plugins), 'scriptmanager#PluginRuntimePath(v:val)')
+  let runtimepaths = scriptmanager_util#EscapeRuntimePaths(runtimepaths)
 
   " 1)
   for r in runtimepaths

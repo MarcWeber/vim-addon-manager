@@ -188,6 +188,8 @@ fun! scriptmanager#Activate(...) abort
     " don't miss the after directories if they exist and
     " put them last! (Thanks to Oliver Teuliere)
     let rtp = split(&runtimepath,'\(\\\@<!\(\\.\)*\\\)\@<!,')
+    " Also need to pass them through the escaping function.
+    let s:new_runtime_paths = scriptmanager_util#EscapeRuntimePaths(s:new_runtime_paths)
     let &runtimepath=join(rtp[:0] + s:new_runtime_paths + rtp[1:]
                                   \ + filter(map(copy(s:new_runtime_paths),'v:val."/after"'), 'isdirectory(v:val)') ,",")
     unlet rtp
