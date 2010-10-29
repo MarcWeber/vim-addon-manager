@@ -36,11 +36,11 @@ let s:c['missing_addon_infos'] = get(s:c,'missing_addon_infos', {})
 " addon_infos cache, {} if file dosen't exist
 let s:c['addon_infos'] = get(s:c,'addon_infos', {})
 let s:c['activated_plugins'] = get(s:c,'activaded_plugins', {})
-" If file is writeable, then this plugin was likely installed by user according 
-" to the instruction. If it is not, then it is likely a system-wide 
-" installation
-let s:c['plugin_root_dir'] = get(s:c, 'plugin_root_dir', ((filewritable(expand('<sfile>')))?
-            \                                               (fnamemodify(expand('<sfile>'),':h:h:h')):
+" If directory where plugin is installed is writeable, then this plugin was 
+" likely installed by user according to the instruction. If it is not, then it 
+" is likely a system-wide installation.
+let s:c['plugin_root_dir'] = get(s:c, 'plugin_root_dir', ((filewritable(expand('<sfile>:h:h:h')))?
+            \                                               (expand('<sfile>:h:h:h')):
             \                                               ('~/vim-addons')))
 " ensure we have absolute paths (windows doesn't like ~/.. ) :
 let s:c['plugin_root_dir'] = expand(s:c['plugin_root_dir'])
