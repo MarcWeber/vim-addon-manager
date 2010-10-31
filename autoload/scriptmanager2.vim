@@ -40,6 +40,7 @@ endfun
 fun! scriptmanager2#Install(toBeInstalledList, ...)
   let toBeInstalledList = scriptmanager2#ReplaceAndFetchUrls(a:toBeInstalledList)
   let opts = a:0 == 0 ? {} : a:1
+  let auto_install = s:c['auto_install'] || get(opts,'auto_install',0)
   for name in toBeInstalledList
     if scriptmanager#IsPluginInstalled(name)
       continue
@@ -68,10 +69,11 @@ fun! scriptmanager2#Install(toBeInstalledList, ...)
     let pluginDir = scriptmanager#PluginDirByName(name)
     " ask user for to confirm installation unless he set auto_install
 
-    if confirm_install != 'y'
+    if auto_install || confirm_install != 'y'
       let confirm_install = input('Install plugin "'.name.'" into "'.s:c['plugin_root_dir'].'" ? [y/n]:','')
     endif
-    if s:c['auto_install'] || get(opts,'auto_install',0) || confirm_install == 'y'
+
+    if auto_install || confirm_install == 'y'
 
       let infoFile = scriptmanager#AddonInfoFile(name)
       call scriptmanager2#Checkout(pluginDir, repository)
