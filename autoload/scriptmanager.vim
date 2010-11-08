@@ -67,13 +67,13 @@ endf
 " use join so that you can break the dict into multiple lines. This makes
 " reading it much easier
 fun! scriptmanager#ReadAddonInfo(path)
-  if a:path =~ 'tlib/plugin-info.txt$'
-    " I'll ask Tom Link to change this when vim-addon-manager is more stable
-    return eval(join(readfile(a:path, "b"),""))
-  endif
+
+  " don't add "b" because it'll read dos files as "\r\n" which will fail the
+  " check and evaluate in eval. \r\n is checked out by some msys git
+  " versions with strange settings
 
   " using eval is evil!
-  let body = join(readfile(a:path, "b"),"")
+  let body = join(readfile(a:path),"")
 
   if scriptmanager#VerifyIsJSON(body)
       " using eval is now safe!
