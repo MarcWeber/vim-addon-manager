@@ -188,12 +188,12 @@ fun! scriptmanager#Activate(...) abort
     " don't miss the after directories if they exist and
     " put them last! (Thanks to Oliver Teuliere)
     let rtp = split(&runtimepath,'\(\\\@<!\(\\.\)*\\\)\@<!,')
-    let &runtimepath=join(rtp[:0] + map(copy(s:new_runtime_paths),
-                \                       'escape(v:val, ''\,'')') + rtp[1:]
-                \                 + map(filter(map(copy(s:new_runtime_paths),
-                \                                  'v:val."/after"'),
-                \                              'isdirectory(v:val)'),
-                \                       'escape(v:val, ''\,'')'), ",")
+    let escapeComma = 'escape(v:val, '','')'
+    let after = filter(map(copy(s:new_runtime_paths), 'v:val."/after"'), 'isdirectory(v:val)')
+    let &runtimepath=join(rtp[:0] + map(copy(s:new_runtime_paths), escapeComma)
+                \                 + rtp[1:]
+                \                 + map(after, escapeComma),
+                \         ",")
     unlet rtp
 
     if !has('vim_starting')
