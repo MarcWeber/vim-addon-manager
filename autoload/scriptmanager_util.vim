@@ -48,18 +48,18 @@ endf
 " contact me.
 
 " !! If you change this run the test, please: call vim_addon_manager_tests#Tests('.')
-fun! scriptmanager_util#Unpack(archive, targetdir, ...)
+fun! scriptmanager_util#Unpack(archive, targetDir, ...)
   let opts = a:0 > 0 ? a:1 : {}
   let strip_components = get(opts, 'strip-components', -1)
   let delSource = get(opts, 'del-source', 0)
 
   let esc_archive = s:shellescape('$', a:archive)
-  let tgt = [{'d': a:targetdir}]
+  let tgt = [{'d': a:targetDir}]
 
   if strip_components > 0 || strip_components == -1
     " when stripping don' strip which was there before unpacking
-    let keep = scriptmanager_util#Glob(a:targetdir.'/*')
-    let strip = 'call scriptmanager_util#StripComponents(a:targetdir, strip_components, keep)'
+    let keep = scriptmanager_util#Glob(a:targetDir.'/*')
+    let strip = 'call scriptmanager_util#StripComponents(a:targetDir, strip_components, keep)'
   else
     let strip = ''
   endif
@@ -74,7 +74,16 @@ fun! scriptmanager_util#Unpack(archive, targetdir, ...)
 
   " .vim file and type syntax?
   if a:archive =~? '\.vim$'
-    call writefile(readfile(a:archive,'b'), a:targetdir.'/'.fnamemodify(a:archive, ':t'),'b')
+    " hook for plugin / syntax files: Move into the correct direcotry:
+    let dir = a:targetDir.'/plugin'
+    let type = opts['script-type']
+    if type  =~# '^\%(syntax\|indent\|ftplugin\|plugin\|autoload\)$'
+      let dir = a:targetDir.'/'.type
+    endif
+    if (!isdirectory(dir))
+      call mkdir(dir, 'p')
+    endif
+    call writefile(readfile(a:archive,'b'), dir.'/'.fnamemodify(a:archive, ':t'), 'b')
 
   " .gz .bzip2 (or .vba.* or .tar.*)
   elseif s:EndsWith(a:archive, keys(gzbzip2) )
@@ -114,7 +123,7 @@ fun! scriptmanager_util#Unpack(archive, targetdir, ...)
         endif
 
         " PHASE (2): now unpack .tar or .vba file and tidy up temp file:
-        call scriptmanager_util#Unpack(renameTo, a:targetdir, { 'strip-components': strip_components, 'del-source': 1 })
+        call scriptmanager_util#Unpack(renameTo, a:targetDir, { 'strip-components': strip_components, 'del-source': 1 })
         call delete(renameTo)
         break
       endif
@@ -151,7 +160,7 @@ fun! scriptmanager_util#Unpack(archive, targetdir, ...)
   elseif s:EndsWith(a:archive, '.vba')
     " .vba reuse vimball#Vimball() function
     exec 'sp '.fnameescape(a:archive)
-    call vimball#Vimball(1,a:targetdir)
+    call vimball#Vimball(1,a:targetDir)
     " wipe out buffer
     bw!
   else

@@ -325,22 +325,11 @@ fun! scriptmanager2#Checkout(targetDir, repository) abort
 
     call scriptmanager_util#Download(a:repository['url'], archiveFile)
 
-    call scriptmanager_util#Unpack(archiveFile, a:targetDir,{ 'strip-components': get(a:repository,'strip-components',-1) })
+    call scriptmanager_util#Unpack(archiveFile, a:targetDir, 
+                \                  {'strip-components': get(a:repository,'strip-components',-1),
+                \                   'script-type': tolower(get(a:repository, 'script-type', 'plugin'))})
 
     call writefile([get(a:repository,"version","?")], a:targetDir."/version")
-
-    " hook for plugin / syntax files: Move into the correct direcotry:
-    let scriptType = get(a:repository, 'script-type','')
-    if scriptType != ""
-      let type = tolower(scriptType)
-      if type  =~# '^\%(syntax\|indent\|ftplugin\|plugin\|autoload\)$'
-        let dir = a:targetDir.'/'.type
-        if (!isdirectory(dir))
-          call mkdir(dir)
-          call rename(a:targetDir.'/'.archiveName, dir.'/'.archiveName)
-        endif
-      endif
-    endif
   endif
 endfun
 
