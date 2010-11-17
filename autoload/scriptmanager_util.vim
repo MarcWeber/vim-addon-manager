@@ -171,6 +171,14 @@ fun! scriptmanager_util#Unpack(archive, targetDir, ...)
     call delete(a:archive)
   endif
 
+  if get(opts,'vim_to_unix_on_unix',0) && has('unix')
+    for f in split(glob(a:targetDir.'/**/*.vim'))
+      exec 'sp '.fnameescape(f)
+      if &fileformat == 'dos' | set fileformat=unix | w | endif
+      bw!
+    endfor
+  endif
+
 endf
 
 " Usage: Glob($HOME.'/*') will list hidden files as well

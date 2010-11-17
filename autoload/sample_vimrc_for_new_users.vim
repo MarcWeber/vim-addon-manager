@@ -84,53 +84,6 @@ noremap \ft :exec 'e ~/.vim/ftplugin/'.&filetype.'_you.vim'<cr>
 " TRecentlyUsedFiles you can map to easily:
 noremap \r :TRecentlyUsedFiles<cr>
 
-" disable some plugins. Maybe you don't want all..
-" (Maybe this step is no longer necessary. Tom Link split the library of the
-" plugins. So you have to activate the plugins individually istead of
-" disabling those you don't want.
-let loaded_cmdlinehelp=1
-let loaded_concordance=1
-let loaded_evalselection=1
-let loaded_glark=1
-let loaded_hookcursormoved=1
-let loaded_linglang=1
-let loaded_livetimestamp=1
-let loaded_localvariables=1
-let loaded_loremipsum=1
-let loaded_my_tinymode=1
-let loaded_netrwPlugin=1
-let loaded_pim=1
-let loaded_quickfixsigns=1
-let loaded_scalefont=1
-let loaded_setsyntax=1
-let loaded_shymenu=1
-let loaded_spec=1
-let loaded_tassert=1
-let loaded_tbak=1
-let loaded_tbibtools=1
-let loaded_tcalc=1
-let loaded_tcomment=1
-let loaded_techopair=1
-let loaded_tgpg=1
-let loaded_tlog=1
-let loaded_tmarks=1
-let loaded_tmboxbrowser=1
-let loaded_tmru=1
-let loaded_tortoisesvn=1
-let loaded_tregisters=1
-let loaded_tselectbuffer=1
-let loaded_tselectfile=1
-let loaded_tsession=1
-let loaded_tskeleton=1
-let loaded_tstatus=1
-let loaded_ttagcomplete=1
-let loaded_ttagecho=1
-let loaded_ttags=1
-"let loaded_ttoc=1
-let loaded_viki=1
-let loaded_vikitasks=1
-
-
 
 " dummy func to enabling you to load this file after adding the top level {{{1
 " dir to runtimepath using :set runtimpeth+=ROOT
@@ -201,7 +154,7 @@ Eg you don't want to write parsers in it. Its too slow for those use cases.
 Yet its powerful enough to make everydays work easier - even competitive to
 bloated IDEs. Example plugins you should know about:
 
-- tlib library
+- tlib library (and all of Tom's plugins
 
 - snipmate (or xptemplate): Insert text snippets. Its not only about speed.
   Snippets are a nice way to organize your memos.
@@ -250,6 +203,8 @@ What are the limitations causing greatest impact to software developers using Vi
   of doomed unless Vim gets a nice async communication interface.
 
   Possible known ways to work around it?
+
+        - vim-addon-async (depends on client-server but works very well)
 
         - implement windows version of this patch
           http://github.com/bartman/vim.git (which still can be improved a lot)

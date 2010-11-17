@@ -327,7 +327,8 @@ fun! scriptmanager2#Checkout(targetDir, repository) abort
 
     call scriptmanager_util#Unpack(archiveFile, a:targetDir, 
                 \                  {'strip-components': get(a:repository,'strip-components',-1),
-                \                   'script-type': tolower(get(a:repository, 'script-type', 'plugin'))})
+                \                   'script-type': tolower(get(a:repository, 'script-type', 'plugin')),
+                \                   'vim_to_unix_on_unix':1 })
 
     call writefile([get(a:repository,"version","?")], a:targetDir."/version")
   endif
