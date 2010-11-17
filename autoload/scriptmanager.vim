@@ -45,6 +45,7 @@ let s:c['plugin_root_dir'] = get(s:c, 'plugin_root_dir', ((filewritable(expand('
 " ensure we have absolute paths (windows doesn't like ~/.. ) :
 let s:c['plugin_root_dir'] = expand(s:c['plugin_root_dir'])
 let s:c['known'] = get(s:c,'known','vim-addon-manager-known-repositories')
+let s:c['change_to_unix_ff'] = get(s:c, 'change_to_unix_ff', (g:os=~#'unix'))
 
 if g:is_win
   " if binary-utils path exists then add it to PATH

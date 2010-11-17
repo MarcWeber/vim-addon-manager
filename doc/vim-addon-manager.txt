@@ -228,6 +228,10 @@ MergeSources                                *vim-addon-manager-MergeSources*
         |vim-addon-manager-known-repositories| and SCM sources also defined 
         there. If MergeSources function is a dictionary function, it will be 
         provided an empty dictionary as |self| dictionary.
+change_to_unix_ff                      *vim-addon-manager-change_to_unix_ff*
+        Remove CR symbols before LF symbols in any vim files (changes dos and 
+        mixed dos/unix line endings to unix line endings). Is on by default if 
+        you are on unix (unix, win32unix, macunix), off otherwise.
 
 ==============================================================================
 5. Installing plugins                   *vim-addon-manager-install-plugins*

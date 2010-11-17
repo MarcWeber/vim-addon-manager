@@ -171,20 +171,26 @@ fun! scriptmanager_util#Unpack(archive, targetDir, ...)
     call delete(a:archive)
   endif
 
-  if get(opts,'vim_to_unix_on_unix',0) && has('unix')
-    for f in split(glob(a:targetDir.'/**/*.vim'))
-      exec 'sp '.fnameescape(f)
-      if &fileformat == 'dos' | set fileformat=unix | w | endif
-      bw!
+  " Do not use `has("unix")' here: it may be useful on `win32unix' (cygwin) and 
+  " `macunix' (someone should ask users of these vims about that)
+  if get(opts, 'unix_ff', 0)
+    for f in scriptmanager_util#Glob(a:targetDir.'/**/*.vim')
+      call writefile(map(readfile(f, 'b'),
+                  \'((v:val[-1:]==#"\r")?(v:val[:-2]):(v:val))'), f, 'b')
     endfor
   endif
+  " Using :sp will fire unneeded autocommands
 
 endf
 
-" Usage: Glob($HOME.'/*') will list hidden files as well
+" Usage: Glob($HOME.'/*')
+" FIXME won't list hidden files as well
 fun! scriptmanager_util#Glob(path)
   return split(glob(a:path),"\n")
-  + filter(split(glob(substitute(a:path,'\*','.*','g')),"\n"),'v:val != "." && v:val != ".."')
+  " The following does not filter . and .. components at all and spoils ** 
+  " patterns (but it lacks `\' at the start of the line, so it is not even 
+  " executed). Commenting this line just clarifies this issue
+  " + filter(split(glob(substitute(a:path,'\*','.*','g')),"\n"),'v:val != "." && v:val != ".."')
 endf
 
 " move */* one level up, then remove first * matches
