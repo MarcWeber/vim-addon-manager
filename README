@@ -1,19 +1,19 @@
 VIM ADDON MANAGER (VAM)
 =======================
 
-VAM installs and updates additional scripts providing augmenting the feature list
-of the text editor Vim.
-It also handles plugin dependencies and puts each script distribution into its own directory
- resulting in a painless installation management.
+VAM installs and updates additional scripts augmenting the feature list of the
+text editor Vim.
+It also handles plugin dependencies and puts each script distribution into its
+own directory resulting in a painless installation management.
 
-Being 100% prue VimL (depending on some additional tools such as curl) it
-should run everywhere. [1]
+Being 100% pure VimL (depending on some additional tools such as curl) it should
+run everywhere. [1]
 
-feauture list:
+Feature list:
 
-- declarative script management (your .vimrc):
+- declarative script management (example lines that should go to your .vimrc):
 
-   set runtimepath+=path-to-vam
+   set runtimepath+=/path/to/vam
    call scriptmanager#Activate(["snipmate","vimdevplugin", .... ])
 
 
