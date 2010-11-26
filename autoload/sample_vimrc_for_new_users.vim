@@ -55,7 +55,10 @@ noremap \e :e<space>**/*
 noremap \n :n<space>**/*
 
 " open a filetype file. Those files are sourced by Vim to setup filetype
-" specific mappings
+" specific mappings. Eg use it for defining commands / mappings which apply
+" for python or perl files only
+" eg command -buffer DoStuff call DoStuff()
+" or map <buffer> \dostuff :call DoStuff()<cr>
 noremap \ft :exec 'e ~/.vim/ftplugin/'.&filetype.'_you.vim'<cr>
 
 " foreign plugin vim-addon-manager {{{1
@@ -256,6 +259,7 @@ http://github.com/dahu/LearnVim
 
 Vim Wiki:
 http://vim.wikia.com
+Checkout its sample .vimrc: http://vim.wikia.com/wiki/Example_vimrc
 
 join #vim (irc.freenode.net)
 
