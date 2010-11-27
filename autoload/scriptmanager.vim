@@ -169,7 +169,6 @@ fun! scriptmanager#Activate(...) abort
   let opts = args[1]
   let topLevel = get(opts,'topLevel',1)
   let opts['topLevel'] = 0
-  let active = copy(s:c['activated_plugins'])
   if topLevel | let s:new_runtime_paths = [] | endif
   call call('scriptmanager#ActivateRecursively', args)
 
@@ -203,17 +202,6 @@ fun! scriptmanager#Activate(...) abort
         call scriptmanager#GlobThenSource(rtp.'/after/plugin/**/*.vim')
       endfor
     endif
-  endif
-
-  if !has('vim_starting')
-    " now source after/plugin/**/*.vim files explicitely. Vim doesn't do it (hack!)
-    for k in keys(s:c['activated_plugins'])
-      if !has_key(active, k)
-        let rtp = scriptmanager#PluginRuntimePath(k)
-        call scriptmanager#GlobThenSource(rtp.'/plugin/**/*.vim')
-        call scriptmanager#GlobThenSource(rtp.'/after/plugin/**/*.vim')
-      endif
-    endfor
   endif
 endfun
 
