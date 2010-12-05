@@ -5,22 +5,21 @@ fun! vcs_checkouts#Update(dir)
   let directory = a:dir
   if isdirectory(directory.'/.git')
     call s:exec_in_dir([{'d': directory, 'c': 'git pull'}])
-    return !v:shell_error
   elseif isdirectory(directory.'/.svn')
     call s:exec_in_dir([{'d': directory, 'c': 'svn update'}])
-    return !v:shell_error
   elseif isdirectory(directory.'/.hg')
     call s:exec_in_dir([
           \ {'d': directory, 'c': 'hg pull'},
           \ {'d': directory, 'c': 'hg update'}
           \ ])
-    if v:shell_error
-      throw "updating ".a:dir." falied. Got exit code: ".v:shell_error
-    endif
   else
     " not knowing how to update a repo is not a failure
     return 0
   endif
+  if v:shell_error
+    throw "updating ".a:dir." falied. Got exit code: ".v:shell_error
+  endif
+  return 1
 endf
 
 " repository = {'type': svn|hg|git, 'url': .. }
