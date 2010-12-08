@@ -629,6 +629,13 @@ what's going to happen.
 ==============================================================================
 11. Troubleshooting and known bugs       *vim-addon-manager-trouble-shooting*
 
+
+  ERROR: Vim(call):E117: Unknown function: scriptmanager#Activate
+
+  SOLUTION: set runtimepath (rtp) correctly. It must match the directory you
+            installed VAM into.
+
+
 TODOs:
 - support vim-scripts.org. This will let you get all www.vim.org scripts using
   git repositories only. I think the general idea is great. However we have to
