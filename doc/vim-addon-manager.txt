@@ -68,7 +68,8 @@ Gentoo users: see |vim-addon-manager-gentoo|.
         endf
         call ActivateAddons()
         " experimental: run after gui has been started
-        " report breakage in this case, please
+        " report breakage in this case, please.
+        " On Windows this may not work. See http://choorucode.wordpress.com/2010/12/09/using-vim-addon-manager-on-windows/
         " au GUIEnter * call Activate()
 4. Optionally genrate helptags: >
        UpdateAddon vim-addon-manager
@@ -634,6 +635,13 @@ what's going to happen.
 
   SOLUTION: set runtimepath (rtp) correctly. It must match the directory you
             installed VAM into.
+
+  ANY OTHER ERROR:
+  Try commenting all your code in .vimrc and other plugins - does it work
+  then? Settings which are known to cause trouble:
+
+    :echo &shell
+    :echo &shellslash (some windows users seem to set this differently?)
 
 
 TODOs:
