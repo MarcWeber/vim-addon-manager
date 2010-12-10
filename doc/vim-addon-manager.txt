@@ -70,7 +70,8 @@ Gentoo users: see |vim-addon-manager-gentoo|.
         endf
         call ActivateAddons()
         " experimental: run after gui has been started
-        " au VimEnter * call Activate()
+        " option1:  au VimEnter * call Activate()
+        " option2:  au GUIEnter * call Activate()
         " See BUGS sections below [*]
     
 <   Note: Depending on the way you choose to run ActivateAddons Vim may not be
@@ -655,12 +656,27 @@ what's going to happen.
     :echo &shell
     :echo &shellslash (some windows users seem to set this differently?)
 
-[*]:
+[*]: Comment about calling ActivateAddons() using autocommands:
+
+  Obviously GUIEnter is only an option if you use gvim only.
+
   Some plugins may fail to assign their changes to existing buffers
   this way. That's one of the reasons why calling ActivateAddons()
   using an autocommand is marked as experimental.
   Probably those are I "won't fix" bugs. Eventually consider patching
-  those plugins instead
+  those plugins instead.
+
+  Workaround: Try adding this to to ActivateAddons() function which should
+  catch almost all issues by reassigning the filetype to each buffer: >
+  bufdo exec 'set ft='.&ft
+< (or use the tlib#buffer#BufDo() function from tlib which will try to
+  preserve the current buffer ... or ... - This may have undesired
+  side effects: Try "vim small-file 2gb-file.txt" and vim will startup fast
+  because the 2gb file will be loaded only if you switch to the buffer.
+  Eg try :bn and you'll wait several minutes. Using bufdo will force loading
+  the (all) buffers on command line immediately ..).
+  You get the idea why I'm not going to maintain this. Putting it into your
+  .vimrc should be easy enough.
 
 TODOs:
 - support vim-scripts.org. This will let you get all www.vim.org scripts using
