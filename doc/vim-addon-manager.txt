@@ -51,11 +51,13 @@ Gentoo users: see |vim-addon-manager-gentoo|.
 1. Create a separate directory that will hold your plugins, for example 
    ~/vim-addons. The addon manager intentionally installs each addon
    into its own directory which is not ~/.vim .
+
 2. Install vim-addon-manager to ~/vim-addons/vim-addon-manager. If you use 
    git, you should do the following: >
         cd ~/vim-addons
         git clone git://github.com/MarcWeber/vim-addon-manager.git
 <  Git will create ~/vim-addons/vim-addon-manager for you.
+
 3. Add ~/vim-addons/vim-addon-manager to your runtimepath by adding the 
    following lines to your vimrc: >
         fun ActivateAddons()
@@ -68,9 +70,14 @@ Gentoo users: see |vim-addon-manager-gentoo|.
         endf
         call ActivateAddons()
         " experimental: run after gui has been started
-        " report breakage in this case, please.
-        " On Windows this may not work. See http://choorucode.wordpress.com/2010/12/09/using-vim-addon-manager-on-windows/
         " au VimEnter * call Activate()
+        " See BUGS sections below [*]
+    
+<   Note: Depending on the way you choose to run ActivateAddons Vim may not be
+    able to show the questions correctly asking you to install a plugin.
+    If that's the case (for whatever reason) I recommend installing the plugin
+    using :ActivateAddons before adding it to the list in .vimrc
+
 4. Optionally genrate helptags: >
        UpdateAddon vim-addon-manager
 <
@@ -648,6 +655,12 @@ what's going to happen.
     :echo &shell
     :echo &shellslash (some windows users seem to set this differently?)
 
+[*]:
+  Some plugins may fail to assign their changes to existing buffers
+  this way. That's one of the reasons why calling ActivateAddons()
+  using an autocommand is marked as experimental.
+  Probably those are I "won't fix" bugs. Eventually consider patching
+  those plugins instead
 
 TODOs:
 - support vim-scripts.org. This will let you get all www.vim.org scripts using
