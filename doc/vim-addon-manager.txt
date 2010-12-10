@@ -70,7 +70,7 @@ Gentoo users: see |vim-addon-manager-gentoo|.
         " experimental: run after gui has been started
         " report breakage in this case, please.
         " On Windows this may not work. See http://choorucode.wordpress.com/2010/12/09/using-vim-addon-manager-on-windows/
-        " au GUIEnter * call Activate()
+        " au VimEnter * call Activate()
 4. Optionally genrate helptags: >
        UpdateAddon vim-addon-manager
 <
@@ -504,7 +504,7 @@ and add it to PATH by >
 
 Ashwin Nanjappa provided an alternative installation instruction here which
 worked for him. You may still want to read this section first. There are
-multiple ways to make VIM run on Windows and install all missing depnedencies.
+multiple ways to make VIM run on Windows and install all missing dependencies.
 http://choorucode.wordpress.com/2010/12/09/using-vim-addon-manager-on-windows/
 
 Does it make sense to support svn and git this way as well?
