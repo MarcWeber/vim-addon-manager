@@ -115,11 +115,11 @@ fun! scriptmanager2#UpdateAddon(name)
       " move plugin to backup destination:
       let pluginDirBackup = pluginDir.'-'.oldVersion
       if isdirectory(pluginDirBackup) || filereadable(pluginDirBackup)
-	if "y" == input("old plugin backup directory found: ".pluginDirBackup.", remove? [y/n]")
-	  call scriptmanager_util#RmFR(pluginDirBackup)
-	else
-	  throw "user abort: remove ".pluginDirBackup." manually"
-	endif
+        if "y" == input("old plugin backup directory found: ".pluginDirBackup.", remove? [y/n]")
+          call scriptmanager_util#RmFR(pluginDirBackup)
+        else
+          throw "user abort: remove ".pluginDirBackup." manually"
+        endif
       endif
       call rename(pluginDir, pluginDirBackup)
       " can be romved. old version is encoded in tmp dir. Removing makes
@@ -128,21 +128,21 @@ fun! scriptmanager2#UpdateAddon(name)
 
       " try creating diff by checking out old version again
       if has_diff
-	let diff_file = s:c['plugin_root_dir'].'/'.a:name.'-'.oldVersion.'.diff'
-	" try to create a diff
-	let archiveName = scriptmanager2#ArchiveNameFromDict(repository)
-	let archiveFileBackup = pluginDirBackup.'/archive/'.archiveName
-	if !filereadable(archiveFileBackup)
-	  echom "old archive file ".archiveFileBackup." is gone, can't try to create diff."
-	else
-	  let archiveFile = pluginDir.'/archive/'.archiveName
-	  call mkdir(pluginDir.'/archive','p')
+        let diff_file = s:c['plugin_root_dir'].'/'.a:name.'-'.oldVersion.'.diff'
+        " try to create a diff
+        let archiveName = scriptmanager2#ArchiveNameFromDict(repository)
+        let archiveFileBackup = pluginDirBackup.'/archive/'.archiveName
+        if !filereadable(archiveFileBackup)
+          echom "old archive file ".archiveFileBackup." is gone, can't try to create diff."
+        else
+          let archiveFile = pluginDir.'/archive/'.archiveName
+          call mkdir(pluginDir.'/archive','p')
 
-	  call scriptmanager_util#CopyFile(archiveFileBackup, archiveFile)
+          call scriptmanager_util#CopyFile(archiveFileBackup, archiveFile)
 
           let rep_copy = deepcopy(repository)
           let rep_copy['url'] = 'file://'.expand(archiveFile)
-	  call scriptmanager2#Checkout(pluginDir, rep_copy)
+          call scriptmanager2#Checkout(pluginDir, rep_copy)
           silent! call delete(pluginDir.'/version')
           try
             call vcs_checkouts#ExecIndir([{'d': s:c['plugin_root_dir'], 'c': scriptmanager_util#ShellDSL('diff -U3 -r $p $p', fnamemodify(pluginDir,':t'), fnamemodify(pluginDirBackup,':t')).' > '.diff_file}])
@@ -151,9 +151,9 @@ fun! scriptmanager2#UpdateAddon(name)
             " :-( this is expected. diff returns non zero exit status. This is hacky
             let diff=1
           endtry
-	  call scriptmanager_util#RmFR(pluginDir)
+          call scriptmanager_util#RmFR(pluginDir)
           echo 6
-	endif
+        endif
       endif
 
       " checkout new version (checkout into empty location - same as installing):
@@ -162,7 +162,7 @@ fun! scriptmanager2#UpdateAddon(name)
       " try applying patch
       let patch_failure = 0
       if exists('diff')
-	if executable("patch")
+        if executable("patch")
           try
             call vcs_checkouts#ExecIndir([{'d': pluginDir, 'c': 'patch -p1 < '. diff_file }])
             echom "patching suceeded"
@@ -181,7 +181,7 @@ fun! scriptmanager2#UpdateAddon(name)
 
       " tidy up - if user didn't provide diff we remove old directory
       if !patch_failure
-	call scriptmanager_util#RmFR(pluginDirBackup)
+        call scriptmanager_util#RmFR(pluginDirBackup)
       endif
     else
       echom "not updating plugin ".a:name." because there is no version according to version key"
@@ -472,8 +472,8 @@ fun! scriptmanager2#MergePluginFiles(plugins, skip_pattern)
         if lines[i] =~ '^\s*finish' && lines[i-1] =~ '^\s*if\s'
           " found a guard
           
-          " negate if, remove {{{ if present (I don't care)
-          let lines[i-1] = 'if !('.matchstr(substitute(lines[i-1],'"[^"]*{{{.*','',''),'if\s*\zs.*').')'
+          " negate if, remove triple { if present (I don't care)
+          let lines[i-1] = 'if !('.matchstr(substitute(lines[i-1],'"[^"]*{\{3}.*','',''),'if\s*\zs.*').')'
           let j = i+1
           while j < len(lines) && lines[j] !~ '^\s*endif'
             let lines[j] = ''
@@ -575,3 +575,4 @@ if g:is_win
 
   endf
 endif
+" vim: et ts=8 sts=2 sw=2

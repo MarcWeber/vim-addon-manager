@@ -244,3 +244,4 @@ command! -nargs=* -complete=customlist,scriptmanager2#InstalledAddonCompletion A
 command! -nargs=* -complete=customlist,scriptmanager2#AddonCompletion UpdateAddons :call scriptmanager2#Update([<f-args>])
 command! -nargs=* -complete=customlist,scriptmanager2#UninstallCompletion UninstallNotLoadedAddons :call scriptmanager2#UninstallAddons([<f-args>])
 
+" vim: et ts=8 sts=2 sw=2

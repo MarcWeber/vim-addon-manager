@@ -99,7 +99,6 @@ fun! scriptmanager_util#Unpack(archive, targetDir, ...)
 
         " PHASE (1): gunzip or bunzip using gzip,bzip2 or 7z:
         if executable('7z') && !exists('g:prefer_tar')
-          echoe "using 7z"
           " defaulting to 7z why or why not?
           call s:exec_in_dir([{'d': fnamemodify(a:archive, ':h'), 'c': '7z x '.esc_archive }])
           " 7z renames tgz to tar
@@ -319,3 +318,4 @@ fun! scriptmanager_util#TempDir(name)
   " expand make \ out of / on Windows
   return expand(s:tmpDir.'/'.a:name)
 endf
+" vim: et ts=8 sts=2 sw=2

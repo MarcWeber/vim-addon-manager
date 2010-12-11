@@ -124,3 +124,4 @@ fun! scriptmanager_test#TestUpdate(case) abort
 
   endif
 endfun
+" vim: et ts=8 sts=2 sw=2
