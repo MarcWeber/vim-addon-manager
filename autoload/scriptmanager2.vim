@@ -110,7 +110,6 @@ fun! scriptmanager2#UpdateAddon(name)
     if oldVersion != newVersion || newVersion == '?'
       " update plugin
       echom "updating plugin ".a:name." because ".(newVersion == '?' ? 'version is unkown' : 'there is a different version')
-      let has_diff = executable('diff')
 
       " move plugin to backup destination:
       let pluginDirBackup = pluginDir.'-'.oldVersion
@@ -127,7 +126,7 @@ fun! scriptmanager2#UpdateAddon(name)
       silent! call delete(pluginDirBackup.'/version')
 
       " try creating diff by checking out old version again
-      if has_diff
+      if s:c['do_diff'] && executable('diff')
         let diff_file = s:c['plugin_root_dir'].'/'.a:name.'-'.oldVersion.'.diff'
         " try to create a diff
         let archiveName = scriptmanager2#ArchiveNameFromDict(repository)
