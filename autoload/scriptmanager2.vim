@@ -135,10 +135,8 @@ fun! scriptmanager2#UpdateAddon(name)
           let archiveFile = pluginDir.'/archive/'.archiveName
           call mkdir(pluginDir.'/archive','p')
 
-          call scriptmanager_util#CopyFile(archiveFileBackup, archiveFile)
-
           let rep_copy = deepcopy(repository)
-          let rep_copy['url'] = 'file://'.expand(archiveFile)
+          let rep_copy['url'] = 'file://'.expand(archiveFileBackup)
           call scriptmanager2#Checkout(pluginDir, rep_copy)
           silent! call delete(pluginDir.'/version')
           try
