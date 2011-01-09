@@ -4,8 +4,6 @@ let s:curl = exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o'
 exec scriptmanager#DefineAndBind('s:c','g:vim_script_manager','{}')
 
 
-let s:system_wide = !filewritable(expand('<sfile>'))
-
 " Install let's you install plugins by passing the url of a addon-info file
 " This preprocessor replaces the urls by the plugin-names putting the
 " repository information into the global dict
@@ -194,7 +192,7 @@ fun! scriptmanager2#Update(list)
   if empty(list) && input('Update all loaded plugins? [y/n] ','y') == 'y'
     call scriptmanager2#LoadKnownRepos(' so that its updated as well')
     " include vim-addon-manager in list
-    if !s:system_wide
+    if !s:c['system_wide']
       call scriptmanager#Activate(['vim-addon-manager'])
     endif
     let list = keys(s:c['activated_plugins'])

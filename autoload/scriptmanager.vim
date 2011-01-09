@@ -39,9 +39,10 @@ let s:c['activated_plugins'] = get(s:c,'activaded_plugins', {})
 " If directory where plugin is installed is writeable, then this plugin was 
 " likely installed by user according to the instruction. If it is not, then it 
 " is likely a system-wide installation.
-let s:c['plugin_root_dir'] = get(s:c, 'plugin_root_dir', ((filewritable(expand('<sfile>:h:h:h')))?
-            \                                               (expand('<sfile>:h:h:h')):
-            \                                               ('~/vim-addons')))
+let s:c['system_wide'] = !filewritable(expand('<sfile>:h:h:h'))
+let s:c['plugin_root_dir'] = get(s:c, 'plugin_root_dir', ((s:c['system_wide'])?
+            \                                               ('~/vim-addons'):
+            \                                               (expand('<sfile>:h:h:h'))))
 " ensure we have absolute paths (windows doesn't like ~/.. ) :
 let s:c['plugin_root_dir'] = expand(s:c['plugin_root_dir'])
 let s:c['known'] = get(s:c,'known','vim-addon-manager-known-repositories')
