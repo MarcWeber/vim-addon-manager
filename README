@@ -6,6 +6,8 @@ text editor Vim.
 It also handles plugin dependencies and puts each script distribution into its
 own directory resulting in a painless installation management.
 
+supported PLUGIN SOURCES: git, mercurial, svn, www.vim.org, ...
+
 Being 100% pure VimL (depending on some additional tools such as curl) it should
 run everywhere. [1]
 
