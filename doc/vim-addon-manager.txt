@@ -284,6 +284,32 @@ Vim does not source plugin/*.vim and after/plugin/*.vim automatically
 if you add pathes to runtimepath after Vim has startup. vim-addon-manager
 takes care of that for you.
 
+addon names & how to find the plugin you're looking for ~
+Open the vim-addon-manager-known-repositories/plugin/vim-addon-manager-known-repositories.vim
+There you'll find the two types of dictionaries which are used to find and
+install plugins. You'll find lines like this:
+>
+  let s:plugin_sources['Align294'] = {'title': 'Align', 'version': '35/41', 'url': 'http://www.vim.org/scripts/download_script.php?src_id=10110', 'vim_version': '7.0', 'date': '2009-03-04', 'vim_script_nr': 294, 'type': 'archive', 'script-type': 'utility', 'archive_name': 'Align.vba.gz', 'author': 'Charles Campbell'}
+  let s:plugin_sources['Align1497'] = {'title': 'Align.vim', 'version': '0.15', 'url': 'http://www.vim.org/scripts/download_script.php?src_id=5451', 'vim_version': '6.0', 'date': '2006-03-17', 'vim_script_nr': 1497, 'type': 'archive', 'script-type': 'utility', 'archive_name': 'Align.vim', 'author': 'Michael Gnezdov'}
+< 
+In this example both titles are stripped to "Align" which would result in a
+name collision. Thus the gather script appends the script ids.
+The script id can be found in the plugin web url.
+
+There is a second type of dict containing bleeding edge versions:
+>
+  let s:scm_plugin_sources['tmru'] = {'type': 'git', 'url': 'git://github.com/tomtom/tmru_vim.git' }
+<
+Both dicts are merged. The default is to prefer the scm version but you can
+choose. (-> MergeSources)
+
+The keys (eg tmru, Align294, Align1497) must be used instead of {name}.
+>
+  :ActivateAddon Align<c-d>
+< showes a list of all names containing "Align" which is often enough to
+identify the plugin you're looking for.
+
+Maybe a :ShowScriptNameOfSciptId X command should be added (?)
 
 ==============================================================================
 6. Addon-info file                           *vim-addon-manager-addon-info*
