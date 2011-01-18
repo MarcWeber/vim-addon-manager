@@ -2,6 +2,8 @@
 ==============================================================================
 CONTENTS                                        *vim-addon-manager-contents*
 
+   (0. HELP - something dosen't work)
+
     1. Intro                           |vim-addon-manager-intro|
     2. Installation                    |vim-addon-manager-installation|
     3. Functionality provided          |vim-addon-manager-functionality|
@@ -16,6 +18,15 @@ CONTENTS                                        *vim-addon-manager-contents*
    10. Some notes for Gentoo users     |vim-addon-manager-gentoo|
    11. Troubleshooting and known bug  |vim-addon-manager-trouble-shooting|
        and TODOs
+
+==============================================================================
+(0. HELP - something dosen't work)
+
+Join irc.freenode.net, /join #vim. Ask there. VAM has many users
+MarcWeber is hanging around often so ping him or create a github ticket [1] and
+people will try to help you. You should skim the docs before asking for
+help though. Also see *vim-addon-manager-author*
+[1] https://github.com/MarcWeber/vim-addon-manager/issues
 
 ==============================================================================
 1. Intro                                           *vim-addon-manager-intro*
