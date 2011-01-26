@@ -305,7 +305,7 @@ choose. (-> MergeSources)
 
 The keys (eg tmru, Align294, Align1497) must be used instead of {name}.
 >
-  :ActivateAddon Align<c-d>
+  :ActivateAddon Align<c-d>[<tab>]
 < showes a list of all names containing "Align" which is often enough to
 identify the plugin you're looking for.
 

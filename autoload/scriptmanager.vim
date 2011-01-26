@@ -205,6 +205,7 @@ fun! scriptmanager#Activate(...) abort
     if !has('vim_starting')
       for rtp in s:new_runtime_paths
         call scriptmanager#GlobThenSource(rtp.'/plugin/**/*.vim')
+        call scriptmanager#GlobThenSource(rtp.'/ftdetect/*.vim')
         call scriptmanager#GlobThenSource(rtp.'/after/plugin/**/*.vim')
       endfor
     endif
