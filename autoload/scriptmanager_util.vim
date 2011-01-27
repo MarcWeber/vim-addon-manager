@@ -77,7 +77,7 @@ fun! scriptmanager_util#Unpack(archive, targetDir, ...)
     " hook for plugin / syntax files: Move into the correct direcotry:
     let dir = a:targetDir.'/plugin'
     let type = opts['script-type']
-    if type  =~# '^\%(syntax\|indent\|ftplugin\|plugin\|autoload\)$'
+    if type  =~# '^\%(syntax\|indent\|ftplugin\|plugin\|autoload\|colors\)$'
       let dir = a:targetDir.'/'.type
     endif
     if (!isdirectory(dir))
