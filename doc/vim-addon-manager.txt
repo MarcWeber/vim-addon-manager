@@ -17,7 +17,7 @@ CONTENTS                                        *vim-addon-manager-contents*
     9. Some notes for windows users    |vim-addon-manager-windows|
    10. Some notes for Gentoo users     |vim-addon-manager-gentoo|
    11. Troubleshooting and known bug  |vim-addon-manager-trouble-shooting|
-       and TODOs
+       and TODOs as well as "I want .."
 
 ==============================================================================
 (0. HELP - something dosen't work)
@@ -780,5 +780,14 @@ So don't use ',' in paths and everyone is happy.
 
 I only act uppon feedback. So if you want changes you have to contact me.
 Don't expect me to know what you dream about.
+
+"I want feature X" such as browsable lists of plugins. ActivateAddon FOO
+make launching the plugin permanent, ...
+Me too - pay me.
+Seriously: I don't want to add all features to VAM. Its desine as minimal as
+possible. This excludes any gui features. If you want to add such browser or
+the like create a new plugin "vim-addon-manager-gui" people can install and
+use. I'm happy to put a link into this manual or assist you.
+However I personally don't have time to write it.
 
 vim:tw=78:fo=tcq2:isk=!-~,^*,^\|,^\":ts=8:ft=help:norl:
