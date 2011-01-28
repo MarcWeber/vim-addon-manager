@@ -102,7 +102,12 @@ endf
 
 " doesn't check dependencies!
 fun! scriptmanager#IsPluginInstalled(name)
-  return isdirectory(scriptmanager#PluginDirByName(a:name))
+  let d = scriptmanager#PluginDirByName(a:name)
+  " if dir exists and its not a failed download
+  " (empty archive directory)
+  return isdirectory(d)
+    \ && ( !isdirectory(d.'/archive')
+    \     || len(glob(d.'/archive/*')) > 0 )
 endf
 
 " {} if file doesn't exist
