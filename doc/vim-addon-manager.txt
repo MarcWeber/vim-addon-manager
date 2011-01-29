@@ -80,7 +80,7 @@ Gentoo users: see |vim-addon-manager-gentoo|.
           endtry
         endf
         call ActivateAddons()
-        " experimental: run after gui has been started
+        " experimental: run after gui has been started [3]
         " option1:  au VimEnter * call Activate()
         " option2:  au GUIEnter * call Activate()
         " See BUGS sections below [*]
@@ -265,6 +265,11 @@ First read |vim-addon-manager-installation|.
 As documented |scriptmanager#Activate| or |:ActivateAddons| will fetch
 (=install) the plugin if it failed to find requested addon in your addons 
 directory.
+
+I recommend using |:ActivateAddons| to "preview" a plugin and if it both works
+and you like it add it to ~/.vimrc.
+This also works around the issue with questions not being displayed correctly
+at startup [3].
 
 You can use |:ActivateAddons|'s tab completion to find the plugin name fast.
 
