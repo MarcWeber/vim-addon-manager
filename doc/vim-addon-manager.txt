@@ -36,14 +36,14 @@ work. Features:
 
     - Separate directories for each plugins
     - Dependency resolution
-    - Popular VCS support: plugin supports fetching from Mercurial, Git and
-      Subversion repositories
+    - Popular VCS support: plugin supports fetching from Git, Mercurial,
+      Subversion and Bazaar repositories
 
 Dependencies:
     - Curl, wget or other program that can output URL contents to stdout (in
       order to get http protocol support)
-    - Mercurial, Git and Subversion (if you want to install plugins from
-      appropriate repositories)
+    - Git, Mercurial, Subversion and Bazaar (if you want to install plugins
+      from appropriate repositories)
     - vcs_checkouts plugin (comes with this addon)
     - Either tar, gzip and zip or 7-zip (required for unpacking some addons)
     - Vimball plugin (required for installing some addons) (in latest vim it
@@ -346,8 +346,8 @@ repository                                          *addon-info-repository*
          |! to it - so that its kept in sync.
 
         Key      Description ~
-        type     Required, must be either one of `hg', `git', `svn' or an
-                 empty string.
+        type     Required, must be either one of `hg', `git', `svn', `bzr' or
+                 an empty string.
         url      If `type' key contains a VCS name (`hg', `git' or `svn'),
                  then this key describes a url that will be passed to this
                  VCS. If `type' key contains an empty string, then it should
@@ -621,8 +621,8 @@ VCS:
 
 We tried thinking about making using vim-addon-manager easier for Windows
 users. One idea was introducing a proxy which asks a linux server to package
-git/svn/mercurial as zip file on the fly. This would mean you don't have to
-install svn,hg,.. to use plugins only.
+git/svn/mercurial/bazaar as zip file on the fly. This would mean you don't
+have to install svn,hg,.. to use plugins only.
 
 If you want something like this to happen contact me.
 
