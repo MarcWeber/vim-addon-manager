@@ -73,7 +73,7 @@ fun! scriptmanager2#Install(toBeInstalledList, ...)
       endif
 
       " install dependencies
-     
+
       let infoFile = scriptmanager#AddonInfoFile(name)
       let info = scriptmanager#AddonInfo(name)
 
@@ -93,7 +93,7 @@ fun! scriptmanager2#UpdateAddon(name)
   let pluginDir = scriptmanager#PluginDirByName(a:name)
   if !vcs_checkouts#Update(pluginDir)
     " try updating plugin by archive
-    
+
     " we have to find out whether there is a new version:
     call scriptmanager2#LoadKnownRepos()
     let repository = get(s:c['plugin_sources'], a:name, {})
@@ -102,7 +102,7 @@ fun! scriptmanager2#UpdateAddon(name)
       return
     endif
     let newVersion = get(repository,'version','?')
-    
+
     let versionFile = pluginDir.'/version'
     let oldVersion = filereadable(versionFile) ? readfile(versionFile, 1)[0] : "?"
     if oldVersion != newVersion || newVersion == '?'
@@ -234,7 +234,7 @@ fun! scriptmanager2#DoCompletion(A,L,P,...)
 
   let beforeC= a:L[:a:P-1]
   let word = matchstr(beforeC, '\zs\S*$')
-  " ollow glob patterns 
+  " ollow glob patterns
   let word = substitute('\*','.*',word,'g')
 
   let not_loaded = config == "uninstall"
@@ -305,7 +305,7 @@ endf
 
 " may throw EXCEPTION_UNPACK
 fun! scriptmanager2#Checkout(targetDir, repository) abort
-  if get(a:repository,'type','') =~ 'git\|hg\|svn'
+  if get(a:repository,'type','') =~ 'git\|hg\|svn\|bzr'
     call vcs_checkouts#Checkout(a:targetDir, a:repository)
   else
     " archive based repositories - no VCS
@@ -320,7 +320,7 @@ fun! scriptmanager2#Checkout(targetDir, repository) abort
 
     call scriptmanager_util#Download(a:repository['url'], archiveFile)
 
-    call scriptmanager_util#Unpack(archiveFile, a:targetDir, 
+    call scriptmanager_util#Unpack(archiveFile, a:targetDir,
                 \                  {'strip-components': get(a:repository,'strip-components',-1),
                 \                   'script-type': tolower(get(a:repository, 'script-type', 'plugin')),
                 \                   'unix_ff': get(a:repository, 'unix_ff', get(s:c, 'change_to_unix_ff')) })
@@ -466,7 +466,7 @@ fun! scriptmanager2#MergePluginFiles(plugins, skip_pattern)
       for i in range(2,len(lines)-1)
         if lines[i] =~ '^\s*finish' && lines[i-1] =~ '^\s*if\s'
           " found a guard
-          
+
           " negate if, remove triple { if present (I don't care)
           let lines[i-1] = 'if !('.matchstr(substitute(lines[i-1],'"[^"]*{\{3}.*','',''),'if\s*\zs.*').')'
           let j = i+1

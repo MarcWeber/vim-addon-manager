@@ -37,15 +37,14 @@ fun! vcs_checkouts#Checkout(targetDir, repository)
     if !isdirectory(a:targetDir)
       throw "Failed checking out ".a:targetDir."!"
     endif
-  elseif a:repository['type'] == 'svn'
-    let parent = fnamemodify(a:targetDir,':h')
-    call s:exec_in_dir([{'d': parent, 'c': 'svn checkout '.s:shellescape(a:repository['url']).' '.s:shellescape(a:targetDir)}])
+  elseif a:repository['type'] == 'bzr'
+    exec '!'.scriptmanager_util#ShellDSL('bzr branch $ $p', a:repository['url'], a:targetDir)
     if !isdirectory(a:targetDir)
       throw "Failed checking out ".a:targetDir."!"
     endif
-  endif
-  elseif a:repository['type'] == 'bzr'
-    exec '!'.scriptmanager_util#ShellDSL('bzr branch $ $p', a:repository['url'], a:targetDir)
+  elseif a:repository['type'] == 'svn'
+    let parent = fnamemodify(a:targetDir,':h')
+    call s:exec_in_dir([{'d': parent, 'c': 'svn checkout '.s:shellescape(a:repository['url']).' '.s:shellescape(a:targetDir)}])
     if !isdirectory(a:targetDir)
       throw "Failed checking out ".a:targetDir."!"
     endif
