@@ -7,6 +7,8 @@ fun! vcs_checkouts#Update(dir)
     call s:exec_in_dir([{'d': directory, 'c': 'git pull'}])
   elseif isdirectory(directory.'/.svn')
     call s:exec_in_dir([{'d': directory, 'c': 'svn update'}])
+  elseif isdirectory(directory.'/.bzr')
+    call s:exec_in_dir([{'d': directory, 'c': 'bzr pull'}])
   elseif isdirectory(directory.'/.hg')
     call s:exec_in_dir([
           \ {'d': directory, 'c': 'hg pull'},
@@ -22,7 +24,7 @@ fun! vcs_checkouts#Update(dir)
   return 1
 endf
 
-" repository = {'type': svn|hg|git, 'url': .. }
+" repository = {'type': git|hg|svn|bzr, 'url': .. }
 fun! vcs_checkouts#Checkout(targetDir, repository)
   if a:repository['type'] == 'git'
     exec '!'.scriptmanager_util#ShellDSL('git clone $ $p', a:repository['url'], a:targetDir)
@@ -38,6 +40,12 @@ fun! vcs_checkouts#Checkout(targetDir, repository)
   elseif a:repository['type'] == 'svn'
     let parent = fnamemodify(a:targetDir,':h')
     call s:exec_in_dir([{'d': parent, 'c': 'svn checkout '.s:shellescape(a:repository['url']).' '.s:shellescape(a:targetDir)}])
+    if !isdirectory(a:targetDir)
+      throw "Failed checking out ".a:targetDir."!"
+    endif
+  endif
+  elseif a:repository['type'] == 'bzr'
+    exec '!'.scriptmanager_util#ShellDSL('bzr branch $ $p', a:repository['url'], a:targetDir)
     if !isdirectory(a:targetDir)
       throw "Failed checking out ".a:targetDir."!"
     endif
