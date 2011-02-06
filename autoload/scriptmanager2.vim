@@ -234,7 +234,7 @@ fun! scriptmanager2#DoCompletion(A,L,P,...)
 
   let beforeC= a:L[:a:P-1]
   let word = matchstr(beforeC, '\zs\S*$')
-  " ollow glob patterns
+  " allow glob patterns
   let word = substitute('\*','.*',word,'g')
 
   let not_loaded = config == "uninstall"
