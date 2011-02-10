@@ -348,7 +348,7 @@ repository                                          *addon-info-repository*
         Key      Description ~
         type     Required, must be either one of `hg', `git', `svn', `bzr' or
                  an empty string.
-        url      If `type' key contains a VCS name (`hg', `git' or `svn'),
+        url      If `type' key contains a VCS name (`hg', `git', `bzr' or `svn'),
                  then this key describes a url that will be passed to this
                  VCS. If `type' key contains an empty string, then it should
                  contain location of the archive.
