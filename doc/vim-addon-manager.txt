@@ -25,7 +25,7 @@ CONTENTS                                        *vim-addon-manager-contents*
 Join irc.freenode.net, /join #vim. Ask there. VAM has many users
 MarcWeber is hanging around often so ping him or create a github ticket [1] and
 people will try to help you. You should skim the docs before asking for
-help though. Also see *vim-addon-manager-author*
+help though. Also see |vim-addon-manager-author|
 [1] https://github.com/MarcWeber/vim-addon-manager/issues
 
 ==============================================================================
