@@ -58,7 +58,9 @@ Read: |vim-addon-manager-installation| and |vim-addon-manager-install-plugins|
 
 Windows users: see |vim-addon-manager-windows|.
 Gentoo users: see |vim-addon-manager-gentoo|.
+linux script: see |linux-installation-script|.
 
+manually:
 1. Create a separate directory that will hold your plugins, for example
    ~/vim-addons. The addon manager intentionally installs each addon
    into its own directory which is not ~/.vim .
@@ -90,7 +92,7 @@ Gentoo users: see |vim-addon-manager-gentoo|.
     If that's the case (for whatever reason) I recommend installing the plugin
     using :ActivateAddons before adding it to the list in .vimrc
 
-4. Optionally genrate helptags: >
+4. Optionally generate helptags: >
        UpdateAddon vim-addon-manager
 <
 
@@ -794,5 +796,20 @@ possible. This excludes any gui features. If you want to add such browser or
 the like create a new plugin "vim-addon-manager-gui" people can install and
 use. I'm happy to put a link into this manual or assist you.
 However I personally don't have time to write it.
+
+*linux-installation-script* paste into your shell:
+
+mkdir ~/vim-addons
+git clone git://github.com/MarcWeber/vim-addon-manager.git ~/vim-addons/vim-addon-manager
+cat >> ~/.vimrc << EOF
+fun ActivateAddons()
+  set runtimepath+=~/vim-addons/vim-addon-manager
+  call scriptmanager#Activate([])
+endf
+call ActivateAddons()
+" experimental: run after gui has been started [3]
+" option1:  au VimEnter * call Activate()
+" option2:  au GUIEnter * call Activate()
+EOF
 
 vim:tw=78:fo=tcq2:isk=!-~,^*,^\|,^\":ts=8:ft=help:norl:
