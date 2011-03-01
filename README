@@ -21,7 +21,7 @@ Feature list:
 
 - optional manual runtime activation of scripts:
 
-  :ActivateAddon plugin-name
+  :ActivateAddons plugin-name
 
 
 - update feature:

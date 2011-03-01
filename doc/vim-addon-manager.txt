@@ -312,7 +312,7 @@ choose. (-> MergeSources)
 
 The keys (eg tmru, Align294, Align1497) must be used instead of {name}.
 >
-  :ActivateAddon Align<c-d>[<tab>]
+  :ActivateAddons Align<c-d>[<tab>]
 < showes a list of all names containing "Align" which is often enough to
 identify the plugin you're looking for.
 
@@ -788,7 +788,7 @@ So don't use ',' in paths and everyone is happy.
 I only act uppon feedback. So if you want changes you have to contact me.
 Don't expect me to know what you dream about.
 
-"I want feature X" such as browsable lists of plugins. ActivateAddon FOO
+"I want feature X" such as browsable lists of plugins. ActivateAddons FOO
 make launching the plugin permanent, ...
 Me too - pay me.
 Seriously: I don't want to add all features to VAM. It is designed as minimal 
