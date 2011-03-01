@@ -20,7 +20,7 @@ CONTENTS                                        *vim-addon-manager-contents*
        and TODOs as well as "I want .."
 
 ==============================================================================
-(0. HELP - something dosen't work)
+(0. HELP - something doesn't work)
 
 Join irc.freenode.net, /join #vim. Ask there. VAM has many users
 MarcWeber is hanging around often so ping him or create a github ticket [1] and
@@ -791,11 +791,11 @@ Don't expect me to know what you dream about.
 "I want feature X" such as browsable lists of plugins. ActivateAddon FOO
 make launching the plugin permanent, ...
 Me too - pay me.
-Seriously: I don't want to add all features to VAM. Its desine as minimal as
-possible. This excludes any gui features. If you want to add such browser or
-the like create a new plugin "vim-addon-manager-gui" people can install and
-use. I'm happy to put a link into this manual or assist you.
-However I personally don't have time to write it.
+Seriously: I don't want to add all features to VAM. It is designed as minimal 
+as possible. This excludes any gui features. If you want to add such browser 
+or the like create a new plugin "vim-addon-manager-gui" people can install and 
+use. I'm happy to put a link into this manual or assist you. However 
+I personally don't have time to write it.
 
 *linux-installation-script* paste into your shell:
 
