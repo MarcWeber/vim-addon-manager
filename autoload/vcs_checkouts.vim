@@ -28,26 +28,20 @@ endf
 fun! vcs_checkouts#Checkout(targetDir, repository)
   if a:repository['type'] == 'git'
     exec '!'.scriptmanager_util#ShellDSL('git clone $ $p', a:repository['url'], a:targetDir)
-    if !isdirectory(a:targetDir)
-      throw "Failed checking out ".a:targetDir."!"
-    endif
   elseif a:repository['type'] == 'hg'
     let parent = fnamemodify(a:targetDir,':h')
     exec '!'.scriptmanager_util#ShellDSL('hg clone $ $p', a:repository['url'], a:targetDir)
-    if !isdirectory(a:targetDir)
-      throw "Failed checking out ".a:targetDir."!"
-    endif
   elseif a:repository['type'] == 'bzr'
     exec '!'.scriptmanager_util#ShellDSL('bzr branch $ $p', a:repository['url'], a:targetDir)
-    if !isdirectory(a:targetDir)
-      throw "Failed checking out ".a:targetDir."!"
-    endif
   elseif a:repository['type'] == 'svn'
     let parent = fnamemodify(a:targetDir,':h')
     call s:exec_in_dir([{'d': parent, 'c': 'svn checkout '.s:shellescape(a:repository['url']).' '.s:shellescape(a:targetDir)}])
-    if !isdirectory(a:targetDir)
-      throw "Failed checking out ".a:targetDir."!"
-    endif
+  else
+    " Keep old behavior: no throw for unknown repository type
+    return
+  endif
+  if !isdirectory(a:targetDir)
+    throw "Failed checking out ".a:targetDir."!"
   endif
 endf
 
