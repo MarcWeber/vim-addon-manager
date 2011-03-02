@@ -142,7 +142,7 @@ fun! scriptmanager#ActivateRecursively(list_of_names, ...)
 
       " activate dependencies merging opts with given repository sources
       " sources given in opts will win
-      call scriptmanager#Activate(keys(dependencies),
+      call scriptmanager#ActivateAddons(keys(dependencies),
         \ extend(copy(opts), { 'plugin_sources' : extend(copy(dependencies), get(opts, 'plugin_sources',{}))}))
     endif
     " source plugin/* files ?
@@ -153,22 +153,36 @@ fun! scriptmanager#ActivateRecursively(list_of_names, ...)
   endfor
 endf
 
+fun! scriptmanager#Activate(...) abort
+  " historical. Call ActivateAddons instead
+  let cmd='%s@\(scriptmanager#Activate\)(@\1Addons(@'
+  let files = filter([$HOME."/.vimrc",$HOME.'/_vimrc'], 'filereadable(v:val)')
+  if len(files) == 1
+    exec 'e '.fnameescape(files[0])
+    echoe "running ".cmd." for you"
+    exec cmd | w
+  else
+    echo "open your the file calling scriptmanager#Activate and run: %s@\(scriptmanager#Activate\)(@\1Addons(@ . Rename happened for consistency"
+  endif
+  call call(function('scriptmanager#ActivateAddons'),a:000)
+endf
+
 " see also ActivateRecursively
 " Activate activates the plugins and their dependencies recursively.
 " I sources both: plugin/*.vim and after/plugin/*.vim files when called after
 " .vimrc has been sourced which happens when you activate plugins manually.
-fun! scriptmanager#Activate(...) abort
+fun! scriptmanager#ActivateAddons(...) abort
   let args = copy(a:000)
   if a:0 == 0 | return | endif
 
   if  type(args[0])==type("")
     " way of usage 1: pass addon names as function arguments
-    " Example: Activate("name1","name2")
+    " Example: ActivateAddons("name1","name2")
 
     let args=[args, {}]
   else
     " way of usage 2: pass addon names as list optionally passing options
-    " Example: Activate(["name1","name2"], { options })
+    " Example: ActivateAddons(["name1","name2"], { options })
 
     let args=[args[0], get(args,1,{})]
   endif
@@ -247,8 +261,8 @@ fun! scriptmanager#AddonInfoFile(name)
   endif
 endf
 
-command! -nargs=* -complete=customlist,scriptmanager2#AddonCompletion ActivateAddons :call scriptmanager#Activate([<f-args>])
-command! -nargs=* -complete=customlist,scriptmanager2#InstalledAddonCompletion ActivateInstalledAddons :call scriptmanager#Activate([<f-args>])
+command! -nargs=* -complete=customlist,scriptmanager2#AddonCompletion ActivateAddons :call scriptmanager#ActivateAddons([<f-args>])
+command! -nargs=* -complete=customlist,scriptmanager2#InstalledAddonCompletion ActivateInstalledAddons :call scriptmanager#ActivateAddons([<f-args>])
 command! -nargs=* -complete=customlist,scriptmanager2#AddonCompletion UpdateAddons :call scriptmanager2#Update([<f-args>])
 command! -nargs=* -complete=customlist,scriptmanager2#UninstallCompletion UninstallNotLoadedAddons :call scriptmanager2#UninstallAddons([<f-args>])
 

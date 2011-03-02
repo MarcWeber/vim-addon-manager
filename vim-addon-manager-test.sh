@@ -30,7 +30,7 @@ let opts = {'auto_install' : 1 }
 " test mercurial
 " test git
 " test subversion
-call scriptmanager#Activate(["translit3","vim-addon-views","vim-latex"], opts)
+call scriptmanager#ActivateAddons(["translit3","vim-addon-views","vim-latex"], opts)
 
 function CheckAll()
    let res = [

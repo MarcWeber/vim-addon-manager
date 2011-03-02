@@ -34,7 +34,7 @@ fun! scriptmanager2#ReplaceAndFetchUrls(list)
 endfun
 
 
-" opts: same as Activate
+" opts: same as ActivateAddons
 fun! scriptmanager2#Install(toBeInstalledList, ...)
   let toBeInstalledList = scriptmanager2#ReplaceAndFetchUrls(a:toBeInstalledList)
   let opts = a:0 == 0 ? {} : a:1
@@ -191,7 +191,7 @@ fun! scriptmanager2#Update(list)
     call scriptmanager2#LoadKnownRepos(' so that its updated as well')
     " include vim-addon-manager in list
     if !s:c['system_wide']
-      call scriptmanager#Activate(['vim-addon-manager'])
+      call scriptmanager#ActivateAddons(['vim-addon-manager'])
     endif
     let list = keys(s:c['activated_plugins'])
   endif
@@ -368,7 +368,7 @@ fun! scriptmanager2#LoadKnownRepos(...)
     endif
     if s:reply ==# 'N' | let s:c.known_repos_activation_policy = "never" | endif
     if s:reply ==? 'y'
-      call scriptmanager#Activate([known])
+      call scriptmanager#ActivateAddons([known])
       " This is not done in .vimrc because Vim loads plugin/*.vim files after
       " having finished processing .vimrc. So do it manually
       exec 'source '.scriptmanager#PluginDirByName(known).'/plugin/vim-addon-manager-known-repositories.vim'

@@ -16,17 +16,17 @@ fun! scriptmanager_test#Test()
   " test mercurial
   call feedkeys("y")
   let plugin_sources['vimstuff'] = { 'type': 'hg', 'url': 'http://vimstuff.hg.sourceforge.net:8000/hgroot/vimstuff/vimstuff' }
-  call scriptmanager#Activate(["vimstuff"])
+  call scriptmanager#ActivateAddons(["vimstuff"])
 
   " test git
   call feedkeys("y")
   let plugin_sources['vim-addon-views'] = { 'type' : 'git', 'url' : 'git://github.com/MarcWeber/vim-addon-views.git' }
-  call scriptmanager#Activate(["vim-addon-views"])
+  call scriptmanager#ActivateAddons(["vim-addon-views"])
 
   " test subversion
   call feedkeys("y")
   let plugin_sources['vim-latex'] = { 'type': 'svn', 'url': 'https://vim-latex.svn.sourceforge.net/svnroot/vim-latex/trunk/vimfiles'}
-  call scriptmanager#Activate(["vim-latex"])
+  call scriptmanager#ActivateAddons(["vim-latex"])
 
 endf
 
