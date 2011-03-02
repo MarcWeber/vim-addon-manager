@@ -102,15 +102,34 @@ c-x c-f : file completion
 c-x c-l : line completion
 c-n     : kind of keyword completion - completes everything found in all opened buffers.
           So maybe even consider openining many files uing :n **/*.ext
+          (if you're a nerd get vim-addon-completion and use the camel case buffer completion found in there)
 all: :h ins-completion
+
+hjkl - as experienced user you'll notice that you don't use them that often.
+So you should at least know about the following (and optionally skim :h
+motion.txt several times and or create your own motions)
+
+how to reach insert mode:
+| is cursor location
+
+    O
+I  i|a  A
+    o
+
+important movements and their relation:
+
+       gg                       
+     <c-u>                      H (top line window)
+
+-      k                        
+0    h | l   $                  M
+<cr>   j
+     <c-v>
+                                L
+       G
 
 
 movements:
-
-vimtutor tells you to use hjkl. But the speedup using Vim comes using the
-appropriate movement command - which is seldomly hjkl.
-
-Skim :h motion.txt
 
 use search / ? to place cursor. Remember that typing a word is not always the
               most efficient way. Eg try /ys t this. And you'll get excatly
@@ -124,6 +143,16 @@ Learn about w vs W. Try it CURSOR_HERE.then.type.it (same for e,E)
 
 f,F,t,T : move to char or just before it forward / backward current line. (A
           must)
+
+be faster: delete then goto insert mode:
+C: deletes till end of line
+c a-movement-action: deletes characters visited while moving
+
+more movements:
+(, ): move by sentence
+[[, ]], {, } : more blockwise movements which are often helpful
+...
+
 
 How to get O(1) access to your files you're editing at the moment {{{1
 
