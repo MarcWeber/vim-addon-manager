@@ -78,7 +78,7 @@ manually:
           " commenting try .. endtry because trace is lost if you use it.
           " There should be no exception anyway
           " try
-            call scriptmanager#ActivateAddons(['pluginA', 'pluginB'])
+            call vam#ActivateAddons(['pluginA', 'pluginB'])
           " catch /.*/
           "  echoe v:exception
           " endtry
@@ -108,7 +108,7 @@ Continue reading |vim-addon-manager-install-plugins|.
 3.1. Commands                                   *vim-addon-manager-commands*
 
 ActivateAddons {name} ...                                  *:ActivateAddons*
-        Activate addons with given names. See |scriptmanager#ActivateAddons()| for
+        Activate addons with given names. See |vam#ActivateAddons()| for
         more details.
 
 ActivateInstalledAddons {name} ...                *:ActivateInstalledAddons*
@@ -117,26 +117,26 @@ ActivateInstalledAddons {name} ...                *:ActivateInstalledAddons*
 
 UpdateAddons [{name} ...]                                    *:UpdateAddons*
         Update addons with given names. Without arguments updates all addons.
-        See |scriptmanager2#Update()| for more details.
+        See |vam#install#Update()| for more details.
 
 UninstallNotLoadedAddons {name} ...              *:UninstallNotLoadedAddons*
         Unistall addons with given names. See
-        |scriptmanager2#UninstallAddons()| for more details.
+        |vam#install#UninstallAddons()| for more details.
 
 ------------------------------------------------------------------------------
 3.2. Functions                                 *vim-addon-manager-functions*
 
-scriptmanager#ActivateAddons([{name}, ...])             *scriptmanager#ActivateAddons()*
+vam#ActivateAddons([{name}, ...])             *vam#ActivateAddons()*
         Activates addons with given names. Used by |:ActivateAddons|.
         Note: This is probably all you need.
         Second note: [{name}, ...] in arguments means that you should pass
         a list of strings, not that {name} is optional. Typical calls (both
         are equivalent): >
-            call scriptmanager#ActivateAddons([
+            call vam#ActivateAddons([
               \ "name1",
               \ "name2",
               \ ])
-            call scriptmanager#ActivateAddons(
+            call vam#ActivateAddons(
               \ "name1",
               \ "name2"
               \ )
@@ -154,9 +154,9 @@ scriptmanager#ActivateAddons([{name}, ...])             *scriptmanager#ActivateA
            them in this case by default).
         Note that in order to bring installed plugins to work, you need to add
         the following line to your vimrc: >
-            call scriptmanager#ActivateAddons([List_of_all_addons_you_need])
+            call vam#ActivateAddons([List_of_all_addons_you_need])
 
-scriptmanager2#Install([{arg}])                   *scriptmanager2#Install()*
+vam#install#Install([{arg}])                   *vam#install#Install()*
         Installs plugins from the given list. Each {arg} may be one the
         following:
             - Name of the plugin
@@ -167,20 +167,20 @@ scriptmanager2#Install([{arg}])                   *scriptmanager2#Install()*
               `http://'.
         After installing the plugin help tags are updated, see |:helptags|.
 
-scriptmanager2#Update([{name}])                    *scriptmanager2#Update()*
+vam#install#Update([{name}])                    *vam#install#Update()*
         Updates plugins with given names. If an empty list is given, then
-        updates all plugins. scriptmanager2#Update also updates the help
+        updates all plugins. vam#install#Update also updates the help
         tags. Note that if plugin is not under control of some VCS, it tries
         to retain user changes unless |vim-addon-manager-do_diff| is disabled.
 
-scriptmanager#AddonInfo({name})                  *scriptmanager#AddonInfo()*
+vam#AddonInfo({name})                  *vam#AddonInfo()*
         Returns dictionary that contains information given in |addon-info.txt|
         file that comes with requested addon. If no |addon-info.txt| file is
         present, it is not readable or addon with given name is not installed,
         then it returns empty dictionary.
 
                                           *scriptmanage2#MergePluginFiles()*
-scriptmanager2#MergePluginFiles([{name}] [, blacklist-regex ])
+vam#install#MergePluginFiles([{name}] [, blacklist-regex ])
         Highly experimental function that may speed up vim start on heavy IO
         load. This function renames all `plugin' directories to
         contents into `~/.vim/after/plugin/vim-addon-manager-merged.vim' which
@@ -197,9 +197,9 @@ scriptmanager2#MergePluginFiles([{name}] [, blacklist-regex ])
         plugins.: >
 
             let s:merge = [ "tlib" ]
-            call scriptmanager#ActivateAddons(s:merge)
-            command MergePluginFiles call scriptmanager2#MergePluginFiles(s:merge+["tlib"], '\%(cmdlinehelp\|concordance\|evalselection\|glark\|hookcursormoved\|linglang\|livetimestamp\|localvariables\|loremipsum\|my_tinymode\|pim\|quickfixsigns\|scalefont\|setsyntax\|shymenu\|spec\|tassert\|tbak\|tbibtools\|tcalc\|tcomment\|techopair\|tgpg\|tmarks\|tmboxbrowser\|tortoisesvn\|tregisters\|tselectbuffer\|tselectfile\|tsession\|tskeleton\|tstatus\|viki\|vikitasks\)\.vim_merged')
-            command UnmergePluginFiles call scriptmanager2#UnmergePluginFiles()
+            call vam#ActivateAddons(s:merge)
+            command MergePluginFiles call vam#install#MergePluginFiles(s:merge+["tlib"], '\%(cmdlinehelp\|concordance\|evalselection\|glark\|hookcursormoved\|linglang\|livetimestamp\|localvariables\|loremipsum\|my_tinymode\|pim\|quickfixsigns\|scalefont\|setsyntax\|shymenu\|spec\|tassert\|tbak\|tbibtools\|tcalc\|tcomment\|techopair\|tgpg\|tmarks\|tmboxbrowser\|tortoisesvn\|tregisters\|tselectbuffer\|tselectfile\|tsession\|tskeleton\|tstatus\|viki\|vikitasks\)\.vim_merged')
+            command UnmergePluginFiles call vam#install#UnmergePluginFiles()
 <
 
         Yes, the info files should be cached as well (TODO)
@@ -223,12 +223,12 @@ plugin_sources                           *vim-addon-manager-plugin_sources*
 plugin_root_dir                         *vim-addon-manager-plugin_root_dir*
         Defines a directory where plugins will be installed to. If directory
         where this plugin is installed to (three levels up relative to
-        autoload/scriptmanager.vim: autoload/../..) is writeable by user, then
+        autoload/vam.vim: autoload/../..) is writeable by user, then
         it defaults to directory in question (so, if user has installed
         vim-addon-manager to ~/.vim/bundle/vim-addon-manager, this will be
-        equal to ~/.vim/bundle). If autoload/scriptmanager.vim is not
+        equal to ~/.vim/bundle). If autoload/vam.vim is not
         writeable by the user, then it defaults to ~/vim-addons. Note that you
-        must set this variable before calling any scriptmanager function.
+        must set this variable before calling any vam function.
 scm_merge_stategy                      *vim-addon-manager-scm_merge_stategy*
         String, valid values: `force' (default), `keep' and `never'. Defines,
         whether SCM sources should be used instead of www.vim.org sources:
@@ -266,7 +266,7 @@ do_diff                                          *vim-addon-manager-do_diff*
 
 First read |vim-addon-manager-installation|.
 
-As documented |scriptmanager#Activate| or |:ActivateAddons| will fetch
+As documented |vam#Activate| or |:ActivateAddons| will fetch
 (=install) the plugin if it failed to find requested addon in your addons
 directory.
 
@@ -279,12 +279,12 @@ You can use |:ActivateAddons|'s tab completion to find the plugin name fast.
 
 Usually you add the names of the addons this way to your .vimrc: >
    set runtimepath+=~/vim-addons/vim-addon-manager
-   call scriptmanager#ActivateAddons(["pluginA","pluginB"])
+   call vam#ActivateAddons(["pluginA","pluginB"])
 <
 You can use the Install function to install plugins only - however in practise
 you use the Activate command / function only.
 
-You can install plugins by URL. See |scriptmanager2#Install()|.
+You can install plugins by URL. See |vam#install#Install()|.
 I prefer you telling me about your repository location, though.
 Also see |vim-addon-manager-repository-locations|.
 
@@ -338,12 +338,12 @@ name                                                      *addon-info-name*
 repository                                          *addon-info-repository*
         Describes where the plugin should be fetched from. Ignored unless the
         plugin is installed using either the second or third form of
-        |scriptmanager2#Install()| call (see its description). This is
+        |vam#install#Install()| call (see its description). This is
         a dictionary with the following keys:
 
          !! Note: As very common in extreme programming documentation may be
          !! outdated. So may be this section. So refer to the code:
-         !! |scriptmanager2#Checkout()| to find out about all supported keys
+         !! |vam#install#Checkout()| to find out about all supported keys
          !! Its easy to read and extend. Contact me if you're unsure. I'll help
          !! you.
          !! I'd even consider moving this section into the code only refering
@@ -551,7 +551,7 @@ Win32 tools for vim-addon-manager
 
 Fast: put curl into ~/vim-addons/binary-utils/dist then call this function
 to setup the remaining tools (tar, bzip, gzip, unzip) >
-    call scriptmanager2#FetchAdditionalWindowsTools()
+    call vam#install#FetchAdditionalWindowsTools()
 <
 If 7z is in PATH bzip, unzip, gzip are not pulled. So consider installing that
 and add it to PATH by >
@@ -694,7 +694,7 @@ what's going to happen.
 11. Troubleshooting and known bugs       *vim-addon-manager-trouble-shooting*
 
 
-  ERROR: Vim(call):E117: Unknown function: scriptmanager#Activate
+  ERROR: Vim(call):E117: Unknown function: vam#Activate
 
   SOLUTION: set runtimepath (rtp) correctly. It must match the directory you
             installed VAM into.
@@ -806,7 +806,7 @@ git clone git://github.com/MarcWeber/vim-addon-manager.git ~/vim-addons/vim-addo
 cat >> ~/.vimrc << EOF
 fun SetupVAM()
   set runtimepath+=~/vim-addons/vim-addon-manager
-  call scriptmanager#ActivateAddons([])
+  call vam#ActivateAddons([])
 endf
 call ActivateAddons()
 " experimental: run after gui has been started [3]

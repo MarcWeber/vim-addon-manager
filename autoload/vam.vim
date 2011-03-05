@@ -1,7 +1,7 @@
 " see README
 
 " this file contains code which is always used
-" code which is used for installing / updating etc should go into scriptmanager2.vim
+" code which is used for installing / updating etc should go into vam/install.vim
 
 
 " don't need a plugin. If you want to use this plugin you call Activate once
@@ -12,10 +12,10 @@ augroup SCRIPT_MANAGER
     \ setlocal ft=addon-info
     \ | setlocal syntax=json
     \ | syn match Error "^\s*'"
-  autocmd BufWritePost *-addon-info.txt call scriptmanager#ReadAddonInfo(expand('%'))
+  autocmd BufWritePost *-addon-info.txt call vam#ReadAddonInfo(expand('%'))
 augroup end
 
-fun! scriptmanager#DefineAndBind(local,global,default)
+fun! vam#DefineAndBind(local,global,default)
   return 'if !exists('.string(a:global).') | let '.a:global.' = '.a:default.' | endif | let '.a:local.' = '.a:global
 endf
 
@@ -26,7 +26,7 @@ for os in split('amiga beos dos32 dos16 mac macunix os2 qnx unix vms win16 win32
 endfor
 let g:is_win = g:os[:2] == 'win'
 
-exec scriptmanager#DefineAndBind('s:c','g:vim_script_manager','{}')
+exec vam#DefineAndBind('s:c','g:vim_script_manager','{}')
 let s:c['config'] = get(s:c,'config',expand('$HOME').'/.vim-script-manager')
 let s:c['auto_install'] = get(s:c,'auto_install', 0)
 " repository locations:
@@ -36,8 +36,8 @@ let s:c['missing_addon_infos'] = get(s:c,'missing_addon_infos', {})
 " addon_infos cache, {} if file dosen't exist
 let s:c['addon_infos'] = get(s:c,'addon_infos', {})
 let s:c['activated_plugins'] = get(s:c,'activaded_plugins', {})
-" If directory where plugin is installed is writeable, then this plugin was 
-" likely installed by user according to the instruction. If it is not, then it 
+" If directory where plugin is installed is writeable, then this plugin was
+" likely installed by user according to the instruction. If it is not, then it
 " is likely a system-wide installation.
 let s:c['system_wide'] = !filewritable(expand('<sfile>:h:h:h'))
 let s:c['plugin_root_dir'] = get(s:c, 'plugin_root_dir', ((s:c['system_wide'])?
@@ -66,14 +66,14 @@ else
   let s:c['plugin_sources']["vim-addon-manager-known-repositories"] = { 'type' : 'archive', 'url': 'http://github.com/MarcWeber/vim-addon-manager-known-repositories/tarball/master', 'archive_name': 'vim-addon-manager-known-repositories-tip.tar.gz' }
 endif
 
-fun! scriptmanager#VerifyIsJSON(s)
+fun! vam#VerifyIsJSON(s)
   let stringless_body = substitute(a:s,'"\%(\\.\|[^"\\]\)*"','','g')
   return stringless_body !~# "[^,:{}\\[\\]0-9.\\-+Eaeflnr-u \t]"
 endf
 
 " use join so that you can break the dict into multiple lines. This makes
 " reading it much easier
-fun! scriptmanager#ReadAddonInfo(path)
+fun! vam#ReadAddonInfo(path)
 
   " don't add "b" because it'll read dos files as "\r\n" which will fail the
   " check and evaluate in eval. \r\n is checked out by some msys git
@@ -82,7 +82,7 @@ fun! scriptmanager#ReadAddonInfo(path)
   " using eval is evil!
   let body = join(readfile(a:path),"")
 
-  if scriptmanager#VerifyIsJSON(body)
+  if vam#VerifyIsJSON(body)
       " using eval is now safe!
       return eval(body)
   else
@@ -92,17 +92,17 @@ fun! scriptmanager#ReadAddonInfo(path)
 
 endf
 
-fun! scriptmanager#PluginDirByName(name)
+fun! vam#PluginDirByName(name)
   return s:c['plugin_root_dir'].'/'.a:name
 endf
-fun! scriptmanager#PluginRuntimePath(name)
-  let info = scriptmanager#AddonInfo(a:name)
+fun! vam#PluginRuntimePath(name)
+  let info = vam#AddonInfo(a:name)
   return s:c['plugin_root_dir'].'/'.a:name.(has_key(info, 'runtimepath') ? '/'.info['runtimepath'] : '')
 endf
 
 " doesn't check dependencies!
-fun! scriptmanager#IsPluginInstalled(name)
-  let d = scriptmanager#PluginDirByName(a:name)
+fun! vam#IsPluginInstalled(name)
+  let d = vam#PluginDirByName(a:name)
   " if dir exists and its not a failed download
   " (empty archive directory)
   return isdirectory(d)
@@ -111,10 +111,10 @@ fun! scriptmanager#IsPluginInstalled(name)
 endf
 
 " {} if file doesn't exist
-fun! scriptmanager#AddonInfo(name)
-  let infoFile = scriptmanager#AddonInfoFile(a:name)
+fun! vam#AddonInfo(name)
+  let infoFile = vam#AddonInfoFile(a:name)
   let s:c['addon_infos'][a:name] = filereadable(infoFile)
-    \ ? scriptmanager#ReadAddonInfo(infoFile)
+    \ ? vam#ReadAddonInfo(infoFile)
     \ : {}
  return get(s:c['addon_infos'],a:name, {})
 endf
@@ -125,7 +125,7 @@ endf
 "   'auto_install': when 1 overrides global setting, so you can autoinstall
 "   trusted repositories only
 " }
-fun! scriptmanager#ActivateRecursively(list_of_names, ...)
+fun! vam#ActivateRecursively(list_of_names, ...)
   let opts = a:0 == 0 ? {} : a:1
 
   for name in a:list_of_names
@@ -133,45 +133,45 @@ fun! scriptmanager#ActivateRecursively(list_of_names, ...)
       " break circular dependencies..
       let s:c['activated_plugins'][name] = 0
 
-      let infoFile = scriptmanager#AddonInfoFile(name)
-      if !filereadable(infoFile) && !scriptmanager#IsPluginInstalled(name)
-        call scriptmanager2#Install([name], opts)
+      let infoFile = vam#AddonInfoFile(name)
+      if !filereadable(infoFile) && !vam#IsPluginInstalled(name)
+        call vam#install#Install([name], opts)
       endif
-      let info = scriptmanager#AddonInfo(name)
+      let info = vam#AddonInfo(name)
       let dependencies = get(info,'dependencies', {})
 
       " activate dependencies merging opts with given repository sources
       " sources given in opts will win
-      call scriptmanager#ActivateAddons(keys(dependencies),
+      call vam#ActivateAddons(keys(dependencies),
         \ extend(copy(opts), { 'plugin_sources' : extend(copy(dependencies), get(opts, 'plugin_sources',{}))}))
     endif
     " source plugin/* files ?
-    let rtp = scriptmanager#PluginRuntimePath(name)
+    let rtp = vam#PluginRuntimePath(name)
     call add(s:new_runtime_paths, rtp)
 
     let s:c['activated_plugins'][name] = 1
   endfor
 endf
 
-fun! scriptmanager#Activate(...) abort
+fun! vam#Activate(...) abort
   " historical. Call ActivateAddons instead
-  let cmd='%s@\(scriptmanager#Activate\)(@\1Addons(@'
+  let cmd='%s@\(vam#Activate\)(@\1Addons(@'
   let files = filter([$HOME."/.vimrc",$HOME.'/_vimrc'], 'filereadable(v:val)')
   if len(files) == 1
     exec 'e '.fnameescape(files[0])
     echoe "running ".cmd." for you"
     exec cmd | w
   else
-    echo "open your the file calling scriptmanager#Activate and run: %s@\(scriptmanager#Activate\)(@\1Addons(@ . Rename happened for consistency"
+    echo "open your the file calling vam#Activate and run: %s@\(vam#Activate\)(@\1Addons(@ . Rename happened for consistency"
   endif
-  call call(function('scriptmanager#ActivateAddons'),a:000)
+  call call(function('vam#ActivateAddons'),a:000)
 endf
 
 " see also ActivateRecursively
 " Activate activates the plugins and their dependencies recursively.
 " I sources both: plugin/*.vim and after/plugin/*.vim files when called after
 " .vimrc has been sourced which happens when you activate plugins manually.
-fun! scriptmanager#ActivateAddons(...) abort
+fun! vam#ActivateAddons(...) abort
   let args = copy(a:000)
   if a:0 == 0 | return | endif
 
@@ -195,12 +195,12 @@ fun! scriptmanager#ActivateAddons(...) abort
   let topLevel = get(opts,'topLevel',1)
   let opts['topLevel'] = 0
   if topLevel | let s:new_runtime_paths = [] | endif
-  call call('scriptmanager#ActivateRecursively', args)
+  call call('vam#ActivateRecursively', args)
 
   " don't know why activating known-repos causes trouble Silex reported it
   " does. Doing so is not recommended. So prevent it
   if !exists('g:in_load_known_repositories') && index(args[0],"vim-addon-manager-known-repositories") != -1
-    throw "You should not activate vim-addon-manager-known-repositories. vim-addon-mananger will do so for you when needed. This way Vim starts up faster in the common case. Also try scriptmanager2#LoadKnownRepos() instead."
+    throw "You should not activate vim-addon-manager-known-repositories. vim-addon-mananger will do so for you when needed. This way Vim starts up faster in the common case. Also try vam#install#LoadKnownRepos() instead."
   endif
 
   if topLevel
@@ -223,47 +223,47 @@ fun! scriptmanager#ActivateAddons(...) abort
 
     if !has('vim_starting')
       for rtp in s:new_runtime_paths
-        call scriptmanager#GlobThenSource(rtp.'/plugin/**/*.vim')
-        call scriptmanager#GlobThenSource(rtp.'/ftdetect/*.vim')
-        call scriptmanager#GlobThenSource(rtp.'/after/plugin/**/*.vim')
+        call vam#GlobThenSource(rtp.'/plugin/**/*.vim')
+        call vam#GlobThenSource(rtp.'/ftdetect/*.vim')
+        call vam#GlobThenSource(rtp.'/after/plugin/**/*.vim')
       endfor
     endif
   endif
 endfun
 
-fun! scriptmanager#GlobThenSource(glob)
+fun! vam#GlobThenSource(glob)
   for file in split(glob(a:glob),"\n")
     exec 'source '.fnameescape(file)
   endfor
 endf
 
 augroup VIM_PLUGIN_MANAGER
-  autocmd VimEnter * call  scriptmanager#Hack()
+  autocmd VimEnter * call  vam#Hack()
 augroup end
 
 " hack: Vim sources plugin files after sourcing .vimrc
 "       Vim doesn't source the after/plugin/*.vim files in other runtime
 "       paths. So do this *after* plugin/* files have been sourced
-fun! scriptmanager#Hack()
+fun! vam#Hack()
   " now source after/plugin/**/*.vim files explicitly. Vim doesn't do it (hack!)
   for p in keys(s:c['activated_plugins'])
-      call scriptmanager#GlobThenSource(scriptmanager#PluginDirByName(p).'/after/plugin/**/*.vim')
+      call vam#GlobThenSource(vam#PluginDirByName(p).'/after/plugin/**/*.vim')
   endfor
 endf
 
-fun! scriptmanager#AddonInfoFile(name)
+fun! vam#AddonInfoFile(name)
   " this name is deprecated
-  let f = scriptmanager#PluginDirByName(a:name).'/plugin-info.txt'
+  let f = vam#PluginDirByName(a:name).'/plugin-info.txt'
   if filereadable(f)
     return f
   else
-    return scriptmanager#PluginDirByName(a:name).'/'.a:name.'-addon-info.txt'
+    return vam#PluginDirByName(a:name).'/'.a:name.'-addon-info.txt'
   endif
 endf
 
-command! -nargs=* -complete=customlist,scriptmanager2#AddonCompletion ActivateAddons :call scriptmanager#ActivateAddons([<f-args>])
-command! -nargs=* -complete=customlist,scriptmanager2#InstalledAddonCompletion ActivateInstalledAddons :call scriptmanager#ActivateAddons([<f-args>])
-command! -nargs=* -complete=customlist,scriptmanager2#AddonCompletion UpdateAddons :call scriptmanager2#Update([<f-args>])
-command! -nargs=* -complete=customlist,scriptmanager2#UninstallCompletion UninstallNotLoadedAddons :call scriptmanager2#UninstallAddons([<f-args>])
+command! -nargs=* -complete=customlist,vam#install#AddonCompletion ActivateAddons :call vam#ActivateAddons([<f-args>])
+command! -nargs=* -complete=customlist,vam#install#InstalledAddonCompletion ActivateInstalledAddons :call vam#ActivateAddons([<f-args>])
+command! -nargs=* -complete=customlist,vam#install#AddonCompletion UpdateAddons :call vam#install#Update([<f-args>])
+command! -nargs=* -complete=customlist,vam#install#UninstallCompletion UninstallNotLoadedAddons :call vam#install#UninstallAddons([<f-args>])
 
 " vim: et ts=8 sts=2 sw=2

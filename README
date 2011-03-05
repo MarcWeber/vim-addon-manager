@@ -16,7 +16,7 @@ Feature list:
 - declarative script management (example lines that should go to your .vimrc):
 
    set runtimepath+=/path/to/vam
-   call scriptmanager#ActivateAddons(["snipmate","vimdevplugin", .... ])
+   call vam#ActivateAddons(["snipmate","vimdevplugin", .... ])
 
 
 - optional manual runtime activation of scripts:

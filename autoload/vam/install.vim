@@ -1,13 +1,13 @@
-" scriptmanager2 contains code which is used when install plugins only
+" vam#install contains code which is used when install plugins only
 
 let s:curl = exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o'
-exec scriptmanager#DefineAndBind('s:c','g:vim_script_manager','{}')
+exec vam#DefineAndBind('s:c','g:vim_script_manager','{}')
 
 
 " Install let's you install plugins by passing the url of a addon-info file
 " This preprocessor replaces the urls by the plugin-names putting the
 " repository information into the global dict
-fun! scriptmanager2#ReplaceAndFetchUrls(list)
+fun! vam#install#ReplaceAndFetchUrls(list)
   let l = a:list
   let idx = 0
   for idx in range(0, len(l)-1)
@@ -21,7 +21,7 @@ fun! scriptmanager2#ReplaceAndFetchUrls(list)
       let t = n
     endif
     if exists('t')
-      let dic = scriptmanager#ReadAddonInfo(t)
+      let dic = vam#ReadAddonInfo(t)
       if !has_key(dic,'name') || !has_key(dic, 'repository')
         echoe n." is no valid addon-info file. It must contain both keys: name and repository"
         continue
@@ -35,19 +35,19 @@ endfun
 
 
 " opts: same as ActivateAddons
-fun! scriptmanager2#Install(toBeInstalledList, ...)
-  let toBeInstalledList = scriptmanager2#ReplaceAndFetchUrls(a:toBeInstalledList)
+fun! vam#install#Install(toBeInstalledList, ...)
+  let toBeInstalledList = vam#install#ReplaceAndFetchUrls(a:toBeInstalledList)
   let opts = a:0 == 0 ? {} : a:1
   for name in toBeInstalledList
-    if scriptmanager#IsPluginInstalled(name)
+    if vam#IsPluginInstalled(name)
       continue
     endif
 
-    let pluginDir = scriptmanager#PluginDirByName(name)
+    let pluginDir = vam#PluginDirByName(name)
     " ask user for to confirm installation unless he set auto_install
     if s:c['auto_install'] || get(opts,'auto_install',0) || input('Install plugin "'.name.'" into "'.s:c['plugin_root_dir'].'" ? [y/n]:','') == 'y'
 
-      if name != s:c['known'] | call scriptmanager2#LoadKnownRepos() | endif
+      if name != s:c['known'] | call vam#install#LoadKnownRepos() | endif
 
       let repository = get(s:c['plugin_sources'], name, get(opts, name,0))
 
@@ -65,8 +65,8 @@ fun! scriptmanager2#Install(toBeInstalledList, ...)
         endif
       endif
 
-      let infoFile = scriptmanager#AddonInfoFile(name)
-      call scriptmanager2#Checkout(pluginDir, repository)
+      let infoFile = vam#AddonInfoFile(name)
+      call vam#install#Checkout(pluginDir, repository)
 
       if !filereadable(infoFile) && has_key(s:c['missing_addon_infos'], name)
         call writefile([s:c['missing_addon_infos'][name]], infoFile)
@@ -74,28 +74,28 @@ fun! scriptmanager2#Install(toBeInstalledList, ...)
 
       " install dependencies
 
-      let infoFile = scriptmanager#AddonInfoFile(name)
-      let info = scriptmanager#AddonInfo(name)
+      let infoFile = vam#AddonInfoFile(name)
+      let info = vam#AddonInfo(name)
 
       let dependencies = get(info,'dependencies', {})
 
       " install dependencies merging opts with given repository sources
       " sources given in opts will win
-      call scriptmanager2#Install(keys(dependencies),
+      call vam#install#Install(keys(dependencies),
         \ extend(copy(opts), { 'plugin_sources' : extend(copy(dependencies), get(opts, 'plugin_sources',{}))}))
     endif
-    call scriptmanager2#HelpTags(name)
+    call vam#install#HelpTags(name)
   endfor
 endf
 
 " this function will be refactored slightly soon by either me or Zyx.
-fun! scriptmanager2#UpdateAddon(name)
-  let pluginDir = scriptmanager#PluginDirByName(a:name)
+fun! vam#install#UpdateAddon(name)
+  let pluginDir = vam#PluginDirByName(a:name)
   if !vcs_checkouts#Update(pluginDir)
     " try updating plugin by archive
 
     " we have to find out whether there is a new version:
-    call scriptmanager2#LoadKnownRepos()
+    call vam#install#LoadKnownRepos()
     let repository = get(s:c['plugin_sources'], a:name, {})
     if empty(repository)
       echom "don't know how to update ".a:name." because its (no longer?) contained in plugin_sources"
@@ -113,7 +113,7 @@ fun! scriptmanager2#UpdateAddon(name)
       let pluginDirBackup = pluginDir.'-'.oldVersion
       if isdirectory(pluginDirBackup) || filereadable(pluginDirBackup)
         if "y" == input("old plugin backup directory found: ".pluginDirBackup.", remove? [y/n]")
-          call scriptmanager_util#RmFR(pluginDirBackup)
+          call vam#utils#RmFR(pluginDirBackup)
         else
           throw "user abort: remove ".pluginDirBackup." manually"
         endif
@@ -127,7 +127,7 @@ fun! scriptmanager2#UpdateAddon(name)
       if s:c['do_diff'] && executable('diff')
         let diff_file = s:c['plugin_root_dir'].'/'.a:name.'-'.oldVersion.'.diff'
         " try to create a diff
-        let archiveName = scriptmanager2#ArchiveNameFromDict(repository)
+        let archiveName = vam#install#ArchiveNameFromDict(repository)
         let archiveFileBackup = pluginDirBackup.'/archive/'.archiveName
         if !filereadable(archiveFileBackup)
           echom "old archive file ".archiveFileBackup." is gone, can't try to create diff."
@@ -137,22 +137,22 @@ fun! scriptmanager2#UpdateAddon(name)
 
           let rep_copy = deepcopy(repository)
           let rep_copy['url'] = 'file://'.expand(archiveFileBackup)
-          call scriptmanager2#Checkout(pluginDir, rep_copy)
+          call vam#install#Checkout(pluginDir, rep_copy)
           silent! call delete(pluginDir.'/version')
           try
-            call vcs_checkouts#ExecIndir([{'d': s:c['plugin_root_dir'], 'c': scriptmanager_util#ShellDSL('diff -U3 -r $p $p', fnamemodify(pluginDir,':t'), fnamemodify(pluginDirBackup,':t')).' > '.diff_file}])
+            call vcs_checkouts#ExecIndir([{'d': s:c['plugin_root_dir'], 'c': vam#utils#ShellDSL('diff -U3 -r $p $p', fnamemodify(pluginDir,':t'), fnamemodify(pluginDirBackup,':t')).' > '.diff_file}])
             silent! call delete(diff_file)
           catch /.*/
             " :-( this is expected. diff returns non zero exit status. This is hacky
             let diff=1
           endtry
-          call scriptmanager_util#RmFR(pluginDir)
+          call vam#utils#RmFR(pluginDir)
           echo 6
         endif
       endif
 
       " checkout new version (checkout into empty location - same as installing):
-      call scriptmanager2#Checkout(pluginDir, repository)
+      call vam#install#Checkout(pluginDir, repository)
 
       " try applying patch
       let patch_failure = 0
@@ -176,7 +176,7 @@ fun! scriptmanager2#UpdateAddon(name)
 
       " tidy up - if user didn't provide diff we remove old directory
       if !patch_failure
-        call scriptmanager_util#RmFR(pluginDirBackup)
+        call vam#utils#RmFR(pluginDirBackup)
       endif
     else
       echom "not updating plugin ".a:name." because there is no version according to version key"
@@ -185,20 +185,20 @@ fun! scriptmanager2#UpdateAddon(name)
   return 1
 endf
 
-fun! scriptmanager2#Update(list)
+fun! vam#install#Update(list)
   let list = a:list
   if empty(list) && input('Update all loaded plugins? [y/n] ','y') == 'y'
-    call scriptmanager2#LoadKnownRepos(' so that its updated as well')
+    call vam#install#LoadKnownRepos(' so that its updated as well')
     " include vim-addon-manager in list
     if !s:c['system_wide']
-      call scriptmanager#ActivateAddons(['vim-addon-manager'])
+      call vam#ActivateAddons(['vim-addon-manager'])
     endif
     let list = keys(s:c['activated_plugins'])
   endif
   let failed = []
   for p in list
-    if scriptmanager2#UpdateAddon(p)
-      call scriptmanager2#HelpTags(p)
+    if vam#install#UpdateAddon(p)
+      call vam#install#HelpTags(p)
     else
       call add(failed,p)
     endif
@@ -212,12 +212,12 @@ endf
 
 " optional arg = 0: only installed
 "          arg = 1: installed and names from known-repositories
-fun! scriptmanager2#KnownAddons(...)
+fun! vam#install#KnownAddons(...)
   let installable = a:0 > 0 ? a:1 : ''
-  let list = filter(split(glob(scriptmanager#PluginDirByName('*')),"\n"), 'isdirectory(v:val)')
+  let list = filter(split(glob(vam#PluginDirByName('*')),"\n"), 'isdirectory(v:val)')
   let list = map(list, "fnamemodify(v:val,':t')")
   if installable == "installable"
-    call scriptmanager2#LoadKnownRepos()
+    call vam#install#LoadKnownRepos()
     call extend(list, keys(s:c['plugin_sources']))
   endif
   " uniq items:
@@ -228,9 +228,9 @@ fun! scriptmanager2#KnownAddons(...)
   return keys(dict)
 endf
 
-fun! scriptmanager2#DoCompletion(A,L,P,...)
+fun! vam#install#DoCompletion(A,L,P,...)
   let config = a:0 > 0 ? a:1 : ''
-  let names = scriptmanager2#KnownAddons(config)
+  let names = vam#install#KnownAddons(config)
 
   let beforeC= a:L[:a:P-1]
   let word = matchstr(beforeC, '\zs\S*$')
@@ -244,27 +244,27 @@ fun! scriptmanager2#DoCompletion(A,L,P,...)
   return filter(names,'v:val =~ '.string(word) . not_loaded)
 endf
 
-fun! scriptmanager2#AddonCompletion(...)
-  return call('scriptmanager2#DoCompletion',a:000+["installable"])
+fun! vam#install#AddonCompletion(...)
+  return call('vam#install#DoCompletion',a:000+["installable"])
 endf
 
-fun! scriptmanager2#InstalledAddonCompletion(...)
-  return call('scriptmanager2#DoCompletion',a:000)
+fun! vam#install#InstalledAddonCompletion(...)
+  return call('vam#install#DoCompletion',a:000)
 endf
 
-fun! scriptmanager2#UninstallCompletion(...)
-  return call('scriptmanager2#DoCompletion',a:000+["uninstall"])
+fun! vam#install#UninstallCompletion(...)
+  return call('vam#install#DoCompletion',a:000+["uninstall"])
 endf
 "}}}
 
 
-fun! scriptmanager2#UninstallAddons(list)
+fun! vam#install#UninstallAddons(list)
   let list = a:list
   if list == []
     echo "No plugins selected. If you ran UninstallNotLoadedAddons use <tab> or <c-d> to get a list of not loaded plugins."
     return
   endif
-  call map(list, 'scriptmanager#PluginDirByName(v:val)')
+  call map(list, 'vam#PluginDirByName(v:val)')
   if input('Confirm running rm -fr on directories: '.join(list,", ").'? [y/n]') == 'y'
     for path in list
       exec '!rm -fr '.s:shellescape(path)
@@ -272,8 +272,8 @@ fun! scriptmanager2#UninstallAddons(list)
   endif
 endf
 
-fun! scriptmanager2#HelpTags(name)
-  let d=scriptmanager#PluginDirByName(a:name).'/doc'
+fun! vam#install#HelpTags(name)
+  let d=vam#PluginDirByName(a:name).'/doc'
   if isdirectory(d) | exec 'helptags '.d | endif
 endf
 
@@ -294,7 +294,7 @@ endf
 " endfun
 
 " basename of url. if archive_name is given use that instead
-fun! scriptmanager2#ArchiveNameFromDict(repository)
+fun! vam#install#ArchiveNameFromDict(repository)
     let archiveName = fnamemodify(substitute(get(a:repository,'archive_name',''), '\.\zsVIM$', 'vim', ''),':t')
     if archiveName == ''
       let archiveName = fnamemodify(a:repository['url'],':t')
@@ -304,7 +304,7 @@ endf
 
 
 " may throw EXCEPTION_UNPACK
-fun! scriptmanager2#Checkout(targetDir, repository) abort
+fun! vam#install#Checkout(targetDir, repository) abort
   if get(a:repository,'type','') =~ 'git\|hg\|svn\|bzr'
     call vcs_checkouts#Checkout(a:targetDir, a:repository)
   else
@@ -313,14 +313,14 @@ fun! scriptmanager2#Checkout(targetDir, repository) abort
     if !isdirectory(a:targetDir) | call mkdir(a:targetDir.'/archive','p') | endif
 
     " basename VIM -> vim
-    let archiveName = scriptmanager2#ArchiveNameFromDict(a:repository)
+    let archiveName = vam#install#ArchiveNameFromDict(a:repository)
 
     " archive will be downloaded to this location
     let archiveFile = a:targetDir.'/archive/'.archiveName
 
-    call scriptmanager_util#Download(a:repository['url'], archiveFile)
+    call vam#utils#Download(a:repository['url'], archiveFile)
 
-    call scriptmanager_util#Unpack(archiveFile, a:targetDir,
+    call vam#utils#Unpack(archiveFile, a:targetDir,
                 \                  {'strip-components': get(a:repository,'strip-components',-1),
                 \                   'script-type': tolower(get(a:repository, 'script-type', 'plugin')),
                 \                   'unix_ff': get(a:repository, 'unix_ff', get(s:c, 'change_to_unix_ff')) })
@@ -340,7 +340,7 @@ endf
 
 " is there a library providing an OS abstraction? This breaks Winndows
 " xcopy or copy should be used there..
-fun! scriptmanager2#Copy(f,t)
+fun! vam#install#Copy(f,t)
   if g:is_win
     exec '!xcopy /e /i '.s:shellescape(a:f).' '.s:shellescape(a:t)
   else
@@ -349,7 +349,7 @@ fun! scriptmanager2#Copy(f,t)
 endfun
 
 
-fun! scriptmanager2#LoadKnownRepos(...)
+fun! vam#install#LoadKnownRepos(...)
   " this could be done better: see BUGS section in documantation "force".
   " Unletting in case of failure is not important because this only
   " deactivates a warning
@@ -368,17 +368,17 @@ fun! scriptmanager2#LoadKnownRepos(...)
     endif
     if s:reply ==# 'N' | let s:c.known_repos_activation_policy = "never" | endif
     if s:reply ==? 'y'
-      call scriptmanager#ActivateAddons([known])
+      call vam#ActivateAddons([known])
       " This is not done in .vimrc because Vim loads plugin/*.vim files after
       " having finished processing .vimrc. So do it manually
-      exec 'source '.scriptmanager#PluginDirByName(known).'/plugin/vim-addon-manager-known-repositories.vim'
+      exec 'source '.vam#PluginDirByName(known).'/plugin/vim-addon-manager-known-repositories.vim'
     endif
   endif
   unlet g:in_load_known_repositories
 endf
 
 
-fun! scriptmanager2#MergeTarget()
+fun! vam#install#MergeTarget()
   return split(&runtimepath,",")[0].'/after/plugin/vim-addon-manager-merged.vim'
 endf
 
@@ -394,12 +394,12 @@ endf
 "    so that its sourced automatically
 "
 " TODO: take after plugins int account?
-fun! scriptmanager2#MergePluginFiles(plugins, skip_pattern)
+fun! vam#install#MergePluginFiles(plugins, skip_pattern)
   if !filereadable('/bin/sh')
     throw "you should be using Linux.. This code is likely to break on other operating systems!"
   endif
 
-  let target = scriptmanager2#MergeTarget()
+  let target = vam#install#MergeTarget()
 
   for r in a:plugins
     if !has_key(s:c['activated_plugins'], r)
@@ -407,7 +407,7 @@ fun! scriptmanager2#MergePluginFiles(plugins, skip_pattern)
     endif
   endfor
 
-  let runtimepaths = map(copy(a:plugins), 'scriptmanager#PluginRuntimePath(v:val)')
+  let runtimepaths = map(copy(a:plugins), 'vam#PluginRuntimePath(v:val)')
 
   " 1)
   for r in runtimepaths
@@ -504,19 +504,19 @@ fun! scriptmanager2#MergePluginFiles(plugins, skip_pattern)
 
 endf
 
-fun! scriptmanager2#UnmergePluginFiles()
-  let path = fnamemodify(scriptmanager#PluginRuntimePath('vim-addon-manager'),':h')
+fun! vam#install#UnmergePluginFiles()
+  let path = fnamemodify(vam#PluginRuntimePath('vim-addon-manager'),':h')
   for merged in split(glob(path.'/*/plugin-merged'),"\n")
             \ +split(glob(path.'/*/*/plugin-merged'),"\n")
     echo "unmerging ".merged
     call rename(merged, substitute(merged,'-merged$','',''))
   endfor
-  call delete(scriptmanager2#MergeTarget())
+  call delete(vam#install#MergeTarget())
 endfun
 
 
 if g:is_win
-  fun! scriptmanager2#FetchAdditionalWindowsTools() abort
+  fun! vam#install#FetchAdditionalWindowsTools() abort
     if !executable("curl") && s:curl == "curl -o"
       throw "No curl found. Either set g:netrw_http_cmd='path/curl -o' or put it in PATH"
     endif
@@ -538,7 +538,7 @@ if g:is_win
         if executable(ex) | continue | endif
       endfor
       if !filereadable(s:c['binary_utils'].'\'.v[1])
-        call scriptmanager_util#DownloadFromMirrors(v[0].v[1], s:c['binary_utils'])
+        call vam#utils#DownloadFromMirrors(v[0].v[1], s:c['binary_utils'])
       endif
     endfor
 
@@ -557,7 +557,7 @@ if g:is_win
     " now we have unzip and can do rest
     for k in ["gzip","bzip2","tar","diffutils","patch"]
       if !executable(tools[k][2])
-        call scriptmanager_util#Unpack(s:c['binary_utils'].'\'.tools[k][1], s:c['binary_utils'].'\dist')
+        call vam#utils#Unpack(s:c['binary_utils'].'\'.tools[k][1], s:c['binary_utils'].'\dist')
       endif
     endfor
 
@@ -566,7 +566,7 @@ if g:is_win
     "return
   "endif
   "let _7zurl = 'mirror://sourceforge/sevenzip/7-Zip/4.65/7z465.exe'
-  "call scriptmanager_util#DownloadFromMirrors(_7zurl, s:c['binary_utils'].'/7z.exe')
+  "call vam#utils#DownloadFromMirrors(_7zurl, s:c['binary_utils'].'/7z.exe')
 
   endf
 endif

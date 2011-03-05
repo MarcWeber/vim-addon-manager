@@ -2,7 +2,7 @@
 let s:plugin_root_dir = fnamemodify(expand('<sfile>'),':h:h:h')
 
 " called by vim-addon-manager-test.sh
-fun! scriptmanager_test#Test()
+fun! vam#test#Test()
   let test_dir = '/tmp/vim-addon-manager-test'
 
   exec '!rm -fr ' test_dir
@@ -16,25 +16,25 @@ fun! scriptmanager_test#Test()
   " test mercurial
   call feedkeys("y")
   let plugin_sources['vimstuff'] = { 'type': 'hg', 'url': 'http://vimstuff.hg.sourceforge.net:8000/hgroot/vimstuff/vimstuff' }
-  call scriptmanager#ActivateAddons(["vimstuff"])
+  call vam#ActivateAddons(["vimstuff"])
 
   " test git
   call feedkeys("y")
   let plugin_sources['vim-addon-views'] = { 'type' : 'git', 'url' : 'git://github.com/MarcWeber/vim-addon-views.git' }
-  call scriptmanager#ActivateAddons(["vim-addon-views"])
+  call vam#ActivateAddons(["vim-addon-views"])
 
   " test subversion
   call feedkeys("y")
   let plugin_sources['vim-latex'] = { 'type': 'svn', 'url': 'https://vim-latex.svn.sourceforge.net/svnroot/vim-latex/trunk/vimfiles'}
-  call scriptmanager#ActivateAddons(["vim-latex"])
+  call vam#ActivateAddons(["vim-latex"])
 
 endf
 
-" scriptmanager_util#Unpack tests
+" vam#utils#Unpack tests
 
 " test: . = all tests
 " tar$ = onnly the tar test
-fun! scriptmanager_test#TestUnpack(test) abort
+fun! vam#test#TestUnpack(test) abort
   let tests = {
       \  'tar':  ['autocorrect', ['README', 'archive', 'archive/autocorrect.tar', 'autocorrect.dat', 'autocorrect.vim', 'generator.rb', 'version'] ],
       \  'tar.gz': ['ack', ['archive', 'archive/ack.tar.gz', 'doc', 'doc/ack.txt', 'plugin', 'plugin/ack.vim', 'version']],
@@ -47,15 +47,15 @@ fun! scriptmanager_test#TestUnpack(test) abort
       \  'vba.bz2': ['winmanager1440',['archive', 'archive/winmanager.vba.bz2', 'doc', 'doc/tags', 'doc/winmanager.txt', 'plugin', 'plugin/start.gnome', 'plugin/start.kde', 'plugin/winfileexplorer.vim', 'plugin/winmanager.vim', 'plugin/wintagexplorer.vim', 'version']]
       \  }
 
-  let tmpDir = scriptmanager_util#TempDir("vim-addon-manager-test")
+  let tmpDir = vam#utils#TempDir("vim-addon-manager-test")
 
-  call scriptmanager2#LoadKnownRepos()
+  call vam#install#LoadKnownRepos()
 
   for [k,v] in items(tests)
     if k !~ a:test | continue | endif
-    call scriptmanager_util#RmFR(tmpDir)
+    call vam#utils#RmFR(tmpDir)
     let dict = g:vim_script_manager['plugin_sources'][v[0]]
-    call scriptmanager2#Checkout(tmpDir, dict)
+    call vam#install#Checkout(tmpDir, dict)
     let files = split(glob(tmpDir.'/**'),"\n")
     " replace \ by / on win and remove tmpDir prefix
     call map(files, 'substitute(v:val,'.string('\').',"/","g")['.(len(tmpDir)+1).':]')
@@ -72,16 +72,16 @@ endf
 
 " tests that creating and applying diffs when updating archive plugins (found
 " on www.vim.org) works as expected.
-fun! scriptmanager_test#TestUpdate(case) abort
-  call scriptmanager2#LoadKnownRepos()
-  let tmpDir = scriptmanager_util#TempDir("vim-addon-manager-test")
+fun! vam#test#TestUpdate(case) abort
+  call vam#install#LoadKnownRepos()
+  let tmpDir = vam#utils#TempDir("vim-addon-manager-test")
   let plugin_name = "www_vim_org_update_test"
   let plugin_source_file = tmpDir.'/'.plugin_name.'.vim'
-  let installDir = scriptmanager#PluginDirByName(plugin_name)
-  let installCompareDir = scriptmanager#PluginDirByName(plugin_name.'-1.0') 
+  let installDir = vam#PluginDirByName(plugin_name)
+  let installCompareDir = vam#PluginDirByName(plugin_name.'-1.0') 
   silent! unlet  g:vim_script_manager['activated_plugins'][plugin_name]
   for dir in [tmpDir, installDir, installCompareDir]
-    if isdirectory(dir) | call scriptmanager_util#RmFR(dir) | endif
+    if isdirectory(dir) | call vam#utils#RmFR(dir) | endif
   endfor
   call mkdir(tmpDir.'/plugin','p')
 

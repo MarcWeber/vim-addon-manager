@@ -28,7 +28,7 @@ fun! s:shellescape(cmd, ...)
 endf
 
 " TODO improve this and move somewhere else?
-fun! scriptmanager_util#ShellDSL(...)
+fun! vam#utils#ShellDSL(...)
   return call('s:shellescape', a:000)
 endf
 
@@ -48,7 +48,7 @@ endf
 " contact me.
 
 " !! If you change this run the test, please: call vim_addon_manager_tests#Tests('.')
-fun! scriptmanager_util#Unpack(archive, targetDir, ...)
+fun! vam#utils#Unpack(archive, targetDir, ...)
   let opts = a:0 > 0 ? a:1 : {}
   let strip_components = get(opts, 'strip-components', -1)
   let delSource = get(opts, 'del-source', 0)
@@ -58,8 +58,8 @@ fun! scriptmanager_util#Unpack(archive, targetDir, ...)
 
   if strip_components > 0 || strip_components == -1
     " when stripping don' strip which was there before unpacking
-    let keep = scriptmanager_util#Glob(a:targetDir.'/*')
-    let strip = 'call scriptmanager_util#StripComponents(a:targetDir, strip_components, keep)'
+    let keep = vam#utils#Glob(a:targetDir.'/*')
+    let strip = 'call vam#utils#StripComponents(a:targetDir, strip_components, keep)'
   else
     let strip = ''
   endif
@@ -106,7 +106,7 @@ fun! scriptmanager_util#Unpack(archive, targetDir, ...)
           " make a backup. gunzip etc rm the original file
           if !delSource
             let b = a:archive.'.bak'
-            call scriptmanager_util#CopyFile(a:archive, b)
+            call vam#utils#CopyFile(a:archive, b)
           endif
 
           " unpack
@@ -122,7 +122,7 @@ fun! scriptmanager_util#Unpack(archive, targetDir, ...)
         endif
 
         " PHASE (2): now unpack .tar or .vba file and tidy up temp file:
-        call scriptmanager_util#Unpack(renameTo, a:targetDir, { 'strip-components': strip_components, 'del-source': 1 })
+        call vam#utils#Unpack(renameTo, a:targetDir, { 'strip-components': strip_components, 'del-source': 1 })
         call delete(renameTo)
         break
       endif
@@ -173,7 +173,7 @@ fun! scriptmanager_util#Unpack(archive, targetDir, ...)
   " Do not use `has("unix")' here: it may be useful on `win32unix' (cygwin) and 
   " `macunix' (someone should ask users of these vims about that)
   if get(opts, 'unix_ff', 0)
-    for f in scriptmanager_util#Glob(a:targetDir.'/**/*.vim')
+    for f in vam#utils#Glob(a:targetDir.'/**/*.vim')
       call writefile(map(readfile(f, 'b'),
                   \'((v:val[-1:]==#"\r")?(v:val[:-2]):(v:val))'), f, 'b')
     endfor
@@ -184,7 +184,7 @@ endf
 
 " Usage: Glob($HOME.'/*')
 " FIXME won't list hidden files as well
-fun! scriptmanager_util#Glob(path)
+fun! vam#utils#Glob(path)
   return split(glob(a:path),"\n")
   " The following does not filter . and .. components at all and spoils ** 
   " patterns (but it lacks `\' at the start of the line, so it is not even 
@@ -207,7 +207,7 @@ endf
 "
 " If num==-1, then StripComponents will strip only if it finds that there is 
 " only one directory that needs stripping
-fun! scriptmanager_util#StripComponents(dir, num, keepdirs)
+fun! vam#utils#StripComponents(dir, num, keepdirs)
   let num = a:num
   let strip_single_dir = 0
   if num == -1
@@ -218,32 +218,32 @@ fun! scriptmanager_util#StripComponents(dir, num, keepdirs)
     let tomove = []
     let toremove = []
     " for each a:dir/*
-    for gdir in filter(scriptmanager_util#Glob(a:dir.'/*'),'isdirectory(v:val)')
+    for gdir in filter(vam#utils#Glob(a:dir.'/*'),'isdirectory(v:val)')
       if index(a:keepdirs, gdir)!=-1 | continue | endif
       call add(toremove, gdir)
       if strip_single_dir && len(toremove)>=2
         return
       endif
       " for each gdir/*
-      for path in scriptmanager_util#Glob(gdir.'/*')
+      for path in vam#utils#Glob(gdir.'/*')
         " move out of dir
         call add(tomove, [path, a:dir.'/'.fnamemodify(path, ':t')])
       endfor
     endfor
     call map(tomove, 'rename(v:val[0], v:val[1])')
-    call map(toremove, 'scriptmanager_util#RmFR(v:val)')
+    call map(toremove, 'vam#utils#RmFR(v:val)')
   endfor
 endf
 
 " also copies 0. May throw an exception on failure
-fun! scriptmanager_util#CopyFile(a,b)
+fun! vam#utils#CopyFile(a,b)
   let fc = readfile(a:a, 'b')
   if writefile(fc, a:b, 'b') != 0
     throw "copying file ".a:a." to ".a:b." failed"
   endif
 endf
 
-fun! scriptmanager_util#Download(url, targetFile)
+fun! vam#utils#Download(url, targetFile)
   " allow redirection because of sourceforge mirrors:
 
   let s:curl = exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o'
@@ -253,7 +253,7 @@ fun! scriptmanager_util#Download(url, targetFile)
   call s:exec_in_dir([{'c': s:shellescape(c.' $p $', a:targetFile, a:url)}])
 endf
 
-fun! scriptmanager_util#RmFR(dir_or_file)
+fun! vam#utils#RmFR(dir_or_file)
   let cmd = ""
   if has('win32') || has('win64')
     if getftype(a:dir_or_file) == 'dir'
@@ -282,8 +282,8 @@ endf
 " a "direct link" (found on the download page)
 " such as "http://downloads.sourceforge.net/project/gnuwin32/gzip/1.3.12-1/gzip-1.3.12-1-bin.zip"
 " can be downloaded this way:
-" call scriptmanager_util#DownloadFromMirrors("mirror://sourceforge/gnuwin32/gzip/1.3.12-1/gzip-1.3.12-1-bin.zip","/tmp")
-fun! scriptmanager_util#DownloadFromMirrors(url, targetDir)
+" call vam#utils#DownloadFromMirrors("mirror://sourceforge/gnuwin32/gzip/1.3.12-1/gzip-1.3.12-1-bin.zip","/tmp")
+fun! vam#utils#DownloadFromMirrors(url, targetDir)
   let mirrors_sourceforge = [
         \   'http://heanet.dl.sourceforge.net/sourceforge/',
         \   'http://surfnet.dl.sourceforge.net/sourceforge/',
@@ -299,7 +299,7 @@ fun! scriptmanager_util#DownloadFromMirrors(url, targetDir)
   if isdirectory(t)
     let t = t .'/'.fnamemodify(url,':t')
   endif
-  call scriptmanager_util#Download(url, t)
+  call vam#utils#Download(url, t)
 endf
 
 
@@ -311,7 +311,7 @@ let s:tmpDir = ""
 "
 " on linux this returns /tmp/a:name
 " on windows it returns C:\Users\NAME\AppData\Local\Temp/a:name
-fun! scriptmanager_util#TempDir(name)
+fun! vam#utils#TempDir(name)
   if s:tmpDir == ""
     let s:tmpDir = fnamemodify(tempname(), ":h".(g:is_win ? '': ':h'))
   endif

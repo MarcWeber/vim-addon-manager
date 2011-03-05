@@ -27,12 +27,12 @@ endf
 " repository = {'type': git|hg|svn|bzr, 'url': .. }
 fun! vcs_checkouts#Checkout(targetDir, repository)
   if a:repository['type'] == 'git'
-    exec '!'.scriptmanager_util#ShellDSL('git clone $ $p', a:repository['url'], a:targetDir)
+    exec '!'.vam#utils#ShellDSL('git clone $ $p', a:repository['url'], a:targetDir)
   elseif a:repository['type'] == 'hg'
     let parent = fnamemodify(a:targetDir,':h')
-    exec '!'.scriptmanager_util#ShellDSL('hg clone $ $p', a:repository['url'], a:targetDir)
+    exec '!'.vam#utils#ShellDSL('hg clone $ $p', a:repository['url'], a:targetDir)
   elseif a:repository['type'] == 'bzr'
-    exec '!'.scriptmanager_util#ShellDSL('bzr branch $ $p', a:repository['url'], a:targetDir)
+    exec '!'.vam#utils#ShellDSL('bzr branch $ $p', a:repository['url'], a:targetDir)
   elseif a:repository['type'] == 'svn'
     let parent = fnamemodify(a:targetDir,':h')
     call s:exec_in_dir([{'d': parent, 'c': 'svn checkout '.s:shellescape(a:repository['url']).' '.s:shellescape(a:targetDir)}])

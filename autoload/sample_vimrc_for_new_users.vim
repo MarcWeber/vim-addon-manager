@@ -74,7 +74,7 @@ noremap \ft :exec 'e ~/.vim/ftplugin/'.&filetype.'_you.vim'<cr>
 " NAME-addon-info.txt files. Probably you want to substitude nameN by plugins
 " such as snipMate, tlib etc.
 
-" call scriptmanager#ActivateAddons(['JSON',"tmru","matchit.zip","vim-dev-plugin","name1","name2"])
+" call vam#ActivateAddons(['JSON',"tmru","matchit.zip","vim-dev-plugin","name1","name2"])
 " JSON: syntax highlighting for the *info* files
 " tmru: list of most recentely used files
 " matchit.zip: make % (match to mathing items such as opening closing parenthesis) even smarter
