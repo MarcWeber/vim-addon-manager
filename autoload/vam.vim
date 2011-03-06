@@ -26,7 +26,7 @@ for os in split('amiga beos dos32 dos16 mac macunix os2 qnx unix vms win16 win32
 endfor
 let g:is_win = g:os[:2] == 'win'
 
-exec vam#DefineAndBind('s:c','g:vim_script_manager','{}')
+exec vam#DefineAndBind('s:c','g:vim_addon_manager','{}')
 let s:c['config'] = get(s:c,'config',expand('$HOME').'/.vim-script-manager')
 let s:c['auto_install'] = get(s:c,'auto_install', 0)
 " repository locations:
