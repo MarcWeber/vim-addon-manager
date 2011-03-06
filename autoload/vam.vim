@@ -153,20 +153,6 @@ fun! vam#ActivateRecursively(list_of_names, ...)
   endfor
 endf
 
-fun! vam#Activate(...) abort
-  " historical. Call ActivateAddons instead
-  let cmd='%s@\(vam#Activate\)(@\1Addons(@'
-  let files = filter([$HOME."/.vimrc",$HOME.'/_vimrc'], 'filereadable(v:val)')
-  if len(files) == 1
-    exec 'e '.fnameescape(files[0])
-    echoe "running ".cmd." for you"
-    exec cmd | w
-  else
-    echo "open your the file calling vam#Activate and run: %s@\(vam#Activate\)(@\1Addons(@ . Rename happened for consistency"
-  endif
-  call call(function('vam#ActivateAddons'),a:000)
-endf
-
 " see also ActivateRecursively
 " Activate activates the plugins and their dependencies recursively.
 " I sources both: plugin/*.vim and after/plugin/*.vim files when called after
