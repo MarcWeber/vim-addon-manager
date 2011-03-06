@@ -206,9 +206,9 @@ vam#install#MergePluginFiles([{name}] [, blacklist-regex ])
 
 ==============================================================================
 4. Options                                      *vim-addon-manager-options*
-                                                     *g:vim_script_manager*
+                                                     *g:vim_addon_manager*
 
-All options are located in the global dictionary g:vim_script_manager. It also
+All options are located in the global dictionary g:vim_addon_manager. It also
 contains some stuff that user should never modify if he wants to see this
 plugin working. Possible keys:
 
@@ -443,7 +443,7 @@ anything.
 
 As alternative you can specify them in your .vimrc like what that plugin is
 doing: Add your own dicts to: >
-    g:vim_script_manager['plugin_sources']['your-plugin-name'] = { ... }
+    g:vim_addon_manager['plugin_sources']['your-plugin-name'] = { ... }
 <
 In your .vimrc or somewhere else (see |vim-addon-manager-plugin_sources|).
 

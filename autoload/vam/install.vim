@@ -1,7 +1,7 @@
 " vam#install contains code which is used when install plugins only
 
 let s:curl = exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o'
-exec vam#DefineAndBind('s:c','g:vim_script_manager','{}')
+exec vam#DefineAndBind('s:c','g:vim_addon_manager','{}')
 
 
 " Install let's you install plugins by passing the url of a addon-info file
