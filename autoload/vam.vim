@@ -6,7 +6,7 @@
 
 " don't need a plugin. If you want to use this plugin you call Activate once
 " anyway
-augroup SCRIPT_MANAGER
+augroup VIM_ADDON_MANAGER
   autocmd!
   autocmd BufRead,BufNewFile *-addon-info.txt
     \ setlocal ft=addon-info
