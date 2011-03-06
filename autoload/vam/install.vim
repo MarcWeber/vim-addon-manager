@@ -40,38 +40,40 @@ fun! vam#install#Install(toBeInstalledList, ...)
   let opts = a:0 == 0 ? {} : a:1
   let auto_install = s:c['auto_install'] || get(opts,'auto_install',0)
   for name in toBeInstalledList
+    " make sure all sources are known
     if vam#IsPluginInstalled(name)
       continue
     endif
-    let confirm_install = ''
-
     if name != s:c['known'] | call vam#install#LoadKnownRepos() | endif
 
     let repository = get(s:c['plugin_sources'], name, get(opts, name,0))
 
     if type(repository) == type(0) && repository == 0
-      echoe "No repository location info known for plugin ".name."!"
-      return
+      echoe "No repository location info known for plugin ".name."! (typo?)"
+      continue " due to abort this won't take place ?
     endif
+
+    let confirmed = ''
+
+    " tell user about target directory. Some users don't get it the first time..
+    echom name." target: ".s:c['plugin_root_dir'].'/'.name
 
     let d = get(repository, 'deprecated', '')
     if type(d) == type('') && d != ''
-      echom "Deprecation warning package ".name. ":"
+      echom "!> Deprecation warning package ".name. ":"
       echom d
-      let confirm_install = input('Plugin '.name.' is deprecated. See warning above. Install it? [y/n]','n')
-      if confirm_install != 'y'
+      " even for auto_install make user confirm the deprecation case
+      if 'y' == input('Plugin '.name.' is deprecated. See warning above. Install it? [y/n]','')
+        let confirmed = 'y'
+      else
         continue
       endif
     endif
 
-    let pluginDir = scriptmanager#PluginDirByName(name)
+    let pluginDir = vam#PluginDirByName(name)
     " ask user for to confirm installation unless he set auto_install
 
-    if auto_install || confirm_install != 'y'
-      let confirm_install = input('Install plugin "'.name.'" into "'.s:c['plugin_root_dir'].'" ? [y/n]:','')
-    endif
-
-    if auto_install || confirm_install == 'y'
+    if auto_install || confirmed == 'y' || 'y' == input('Install plugin "'.name.'" ? [y/n]:','')
 
       let infoFile = vam#AddonInfoFile(name)
       call vam#install#Checkout(pluginDir, repository)
