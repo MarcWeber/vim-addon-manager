@@ -19,6 +19,7 @@ endfun
 fun! scriptmanager#Activate(...) abort
   " historical. Call vam#ActivateAddons instead
   augroup scriptmanagerRebrand
+    autocmd!
     autocmd VimEnter * call s:UpdateVimrc()
   augroup END
   if exists('g:vim_script_manager')
