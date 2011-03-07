@@ -7,7 +7,7 @@ fun! scriptmanager#Activate(...) abort
   let files = filter([$HOME."/.vimrc",$HOME.'/_vimrc'], 'filereadable(v:val)')
   if len(files) == 1
     echohl WarningMsg
-    echomsg "scriptmanager#Actiavte and g:vim_script_manager were renamed to vam#ActivateAddons and g:vim_addon_manager."
+    echomsg "scriptmanager#Activate and g:vim_script_manager were renamed to vam#ActivateAddons and g:vim_addon_manager."
     echohl None
     if confirm("Replace given names in ".files[0]."?", "&No\n&Yes")==2
       exec 'e '.fnameescape(files[0])
