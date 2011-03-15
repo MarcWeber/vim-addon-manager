@@ -1,0 +1,32 @@
+This list is incomplete. Improve it!
+
+VAM = vim-addon-manager
+PAT = pathogen
+
+dependency management
+=====================
+VAM: see *-addon-info.txt files which contains a key "depednencies"
+PAT: ?
+
+addon sources ?
+===============
+VAM: by plugin name. vim-addon-manager-known-repositories contains repo info.
+     You can add your own sources in ~/.vimrc or by other ways easily
+PAT: ?
+
+Tags:
+=====
+VAM:  runs helptags automatically
+PAT: has http://hackage.haskell.org/packages/archive/gtk/0.12.0/gtk-0.12.0.tar.gz
+
+extra dirs hacks (load files which are not loaded when adding to runtimepath only)
+===================
+VAM: See if !has('vim_starting') in autoload/vam.vim
+PAT: I haven't seen so[urce] or ru[ntime] usage in pathogen.vim. So I guess
+     this feature does not exist
+
+
+uninstallation:
+===============
+VAM: UninstallNotLoadedAddons
+PAT: ? (TODO)
