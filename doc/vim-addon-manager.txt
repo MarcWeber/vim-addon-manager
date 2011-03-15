@@ -107,6 +107,12 @@ Continue reading |vim-addon-manager-install-plugins|.
 ------------------------------------------------------------------------------
 3.1. Commands                                   *vim-addon-manager-commands*
 
+InstallAddons {name} ...                                  *:InstallAddons*
+        Install addons with given names. See |vam#install#InstallAddons()| for
+        more details.
+        You use InstallAddons instead of ActivateAddons if you want to review
+        plugin source before running it.
+
 ActivateAddons {name} ...                                  *:ActivateAddons*
         Activate addons with given names. See |vam#ActivateAddons()| for
         more details.
@@ -281,8 +287,9 @@ Usually you add the names of the addons this way to your .vimrc: >
    set runtimepath+=~/vim-addons/vim-addon-manager
    call vam#ActivateAddons(["pluginA","pluginB"])
 <
-You can use the Install function to install plugins only - however in practise
-you use the Activate command / function only.
+You can use the InstallAddons function to install plugins only.
+You should do this if you don't trust foreign code. Then you can review it
+before it'll be executed. Otherwise use ActivateAddons
 
 You can install plugins by URL. See |vam#install#Install()|.
 I prefer you telling me about your repository location, though.
@@ -764,6 +771,7 @@ www.vim.org) you must trust authors. I can't review all code - so expect code
 to steal your passwords, run sudo rm -fr / ... etc. (This never happened to
 me. But it could)
 Briefly: I'm not responsible for the code you get using vim-addon-manager.
+You can use |InstallAddons| to preview source.
 
 If something goes wrong - and if I don't reply within 24h:
 The following github users are collaborators. This means they have write

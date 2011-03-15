@@ -247,6 +247,7 @@ fun! vam#AddonInfoFile(name)
   endif
 endf
 
+command! -nargs=* -complete=customlist,vam#install#AddonCompletion InstallAddons :call vam#install#Install([<f-args>])
 command! -nargs=* -complete=customlist,vam#install#AddonCompletion ActivateAddons :call vam#ActivateAddons([<f-args>])
 command! -nargs=* -complete=customlist,vam#install#InstalledAddonCompletion ActivateInstalledAddons :call vam#ActivateAddons([<f-args>])
 command! -nargs=* -complete=customlist,vam#install#AddonCompletion UpdateAddons :call vam#install#Update([<f-args>])
