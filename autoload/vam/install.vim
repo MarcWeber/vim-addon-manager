@@ -276,9 +276,7 @@ fun! vam#install#UninstallAddons(list)
   endif
   call map(list, 'vam#PluginDirByName(v:val)')
   if input('Confirm running rm -fr on directories: '.join(list,", ").'? [y/n]') == 'y'
-    for path in list
-      exec '!rm -fr '.s:shellescape(path)
-    endfor
+    call map(list, 'vam#utils#RmFR(v:val)')
   endif
 endf
 
