@@ -1,4 +1,4 @@
-*vim-addon-manager.txt* Package manager for Vim
+*vim-addon-manager.txt* Declarative package manager for Vim
 ==============================================================================
 CONTENTS                                        *vim-addon-manager-contents*
 
@@ -48,6 +48,10 @@ Dependencies:
     - Either tar, gzip and zip or 7-zip (required for unpacking some addons)
     - Vimball plugin (required for installing some addons) (in latest vim it
       is included by default)
+
+What does "Declarative package manager" mean? The final behaviour of Vim
+should be declared once. Your ~/.vimrc and :UpdateAddons should be enough
+to cause same Vim behaviour everywhere. [2]
 
 ------------------------------------------------------------------------------
 Getting started fast: ~
@@ -735,6 +739,18 @@ what's going to happen.
   You get the idea why I'm not going to maintain this. Putting it into your
   .vimrc should be easy enough.
 
+[2]: VAM's behaviour depends on PATH
+  If you don't have git in PATH git sources are dropped. ZyX comitted it
+  making me somewhat unhappy. However a warning is echoed so its ok.
+  This means that VAM falls back to vim.sf.net if possible if you don't have
+  git installed.
+  I should fix this by making this filtering explicit by asking users to put
+  this into their ~/.vimrc:
+  let g:vim_addon_manager.filter_scms = filter(['git','svn','bzr','hg'], '!executable(v:val)')
+  If you feel strong about it comment the closed bug on the github bug
+  tracker.
+
+
 TODOs:
 - support vim-scripts.org. This will let you get all www.vim.org scripts using
   git repositories only. I think the general idea is great. However we have to
@@ -816,7 +832,7 @@ fun SetupVAM()
   set runtimepath+=~/vim-addons/vim-addon-manager
   call vam#ActivateAddons([])
 endf
-call ActivateAddons()
+call SetupVAM()
 " experimental: run after gui has been started [3]
 " option1:  au VimEnter * call SetupVAM()
 " option2:  au GUIEnter * call SetupVAM()

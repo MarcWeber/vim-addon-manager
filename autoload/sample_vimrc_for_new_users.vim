@@ -98,6 +98,9 @@ finish
 
 DON'T MISS THESE {{{1
 
+digraphs: type chars which are untypable:
+c-k =e  : types € (see :h digraph)
+
 c-x c-f : file completion
 c-x c-l : line completion
 c-n     : kind of keyword completion - completes everything found in all opened buffers.
