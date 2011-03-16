@@ -1,32 +1,51 @@
 This list is incomplete. Improve it!
 
 VAM = vim-addon-manager
+VUN = Vundle
 PAT = pathogen
+
+PAT needs you to manually download plugins and put them inside a directory
+    which pathogen will load at startup.
+VUN can search http://vim-scripts.org/vim/scripts.html by name and you tell
+    which names you're interested in in your .vimrc, before calling a command
+    that installs them.
+VAM has a repository dedicated to listing vim plugins and their dependencies,
+    and is conceptually different than Vundle.
 
 dependency management
 =====================
-VAM: see *-addon-info.txt files which contains a key "depednencies"
-PAT: ?
+VAM: see *-addon-info.txt files which contains a key "dependencies"
+VUN: none
+PAT: none
 
 addon sources ?
 ===============
 VAM: by plugin name. vim-addon-manager-known-repositories contains repo info.
      You can add your own sources in ~/.vimrc or by other ways easily
-PAT: ?
+VUN: You can give a git url for a Bundle
+PAT: You can git clone a plugin into the plugin's directory manually
 
 Tags:
 =====
-VAM:  runs helptags automatically
+VAM: runs helptags automatically
+VUN: runs helptags automatically
 PAT: has http://hackage.haskell.org/packages/archive/gtk/0.12.0/gtk-0.12.0.tar.gz
 
 extra dirs hacks (load files which are not loaded when adding to runtimepath only)
 ===================
 VAM: See if !has('vim_starting') in autoload/vam.vim
+VUN: ?
 PAT: I haven't seen so[urce] or ru[ntime] usage in pathogen.vim. So I guess
      this feature does not exist
 
+VimBalls:
+=========
+VAM: handles them automatically
+VUN: ?
+PAT: need to put them in a special directory (?)
 
 uninstallation:
 ===============
 VAM: UninstallNotLoadedAddons
-PAT: ? (TODO)
+VUN: ?
+PAT: delete the plugin's directory manually
