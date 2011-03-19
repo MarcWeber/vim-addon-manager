@@ -230,6 +230,8 @@ vam#install#MergePluginFiles([{name}] [, blacklist-regex ])
   |vam#install#RewriteName| which allows following shortcuts: >
 
   github:YourName -> {'type':'git', 'url': 'git://github.com/YourName/vim-addon-YourName'}
+  github:Name/Repo -> {'type':'git', 'url': 'git://github.com/Name/Repo'}
+
   git:URL         -> {'type':'git', 'url': 'URL'} (experimental, is vam#PluginDirByName used everywhere?)
 
 < Thus using the addon name github:YourName is enough to install your personal
