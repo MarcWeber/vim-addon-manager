@@ -826,7 +826,7 @@ I personally don't have time to write it.
 *linux-installation-script* paste into your shell:
 
 mkdir ~/vim-addons
-git clone git://github.com/MarcWeber/vim-addon-manager.git ~/vim-addons/vim-addon-manager
+git clone --depth 1 git://github.com/MarcWeber/vim-addon-manager.git ~/vim-addons/vim-addon-manager
 cat >> ~/.vimrc << EOF
 fun SetupVAM()
   set runtimepath+=~/vim-addons/vim-addon-manager
