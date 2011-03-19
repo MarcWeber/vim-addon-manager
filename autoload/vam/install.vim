@@ -3,6 +3,19 @@
 let s:curl = exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o'
 exec vam#DefineAndBind('s:c','g:vim_addon_manager','{}')
 
+let s:c.name_rewriting = get(s:c,'name_rewriting',{})
+let s:nr = s:c.name_rewriting
+let s:nr.vam_defaults = get(s:nr,'git', function('vam#install#RewriteName'))
+
+fun! vam#install#RewriteName(name, repos)
+  if a:name =~ '^github:'
+    let rest = a:name[len('github:'):]
+    call add(a:repos, {'type' : 'git', 'url' : 'git://github.com/'.(rest =~ '/' ? rest : rest.'/vim-addon-'.rest)})
+  endif
+  if a:name =~ '^git:'
+    call add(a:repos, {'type' : 'git', 'url' : a:name[len('git:'):]})
+  endif
+endf
 
 " Install let's you install plugins by passing the url of a addon-info file
 " This preprocessor replaces the urls by the plugin-names putting the
@@ -49,14 +62,27 @@ fun! vam#install#Install(toBeInstalledList, ...)
     let repository = get(s:c['plugin_sources'], name, get(opts, name,0))
 
     if type(repository) == type(0) && repository == 0
-      echoe "No repository location info known for plugin ".name."! (typo?)"
-      continue " due to abort this won't take place ?
+      " try rewriting plugin names. See vam#install#RewriteName
+      let r =[]
+      for [k,F] in items(s:nr)
+        call call(F,[name, r])
+        unlet k F
+      endfor
+      if len(r) > 0
+        unlet repository
+        let repository = r[0]
+        echom 'name '.name.' expanded to :'.string(repository)
+      else
+        echoe "No repository location info known for plugin ".name."! (typo?)"
+        continue " due to abort this won't take place ?
+      endif
     endif
 
     let confirmed = ''
 
     " tell user about target directory. Some users don't get it the first time..
-    echom name." target: ".s:c['plugin_root_dir'].'/'.name
+    let pluginDir = vam#PluginDirByName(name)
+    echom name." target: ".pluginDir
 
     let d = get(repository, 'deprecated', '')
     if type(d) == type('') && d != ''
@@ -70,7 +96,6 @@ fun! vam#install#Install(toBeInstalledList, ...)
       endif
     endif
 
-    let pluginDir = vam#PluginDirByName(name)
     " ask user for to confirm installation unless he set auto_install
 
     if auto_install || confirmed == 'y' || 'y' == input('Install plugin "'.name.'" ? [y/n]:','')
