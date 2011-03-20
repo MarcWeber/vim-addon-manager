@@ -394,14 +394,14 @@ fun! vam#install#LoadKnownRepos(...)
   if 0 == get(s:c['activated_plugins'], known, 0)
     let policy=get(s:c, 'known_repos_activation_policy', 'autoload')
     if policy==?"ask"
-      let s:reply = confirm('Activate plugin '.known.' to '.reason."?", "&Yes\n&No\nN&ever (during session)")
+      let reply = confirm('Activate plugin '.known.' to '.reason."?", "&Yes\n&No\nN&ever (during session)")
     elseif policy==?"never"
-      let s:reply=2
+      let reply=2
     else
-      let s:reply=1
+      let reply=1
     endif
-    if s:reply == 3 | let s:c.known_repos_activation_policy = "never" | endif
-    if s:reply == 1
+    if reply == 3 | let s:c.known_repos_activation_policy = "never" | endif
+    if reply == 1
       call vam#ActivateAddons([known])
       " This is not done in .vimrc because Vim loads plugin/*.vim files after
       " having finished processing .vimrc. So do it manually
