@@ -4,7 +4,7 @@ let s:c.scm_extra_args = get(s:c,'scm_extra_args',{})
 
 let s:se = s:c.scm_extra_args
 " this is not proberly quoted yet thus its will change:
-" using list so that we can encode ['$ $',[1,2]] (quonting values if needed)
+" using list so that we can encode ['$ $',[1,2]] (quoting values if needed)
 let s:se.git = get(s:c,'git', [s:c.shallow_clones ? '--depth 1' : ''])
 
 " this may be useful for other projects.
