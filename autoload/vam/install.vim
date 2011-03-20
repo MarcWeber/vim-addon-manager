@@ -3,8 +3,7 @@
 let s:curl = exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o'
 exec vam#DefineAndBind('s:c','g:vim_addon_manager','{}')
 
-let s:c.name_rewriting = get(s:c, 'name_rewriting', [])+['vam#install#RewriteName']
-let s:nr = s:c.name_rewriting
+let s:c.name_rewriting = get(s:c, 'name_rewriting', {'00git+github': 'vam#install#RewriteName'})
 
 fun! s:confirm(msg, ...)
   return confirm(a:msg, a:0 ? "&No\n&Yes" : "&Yes\n&No") == 1+a:0
@@ -64,16 +63,15 @@ fun! vam#install#Install(toBeInstalledList, ...)
     let repository = get(s:c['plugin_sources'], name, get(opts, name,0))
 
     if type(repository) == type(0) && repository == 0
-      " try rewriting plugin names. See vam#install#RewriteName
-      " XXX if you modify this, remember two points:
-      " 1. If function F is defined, you cannot assign function reference to 
-      " F variable, but you can assign it to any key of any dictionary.
-      " 2. If value is reference to a dictionary function, it won't run without 
-      " supplying a dictionary as a third argument to call().
-      let r=filter(map(copy(s:nr), 'call(v:val, [name], {})'), 'type(v:val)=='.type({}))
-      if !empty(r)
+      unlet repository
+      for key in sort(keys(s:c.name_rewriting))
+        let repository=s:c.name_rewriting[key](name)
+        if type(repository) == type({})
+          break
+        endif
         unlet repository
-        let repository = r[0]
+      endfor
+      if exists('repository')
         echom 'name '.name.' expanded to :'.string(repository)
       else
         echoe "No repository location info known for plugin ".name."! (typo?)"

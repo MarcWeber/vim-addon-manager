@@ -279,13 +279,15 @@ do_diff                                            *vim-addon-manager-do_diff*
         installed plugins (unless they are under SCM control). Requires diff
         and patch programs installed.
 name_rewriting                              *vim-addon-manager-name_rewriting*
-        Set this to a list of functions which take a plugin name and return 
-        either a dictionary with repository location (see 
-        |addon-info-repository|) for given name or zero, location will be set 
-        to the first non-zero value. These functions will be called when 
-        repository location for requested plugin is not found. If none of the 
-        functions returned a dictionary, |vam#install#RewriteName()| will be 
-        called.
+        Set this to a dictionary with functions each taking a plugin name and 
+        returning either a dictionary with repository location (see 
+        |addon-info-repository|) for given name or zero. Location will be set 
+        to the first non-zero value, functions are executed in order 
+        determined by |sort()|ing |keys()| of the dictionary. These functions 
+        will be called when repository location for requested plugin is not 
+        found.
+        Default value: {"00git+github": "vam#install#RewriteName"} (see 
+        |vam#install#RewriteName()|).
 
 ==============================================================================
 5. Installing plugins                      *vim-addon-manager-install-plugins*
