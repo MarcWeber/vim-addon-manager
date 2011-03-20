@@ -6,6 +6,10 @@ exec vam#DefineAndBind('s:c','g:vim_addon_manager','{}')
 let s:c.name_rewriting = get(s:c, 'name_rewriting', [])+['vam#install#RewriteName']
 let s:nr = s:c.name_rewriting
 
+fun! s:confirm(msg, ...)
+  return confirm(a:msg, a:0 ? "&No\n&Yes" : "&Yes\n&No") == 1+!a:0
+endfun
+
 fun! vam#install#RewriteName(name)
   if a:name[:6]==#'github:'
     let rest = a:name[len('github:'):]
@@ -13,7 +17,7 @@ fun! vam#install#RewriteName(name)
   elseif a:name[:3]==#'git:'
     return {'type' : 'git', 'url' : a:name[len('git:'):]}
   endif
-endf
+endfun
 
 " Install let's you install plugins by passing the url of a addon-info file
 " This preprocessor replaces the urls by the plugin-names putting the
@@ -25,7 +29,7 @@ fun! vam#install#ReplaceAndFetchUrls(list)
     silent! unlet t
     let n = l[idx]
     " assume n is either an url or a path
-    if n =~ '^http://' && 'y' == input('Fetch plugin info from url '.n.' [y/n]')
+    if n =~ '^http://' && s:confirm('Fetch plugin info from URL '.n.'?')
       let t = tempfile()
       exec '!'.s:curl.' '.t.' > '.s:shellescape(t)
     elseif n =~  '[/\\]' && filereadable(n)
@@ -77,7 +81,7 @@ fun! vam#install#Install(toBeInstalledList, ...)
       endif
     endif
 
-    let confirmed = ''
+    let confirmed = 0
 
     " tell user about target directory. Some users don't get it the first time..
     let pluginDir = vam#PluginDirByName(name)
@@ -88,8 +92,8 @@ fun! vam#install#Install(toBeInstalledList, ...)
       echom "!> Deprecation warning package ".name. ":"
       echom d
       " even for auto_install make user confirm the deprecation case
-      if 'y' == input('Plugin '.name.' is deprecated. See warning above. Install it? [y/n]','')
-        let confirmed = 'y'
+      if s:confirm('Plugin '.name.' is deprecated, see warning above. Install it?', 1)
+        let confirmed = 1
       else
         continue
       endif
@@ -97,7 +101,7 @@ fun! vam#install#Install(toBeInstalledList, ...)
 
     " ask user for to confirm installation unless he set auto_install
 
-    if auto_install || confirmed == 'y' || 'y' == input('Install plugin "'.name.'" ? [y/n]:','')
+    if auto_install || confirmed || s:confirm("Install plugin `".name."'?")
 
       let infoFile = vam#AddonInfoFile(name)
       call vam#install#Checkout(pluginDir, repository)
@@ -146,7 +150,7 @@ fun! vam#install#UpdateAddon(name)
       " move plugin to backup destination:
       let pluginDirBackup = pluginDir.'-'.oldVersion
       if isdirectory(pluginDirBackup) || filereadable(pluginDirBackup)
-        if "y" == input("old plugin backup directory found: ".pluginDirBackup.", remove? [y/n]")
+        if s:confirm("Remove old plugin backup directory (".pluginDirBackup.")?")
           call vam#utils#RmFR(pluginDirBackup)
         else
           throw "user abort: remove ".pluginDirBackup." manually"
@@ -221,7 +225,7 @@ endf
 
 fun! vam#install#Update(list)
   let list = a:list
-  if empty(list) && input('Update all loaded plugins? [y/n] ','y') == 'y'
+  if empty(list) && s:confirm('Update all loaded plugins?')
     call vam#install#LoadKnownRepos(' so that its updated as well')
     " include vim-addon-manager in list
     if !s:c['system_wide']
@@ -299,7 +303,7 @@ fun! vam#install#UninstallAddons(list)
     return
   endif
   call map(list, 'vam#PluginDirByName(v:val)')
-  if input('Confirm running rm -fr on directories: '.join(list,", ").'? [y/n]') == 'y'
+  if s:confirm('Confirm running rm -fr on directories: '.join(list,", ").'?')
     call map(list, 'vam#utils#RmFR(v:val)')
   endif
 endf
@@ -392,14 +396,14 @@ fun! vam#install#LoadKnownRepos(...)
   if 0 == get(s:c['activated_plugins'], known, 0)
     let policy=get(s:c, 'known_repos_activation_policy', 'autoload')
     if policy==?"ask"
-      let s:reply = input('Activate plugin '.known.' to '.reason."? [y/n/N=don't ask again this (session)]:",'')
+      let s:reply = confirm('Activate plugin '.known.' to '.reason."?", "&Yes\n&No\nN&ever (during session)")
     elseif policy==?"never"
-      let s:reply="n"
+      let s:reply=2
     else
-      let s:reply='y'
+      let s:reply=1
     endif
-    if s:reply ==# 'N' | let s:c.known_repos_activation_policy = "never" | endif
-    if s:reply ==? 'y'
+    if s:reply == 3 | let s:c.known_repos_activation_policy = "never" | endif
+    if s:reply == 1
       call vam#ActivateAddons([known])
       " This is not done in .vimrc because Vim loads plugin/*.vim files after
       " having finished processing .vimrc. So do it manually
