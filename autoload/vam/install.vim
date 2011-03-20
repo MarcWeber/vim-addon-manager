@@ -7,7 +7,7 @@ let s:c.name_rewriting = get(s:c, 'name_rewriting', [])+['vam#install#RewriteNam
 let s:nr = s:c.name_rewriting
 
 fun! s:confirm(msg, ...)
-  return confirm(a:msg, a:0 ? "&No\n&Yes" : "&Yes\n&No") == 1+!a:0
+  return confirm(a:msg, a:0 ? "&No\n&Yes" : "&Yes\n&No") == 1+a:0
 endfun
 
 fun! vam#install#RewriteName(name)
