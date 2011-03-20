@@ -65,7 +65,7 @@ fun! vam#install#Install(toBeInstalledList, ...)
     if type(repository) == type(0) && repository == 0
       unlet repository
       for key in sort(keys(s:c.name_rewriting))
-        let repository=s:c.name_rewriting[key](name)
+        let repository=call(s:c.name_rewriting[key], [name], {})
         if type(repository) == type({})
           break
         endif
