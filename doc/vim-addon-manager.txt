@@ -9,9 +9,6 @@ CONTENTS                                          *vim-addon-manager-contents*
     3. Functionality provided          |vim-addon-manager-functionality|
         3.1. Commands                  |vim-addon-manager-commands|
         3.2. Functions                 |vim-addon-manager-functions|
-        3.3. name rewriting            |vim-addon-manager-name-rewriting|
-             (keeping track of your
-             personal vim configuration)
     4. Options                         |vim-addon-manager-options|
     5. Installing plugins              |vim-addon-manager-install-plugins|
     6. Addon-info file                 |vim-addon-manager-addon-info|
@@ -93,7 +90,7 @@ manually:
         call SetupVAM()
         " experimental: run after gui has been started [3]
         " option1:  au VimEnter * call SetupVAM()
-        " option2:  au GUIEnter * call SetupVAM() 
+        " option2:  au GUIEnter * call SetupVAM()
         " See BUGS sections below [*]
 
 <   Note: Depending on the way you choose to run ActivateAddons Vim may not be
@@ -103,7 +100,6 @@ manually:
 
 4. Optionally generate helptags: >
        UpdateAddon vim-addon-manager
-<
 
 
 Continue reading |vim-addon-manager-install-plugins|.
@@ -217,27 +213,14 @@ vam#install#MergePluginFiles([{name}] [, blacklist-regex ])
 
         Yes, the info files should be cached as well (TODO)
 
-------------------------------------------------------------------------------
-3.3. name rewriting / personal Vim config   *vim-addon-manager-name-rewriting*
-
-  We all have our custom config - and maybe we all think that our setup is
-  interesting - but not interesting enough to tell everybody about the url.
-
-  For this reason name rewriting has been introduced:
-  Whenever a name is unkown rewriting is tried. >
-  g:vim_addon_manager.name_rewriting
-< contains a dict of functions rewriting names. The default implementation is
-  |vam#install#RewriteName| which allows following shortcuts: >
-
-  github:YourName -> {'type':'git', 'url': 'git://github.com/YourName/vim-addon-YourName'}
-  github:Name/Repo -> {'type':'git', 'url': 'git://github.com/Name/Repo'}
-
-  git:URL         -> {'type':'git', 'url': 'URL'} (experimental, is vam#PluginDirByName used everywhere?)
-
-< Thus using the addon name github:YourName is enough to install your personal
-  Vim config whose plugin/*.vim files can call ActivateAddons again to load
-  additional plugins.
-  Of course patches for additional rewritings will be accepted
+vam#install#RewriteName({name})                    *vam#install#RewriteName()*
+    Returns a dictionary if {name} matches one of the following patterns:
+    Pattern            Dictionary ~
+    github:{Name}      {"type": "git",
+                        "url": "git://github.com/{Name}/vim-addon-{Name}}
+    github:{N}/{Repo}  {"type": "git",
+                        "url": "git://github.com/{N}/{Repo}"}
+    git:{URL}          {"type": "git", "url": {URL}} (experimental)
 
 ==============================================================================
 4. Options                                         *vim-addon-manager-options*
@@ -295,6 +278,17 @@ do_diff                                            *vim-addon-manager-do_diff*
         If this option is true (default), then try to retain user changes to
         installed plugins (unless they are under SCM control). Requires diff
         and patch programs installed.
+name_rewriting                              *vim-addon-manager-name_rewriting*
+        Set this to a dictionary with functions each taking a plugin name and 
+        returning either a dictionary with repository location (see 
+        |addon-info-repository|) for given name or zero. Location will be set 
+        to the first non-zero value, functions are executed in order 
+        determined by |sort()|ing |keys()| of the dictionary. These functions 
+        will be called when repository location for requested plugin is not 
+        found.
+        Value will be extended with >
+            {"99git+github": "vam#install#RewriteName"}
+<       after it is read (see |vam#install#RewriteName()|).
 
 ==============================================================================
 5. Installing plugins                      *vim-addon-manager-install-plugins*
