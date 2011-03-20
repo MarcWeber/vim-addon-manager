@@ -3,17 +3,15 @@
 let s:curl = exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o'
 exec vam#DefineAndBind('s:c','g:vim_addon_manager','{}')
 
-let s:c.name_rewriting = get(s:c,'name_rewriting',{})
+let s:c.name_rewriting = get(s:c, 'name_rewriting', [])+['vam#install#RewriteName']
 let s:nr = s:c.name_rewriting
-let s:nr.vam_defaults = get(s:nr,'git', function('vam#install#RewriteName'))
 
-fun! vam#install#RewriteName(name, repos)
-  if a:name =~ '^github:'
+fun! vam#install#RewriteName(name)
+  if a:name[:6]==#'github:'
     let rest = a:name[len('github:'):]
-    call add(a:repos, {'type' : 'git', 'url' : 'git://github.com/'.(rest =~ '/' ? rest : rest.'/vim-addon-'.rest)})
-  endif
-  if a:name =~ '^git:'
-    call add(a:repos, {'type' : 'git', 'url' : a:name[len('git:'):]})
+    return {'type' : 'git', 'url' : 'git://github.com/'.(rest =~ '/' ? rest : rest.'/vim-addon-'.rest)}
+  elseif a:name[:3]==#'git:'
+    return {'type' : 'git', 'url' : a:name[len('git:'):]}
   endif
 endf
 
@@ -63,12 +61,13 @@ fun! vam#install#Install(toBeInstalledList, ...)
 
     if type(repository) == type(0) && repository == 0
       " try rewriting plugin names. See vam#install#RewriteName
-      let r =[]
-      for [k,F] in items(s:nr)
-        call call(F,[name, r])
-        unlet k F
-      endfor
-      if len(r) > 0
+      " XXX if you modify this, remember two points:
+      " 1. If function F is defined, you cannot assign function reference to 
+      " F variable, but you can assign it to any key of any dictionary.
+      " 2. If value is reference to a dictionary function, it won't run without 
+      " supplying a dictionary as a third argument to call().
+      let r=filter(map(copy(s:nr), 'call(v:val, [name], {})'), 'type(v:val)=='.type({}))
+      if !empty(r)
         unlet repository
         let repository = r[0]
         echom 'name '.name.' expanded to :'.string(repository)
