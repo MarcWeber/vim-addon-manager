@@ -3,7 +3,8 @@
 let s:curl = exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o'
 exec vam#DefineAndBind('s:c','g:vim_addon_manager','{}')
 
-let s:c.name_rewriting = get(s:c, 'name_rewriting', {'00git+github': 'vam#install#RewriteName'})
+let s:c.name_rewriting = get(s:c, 'name_rewriting', {})
+call extend(s:c.name_rewriting, {'99git+github': 'vam#install#RewriteName'})
 
 fun! s:confirm(msg, ...)
   return confirm(a:msg, a:0 ? "&No\n&Yes" : "&Yes\n&No") == 1+a:0

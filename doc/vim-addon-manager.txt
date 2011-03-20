@@ -286,8 +286,9 @@ name_rewriting                              *vim-addon-manager-name_rewriting*
         determined by |sort()|ing |keys()| of the dictionary. These functions 
         will be called when repository location for requested plugin is not 
         found.
-        Default value: {"00git+github": "vam#install#RewriteName"} (see 
-        |vam#install#RewriteName()|).
+        Value will be extended with >
+            {"99git+github": "vam#install#RewriteName"}
+<       after it is read (see |vam#install#RewriteName()|).
 
 ==============================================================================
 5. Installing plugins                      *vim-addon-manager-install-plugins*
