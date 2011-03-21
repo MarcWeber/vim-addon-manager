@@ -1,16 +1,17 @@
 This list is incomplete. Improve it!
 
-management systems, first commit
+The reason for this file is to help users choose a system to fit their needs
+faster - and to find out why so much effort was put into this topic - cause I thought VAM would satisfy almost all needs .. Obviously I was wrong. So I'd like to document it.
 
-PAT = pathogen          (2008-08-07 -> vim.sf.net)
-VAM = vim-addon-manager (first commit 2009-12-27)
-VUN = Vundle
-MANA = VIMANA
-JOLT = jolt
-VTS = vim-nicktears      (2010-08-19)
-VSU = Vim Script Updater
 GLVS = GetLatestVimScript (Vim $RUNTIME files)
-GVS = get vim scripts
+PAT = pathogen          (2008-08-07 -> vim.sf.net)
+MANA = VIMANA           (first commit 2009-08-07)
+VAM = vim-addon-manager (first commit 2009-12-27)
+JOLT = jolt             (first commit 2010-08-06)
+VUN = Vundle            (first commit 2010-10-18)
+VSU = Vim Script Updater (2010-07-1 -> vim.sf.net)
+VTS = vim-nicktears     (2010-08-19)
+GVS = get vim scripts   (2011-03)
 
 DESIGN CHOICES
 =============
