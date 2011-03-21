@@ -1,3 +1,12 @@
+exec vam#DefineAndBind('s:c','g:vim_addon_manager','{}')
+let s:c.shallow_clones = get(s:c,'shallow_clones',1)
+let s:c.scm_extra_args = get(s:c,'scm_extra_args',{})
+
+let s:se = s:c.scm_extra_args
+" this is not proberly quoted yet thus its will change:
+" using list so that we can encode ['$ $',[1,2]] (quoting values if needed)
+let s:se.git = get(s:c,'git', [s:c.shallow_clones ? '--depth 1' : ''])
+
 " this may be useful for other projects.
 " Thus move checking .hg .svn etc into a different file
 
@@ -27,7 +36,7 @@ endf
 " repository = {'type': git|hg|svn|bzr, 'url': .. }
 fun! vcs_checkouts#Checkout(targetDir, repository)
   if a:repository['type'] == 'git'
-    exec '!'.vam#utils#ShellDSL('git clone $ $p', a:repository['url'], a:targetDir)
+    exec '!'.vam#utils#ShellDSL('git clone '. s:se.git[0] .' $ $p', a:repository['url'], a:targetDir)
   elseif a:repository['type'] == 'hg'
     let parent = fnamemodify(a:targetDir,':h')
     exec '!'.vam#utils#ShellDSL('hg clone $ $p', a:repository['url'], a:targetDir)

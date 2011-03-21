@@ -93,11 +93,11 @@ fun! vam#ReadAddonInfo(path)
 endf
 
 fun! vam#PluginDirByName(name)
-  return s:c['plugin_root_dir'].'/'.a:name
+  return s:c['plugin_root_dir'].'/'.substitute(a:name,'[\\/:]','','g')
 endf
 fun! vam#PluginRuntimePath(name)
   let info = vam#AddonInfo(a:name)
-  return s:c['plugin_root_dir'].'/'.a:name.(has_key(info, 'runtimepath') ? '/'.info['runtimepath'] : '')
+  return vam#PluginDirByName(a:name).(has_key(info, 'runtimepath') ? '/'.info['runtimepath'] : '')
 endf
 
 " doesn't check dependencies!

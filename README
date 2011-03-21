@@ -6,7 +6,7 @@ text editor Vim.
 It also handles plugin dependencies and puts each script distribution into its
 own directory resulting in a painless installation management.
 
-supported PLUGIN SOURCES: git, mercurial, svn, bzr, www.vim.org, ...
+Supported PLUGIN SOURCES: git, mercurial, svn, bzr, www.vim.org, ...
 
 Being 100% pure VimL (depending on some additional tools such as curl) it should
 run everywhere. [1]
@@ -28,28 +28,29 @@ Feature list:
 
   :UpdateAddons [optional name list]
 
-  This even tries to keep your local modification to achive based
+  This even tries to keep your local modification to archive based
   installations ! [2]
 
 
 - a function which configures plugin sources:
 
-  1) www.vim.org (the plugin list is updated once within 10 days by cron job)
+  1) www.vim.org (the plugin list is updated once within 10 days by a cron job)
 
-  2) some scripts have been added manually. Some of them are dev versions which
-     are also contained in 1)
+  2) some scripts have been added manually. Some of them are development
+     versions which are also contained in 1)
 
-  Contact me and I'll add additional sources.
-
-
-- several maintainers & contributors providing feedback and fixing bugs.
-  (Thanks to you all!) (list provided in documentation)
+  Contact me and I will add additional sources.
 
 
-Continue reading the documentation: doc/vim-addon-manager.txt (online: http://github.com/MarcWeber/vim-addon-manager/blob/master/doc/vim-addon-manager.txt)
+- community driven: several maintainers & contributors providing feedback and
+  fixing bugs. Thanks to you all! (list provided in the documentation)
+
+
+Continue reading the documentation: doc/vim-addon-manager.txt (online:
+http://github.com/MarcWeber/vim-addon-manager/blob/master/doc/vim-addon-manager.txt)
 
 I could quote several people who told me how "awesome" this small tool is.
 But I prefer letting you explore it yourself.
 
-[1] most testing has been done on Linux like environments
+[1] most testing has been done on Unix environments
 [2] diff tools (diff and patch) required
