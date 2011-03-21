@@ -10,9 +10,10 @@ VAM  = vim-addon-manager [VimL] (first commit 2009-12-27)
 JOLT = jolt             [python] (first commit 2010-08-06)
 VUN = Vundle            [VimL]       (first commit 2010-10-18)
 VSU = Vim Script Updater [python] (2010-07-1 -> vim.sf.net)
-VTS = vim-nicktears     [Ruby] (2010-08-19)
+VTS = vim-nicktears     [ruby] (2010-08-19)
+VCSDO = vcsdo           [ruby] (first commit 2010-10-31)
+        (-> https://github.com/tomtom/vcsdo)
 GVS = get vim scripts   [bash] (2011-03)
-
 DESIGN CHOICES
 =============
 VAM:
@@ -22,7 +23,9 @@ VAM:
   - minimize code to be run at startup
   - allow activating / installing plugins without restarting Vim
     (=> VimL must be used)
-
+  - allow fixing bugs even if maintainers are on holidays.
+    Thus provide a maintained list of plugin sources 
+    (-> vim-addon-manager-known-repositories)
 
 PAT needs you to manually download plugins and put them inside a directory
     which pathogen will load at startup.
@@ -40,6 +43,19 @@ VAM: VimL (see above), dependency management, minimize text users have to write
      (spceifying names only). Those features did not exist previously.
 
 
+Perquisites
+=============
+VAM: curl, tar or 7z
+others: TODO: Also refer to the used language
+
+Can install plugins without restarting:
+=======================================
+What does this mean? add directory to runtimepath is not enough.
+You also have to source plugin/*.vim and maybe plugin/after/* files and such.
+VAM: :ActivateAddon NAME and you're done
+
+all others: you can always sources the .vim files manually to get the same
+result.
 
 dependency management
 =====================
