@@ -86,8 +86,10 @@ fun! vam#ReadAddonInfo(path)
       " using eval is now safe!
       return eval(body)
   else
-      echoe "Invalid JSON in ".a:path."!"
-      return {}
+    echohl ErrorMsg
+    echom "Invalid JSON in ".a:path."!"
+    echohl None
+    return {}
   endif
 
 endf

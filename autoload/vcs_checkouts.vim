@@ -28,7 +28,7 @@ fun! vcs_checkouts#Update(dir)
     return 0
   endif
   if v:shell_error
-    throw "updating ".a:dir." falied. Got exit code: ".v:shell_error
+    throw "Updating ".a:dir." falied. Got exit code: ".v:shell_error
   endif
   return 1
 endf

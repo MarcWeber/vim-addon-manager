@@ -38,7 +38,9 @@ fun! vam#install#ReplaceAndFetchUrls(list)
     if exists('t')
       let dic = vam#ReadAddonInfo(t)
       if !has_key(dic,'name') || !has_key(dic, 'repository')
-        echoe n." is no valid addon-info file. It must contain both keys: name and repository"
+        echohl ErrorMsg
+        echom n." is no valid addon-info file. It must contain both keys: name and repository"
+        echohl None
         continue
       endif
       let s:c['plugin_sources'][dic['name']] = dic['repository']
@@ -73,9 +75,11 @@ fun! vam#install#Install(toBeInstalledList, ...)
         unlet repository
       endfor
       if exists('repository')
-        echom 'name '.name.' expanded to :'.string(repository)
+        echom 'Name '.name.' expanded to :'.string(repository)
       else
-        echoe "No repository location info known for plugin ".name."! (typo?)"
+        echohl ErrorMsg
+        echom "No repository location info known for plugin ".name."! (typo?)"
+        echohl None
         continue " due to abort this won't take place ?
       endif
     endif
@@ -125,99 +129,120 @@ fun! vam#install#Install(toBeInstalledList, ...)
   endfor
 endf
 
-" this function will be refactored slightly soon by either me or Zyx.
+" this function will be refactored slightly soon by either me or ZyX.
 fun! vam#install#UpdateAddon(name)
   let pluginDir = vam#PluginDirByName(a:name)
-  if !vcs_checkouts#Update(pluginDir)
-    " try updating plugin by archive
-
-    " we have to find out whether there is a new version:
-    call vam#install#LoadKnownRepos()
-    let repository = get(s:c['plugin_sources'], a:name, {})
-    if empty(repository)
-      echom "don't know how to update ".a:name." because its (no longer?) contained in plugin_sources"
-      return
+  " First, try updating using VCS. Return 1 if everything is ok, 0 if exception 
+  " is thrown
+  try
+    if vcs_checkouts#Update(pluginDir)
+      return 1
     endif
-    let newVersion = get(repository,'version','?')
+  catch /.*/
+    echohl ErrorMsg
+    echom v:exception
+    echohl None
+    return 0
+  endtry
 
-    let versionFile = pluginDir.'/version'
-    let oldVersion = filereadable(versionFile) ? readfile(versionFile, 1)[0] : "?"
-    if oldVersion != newVersion || newVersion == '?'
-      " update plugin
-      echom "updating plugin ".a:name." because ".(newVersion == '?' ? 'version is unkown' : 'there is a different version')
+  "Next, try updating plugin by archive
 
-      " move plugin to backup destination:
-      let pluginDirBackup = pluginDir.'-'.oldVersion
-      if isdirectory(pluginDirBackup) || filereadable(pluginDirBackup)
-        if s:confirm("Remove old plugin backup directory (".pluginDirBackup.")?")
-          call vam#utils#RmFR(pluginDirBackup)
-        else
-          throw "user abort: remove ".pluginDirBackup." manually"
-        endif
-      endif
-      call rename(pluginDir, pluginDirBackup)
-      " can be romved. old version is encoded in tmp dir. Removing makes
-      " diffing easier
-      silent! call delete(pluginDirBackup.'/version')
+  " we have to find out whether there is a new version:
+  call vam#install#LoadKnownRepos()
+  let repository = get(s:c['plugin_sources'], a:name, {})
+  if empty(repository)
+    echohl WarningMsg
+    echom "Don't know how to update ".a:name." because it is (no longer?) contained in plugin_sources"
+    echohl None
+    return 0
+  endif
+  let newVersion = get(repository,'version','?')
 
-      " try creating diff by checking out old version again
-      if s:c['do_diff'] && executable('diff')
-        let diff_file = s:c['plugin_root_dir'].'/'.a:name.'-'.oldVersion.'.diff'
-        " try to create a diff
-        let archiveName = vam#install#ArchiveNameFromDict(repository)
-        let archiveFileBackup = pluginDirBackup.'/archive/'.archiveName
-        if !filereadable(archiveFileBackup)
-          echom "old archive file ".archiveFileBackup." is gone, can't try to create diff."
-        else
-          let archiveFile = pluginDir.'/archive/'.archiveName
-          call mkdir(pluginDir.'/archive','p')
+  let versionFile = pluginDir.'/version'
+  let oldVersion = filereadable(versionFile) ? readfile(versionFile, 1)[0] : "?"
+  if oldVersion != newVersion || newVersion == '?'
+    " update plugin
+    echom "Updating plugin ".a:name." because ".(newVersion == '?' ? 'version is unkown' : 'there is a different version')
 
-          let rep_copy = deepcopy(repository)
-          let rep_copy['url'] = 'file://'.expand(archiveFileBackup)
-          call vam#install#Checkout(pluginDir, rep_copy)
-          silent! call delete(pluginDir.'/version')
-          try
-            call vcs_checkouts#ExecIndir([{'d': s:c['plugin_root_dir'], 'c': vam#utils#ShellDSL('diff -U3 -r $p $p', fnamemodify(pluginDir,':t'), fnamemodify(pluginDirBackup,':t')).' > '.diff_file}])
-            silent! call delete(diff_file)
-          catch /.*/
-            " :-( this is expected. diff returns non zero exit status. This is hacky
-            let diff=1
-          endtry
-          call vam#utils#RmFR(pluginDir)
-          echo 6
-        endif
-      endif
-
-      " checkout new version (checkout into empty location - same as installing):
-      call vam#install#Checkout(pluginDir, repository)
-
-      " try applying patch
-      let patch_failure = 0
-      if exists('diff')
-        if executable("patch")
-          try
-            call vcs_checkouts#ExecIndir([{'d': pluginDir, 'c': 'patch -p1 < '. diff_file }])
-            echom "patching suceeded"
-            let patch_failure = 0
-            call delete(diff_file)
-            let patch_failure = 0
-          catch /.*/
-            let patch_failure = 1
-            echom "failed applying patch ".diff_file." kept old dir in ".pluginDirBackup
-          endtry
-        else
-          echom "failed trying to apply diff. patch exectubale not found"
-          let patch_failure = 1
-        endif
-      endif
-
-      " tidy up - if user didn't provide diff we remove old directory
-      if !patch_failure
+    " move plugin to backup destination:
+    let pluginDirBackup = pluginDir.'-'.oldVersion
+    if isdirectory(pluginDirBackup) || filereadable(pluginDirBackup)
+      if s:confirm("Remove old plugin backup directory (".pluginDirBackup.")?")
         call vam#utils#RmFR(pluginDirBackup)
+      else
+        throw "User abort: remove ".pluginDirBackup." manually"
       endif
-    else
-      echom "not updating plugin ".a:name." because there is no version according to version key"
     endif
+    call rename(pluginDir, pluginDirBackup)
+    " can be romved. old version is encoded in tmp dir. Removing makes
+    " diffing easier
+    silent! call delete(pluginDirBackup.'/version')
+
+    " try creating diff by checking out old version again
+    if s:c['do_diff'] && executable('diff')
+      let diff_file = s:c['plugin_root_dir'].'/'.a:name.'-'.oldVersion.'.diff'
+      " try to create a diff
+      let archiveName = vam#install#ArchiveNameFromDict(repository)
+      let archiveFileBackup = pluginDirBackup.'/archive/'.archiveName
+      if !filereadable(archiveFileBackup)
+        echohl WarningMsg
+        echom "Old archive file ".archiveFileBackup." is gone, can't try to create diff."
+        echohl None
+      else
+        let archiveFile = pluginDir.'/archive/'.archiveName
+        call mkdir(pluginDir.'/archive','p')
+
+        let rep_copy = deepcopy(repository)
+        let rep_copy['url'] = 'file://'.expand(archiveFileBackup)
+        call vam#install#Checkout(pluginDir, rep_copy)
+        silent! call delete(pluginDir.'/version')
+        try
+          call vcs_checkouts#ExecIndir([{'d': s:c['plugin_root_dir'], 'c': vam#utils#ShellDSL('diff -U3 -r $p $p', fnamemodify(pluginDir,':t'), fnamemodify(pluginDirBackup,':t')).' > '.diff_file}])
+          silent! call delete(diff_file)
+        catch /.*/
+          " :-( this is expected. diff returns non zero exit status. This is hacky
+          let diff=1
+        endtry
+        call vam#utils#RmFR(pluginDir)
+        echo 6
+      endif
+    endif
+
+    " checkout new version (checkout into empty location - same as installing):
+    call vam#install#Checkout(pluginDir, repository)
+
+    " try applying patch
+    let patch_failure = 0
+    if exists('diff')
+      if executable("patch")
+        try
+          call vcs_checkouts#ExecIndir([{'d': pluginDir, 'c': 'patch -p1 < '. diff_file }])
+          echom "Patching suceeded"
+          let patch_failure = 0
+          call delete(diff_file)
+          let patch_failure = 0
+        catch /.*/
+          let patch_failure = 1
+          echohl ErrorMsg
+          echom "Failed applying patch ".diff_file." kept old dir in ".pluginDirBackup
+          echohl None
+        endtry
+      else
+        echohl ErrorMsg
+        echom "Failed trying to apply diff. patch exectubale not found"
+        echohl None
+        let patch_failure = 1
+      endif
+    endif
+
+    " tidy up - if user didn't provide diff we remove old directory
+    if !patch_failure
+      call vam#utils#RmFR(pluginDirBackup)
+    endif
+  else
+    echohl WarningMsg
+    echom "Not updating plugin ".a:name." because there is no version according to version key"
+    echohl None
   endif
   return 1
 endf
@@ -241,7 +266,9 @@ fun! vam#install#Update(list)
     endif
   endfor
   if !empty(failed)
-    echoe "Failed updating plugins: ".string(failed)."."
+    echohl ErrorMsg
+    echom "Failed updating plugins: ".string(failed)."."
+    echohl None
   endif
 endf
 
