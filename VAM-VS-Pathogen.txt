@@ -1,8 +1,27 @@
 This list is incomplete. Improve it!
 
-VAM = vim-addon-manager
+management systems, first commit
+
+PAT = pathogen          (2008-08-07 -> vim.sf.net)
+VAM = vim-addon-manager (first commit 2009-12-27)
 VUN = Vundle
-PAT = pathogen
+MANA = VIMANA
+JOLT = jolt
+VTS = vim-nicktears      (2010-08-19)
+VSU = Vim Script Updater
+GLVS = GetLatestVimScript (Vim $RUNTIME files)
+GVS = get vim scripts
+
+DESIGN CHOICES
+=============
+VAM:
+  - declare script dependencies (make sharing code easier)
+  - declarative (specify list of plugins you want to have installed)
+  - minimal (20% effort and get 80% of value)
+  - minimize code to be run at startup
+  - allow activating / installing plugins without restarting Vim
+    (=> VimL must be used)
+
 
 PAT needs you to manually download plugins and put them inside a directory
     which pathogen will load at startup.
@@ -11,6 +30,15 @@ VUN can search http://vim-scripts.org/vim/scripts.html by name and you tell
     that installs them.
 VAM has a repository dedicated to listing vim plugins and their dependencies,
     and is conceptually different than Vundle.
+
+REASONS FOR STARTING THE PROJECT
+================================
+PAT: ? Probably because GLVS did not handle git etc ? (ask author)
+
+VAM: VimL (see above), dependency management, minimize text users have to write
+     (spceifying names only). Those features did not exist previously.
+
+
 
 dependency management
 =====================
@@ -49,3 +77,4 @@ uninstallation:
 VAM: UninstallNotLoadedAddons
 VUN: ?
 PAT: delete the plugin's directory manually
+
