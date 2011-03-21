@@ -3,15 +3,15 @@ This list is incomplete. Improve it!
 The reason for this file is to help users choose a system to fit their needs
 faster - and to find out why so much effort was put into this topic - cause I thought VAM would satisfy almost all needs .. Obviously I was wrong. So I'd like to document it.
 
-GLVS = GetLatestVimScript (Vim $RUNTIME files)
-PAT = pathogen          (2008-08-07 -> vim.sf.net)
-MANA = VIMANA           (first commit 2009-08-07)
-VAM = vim-addon-manager (first commit 2009-12-27)
-JOLT = jolt             (first commit 2010-08-06)
-VUN = Vundle            (first commit 2010-10-18)
-VSU = Vim Script Updater (2010-07-1 -> vim.sf.net)
-VTS = vim-nicktears     (2010-08-19)
-GVS = get vim scripts   (2011-03)
+GLVS = GetLatestVimScript [VimL] (Vim $RUNTIME files)
+PAT  = pathogen          [VimL] (2008-08-07 -> vim.sf.net)
+MANA = VIMANA           [perl] (first commit 2009-08-07)
+VAM  = vim-addon-manager [VimL] (first commit 2009-12-27)
+JOLT = jolt             [python] (first commit 2010-08-06)
+VUN = Vundle            [VimL]       (first commit 2010-10-18)
+VSU = Vim Script Updater [python] (2010-07-1 -> vim.sf.net)
+VTS = vim-nicktears     [Ruby] (2010-08-19)
+GVS = get vim scripts   [bash] (2011-03)
 
 DESIGN CHOICES
 =============
@@ -58,7 +58,7 @@ Tags:
 =====
 VAM: runs helptags automatically
 VUN: runs helptags automatically
-PAT: has http://hackage.haskell.org/packages/archive/gtk/0.12.0/gtk-0.12.0.tar.gz
+PAT: runs helptags automatically
 
 extra dirs hacks (load files which are not loaded when adding to runtimepath only)
 ===================
@@ -67,9 +67,9 @@ VUN: ?
 PAT: I haven't seen so[urce] or ru[ntime] usage in pathogen.vim. So I guess
      this feature does not exist
 
-VimBalls:
-=========
-VAM: handles them automatically
+support for VimBalls:
+======================
+VAM: YES
 VUN: ?
 PAT: need to put them in a special directory (?)
 
