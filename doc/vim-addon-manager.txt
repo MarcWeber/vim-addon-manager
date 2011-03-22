@@ -723,6 +723,13 @@ what's going to happen.
 ==============================================================================
 11. Troubleshooting and known bugs        *vim-addon-manager-trouble-shooting*
 
+  runtimepath manipulation should be separated from installation / update
+  logic. This way you can have different implementation for updating plugins
+  eg one being written in python which you can run from commandline.
+  However to keep it portable this means we had to support
+  - a VimL solution (eg for Windows users ?)
+  - a python/ruby/perl/whatsoever commandline version
+  (See thread "which plugin management system to use?" on vim_use)
 
   ERROR: Vim(call):E117: Unknown function: vam#Activate
 
@@ -850,7 +857,7 @@ git clone --depth 1 git://github.com/MarcWeber/vim-addon-manager.git $VAM_PLUGIN
 cat >> ~/.vimrc << EOF
 fun SetupVAM()
   set runtimepath+=$VAM_PLUGINS/vim-addon-manager
-  call vam#ActivateAddons(["github:YourName"])
+  call vam#ActivateAddons(["github:YourName"],{'auto_install' : 0})
 endf
 call SetupVAM()
 " experimental: run after gui has been started [3]
