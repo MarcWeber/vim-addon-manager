@@ -14,6 +14,8 @@ VTS = vim-nicktears     [ruby] (2010-08-19)
 VCSDO = vcsdo           [ruby] (first commit 2010-10-31)
         (-> https://github.com/tomtom/vcsdo)
 GVS = get vim scripts   [bash] (2011-03)
+TPL = tplugin [VimL] (2011-03 -> github)
+
 DESIGN CHOICES
 =============
 VAM:
@@ -34,6 +36,12 @@ VUN can search http://vim-scripts.org/vim/scripts.html by name and you tell
     that installs them.
 VAM has a repository dedicated to listing vim plugins and their dependencies,
     and is conceptually different than Vundle.
+TPL works similarly to PAT but adds directories to the runtimepath only 
+    when needed. TPL scans all repositories for commands, functions 
+    etc. It generate proxy commands for those items found and loads the 
+    original file when invoking a command/function for the first time. 
+    The goal is to have numerous plugins readily available with minimal 
+    impact on startup time. Users have to run :TPluginScan first.
 
 REASONS FOR STARTING THE PROJECT
 ================================
@@ -41,6 +49,9 @@ PAT: ? Probably because GLVS did not handle git etc ? (ask author)
 
 VAM: VimL (see above), dependency management, minimize text users have to write
      (spceifying names only). Those features did not exist previously.
+
+TPL  A replacement for the AsNeeded plugin that makes it easy to use 
+     plugins provided as vcs repositories (similar to PAT, VAM etc.)
 
 
 Perquisites
@@ -62,6 +73,8 @@ dependency management
 VAM: see *-addon-info.txt files which contains a key "dependencies"
 VUN: none
 PAT: none
+TPL: Uses _tplugin.vim files to run hooks. Since version 0.12, TPL it 
+     can make use of VAM's *-addon-info.txt files.
 
 addon sources ?
 ===============
@@ -69,12 +82,14 @@ VAM: by plugin name. vim-addon-manager-known-repositories contains repo info.
      You can add your own sources in ~/.vimrc or by other ways easily
 VUN: You can give a git url for a Bundle
 PAT: You can git clone a plugin into the plugin's directory manually
+TPL: Use VAM or clone a plugin manually as with PAT.
 
 Tags:
 =====
 VAM: runs helptags automatically
 VUN: runs helptags automatically
 PAT: runs helptags automatically
+TPL: Generates helptags when scanning the plugin repositories.
 
 extra dirs hacks (load files which are not loaded when adding to runtimepath only)
 ===================
@@ -82,16 +97,20 @@ VAM: See if !has('vim_starting') in autoload/vam.vim
 VUN: ?
 PAT: I haven't seen so[urce] or ru[ntime] usage in pathogen.vim. So I guess
      this feature does not exist
+TPL: Loads files as required
 
 support for VimBalls:
 ======================
 VAM: YES
 VUN: ?
 PAT: need to put them in a special directory (?)
+TPL: The author uses https://github.com/tomtom/vimball.rb to extract 
+     vimballs to single directories under the bundle root directory
 
 uninstallation:
 ===============
 VAM: UninstallNotLoadedAddons
 VUN: ?
 PAT: delete the plugin's directory manually
+TPL: delete the plugin's directory manually
 
