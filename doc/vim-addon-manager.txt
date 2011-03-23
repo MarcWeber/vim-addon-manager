@@ -11,12 +11,13 @@ CONTENTS                                          *vim-addon-manager-contents*
         3.2. Functions                 |vim-addon-manager-functions|
     4. Options                         |vim-addon-manager-options|
     5. Installing plugins              |vim-addon-manager-install-plugins|
-    6. Addon-info file                 |vim-addon-manager-addon-info|
-    7. Author, credits, some notes     |vim-addon-manager-related|
-    8. Testing this plugin             |vim-addon-manager-testing|
-    9. Some notes for windows users    |vim-addon-manager-windows|
-   10. Some notes for Gentoo users     |vim-addon-manager-gentoo|
-   11. Troubleshooting and known bug   |vim-addon-manager-trouble-shooting|
+    6. Uninstalling plugins            |vim-addon-manager-uninstall-plugins|
+    7. Addon-info file                 |vim-addon-manager-addon-info|
+    8. Author, credits, some notes     |vim-addon-manager-related|
+    9. Testing this plugin             |vim-addon-manager-testing|
+   10. Some notes for windows users    |vim-addon-manager-windows|
+   11. Some notes for Gentoo users     |vim-addon-manager-gentoo|
+   12. Troubleshooting and known bug   |vim-addon-manager-trouble-shooting|
        and TODOs as well as "I want .."
 
 ==============================================================================
@@ -351,7 +352,17 @@ identify the plugin you're looking for.
 Maybe a :ShowScriptNameOfSciptId X command should be added (?)
 
 ==============================================================================
-6. Addon-info file                              *vim-addon-manager-addon-info*
+6. Uninstalling Plugins                  *vim-addon-manager-uninstall-plugins*
+
+Remove the plugin name from the call to |vam#ActivateAddons()| in your vimrc.
+Restart Vim.
+Uninstall using:
+>
+  :UninstallNotLoadedAddons PLUGIN
+<
+
+==============================================================================
+7. Addon-info file                              *vim-addon-manager-addon-info*
                                                               *addon-info.txt*
 
 Each plugin that intends to use vim-addon-manager for distributing itself
@@ -462,7 +473,7 @@ homepage                                                 *addon-info-homepage*
         but setting them to the real values will not do any harm.
 
 ==============================================================================
-7. Author, credits, some notes                     *vim-addon-manager-related*
+8. Author, credits, some notes                     *vim-addon-manager-related*
 
                                       *vim-addon-manager-repository-locations*
 List of known repositories is defined in a separate plugin called
@@ -557,7 +568,7 @@ What features are missing?
 
 
 ==============================================================================
-8. Testing this plugin                             *vim-addon-manager-testing*
+9. Testing this plugin                             *vim-addon-manager-testing*
 
 Run >
     # Replace ~/vim-addons/vim-addon-manager with the path you installed this
@@ -573,7 +584,7 @@ at the end. Written for Linux only. Code coverage is bad. Its a starting
 point.
 
 ==============================================================================
-9. Some notes for windows users                    *vim-addon-manager-windows*
+10. Some notes for windows users                   *vim-addon-manager-windows*
 
 
 
@@ -661,7 +672,7 @@ have to install svn,hg,.. to use plugins only.
 If you want something like this to happen contact me.
 
 ==============================================================================
-10. Some notes for Gentoo users                     *vim-addon-manager-gentoo*
+11. Some notes for Gentoo users                     *vim-addon-manager-gentoo*
 
 Gentoo users may consider installing this plugin from pluginloader overlay
 which is accessible via mercurial, url:
@@ -721,7 +732,7 @@ See related work to get it instead of this. Lets watch it and be curious about
 what's going to happen.
 
 ==============================================================================
-11. Troubleshooting and known bugs        *vim-addon-manager-trouble-shooting*
+12. Troubleshooting and known bugs        *vim-addon-manager-trouble-shooting*
 
   runtimepath manipulation should be separated from installation / update
   logic. This way you can have different implementation for updating plugins
