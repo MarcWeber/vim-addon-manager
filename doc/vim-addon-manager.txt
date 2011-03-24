@@ -354,11 +354,12 @@ Maybe a :ShowScriptNameOfSciptId X command should be added (?)
 ==============================================================================
 6. Uninstalling Plugins                  *vim-addon-manager-uninstall-plugins*
 
-1. Remove the plugin name from the call to |vam#ActivateAddons()| in your vimrc.
+6.1. Remove the plugin name from the call to |vam#ActivateAddons()| in your
+vimrc.
 
-2. Restart Vim.
+6.2. Restart Vim.
 
-3. Remove plugin directory using >
+6.3. Remove plugin directory using >
   :UninstallNotLoadedAddons {pluginname}
 <
 
