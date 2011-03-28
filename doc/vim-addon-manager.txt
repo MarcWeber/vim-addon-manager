@@ -280,12 +280,12 @@ do_diff                                            *vim-addon-manager-do_diff*
         installed plugins (unless they are under SCM control). Requires diff
         and patch programs installed.
 name_rewriting                              *vim-addon-manager-name_rewriting*
-        Set this to a dictionary with functions each taking a plugin name and 
-        returning either a dictionary with repository location (see 
-        |addon-info-repository|) for given name or zero. Location will be set 
-        to the first non-zero value, functions are executed in order 
-        determined by |sort()|ing |keys()| of the dictionary. These functions 
-        will be called when repository location for requested plugin is not 
+        Set this to a dictionary with functions each taking a plugin name and
+        returning either a dictionary with repository location (see
+        |addon-info-repository|) for given name or zero. Location will be set
+        to the first non-zero value, functions are executed in order
+        determined by |sort()|ing |keys()| of the dictionary. These functions
+        will be called when repository location for requested plugin is not
         found.
         Value will be extended with >
             {"99git+github": "vam#install#RewriteName"}
@@ -588,20 +588,30 @@ point.
 ==============================================================================
 10. Some notes for windows users                   *vim-addon-manager-windows*
 
-
-
 Win32 tools for vim-addon-manager
 
 Fast: put curl into ~/vim-addons/binary-utils/dist then call this function
-to setup the remaining tools (tar, bzip, gzip, unzip) >
+to setup the remaining tools (tar, bzip, gzip, unzip)
+>
     call vam#install#FetchAdditionalWindowsTools()
 <
 If 7z is in PATH bzip, unzip, gzip are not pulled. So consider installing that
-and add it to PATH by >
-      let $PATH=$PATH.';'.PATH_TO_7z
+and add it to PATH by
+>
+    let $PATH=$PATH.';'.PATH_TO_7z
+<
+( TODO: test it, provide a way to install 7z instead? )
+
+After the tools are setup, sometimes installing an addon still fail.
+Usually this is triggered by a weird value of |shellslash| or |shellquote|.
+Here is that was found to be working:
+>
+    set shellslash=0
+    set shellquote=\"
 <
 
-( TODO: test it, provide a way to install 7z instead? )
+See http://stackoverflow.com/questions/355988/how-do-i-deal-with-quote-characters-when-using-cmd-exe
+for more informations.
 
 Ashwin Nanjappa provided an alternative installation instruction here which
 worked for him. You may still want to read this section first. There are
@@ -856,10 +866,10 @@ Don't expect me to know what you dream about.
 "I want feature X" such as browsable lists of plugins. ActivateAddons FOO
 make launching the plugin permanent, ...
 Me too - pay me.
-Seriously: I don't want to add all features to VAM. It is designed as minimal 
-as possible. This excludes any gui features. If you want to add such browser 
-or the like create a new plugin "vim-addon-manager-gui" people can install and 
-use. I'm happy to put a link into this manual or assist you. However 
+Seriously: I don't want to add all features to VAM. It is designed as minimal
+as possible. This excludes any gui features. If you want to add such browser
+or the like create a new plugin "vim-addon-manager-gui" people can install and
+use. I'm happy to put a link into this manual or assist you. However
 I personally don't have time to write it.
 
 *linux-installation-script* paste into your shell:
