@@ -6,6 +6,8 @@ CONTENTS                                          *vim-addon-manager-contents*
 
     1. Intro                           |vim-addon-manager-intro|
     2. Installation                    |vim-addon-manager-installation|
+        2.1 Example: personal          |vim-addon-manager-complex-setup-sample|
+            configurable setup,
     3. Functionality provided          |vim-addon-manager-functionality|
         3.1. Commands                  |vim-addon-manager-commands|
         3.2. Functions                 |vim-addon-manager-functions|
@@ -104,6 +106,24 @@ manually:
 
 
 Continue reading |vim-addon-manager-install-plugins|.
+
+------------------------------------------------------------------------------
+2.1 Example: personal configurable setup *vim-addon-manager-complex-setup-sample*
+>
+  call vam#ActivateAddons("github:YOURNAME",{'auto_install' : 0})
+  " this initializes Vim the way *you* want also loading more plugins:
+  call vim_addon_YOURNAME#Activate(['c-dev','ruby-dev'])
+<
+  My implementation looks like this:
+  https://github.com/MarcWeber/vim-addon-MarcWeber/blob/master/autoload/vim_addon_MarcWeber.vim
+
+  You can then load plugins depending on env vars:
+  Example: >
+  call vim_addon_YOURNAME#Activate(['always']+split($V,','))
+< Then you can run vim like this from shell >
+  V=c-dev,ruby-dev vim
+<
+  This section was written to inspire you only.
 
 ==============================================================================
 3. Functionality provided                    *vim-addon-manager-functionality*
