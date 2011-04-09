@@ -89,7 +89,7 @@ manually:
           " endtry
         endf
         call SetupVAM()
-        " experimental: run after gui has been started [3]
+        " experimental: run after gui has been started (gvim) [3]
         " option1:  au VimEnter * call SetupVAM()
         " option2:  au GUIEnter * call SetupVAM()
         " See BUGS sections below [*]
@@ -871,6 +871,11 @@ as possible. This excludes any gui features. If you want to add such browser
 or the like create a new plugin "vim-addon-manager-gui" people can install and
 use. I'm happy to put a link into this manual or assist you. However
 I personally don't have time to write it.
+
+VAM only checks out 2 revisions using git.
+Its not a bug. You can get remaining versions by git fetch --depth=9999999
+or such. This speeds up installation very much and should be still be
+sufficient to prepare patches.
 
 *linux-installation-script* paste into your shell:
 
