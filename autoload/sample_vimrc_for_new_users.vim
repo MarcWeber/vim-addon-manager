@@ -218,6 +218,7 @@ most important mappings / commands:
 g;  = jump back in list of last edited locations
 <c-o> <c-i> = jump back and forth in location list
 <c-^> = toggle buffers
+c-w then one of v s w q  h j k l (z) : move cursor, split windows, quit buffer
 
 q:, ?:, /: : Open mini buffer to browse or edit command or search history
              You can open this from command line using <c-f>!
