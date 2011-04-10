@@ -95,7 +95,9 @@ fun! vam#install#Install(toBeInstalledList, ...)
       echom "!> Deprecation warning package ".name. ":"
       echom d
       " even for auto_install make user confirm the deprecation case
-      if s:confirm('Plugin '.name.' is deprecated, see warning above. Install it?', 1)
+      " Don't allow [y] intentionally: Its too easy to overlook this warning.
+      " So force users typing [s] instead
+      if confirm('Plugin '.name.' is deprecated, see warning above. Install it?', "&No\nYe&s (alternative available)") == 2
         let confirmed = 1
       else
         continue
