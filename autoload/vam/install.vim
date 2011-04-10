@@ -7,7 +7,13 @@ let s:c.name_rewriting = get(s:c, 'name_rewriting', {})
 call extend(s:c.name_rewriting, {'99git+github': 'vam#install#RewriteName'})
 
 fun! s:confirm(msg, ...)
-  return confirm(a:msg, a:0 ? "&No\n&Yes" : "&Yes\n&No") == 1+a:0
+  if a:0 && type(a:1)==type("")
+    return call("confirm", [a:msg]+a:000)
+  else
+    " Don't allow [y] with additional argument intentionally: it is too easy to 
+    " overlook the dialog. So force users typing [s] instead
+    return confirm(a:msg, a:0 ? "&No\nYe&s" : "&Yes\n&No") == 1+a:0
+  endif
 endfun
 
 fun! vam#install#RewriteName(name)
@@ -95,9 +101,7 @@ fun! vam#install#Install(toBeInstalledList, ...)
       echom "!> Deprecation warning package ".name. ":"
       echom d
       " even for auto_install make user confirm the deprecation case
-      " Don't allow [y] intentionally: Its too easy to overlook this warning.
-      " So force users typing [s] instead
-      if confirm('Plugin '.name.' is deprecated, see warning above. Install it?', "&No\nYe&s (alternative available)") == 2
+      if s:confirm('Plugin '.name.' is deprecated, see warning above. Install it?', 1)
         let confirmed = 1
       else
         continue
@@ -424,7 +428,7 @@ fun! vam#install#LoadKnownRepos(...)
   if 0 == get(s:c['activated_plugins'], known, 0)
     let policy=get(s:c, 'known_repos_activation_policy', 'autoload')
     if policy==?"ask"
-      let reply = confirm('Activate plugin '.known.' to '.reason."?", "&Yes\n&No\nN&ever (during session)")
+      let reply = s:confirm('Activate plugin '.known.' to '.reason."?", "&Yes\n&No\nN&ever (during session)")
     elseif policy==?"never"
       let reply=2
     else
