@@ -373,6 +373,13 @@ endf
 
 " may throw EXCEPTION_UNPACK
 fun! vam#install#Checkout(targetDir, repository) abort
+  if get(a:repository, 'script-type') is 'patch'
+    echohl WarningMsg
+    echom "This plugin requires patching and recompiling vim."
+    echom "VAM could not do this, so you have to apply patch"
+    echom "manually."
+    echohl None
+  endif
   if get(a:repository,'type','') =~ 'git\|hg\|svn\|bzr'
     call vcs_checkouts#Checkout(a:targetDir, a:repository)
   else
