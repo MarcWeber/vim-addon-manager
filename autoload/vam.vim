@@ -35,7 +35,7 @@ let s:c['plugin_sources'] = get(s:c,'plugin_sources', {})
 let s:c['missing_addon_infos'] = get(s:c,'missing_addon_infos', {})
 " addon_infos cache, {} if file dosen't exist
 let s:c['addon_infos'] = get(s:c,'addon_infos', {})
-let s:c['activated_plugins'] = get(s:c,'activaded_plugins', {})
+let s:c['activated_plugins'] = get(s:c,'activated_plugins', {})
 " If directory where plugin is installed is writeable, then this plugin was
 " likely installed by user according to the instruction. If it is not, then it
 " is likely a system-wide installation.
@@ -212,10 +212,14 @@ fun! vam#ActivateAddons(...) abort
     if !has('vim_starting')
       for rtp in s:new_runtime_paths
         call vam#GlobThenSource(rtp.'/plugin/**/*.vim')
-        call vam#GlobThenSource(rtp.'/ftdetect/*.vim')
         call vam#GlobThenSource(rtp.'/after/plugin/**/*.vim')
       endfor
     endif
+
+    for rtp in s:new_runtime_paths
+      call vam#GlobThenSource(rtp.'/ftdetect/*.vim')
+    endfor
+
   endif
 endfun
 
