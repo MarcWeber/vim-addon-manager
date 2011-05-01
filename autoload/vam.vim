@@ -149,12 +149,13 @@ fun! vam#ActivateRecursively(list_of_names, ...)
     endif
     " source plugin/* files ?
     let rtp = vam#PluginRuntimePath(name)
-    call add(s:new_runtime_paths, rtp)
+    call add(opts['new_runtime_paths'], rtp)
 
     let s:c['activated_plugins'][name] = 1
   endfor
 endf
 
+let s:top_level = 0
 " see also ActivateRecursively
 " Activate activates the plugins and their dependencies recursively.
 " I sources both: plugin/*.vim and after/plugin/*.vim files when called after
@@ -180,9 +181,13 @@ fun! vam#ActivateAddons(...) abort
   " args[1] = options
 
   let opts = args[1]
-  let topLevel = get(opts,'topLevel',1)
   let opts['topLevel'] = 0
-  if topLevel | let s:new_runtime_paths = [] | endif
+  let topLevel = !has_key(opts, 'new_runtime_paths')
+
+  " add new_runtime_paths state if not present in opts yet
+  let new_runtime_paths = get(opts, 'new_runtime_paths',[])
+  let opts['new_runtime_paths'] = new_runtime_paths
+
   call call('vam#ActivateRecursively', args)
 
   " don't know why activating known-repos causes trouble Silex reported it
@@ -202,21 +207,21 @@ fun! vam#ActivateAddons(...) abort
     " put them last! (Thanks to Oliver Teuliere)
     let rtp = split(&runtimepath,'\(\\\@<!\(\\.\)*\\\)\@<!,')
     let escapeComma = 'escape(v:val, '','')'
-    let after = filter(map(copy(s:new_runtime_paths), 'v:val."/after"'), 'isdirectory(v:val)')
-    let &runtimepath=join(rtp[:0] + map(copy(s:new_runtime_paths), escapeComma)
+    let after = filter(map(copy(new_runtime_paths), 'v:val."/after"'), 'isdirectory(v:val)')
+    let &runtimepath=join(rtp[:0] + map(copy(new_runtime_paths), escapeComma)
                 \                 + rtp[1:]
                 \                 + map(after, escapeComma),
                 \         ",")
     unlet rtp
 
     if !has('vim_starting')
-      for rtp in s:new_runtime_paths
+      for rtp in new_runtime_paths
         call vam#GlobThenSource(rtp.'/plugin/**/*.vim')
         call vam#GlobThenSource(rtp.'/after/plugin/**/*.vim')
       endfor
     endif
 
-    for rtp in s:new_runtime_paths
+    for rtp in new_runtime_paths
       call vam#GlobThenSource(rtp.'/ftdetect/*.vim')
     endfor
 

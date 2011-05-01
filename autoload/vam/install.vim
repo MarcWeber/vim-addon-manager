@@ -67,7 +67,7 @@ fun! vam#install#Install(toBeInstalledList, ...)
     if vam#IsPluginInstalled(name)
       continue
     endif
-    if name != s:c['known'] | call vam#install#LoadKnownRepos() | endif
+    if name != s:c['known'] | call vam#install#LoadKnownRepos(opts) | endif
 
     let repository = get(s:c['plugin_sources'], name, get(opts, name,0))
 
@@ -154,7 +154,7 @@ fun! vam#install#UpdateAddon(name)
   "Next, try updating plugin by archive
 
   " we have to find out whether there is a new version:
-  call vam#install#LoadKnownRepos()
+  call vam#install#LoadKnownRepos({})
   let repository = get(s:c['plugin_sources'], a:name, {})
   if empty(repository)
     echohl WarningMsg
@@ -256,7 +256,7 @@ endf
 fun! vam#install#Update(list)
   let list = a:list
   if empty(list) && s:confirm('Update all loaded plugins?')
-    call vam#install#LoadKnownRepos(' so that its updated as well')
+    call vam#install#LoadKnownRepos({}, ' so that its updated as well')
     " include vim-addon-manager in list
     if !s:c['system_wide']
       call vam#ActivateAddons(['vim-addon-manager'])
@@ -287,7 +287,7 @@ fun! vam#install#KnownAddons(...)
   let list = filter(split(glob(vam#PluginDirByName('*')),"\n"), 'isdirectory(v:val)')
   let list = map(list, "fnamemodify(v:val,':t')")
   if installable == "installable"
-    call vam#install#LoadKnownRepos()
+    call vam#install#LoadKnownRepos({})
     call extend(list, keys(s:c['plugin_sources']))
   endif
   " uniq items:
@@ -424,7 +424,9 @@ fun! vam#install#Copy(f,t)
 endfun
 
 
-fun! vam#install#LoadKnownRepos(...)
+fun! vam#install#LoadKnownRepos(opts, ...)
+  " opts: only used to pass topLevel argument
+
   " this could be done better: see BUGS section in documantation "force".
   " Unletting in case of failure is not important because this only
   " deactivates a warning
@@ -443,7 +445,7 @@ fun! vam#install#LoadKnownRepos(...)
     endif
     if reply == 3 | let s:c.known_repos_activation_policy = "never" | endif
     if reply == 1
-      call vam#ActivateAddons([known])
+      call vam#ActivateAddons([known], a:opts)
       " This is not done in .vimrc because Vim loads plugin/*.vim files after
       " having finished processing .vimrc. So do it manually
       exec 'source '.vam#PluginDirByName(known).'/plugin/vim-addon-manager-known-repositories.vim'
