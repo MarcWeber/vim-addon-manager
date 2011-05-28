@@ -54,12 +54,19 @@ noremap \e :e<space>**/*
 " :bn = :bnext  @: repeats last command
 noremap \n :n<space>**/*
 
+" minimal command-t like alternative using tlib: (_g_lob _o_pen)
+noremap \go
+
 " open a filetype file. Those files are sourced by Vim to setup filetype
 " specific mappings. Eg use it for defining commands / mappings which apply
 " for python or perl files only
 " eg command -buffer DoStuff call DoStuff()
 " or map <buffer> \dostuff :call DoStuff()<cr>
 noremap \ft :exec 'e ~/.vim/ftplugin/'.&filetype.'_you.vim'<cr>
+
+" for windows: make backspace work. Doesn't hurt on linux. This should be
+" default!
+set bs=2
 
 " foreign plugin vim-addon-manager {{{1
 
@@ -87,6 +94,9 @@ noremap \ft :exec 'e ~/.vim/ftplugin/'.&filetype.'_you.vim'<cr>
 " TRecentlyUsedFiles you can map to easily:
 noremap \r :TRecentlyUsedFiles<cr>
 
+" simple glob open based on tlib's List function (similar to TCommand or fuzzy
+" plugin etc)
+noremap \go :exec 'e '. fnameescape(tlib#input#List('s','select file', split(glob(input('glob pattern, curr dir:','**/*')),"\n") ))<cr>
 
 " dummy func to enabling you to load this file after adding the top level {{{1
 " dir to runtimepath using :set runtimpeth+=ROOT
@@ -156,6 +166,8 @@ more movements:
 [[, ]], {, } : more blockwise movements which are often helpful
 ...
 
+This script may also have its usage: Jump to charater location fast:
+http://www.vim.org/scripts/script.php?script_id=3437
 
 How to get O(1) access to your files you're editing at the moment {{{1
 

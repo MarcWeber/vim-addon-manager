@@ -105,6 +105,8 @@ manually:
 4. Optionally generate helptags: >
        UpdateAddon vim-addon-manager
 
+Tip: Press q once intsead of pressing <cr> each time Vim asks you to press
+Enter.
 
 Continue reading |vim-addon-manager-install-plugins|.
 
