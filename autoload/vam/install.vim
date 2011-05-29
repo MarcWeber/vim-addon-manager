@@ -311,7 +311,7 @@ fun! vam#install#DoCompletion(A,L,P,...)
     \ ? " && index(keys(s:c['activated_plugins']), v:val) == -1"
     \ : ''
 
-  return filter(names,'v:val =~ '.string(word) . not_loaded)
+  return filter(names,'v:val =~? '.string(word) . not_loaded)
 endf
 
 fun! vam#install#AddonCompletion(...)
