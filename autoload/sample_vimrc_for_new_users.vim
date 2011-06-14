@@ -188,6 +188,10 @@ like this to your .vimrc so that you can switch buffers using m-1 m-2 etc:
 The ways to optimize code navigation are endless. Watch yourself.
 If you think something takes too long - optimize it.
 
+Bindings in command line are shitty?
+yes - remap them - or use "emacscommandline" plugin which does this for you.
+or use q: (normal mode) or c-f in commandline
+
 
 MY COMMENTS ABOUT VIM AND ITS USAGE {{{1
 ========================================
