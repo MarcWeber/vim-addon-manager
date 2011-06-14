@@ -8,11 +8,11 @@
 " anyway
 augroup VIM_ADDON_MANAGER
   autocmd!
-  autocmd BufRead,BufNewFile *-addon-info.txt
+  autocmd BufRead,BufNewFile *-addon-info.txt,addon-info.json
     \ setlocal ft=addon-info
     \ | setlocal syntax=json
     \ | syn match Error "^\s*'"
-  autocmd BufWritePost *-addon-info.txt call vam#ReadAddonInfo(expand('%'))
+  autocmd BufWritePost *-addon-info.txt,addon-info.json call vam#ReadAddonInfo(expand('%'))
 augroup end
 
 fun! vam#DefineAndBind(local,global,default)
@@ -249,13 +249,23 @@ fun! vam#Hack()
 endf
 
 fun! vam#AddonInfoFile(name)
-  " this name is deprecated
-  let f = vam#PluginDirByName(a:name).'/plugin-info.txt'
-  if filereadable(f)
-    return f
-  else
-    return vam#PluginDirByName(a:name).'/'.a:name.'-addon-info.txt'
-  endif
+  " history:
+  " 1) plugin-info.txt was the first name (deprecated)
+  " 2) a:name-addon-info.txt was the second recommended name (maybe deprecated - no hurry)
+  " 3) Now the recommended way is addon-info.json because:
+  "   - you can rename a script without having to rename the file
+  "   - json says all about its contents (Let's hope all browsers still render
+  "     it in a readable way
+
+  let p = vam#PluginDirByName(a:name)
+  let default = p.'/addon-info.json'
+  let choices = [ default , p.'/plugin-info.txt', p.'/'.a:name.'-addon-info.txt']
+  for f in choices
+    if filereadable(f)
+      return f
+    endif
+  endfor
+  return default
 endf
 
 command! -nargs=* -complete=customlist,vam#install#AddonCompletion InstallAddons :call vam#install#Install([<f-args>])

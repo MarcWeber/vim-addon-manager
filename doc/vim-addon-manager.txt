@@ -391,8 +391,11 @@ Follow these steps:
                                                               *addon-info.txt*
 
 Each plugin that intends to use vim-addon-manager for distributing itself
-needs to have {plugname}-addon-info.txt file in its root, that contains the
-JSON dictionary with the following keys (none of the keys are required):
+needs to have addon-info.json [1] file in its root,
+that contains the JSON dictionary with the following keys (none of the keys
+are required):
+
+[1]:  older alternative name: {plugname}-addon-info.txt
 
 name                                                         *addon-info-name*
         Name of the plugin. Must not contain any characters that cannot be
