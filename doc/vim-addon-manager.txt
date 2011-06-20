@@ -834,6 +834,10 @@ TODOs:
   If you want this feature tell me. I'll add the sources to
   |vim-addon-manager-known-repositories| then.
 
+- there should be a AddonInfo command or such.
+  A draft implementation can be found here:
+  https://github.com/MarcWeber/vim-addon-manager/issues/41
+
 Sometimes it happens that some small bugs appear. Most of the time they are
 easy to identify and trivial fix. Usually fixes happen very fast (within less
 than 2 days)
