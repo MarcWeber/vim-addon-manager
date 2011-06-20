@@ -512,7 +512,8 @@ anything.
 
 As alternative you can specify them in your .vimrc like what that plugin is
 doing: Add your own dicts to: >
-    g:vim_addon_manager['plugin_sources']['your-plugin-name'] = { ... }
+    let g:vim_addon_manager = {'plugin_sources': {}}
+    let g:vim_addon_manager['plugin_sources']['your-plugin-name'] = { ... }
 <
 In your .vimrc or somewhere else (see |vim-addon-manager-plugin_sources|).
 
