@@ -909,22 +909,6 @@ Its not a bug. You can get remaining versions by git fetch --depth=9999999
 or such. This speeds up installation very much and should be still be
 sufficient to prepare patches.
 
-*linux-installation-script* paste into your shell:
-
-VAM_PLUGINS=~/vim-addons
-mkdir -p $VAM_PLUGINS
-git clone --depth 1 git://github.com/MarcWeber/vim-addon-manager.git $VAM_PLUGINS/vim-addon-manager
-cat >> ~/.vimrc << EOF
-fun SetupVAM()
-  set runtimepath+=$VAM_PLUGINS/vim-addon-manager
-  call vam#ActivateAddons(["github:YourName"],{'auto_install' : 0})
-endf
-call SetupVAM()
-" experimental: run after gui has been started [3]
-" option1:  au VimEnter * call SetupVAM()
-" option2:  au GUIEnter * call SetupVAM()
-EOF
-
 
 ==============================================================================
 13. VAM vs ...
@@ -961,5 +945,25 @@ out the importance of the "dependency" feature. It allows reusing code easily.
 Thus code will be reused easily. Thus code review will take place yielding
 more collaboration thus better code. That was the main reason why I started
 VAM. And that's good for community.
+
+
+==============================================================================
+
+*linux-installation-script* paste into your shell:
+
+VAM_PLUGINS=~/vim-addons
+mkdir -p $VAM_PLUGINS
+git clone --depth 1 git://github.com/MarcWeber/vim-addon-manager.git $VAM_PLUGINS/vim-addon-manager
+cat >> ~/.vimrc << EOF
+fun SetupVAM()
+  set runtimepath+=$VAM_PLUGINS/vim-addon-manager
+  call vam#ActivateAddons(["github:YourName"],{'auto_install' : 0})
+endf
+call SetupVAM()
+" experimental: run after gui has been started [3]
+" option1:  au VimEnter * call SetupVAM()
+" option2:  au GUIEnter * call SetupVAM()
+" call sample_vimrc_for_new_users#Load()
+EOF
 
 vim:tw=78:fo=tcq2:isk=!-~,^*,^\|,^\":ts=8:ft=help:norl:
