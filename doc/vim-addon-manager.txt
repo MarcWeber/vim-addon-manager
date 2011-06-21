@@ -941,12 +941,14 @@ vs Pathogen
 
   3) simple dependency management
 
-  4) supports all VCS (svn, bazaar, git, mercurial)
+  4) supports all common VCS (svn, bazaar, git, mercurial)
 
-  5) It works around some incomplete implementations of rtp in Vim.
+  5) Automatic downloading of scripts from vim.org.
+
+  6) It works around some incomplete implementations of rtp in Vim.
     Eg Vim does not load after directories of rtp paths.
 
-  6) You can easily load plugins at runtime.
+  7) You can easily load plugins at runtime.
 
 
 vs X
@@ -954,7 +956,7 @@ vs X
   TODO: Most people are using VAM or Pathogen now AFAIK - so if you feel need
   for this list submit patches
 
-I personally don't havy anything against the other solutions. I like to point
+I personally don't have anything against the other solutions. I like to point
 out the importance of the "dependency" feature. It allows reusing code easily.
 Thus code will be reused easily. Thus code review will take place yielding
 more collaboration thus better code. That was the main reason why I started
