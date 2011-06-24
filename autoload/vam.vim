@@ -191,7 +191,6 @@ fun! vam#ActivateAddons(...) abort
   " args[1] = options
 
   let opts = args[1]
-  let opts['topLevel'] = 0
   let topLevel = !has_key(opts, 'new_runtime_paths')
 
   " add new_runtime_paths state if not present in opts yet
