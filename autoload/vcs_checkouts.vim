@@ -44,7 +44,12 @@ fun! vcs_checkouts#Checkout(targetDir, repository)
     exec '!'.vam#utils#ShellDSL('bzr branch $ $p', a:repository['url'], a:targetDir)
   elseif a:repository['type'] == 'svn'
     let parent = fnamemodify(a:targetDir,':h')
-    call s:exec_in_dir([{'d': parent, 'c': 'svn checkout '.s:shellescape(a:repository['url']).' '.s:shellescape(a:targetDir)}])
+    call s:exec_in_dir([{'d': parent, 'c': 'svn checkout'
+          \ .' '.s:shellescape(a:repository['url'])
+          \ .' '.s:shellescape(a:targetDir)
+          \ .(has_key(a:repository,'username') ? ' --username '.s:shellescape(a:repository['username']) : '')
+          \ .(has_key(a:repository,'password') ? ' --password '.s:shellescape(a:repository['password']) : '')
+          \  }])
   else
     " Keep old behavior: no throw for unknown repository type
     return
