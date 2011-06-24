@@ -114,7 +114,7 @@ Continue reading |vim-addon-manager-install-plugins|.
 ------------------------------------------------------------------------------
 2.1 Example: personal configurable setup *vim-addon-manager-complex-setup-sample*
 >
-  call vam#ActivateAddons("github:YOURNAME",{'auto_install' : 0})
+  call vam#ActivateAddons(["github:YOURNAME"],{'auto_install' : 0})
   " this initializes Vim the way *you* want also loading more plugins:
   call vim_addon_YOURNAME#Activate(['c-dev','ruby-dev'])
 <
@@ -160,35 +160,28 @@ UninstallNotLoadedAddons {name} ...                *:UninstallNotLoadedAddons*
 ------------------------------------------------------------------------------
 3.2. Functions                                   *vim-addon-manager-functions*
 
-vam#ActivateAddons([{name}, ...])                       *vam#ActivateAddons()*
-        Activates addons with given names. Used by |:ActivateAddons|.
-        Note: This is probably all you need.
-        Second note: [{name}, ...] in arguments means that you should pass
-        a list of strings, not that {name} is optional. Typical calls (both
-        are equivalent): >
-            call vam#ActivateAddons([
-              \ "name1",
-              \ "name2",
-              \ ])
-            call vam#ActivateAddons(
-              \ "name1",
-              \ "name2"
-              \ )
-<
-        Activating a plugin means that function will do the following steps:
-        0. Check, whether requested addon is already installed. If it is not,
-           vim-addon-manager will install it.
-        1. Activate plugins that are mentioned in dependencies dictionary (see
-           |addon-info-dependencies|).
-        2. Add plugin runtime directory to 'runtimepath' option.
-        3. Check whether vim has already started. If it was then source first
-           all files under addon's plugin directory, then under after/plugin
-           directory. If it was not, then wait until vim loads and source
-           files under addon's after/plugin directory (Vim does not sources
-           them in this case by default).
-        Note that in order to bring installed plugins to work, you need to add
-        the following line to your vimrc: >
-            call vam#ActivateAddons([List_of_all_addons_you_need])
+vam#ActivateAddons([{name}, ...][, {}])                       *vam#ActivateAddons()*
+                   |             ^ optional auto_install setting
+                   ^ list of names
+
+        Installs [1] then activates [2] the plugins identified by name along
+        with their dependencies. This is meant to be called form your .vimrc
+        and is used by :ActivateAddons
+
+        [1] installation takes place if directory with that name does not
+            exist on disk yet.
+
+            |vam#install#Install()| installs the plugins
+
+        [2] activation means:
+          case 1: Vim is running: 
+            set runtimepath, then
+            source plugin/*.vim files etc [3]
+
+          case 2: Vim is starting up:
+            only set runtimepath, delay sourcing some additional files [3]
+
+        [3] details see usage of vam#GlobThenSource
 
 vam#install#Install([{arg}])                           *vam#install#Install()*
         Installs plugins from the given list. Each {arg} may be one the
@@ -523,7 +516,7 @@ doing: Add your own dicts to: >
 Eg if you want to patch -known-repository sources try this: >
     fun MyMergeSources(plugin_sources, www_vim_org, scm_plugin_sources)
       " run default:
-      call vam_known_repositories(a:plugin_sources, a:www_vim_org, a:scm_plugin_sources)
+      call vam_known_repositories#MergeSources(a:plugin_sources, a:www_vim_org, a:scm_plugin_sources)
 
       " patch sources the way you like. This example adds username und password
       " for SVN repositories. As alternative you could overwrite git urls etc ..
@@ -978,7 +971,8 @@ git clone --depth 1 git://github.com/MarcWeber/vim-addon-manager.git $VAM_PLUGIN
 cat >> ~/.vimrc << EOF
 fun SetupVAM()
   set runtimepath+=$VAM_PLUGINS/vim-addon-manager
-  call vam#ActivateAddons(["github:YourName"],{'auto_install' : 0})
+  call vam#ActivateAddons([],{'auto_install' : 0})
+  " eg replace [] by ["github:YourName"] or ["matchit.zip","ttoc",".."]
 endf
 call SetupVAM()
 " experimental: run after gui has been started [3]
@@ -987,4 +981,6 @@ call SetupVAM()
 " call sample_vimrc_for_new_users#Load()
 EOF
 
+The following line need not be pasted. It exists to set Vim formatting
+options. See :h 'modeline' to learn about it.
 vim:tw=78:fo=tcq2:isk=!-~,^*,^\|,^\":ts=8:ft=help:norl:

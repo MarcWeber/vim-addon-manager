@@ -168,6 +168,16 @@ fun! vam#ActivateAddons(...) abort
     " way of usage 1: pass addon names as function arguments
     " Example: ActivateAddons("name1","name2")
 
+    " This way of calling has two flaws:
+    " - doesn't scale due to amount of args limitation
+    " - you can't pass autoinstall=1
+    " Therefore we should get rid of this way..
+    
+    " verify that all args are strings only because errors are hard to debug
+    if !empty(filter(copy(args),'type(v:val) != type("")'))
+      throw "bad argument to vam#ActivateAddons, strings only expected. Use ActivateAddons(['n1','n2',..],{..}) instead"
+    endif
+
     let args=[args, {}]
   else
     " way of usage 2: pass addon names as list optionally passing options
