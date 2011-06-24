@@ -295,6 +295,8 @@ MergeSources                                  *vim-addon-manager-MergeSources*
         |vim-addon-manager-known-repositories| and SCM sources also defined
         there. If MergeSources function is a dictionary function, it will be
         provided an empty dictionary as |self| dictionary.
+
+        An Example can be found in this file.
 change_to_unix_ff                        *vim-addon-manager-change_to_unix_ff*
         Remove CR symbols before LF symbols in any vim files (changes dos and
         mixed dos/unix line endings to unix line endings). Is on by default if
@@ -513,8 +515,27 @@ anything.
 
 As alternative you can specify them in your .vimrc like what that plugin is
 doing: Add your own dicts to: >
-    let g:vim_addon_manager = {'plugin_sources': {}}
+    let g:vim_addon_manager = {}
+    let g:vim_addon_manager['plugin_sources'] = {}
     let g:vim_addon_manager['plugin_sources']['your-plugin-name'] = { ... }
+
+<
+Eg if you want to patch -known-repository sources try this: >
+    fun MyMergeSources(plugin_sources, www_vim_org, scm_plugin_sources)
+      " run default:
+      call vam_known_repositories(a:plugin_sources, a:www_vim_org, a:scm_plugin_sources)
+
+      " patch sources the way you like. This example adds username und password
+      " for SVN repositories. As alternative you could overwrite git urls etc ..
+      for your_plugin in ['svn-driven-key1', ...]
+        let a:plugin_sources[your_plugin]['username'] = 'svn user'
+        let a:plugin_sources[your_plugin]['password'] = 'svn user'
+       endfor
+    endf
+    " tell VAM to use your MergeSources function:
+    let g:vim_addon_manager = {}
+    let g:vim_addon_manager['MergeSources'] = function('MyMergeSources')
+
 <
 In your .vimrc or somewhere else (see |vim-addon-manager-plugin_sources|).
 
