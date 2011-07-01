@@ -146,12 +146,13 @@ fun! vam#ActivateRecursively(list_of_names, ...)
       " sources given in opts will win
       call vam#ActivateAddons(keys(dependencies),
         \ extend(copy(opts), { 'plugin_sources' : extend(copy(dependencies), get(opts, 'plugin_sources',{}))}))
-    endif
-    " source plugin/* files ?
-    let rtp = vam#PluginRuntimePath(name)
-    call add(opts['new_runtime_paths'], rtp)
 
-    let s:c['activated_plugins'][name] = 1
+      " source plugin/* files ?
+      let rtp = vam#PluginRuntimePath(name)
+      call add(opts['new_runtime_paths'], rtp)
+
+      let s:c['activated_plugins'][name] = 1
+    endif
   endfor
 endf
 
