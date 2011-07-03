@@ -27,14 +27,11 @@ endfor
 let g:is_win = g:os[:2] == 'win'
 
 exec vam#DefineAndBind('s:c','g:vim_addon_manager','{}')
-let s:c['config'] = get(s:c,'config',expand('$HOME').'/.vim-script-manager')
 let s:c['auto_install'] = get(s:c,'auto_install', 0)
 " repository locations:
 let s:c['plugin_sources'] = get(s:c,'plugin_sources', {})
 " if a plugin has an item here the dict value contents will be written as plugin info file
 let s:c['missing_addon_infos'] = get(s:c,'missing_addon_infos', {})
-" addon_infos cache, {} if file dosen't exist
-let s:c['addon_infos'] = get(s:c,'addon_infos', {})
 let s:c['activated_plugins'] = get(s:c,'activated_plugins', {})
 " If directory where plugin is installed is writeable, then this plugin was
 " likely installed by user according to the instruction. If it is not, then it
@@ -115,10 +112,9 @@ endf
 " {} if file doesn't exist
 fun! vam#AddonInfo(name)
   let infoFile = vam#AddonInfoFile(a:name)
-  let s:c['addon_infos'][a:name] = filereadable(infoFile)
+  return filereadable(infoFile)
     \ ? vam#ReadAddonInfo(infoFile)
     \ : {}
- return get(s:c['addon_infos'],a:name, {})
 endf
 
 
