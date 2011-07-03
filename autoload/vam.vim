@@ -176,7 +176,7 @@ fun! vam#ActivateAddons(...) abort
     
     " verify that all args are strings only because errors are hard to debug
     if !empty(filter(copy(args),'type(v:val) != type("")'))
-      throw "bad argument to vam#ActivateAddons, strings only expected. Use ActivateAddons(['n1','n2',..],{..}) instead"
+      throw "Bad argument to vam#ActivateAddons: only Strings are permitted. Use ActivateAddons(['n1','n2',..], {..}) to pass options dictionary"
     endif
 
     let args=[args, {}]
