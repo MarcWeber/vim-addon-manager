@@ -279,6 +279,9 @@ known_repos_activation_policy
         `Never' means that |vim-addon-manager-known-repositories| will not be
         loaded and the user will not get any prompts. `Autoload' means that it
         will be loaded when it is required, user also won't get asked.
+known                                                *vim-addon-manager-known*
+        String, specifies the name of plugin which provides list of
+        repositories. Default is vim-addon-manager-known-repositories.
 MergeSources                                  *vim-addon-manager-MergeSources*
         Function reference, defines a function that will be used to merge
         user, |vim-addon-manager-known-repositories| and SCM sources.
