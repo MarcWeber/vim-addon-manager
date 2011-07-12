@@ -23,6 +23,9 @@ CONTENTS                                          *vim-addon-manager-contents*
        and TODOs as well as "I want .."
    13. VAM vs ...
 
+   20. making plugins work with VAM
+        (rtp different from ~/.vim)
+
 ==============================================================================
 (0. HELP - something doesn't work)
 
@@ -66,7 +69,8 @@ Read: |vim-addon-manager-installation| and |vim-addon-manager-install-plugins|
 
 Windows users: see |vim-addon-manager-windows|.
 Gentoo users: see |vim-addon-manager-gentoo|.
-linux script: see |linux-installation-script|.
+linux/cygwin/OSX (anything support /bin/sh like shells) script:
+             see |linux-installation-script|.
 
 manually:
 1. Create a separate directory that will hold your plugins, for example
@@ -963,6 +967,22 @@ Thus code will be reused easily. Thus code review will take place yielding
 more collaboration thus better code. That was the main reason why I started
 VAM. And that's good for community.
 
+==============================================================================
+20. making plugins work with VAM (rtp different from ~/.vim)
+
+Most plugins should work out of the box.
+
+Some older plugins expect to be installed into ~/.vim. Probably they can be
+patched easily by replacing ~/.vim by a path relative to the file running the
+code: >
+
+  " this is ~/vim-addons/foo/autoload/x.vim
+  " does not work inside a function!
+  let s:plugin_base_dir = expand('<sfile>:p:h:h')
+  " now s:plugin_base_dir contains ~/vim-addons/foo
+<
+Then plugins can find additional resources (templates, python files, ..)
+relative to s:parent_dir_of_this_file
 
 ==============================================================================
 
