@@ -19,10 +19,7 @@ fun! vcs_checkouts#Update(dir)
   elseif isdirectory(directory.'/.bzr')
     call s:exec_in_dir([{'d': directory, 'c': 'bzr pull'}])
   elseif isdirectory(directory.'/.hg')
-    call s:exec_in_dir([
-          \ {'d': directory, 'c': 'hg pull'},
-          \ {'d': directory, 'c': 'hg update'}
-          \ ])
+    call s:exec_in_dir([{'d': directory, 'c': 'hg pull -u'},])
   else
     " not knowing how to update a repo is not a failure
     return 0
