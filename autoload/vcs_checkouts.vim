@@ -17,9 +17,9 @@ fun! vcs_checkouts#Update(dir)
   elseif isdirectory(directory.'/.svn')
     call s:exec_in_dir([{'d': directory, 'c': 'svn update'}])
   elseif isdirectory(directory.'/.bzr')
-    call s:exec_in_dir([{'d': directory, 'c': 'bzr pull'}])
+    call vam#utils#RunShell('bzr pull -d $', directory)
   elseif isdirectory(directory.'/.hg')
-    call s:exec_in_dir([{'d': directory, 'c': 'hg pull -u'},])
+    call vam#utils#RunShell('hg pull -u -R $', directory)
   else
     " not knowing how to update a repo is not a failure
     return 0
@@ -33,20 +33,18 @@ endf
 " repository = {'type': git|hg|svn|bzr, 'url': .. }
 fun! vcs_checkouts#Checkout(targetDir, repository)
   if a:repository['type'] == 'git'
-    exec '!'.vam#utils#ShellDSL('git clone '. s:se.git[0] .' $ $p', a:repository['url'], a:targetDir)
+    call vam#utils#RunShell('git clone '.s:se.git[0].' $ $p', a:repository.url, a:targetDir)
   elseif a:repository['type'] == 'hg'
-    let parent = fnamemodify(a:targetDir,':h')
-    exec '!'.vam#utils#ShellDSL('hg clone $ $p', a:repository['url'], a:targetDir)
+    call vam#utils#RunShell('hg clone $ $p', a:repository.url, a:targetDir)
   elseif a:repository['type'] == 'bzr'
-    exec '!'.vam#utils#ShellDSL('bzr branch $ $p', a:repository['url'], a:targetDir)
+    call vam#utils#RunShell('bzr branch $ $p', a:repository.url, a:targetDir)
   elseif a:repository['type'] == 'svn'
-    let parent = fnamemodify(a:targetDir,':h')
-    call s:exec_in_dir([{'d': parent, 'c': 'svn checkout'
-          \ .' '.s:shellescape(a:repository['url'])
-          \ .' '.s:shellescape(a:targetDir)
-          \ .(has_key(a:repository,'username') ? ' --username '.s:shellescape(a:repository['username']) : '')
-          \ .(has_key(a:repository,'password') ? ' --password '.s:shellescape(a:repository['password']) : '')
-          \  }])
+    let args=['svn checkout $ $p', a:repository.url, a:targetDir]
+    for key in filter(['username', 'password'], 'has_key(a:repository, v:val)')
+      let args[0].=' --'.key.' $'
+      let args+=[a:repository[key]]
+    endfor
+    call call('vam#utils#RunShell', args)
   else
     " Keep old behavior: no throw for unknown repository type
     return
@@ -70,7 +68,7 @@ fun! vcs_checkouts#ExecIndir(cmds) abort
         exec "lcd ".fnameescape(c.d)
       endif
       if has_key(c, "c")
-        exec '!'.c.c
+        exec 'silent !'.c.c
       endif
       " break if one of the pased commands failes:
       if v:shell_error != 0
@@ -83,20 +81,17 @@ fun! vcs_checkouts#ExecIndir(cmds) abort
     " execute command sequences on linux
     let cmds_str = []
     for c in a:cmds
-      if has_key(c,"d")
-        call add(cmds_str, "cd ".s:shellescape(c.d))
+      if has_key(c, "d")
+        call add(cmds_str, "cd ".shellescape(c.d, 1))
       endif
-      if has_key(c,"c")
+      if has_key(c, "c")
         call add(cmds_str, c.c)
       endif
     endfor
-    exec '!'.join(cmds_str," && ")
+    exec 'silent !'.join(cmds_str," && ")
     if v:shell_error != 0
       throw "error executing ".string(cmds_str)
     endif
   endif
 endf
-
-fun! s:shellescape(s)
-  return shellescape(a:s,1)
-endf
+" vim: et ts=8 sts=2 sw=2

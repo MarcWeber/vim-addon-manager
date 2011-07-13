@@ -2,25 +2,23 @@
 let s:curl = exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o'
 
 " cmds = list of {'d':  dir to run command in, 'c': the command line to be run }
-fun! s:exec_in_dir(cmds)
-  call vcs_checkouts#ExecIndir(a:cmds)
-endf
+let s:exec_in_dir=function('vcs_checkouts#ExecIndir')
 
 " insert arguments at placeholders $ shell escaping the value
 " usage: s:shellescape("rm --arg $ -fr $p $p $p", [string, file1, file2, file3])
 "
 " the / \ annoyance of Windows is fixed by calling expand which replaces / by
 " \ on Windows. This only happens by the $p substitution
-fun! s:shellescape(cmd, ...)
+fun! vam#utils#ShellDSL(cmd, ...)
   let list = copy(a:000)
   let r = ''
-  let l = split(a:cmd, '\$', 1)
+  let l = split(a:cmd, '\V$', 1)
   let r = l[0]
   for x in l[1:]
     let i = remove(list, 0)
     if x[0] == 'p'
       let x = x[1:]
-      let i = expand(i)
+      let i = expand(fnameescape(i))
     endif
     let r .= shellescape(i,1).x
   endfor
@@ -28,8 +26,10 @@ fun! s:shellescape(cmd, ...)
 endf
 
 " TODO improve this and move somewhere else?
-fun! vam#utils#ShellDSL(...)
-  return call('s:shellescape', a:000)
+fun! vam#utils#RunShell(...)
+  execute "silent !".call('vam#utils#ShellDSL', a:000)
+  redraw
+  return !v:shell_error
 endf
 
 "Usages: EndsWith('name.tar',   '.tar', '.txt') returns 1 even if .tar was .txt
@@ -53,7 +53,7 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
   let strip_components = get(opts, 'strip-components', -1)
   let delSource = get(opts, 'del-source', 0)
 
-  let esc_archive = s:shellescape('$', a:archive)
+  let esc_archive = vam#utils#ShellDSL('$', a:archive)
   let tgt = [{'d': a:targetDir}]
 
   if strip_components > 0 || strip_components == -1
@@ -102,7 +102,7 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
         " PHASE (1): gunzip or bunzip using gzip,bzip2 or 7z:
         if executable('7z') && !exists('g:prefer_tar')
           " defaulting to 7z why or why not?
-          call s:exec_in_dir([{'d': fnamemodify(a:archive, ':h'), 'c': '7z x '.esc_archive }])
+          call vam#utils#RunShell('7z x -o$ $', fnamemodify(a:archive, ':h'), a:archive)
           " 7z renames tgz to tar
         else
           " make a backup. gunzip etc rm the original file
@@ -112,7 +112,7 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
           endif
 
           " unpack
-          call s:exec_in_dir([{'c': z[2].' '.esc_archive }])
+          call vam#utils#RunShell(z[2].' $', a:archive)
 
           " copy backup back:
           if !delSource | call rename(b, a:archive) | endif
@@ -136,7 +136,7 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
     " .tar
   elseif s:EndsWith(a:archive, '.tar')
     if executable('7z')
-      call s:exec_in_dir(tgt + [{'c': '7z x '.esc_archive }])
+      call vam#utils#RunShell('7z x -o$ $', a:targetDir, a:archive)
     else
       call s:exec_in_dir(tgt + [{'c': 'tar -xf '.esc_archive }])
     endif
@@ -145,7 +145,7 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
     " .zip
   elseif s:EndsWith(a:archive, '.zip')
     if executable('7z')
-      call s:exec_in_dir(tgt + [{'c': '7z x '.esc_archive }])
+      call vam#utils#RunShell('7z x -o$ $', a:targetDir, a:archive)
     else
       call s:exec_in_dir(tgt + [{'c': 'unzip '.esc_archive }])
     endif
@@ -155,7 +155,7 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
     " (I have actually seen only .7z and .rar, but 7z supports other formats 
     " too)
   elseif s:EndsWith(a:archive,  '.7z','.cab','.arj','.rar','.jar')
-    call s:exec_in_dir(tgt + [{'c': '7z x '.esc_archive }])
+    call vam#utils#RunShell('7z x -o$ $', a:targetDir, a:archive)
     exec strip
 
   elseif s:EndsWith(a:archive, '.vba')
@@ -252,7 +252,7 @@ fun! vam#utils#Download(url, targetFile)
   " Let's hope that nobody is using a dir called "curl " .. because
   " substitution will be wrong then
   let c = substitute(s:curl, '\ccurl\(\.exe\)\?\%( \|$\)','curl\1 --location --max-redirs 40 ','')
-  call s:exec_in_dir([{'c': s:shellescape(c.' $p $', a:targetFile, a:url)}])
+  call vam#utils#RunShell(c.' $p $', a:targetFile, a:url)
 endf
 
 fun! vam#utils#RmFR(dir_or_file)
@@ -276,7 +276,7 @@ fun! vam#utils#RmFR(dir_or_file)
   if cmd == ""
     throw "don't know how to RmFR on this system: ".g:os
   else
-    exec '!'.s:shellescape(cmd.' $', a:dir_or_file)
+    call vam#utils#RunShell(cmd.' $', a:dir_or_file)
   endif
 endf
 

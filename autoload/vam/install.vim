@@ -37,7 +37,7 @@ fun! vam#install#ReplaceAndFetchUrls(list)
     " assume n is either an url or a path
     if n =~ '^http://' && s:confirm('Fetch plugin info from URL '.n.'?')
       let t = tempfile()
-      exec '!'.s:curl.' '.t.' > '.s:shellescape(t)
+      call vam#utils#RunShell(s:curl.' $ > $', n, t)
     elseif n =~  '[/\\]' && filereadable(n)
       let t = n
     endif
@@ -404,22 +404,13 @@ fun! vam#install#Checkout(targetDir, repository) abort
   endif
 endfun
 
-fun! s:shellescape(s)
-  return shellescape(a:s,1)
-endf
-
-" cmds = list of {'d':  dir to run command in, 'c': the command line to be run }
-fun! s:exec_in_dir(cmds)
-  call vcs_checkouts#ExecIndir(a:cmds)
-endf
-
 " is there a library providing an OS abstraction? This breaks Winndows
 " xcopy or copy should be used there..
 fun! vam#install#Copy(f,t)
   if g:is_win
-    exec '!xcopy /e /i '.s:shellescape(a:f).' '.s:shellescape(a:t)
+    call vam#utils#RunShell('xcopy /e /i $ $', a:f, a:t)
   else
-    exec '!cp -r '.s:shellescape(a:f).' '.s:shellescape(a:t)
+    call vam#utils#RunShell('cp -r $ $', a:f, a:t)
   endif
 endfun
 
@@ -493,7 +484,7 @@ fun! vam#install#MergePluginFiles(plugins, skip_pattern)
   " 1)
   for r in runtimepaths
     if (isdirectory(r.'/plugin'))
-      call s:exec_in_dir([{'c':'mv '.s:shellescape(r.'/plugin').' '.s:shellescape(r.'/plugin-merged')}])
+      call vam#utils#RunShell('mv $ $', r.'/plugin', r.'/plugin-merged')
     endif
   endfor
 
