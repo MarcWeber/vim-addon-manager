@@ -1,0 +1,7 @@
+::: In plugin {svn}/plugin/msgWrite.vim
+./vam-test-known
+./vam-test-known/plugin
+./vam-test-known/plugin/vim-addon-manager-known-repositories.vim
+./vam_test_svn
+./vam_test_svn/plugin
+./vam_test_svn/plugin/msgWrite.vim
