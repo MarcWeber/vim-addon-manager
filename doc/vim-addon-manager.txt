@@ -164,32 +164,25 @@ UninstallNotLoadedAddons {name} ...                *:UninstallNotLoadedAddons*
 ------------------------------------------------------------------------------
 3.2. Functions                                   *vim-addon-manager-functions*
 
-vam#ActivateAddons([{name}, ...][, {}])                       *vam#ActivateAddons()*
-                   |             ^ optional auto_install setting
-                   ^ list of names
+vam#ActivateAddons({addons}[, {opts}])                  *vam#ActivateAddons()*
+        Installs and activates plugins listed in {addons} (see description of
+        |vam#install#Install()|) list alongside with their dependencies. This
+        is meant to be called from your .vimrc. Installation takes place only
+        if plugin directory does not exist. Activation means adding plugin
+        directory to 'runtimepath'. If vim has already started VAM will also
+        source plugin/**/*.vim (in other case sourcing is done by vim).
 
-        Installs [1] then activates [2] the plugins identified by name along
-        with their dependencies. This is meant to be called form your .vimrc
-        and is used by :ActivateAddons
+        Optional {opts} argument should be a dictionary with key
+        "auto_install". It will be used to override global option
+        |vim-addon-manager-auto_install|. Other possible keys are for internal
+        use only.
 
-        [1] installation takes place if directory with that name does not
-            exist on disk yet.
+        In order to manually activate plugins try using |:ActivateAddons|
+        which also provides completion.
 
-            |vam#install#Install()| installs the plugins
-
-        [2] activation means:
-          case 1: Vim is running: 
-            set runtimepath, then
-            source plugin/*.vim files etc [3]
-
-          case 2: Vim is starting up:
-            only set runtimepath, delay sourcing some additional files [3]
-
-        [3] details see usage of vam#GlobThenSource
-
-vam#install#Install([{arg}])                           *vam#install#Install()*
-        Installs plugins from the given list. Each {arg} may be one the
-        following:
+vam#install#Install({addons}[, {opts}])                *vam#install#Install()*
+        Installs plugins listed in {addons} list. Each list item must be one
+        of the following:
             - Name of the plugin
             - Path to |addon-info.txt| file (it must contain at least one
               forward or back slash, so use `./plugname-addon-info.txt' for
@@ -198,17 +191,20 @@ vam#install#Install([{arg}])                           *vam#install#Install()*
               `http://'.
         After installing the plugin help tags are updated, see |:helptags|.
 
-vam#install#Update([{name}])                            *vam#install#Update()*
-        Updates plugins with given names. If an empty list is given, then
-        updates all plugins. vam#install#Update also updates the help
-        tags. Note that if plugin is not under control of some VCS, it tries
-        to retain user changes unless |vim-addon-manager-do_diff| is disabled.
+        {opts} argument is described in |vam#ActivateAddons()|.
+
+vam#install#Update({addons})                            *vam#install#Update()*
+        Updates plugins which names are listed in {addons}. If an empty list
+        is given, then updates all plugins. vam#install#Update also updates
+        the help tags. Note that if plugin is not under control of some VCS,
+        it tries to retain user changes unless |vim-addon-manager-do_diff| is
+        disabled.
 
 vam#AddonInfo({name})                                        *vam#AddonInfo()*
         Returns dictionary that contains information given in |addon-info.txt|
         file that comes with requested addon. If no |addon-info.txt| file is
         present, it is not readable or addon with given name is not installed,
-        then it returns empty dictionary.
+        then it returns an empty dictionary.
 
                                               *vam#install#MergePluginFiles()*
 vam#install#MergePluginFiles([{name}] [, blacklist-regex ])
@@ -1006,4 +1002,4 @@ EOF
 
 The following line need not be pasted. It exists to set Vim formatting
 options. See :h 'modeline' to learn about it.
-vim:tw=78:fo=tcq2:isk=!-~,^*,^\|,^\":ts=8:ft=help:norl:
+vim:tw=78:fo=tcq2:ts=8:ft=help:norl:
