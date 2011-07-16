@@ -1,0 +1,3 @@
+./vam_test_bzr
+./vam_test_bzr/macros
+./vam_test_bzr/macros/matchit.vim
