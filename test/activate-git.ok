@@ -1,6 +1,0 @@
-./vam-test-known
-./vam-test-known/plugin
-./vam-test-known/plugin/vim-addon-manager-known-repositories.vim
-./vam_test_git
-./vam_test_git/plugin
-./vam_test_git/plugin/vim-addon-manager-known-repositories.vim

@@ -1,0 +1,3 @@
+./vam_test_svn
+./vam_test_svn/plugin
+./vam_test_svn/plugin/msgWrite.vim

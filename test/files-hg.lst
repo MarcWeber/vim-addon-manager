@@ -1,0 +1,8 @@
+./vam_test_hg
+./vam_test_hg/addon-info.json
+./vam_test_hg/runtimepath
+./vam_test_hg/runtimepath/plugin
+./vam_test_hg/runtimepath/plugin/writeMsg.vim
+./vam_test_svn
+./vam_test_svn/plugin
+./vam_test_svn/plugin/msgWrite.vim

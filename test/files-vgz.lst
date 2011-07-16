@@ -1,6 +1,3 @@
-./vam-test-known
-./vam-test-known/plugin
-./vam-test-known/plugin/vim-addon-manager-known-repositories.vim
 ./vam_test_vgz
 ./vam_test_vgz/archive
 ./vam_test_vgz/archive/vam_test_vgz.vba.gz
