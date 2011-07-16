@@ -7,7 +7,24 @@ let s:c.name_rewriting = get(s:c, 'name_rewriting', {})
 call extend(s:c.name_rewriting, {'99git+github': 'vam#install#RewriteName'})
 
 fun! s:confirm(msg, ...)
-  if a:0 && type(a:1)==type("")
+  if getchar(1)
+    let char = getchar()
+    if type(char) == type(0)
+      let char = nr2char(char)
+    endif
+    let char = tolower(char)
+    if a:0
+      if type(a:1)==type("")
+        let choices = tolower(substitute(a:1, '\v\&@<!.', '', 'g'))
+        let idx     = stridx(choices, char)+1
+        return idx ? idx : get(a:000, 1, 1)
+      else
+        return char is# 's'
+      endif
+    else
+      return char isnot# 'n'
+    endif
+  elseif a:0 && type(a:1) == type("")
     return call("confirm", [a:msg]+a:000)
   else
     " Don't allow [y] with additional argument intentionally: it is too easy to 
