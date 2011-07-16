@@ -14,7 +14,6 @@ else
             \}
 endif
 let g:vim_addon_manager.auto_install=1
-let g:vim_addon_manager.change_to_unix_ff=1
 let g:vim_addon_manager.do_diff=0
 let g:vim_addon_manager.plugin_root_dir=fnamemodify('./vam-'.g:curtest, ':p')
 let s:outfile=fnamemodify(g:outfile, ':p')
@@ -45,7 +44,7 @@ function Try(cmd)
     finally
         " Unlike :catch this won't loose trace
         if failed
-            call writefile([v:exception], s:errfile, 'b')
+            call writefile([], s:errfile, 'b')
         endif
     endtry
 endfunction
