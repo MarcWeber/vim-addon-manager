@@ -1,0 +1,7 @@
+./vam_test_archive_name
+./vam_test_archive_name/archive
+./vam_test_archive_name/archive/vam_test_archive_name.tar.gz
+./vam_test_archive_name/pax_global_header
+./vam_test_archive_name/plugin
+./vam_test_archive_name/plugin/vim-addon-manager-known-repositories.vim
+./vam_test_archive_name/version

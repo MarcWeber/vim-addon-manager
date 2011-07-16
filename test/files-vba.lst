@@ -1,0 +1,11 @@
+./vam_test_vba
+./vam_test_vba/archive
+./vam_test_vba/archive/vam_test_vba.vba
+./vam_test_vba/doc
+./vam_test_vba/doc/json.rux
+./vam_test_vba/doc/json.txt
+./vam_test_vba/doc/tags
+./vam_test_vba/doc/tags-ru
+./vam_test_vba/plugin
+./vam_test_vba/plugin/json.vim
+./vam_test_vba/version

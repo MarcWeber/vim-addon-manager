@@ -1,0 +1,53 @@
+let g:vim_addon_manager={}
+let g:vim_addon_manager.known='vam-test-known'
+if executable('git')
+    let g:vim_addon_manager.plugin_sources={
+                \'vam-test-known': {'type': 'git',
+                \                    'url': 'git://vimpluginloader.git.sourceforge.net/gitroot/vimpluginloader/vam-test-repository/',},
+            \}
+else
+    let g:vim_addon_manager.plugin_sources={
+                \'vam-test-known': {'type': 'archive',
+                \                    'url': 'http://vimpluginloader.git.sourceforge.net/git/gitweb.cgi?p=vimpluginloader/vam-test-repository;a=snapshot;h=HEAD;sf=tgz',
+                \                'version': '9999',
+                \           'archive_name': 'vam-test-known.tar.gz'},
+            \}
+endif
+let g:vim_addon_manager.auto_install=1
+let g:vim_addon_manager.do_diff=0
+let g:vim_addon_manager.plugin_root_dir=fnamemodify('./vam-'.g:curtest, ':p')
+let s:outfile=fnamemodify(g:outfile, ':p')
+let s:errfile=fnamemodify(g:outfile, ':p:r').'.fail'
+function WriteFile(...)
+    let r=[]
+    if filereadable(s:outfile)
+        let r+=readfile(s:outfile, 'b')
+    endif
+    if type(a:1)==type([])
+        let r+=a:1
+    else
+        let r+=a:000
+    endif
+    call writefile(r, s:outfile, 'b')
+    return ''
+endfunction
+function WriteGlob()
+    cd `="vam-".g:curtest`
+    call WriteFile(split(glob('./**'), "\n"))
+    cd ..
+endfunction
+function Try(cmd)
+    let failed=1
+    try
+        execute a:cmd
+        let failed=0
+    finally
+        " Unlike :catch this won't loose trace
+        if failed
+            call writefile([], s:errfile, 'b')
+        endif
+    endtry
+endfunction
+if filereadable(g:curtest.'.vim')
+    source `=g:curtests.".vim"`
+endif

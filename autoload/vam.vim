@@ -211,7 +211,7 @@ fun! vam#ActivateAddons(...) abort
     " add paths after ~/.vim but before $VIMRUNTIME
     " don't miss the after directories if they exist and
     " put them last! (Thanks to Oliver Teuliere)
-    let rtp = split(&runtimepath,'\(\\\@<!\(\\.\)*\\\)\@<!,')
+    let rtp = split(&runtimepath, '\v(\\@<!(\\.)*\\)@<!\,')
     let escapeComma = 'escape(v:val, '','')'
     let after = filter(map(copy(new_runtime_paths), 'v:val."/after"'), 'isdirectory(v:val)')
     let &runtimepath=join(rtp[:0] + map(copy(new_runtime_paths), escapeComma)

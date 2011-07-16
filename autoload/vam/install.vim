@@ -7,7 +7,24 @@ let s:c.name_rewriting = get(s:c, 'name_rewriting', {})
 call extend(s:c.name_rewriting, {'99git+github': 'vam#install#RewriteName'})
 
 fun! s:confirm(msg, ...)
-  if a:0 && type(a:1)==type("")
+  if getchar(1)
+    let char = getchar()
+    if type(char) == type(0)
+      let char = nr2char(char)
+    endif
+    let char = tolower(char)
+    if a:0
+      if type(a:1)==type("")
+        let choices = tolower(substitute(a:1, '\v\&@<!.', '', 'g'))
+        let idx     = stridx(choices, char)+1
+        return idx ? idx : get(a:000, 1, 1)
+      else
+        return char is# 's'
+      endif
+    else
+      return char isnot# 'n'
+    endif
+  elseif a:0 && type(a:1) == type("")
     return call("confirm", [a:msg]+a:000)
   else
     " Don't allow [y] with additional argument intentionally: it is too easy to 
@@ -37,7 +54,7 @@ fun! vam#install#ReplaceAndFetchUrls(list)
     " assume n is either an url or a path
     if n =~ '^http://' && s:confirm('Fetch plugin info from URL '.n.'?')
       let t = tempfile()
-      exec '!'.s:curl.' '.t.' > '.s:shellescape(t)
+      call vam#utils#RunShell(s:curl.' $ > $', n, t)
     elseif n =~  '[/\\]' && filereadable(n)
       let t = n
     endif
@@ -203,7 +220,7 @@ fun! vam#install#UpdateAddon(name)
         call vam#install#Checkout(pluginDir, rep_copy)
         silent! call delete(pluginDir.'/version')
         try
-          call vcs_checkouts#ExecIndir([{'d': s:c['plugin_root_dir'], 'c': vam#utils#ShellDSL('diff -U3 -r $p $p', fnamemodify(pluginDir,':t'), fnamemodify(pluginDirBackup,':t')).' > '.diff_file}])
+          call vam#utils#ExecInDir([{'d': s:c['plugin_root_dir'], 'c': vam#utils#ShellDSL('diff -U3 -r -a --binary $p $p', fnamemodify(pluginDir,':t'), fnamemodify(pluginDirBackup,':t')).' > '.diff_file}])
           silent! call delete(diff_file)
         catch /.*/
           " :-( this is expected. diff returns non zero exit status. This is hacky
@@ -222,7 +239,7 @@ fun! vam#install#UpdateAddon(name)
     if exists('diff')
       if executable("patch")
         try
-          call vcs_checkouts#ExecIndir([{'d': pluginDir, 'c': 'patch -p1 < '. diff_file }])
+          call vam#utils#ExecInDir([{'d': pluginDir, 'c': vam#utils#ShellDSL('patch --binary -p1 --input=$p', diff_file)}])
           echom "Patching suceeded"
           let patch_failure = 0
           call delete(diff_file)
@@ -258,7 +275,7 @@ fun! vam#install#Update(list)
   if empty(list) && s:confirm('Update all loaded plugins?')
     call vam#install#LoadKnownRepos({}, ' so that its updated as well')
     " include vim-addon-manager in list
-    if !s:c['system_wide']
+    if !s:c['system_wide'] && isdirectory(vam#PluginDirByName('vim-addon-manager'))
       call vam#ActivateAddons(['vim-addon-manager'])
     endif
     let list = keys(s:c['activated_plugins'])
@@ -404,22 +421,13 @@ fun! vam#install#Checkout(targetDir, repository) abort
   endif
 endfun
 
-fun! s:shellescape(s)
-  return shellescape(a:s,1)
-endf
-
-" cmds = list of {'d':  dir to run command in, 'c': the command line to be run }
-fun! s:exec_in_dir(cmds)
-  call vcs_checkouts#ExecIndir(a:cmds)
-endf
-
 " is there a library providing an OS abstraction? This breaks Winndows
 " xcopy or copy should be used there..
 fun! vam#install#Copy(f,t)
   if g:is_win
-    exec '!xcopy /e /i '.s:shellescape(a:f).' '.s:shellescape(a:t)
+    call vam#utils#RunShell('xcopy /e /i $ $', a:f, a:t)
   else
-    exec '!cp -r '.s:shellescape(a:f).' '.s:shellescape(a:t)
+    call vam#utils#RunShell('cp -r $ $', a:f, a:t)
   endif
 endfun
 
@@ -493,7 +501,7 @@ fun! vam#install#MergePluginFiles(plugins, skip_pattern)
   " 1)
   for r in runtimepaths
     if (isdirectory(r.'/plugin'))
-      call s:exec_in_dir([{'c':'mv '.s:shellescape(r.'/plugin').' '.s:shellescape(r.'/plugin-merged')}])
+      call vam#utils#RunShell('mv $ $', r.'/plugin', r.'/plugin-merged')
     endif
   endfor
 

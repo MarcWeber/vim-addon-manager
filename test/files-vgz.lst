@@ -1,0 +1,11 @@
+./vam_test_vgz
+./vam_test_vgz/archive
+./vam_test_vgz/archive/vam_test_vgz.vba.gz
+./vam_test_vgz/doc
+./vam_test_vgz/doc/json.rux
+./vam_test_vgz/doc/json.txt
+./vam_test_vgz/doc/tags
+./vam_test_vgz/doc/tags-ru
+./vam_test_vgz/plugin
+./vam_test_vgz/plugin/json.vim
+./vam_test_vgz/version
