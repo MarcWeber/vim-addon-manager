@@ -274,6 +274,9 @@ fun! vam#AddonInfoFile(name)
   return default
 endf
 
+" If you want these commands witohut activating plugins call
+" vam#ActivateAddons([]) with empty list. Not moving them into plugin/vam.vim
+" to prevent additional IO seeks.
 command! -nargs=* -complete=customlist,vam#install#AddonCompletion InstallAddons :call vam#install#Install([<f-args>])
 command! -nargs=* -complete=customlist,vam#install#AddonCompletion ActivateAddons :call vam#ActivateAddons([<f-args>])
 command! -nargs=* -complete=customlist,vam#install#InstalledAddonCompletion ActivateInstalledAddons :call vam#ActivateAddons([<f-args>])
