@@ -1,9 +1,6 @@
 " let users override curl command. Reuse netrw setting
 let s:curl = exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o'
 
-" cmds = list of {'d':  dir to run command in, 'c': the command line to be run }
-let s:exec_in_dir=function('vcs_checkouts#ExecIndir')
-
 " insert arguments at placeholders $ shell escaping the value
 " usage: s:shellescape("rm --arg $ -fr $p $p $p", [string, file1, file2, file3])
 "
@@ -31,6 +28,46 @@ fun! vam#utils#RunShell(...)
   redraw
   return !v:shell_error
 endf
+
+" cmds = list of {'d':  dir to run command in, 'c': the command line to be run }
+fun! vam#utils#ExecInDir(cmds) abort
+  if g:is_win
+    " set different lcd in extra buffer:
+    new
+    try
+      let lcd=""
+      for c in a:cmds
+        if has_key(c, "d")
+          exec "lcd ".fnameescape(c.d)
+        endif
+        if has_key(c, "c")
+          exec 'silent !'.c.c
+        endif
+        if v:shell_error != 0
+          throw "error executing ".c.c
+        endif
+      endfor
+    finally
+      bw!
+    endtry
+  else
+    " execute command sequences on linux
+    let cmds_str = []
+    for c in a:cmds
+      if has_key(c, "d")
+        call add(cmds_str, "cd ".shellescape(c.d, 1))
+      endif
+      if has_key(c, "c")
+        call add(cmds_str, c.c)
+      endif
+    endfor
+    exec 'silent !'.join(cmds_str," && ")
+    if v:shell_error != 0
+      throw "error executing ".string(cmds_str)
+    endif
+  endif
+endf
+let s:exec_in_dir=function('vam#utils#ExecInDir')
 
 "Usages: EndsWith('name.tar',   '.tar', '.txt') returns 1 even if .tar was .txt
 fun! s:EndsWith(name, ...)

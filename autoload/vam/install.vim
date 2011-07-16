@@ -220,7 +220,7 @@ fun! vam#install#UpdateAddon(name)
         call vam#install#Checkout(pluginDir, rep_copy)
         silent! call delete(pluginDir.'/version')
         try
-          call vcs_checkouts#ExecIndir([{'d': s:c['plugin_root_dir'], 'c': vam#utils#ShellDSL('diff -U3 -r $p $p', fnamemodify(pluginDir,':t'), fnamemodify(pluginDirBackup,':t')).' > '.diff_file}])
+          call vam#utils#ExecInDir([{'d': s:c['plugin_root_dir'], 'c': vam#utils#ShellDSL('diff -U3 -r -a --binary $p $p', fnamemodify(pluginDir,':t'), fnamemodify(pluginDirBackup,':t')).' > '.diff_file}])
           silent! call delete(diff_file)
         catch /.*/
           " :-( this is expected. diff returns non zero exit status. This is hacky
@@ -239,7 +239,7 @@ fun! vam#install#UpdateAddon(name)
     if exists('diff')
       if executable("patch")
         try
-          call vcs_checkouts#ExecIndir([{'d': pluginDir, 'c': 'patch -p1 < '. diff_file }])
+          call vam#utils#ExecInDir([{'d': pluginDir, 'c': vam#utils#ShellDSL('patch --binary -p1 --input=$p', diff_file)}])
           echom "Patching suceeded"
           let patch_failure = 0
           call delete(diff_file)

@@ -54,44 +54,6 @@ fun! vcs_checkouts#Checkout(targetDir, repository)
   endif
 endf
 
-fun! s:exec_in_dir(cmds)
-  call vcs_checkouts#ExecIndir(a:cmds)
-endf
+let s:exec_in_dir=function('vam#utils#ExecInDir')
 
-fun! vcs_checkouts#ExecIndir(cmds) abort
-  if g:is_win
-    " set different lcd in extra buffer:
-    new
-    let lcd=""
-    for c in a:cmds
-      if has_key(c, "d")
-        exec "lcd ".fnameescape(c.d)
-      endif
-      if has_key(c, "c")
-        exec 'silent !'.c.c
-      endif
-      " break if one of the pased commands failes:
-      if v:shell_error != 0
-        throw "error executing ".c.c
-      endif
-    endfor
-    " should lcd withou args be used instead?
-    bw!
-  else
-    " execute command sequences on linux
-    let cmds_str = []
-    for c in a:cmds
-      if has_key(c, "d")
-        call add(cmds_str, "cd ".shellescape(c.d, 1))
-      endif
-      if has_key(c, "c")
-        call add(cmds_str, c.c)
-      endif
-    endfor
-    exec 'silent !'.join(cmds_str," && ")
-    if v:shell_error != 0
-      throw "error executing ".string(cmds_str)
-    endif
-  endif
-endf
 " vim: et ts=8 sts=2 sw=2
