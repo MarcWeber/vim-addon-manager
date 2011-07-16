@@ -175,7 +175,7 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
   " Do not use `has("unix")' here: it may be useful on `win32unix' (cygwin) and 
   " `macunix' (someone should ask users of these vims about that)
   if get(opts, 'unix_ff', 0)
-    for f in vam#utils#Glob(a:targetDir.'/**/*.vim')
+    for f in filter(vam#utils#Glob(a:targetDir.'/**/*.vim'), 'filewriteable(v:val)==1')
       call writefile(map(readfile(f, 'b'),
                   \'((v:val[-1:]==#"\r")?(v:val[:-2]):(v:val))'), f, 'b')
     endfor
