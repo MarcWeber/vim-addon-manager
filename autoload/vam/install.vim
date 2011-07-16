@@ -275,7 +275,7 @@ fun! vam#install#Update(list)
   if empty(list) && s:confirm('Update all loaded plugins?')
     call vam#install#LoadKnownRepos({}, ' so that its updated as well')
     " include vim-addon-manager in list
-    if !s:c['system_wide']
+    if !s:c['system_wide'] && isdirectory(vam#PluginDirByName('vim-addon-manager'))
       call vam#ActivateAddons(['vim-addon-manager'])
     endif
     let list = keys(s:c['activated_plugins'])
