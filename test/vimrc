@@ -18,6 +18,7 @@ let g:vim_addon_manager.change_to_unix_ff=1
 let g:vim_addon_manager.do_diff=0
 let g:vim_addon_manager.plugin_root_dir=fnamemodify('./vam-'.g:curtest, ':p')
 let s:outfile=fnamemodify(g:outfile, ':p')
+let s:errfile=fnamemodify(g:outfile, ':p:r').'.fail'
 function WriteFile(...)
     let r=[]
     if filereadable(s:outfile)
@@ -35,6 +36,18 @@ function WriteGlob()
     cd `="vam-".g:curtest`
     call WriteFile(split(glob('./**'), "\n"))
     cd ..
+endfunction
+function Try(cmd)
+    let failed=1
+    try
+        execute a:cmd
+        let failed=0
+    finally
+        " Unlike :catch this won't loose trace
+        if failed
+            call writefile([v:exception], s:errfile, 'b')
+        endif
+    endtry
 endfunction
 if filereadable(g:curtest.'.vim')
     source `=g:curtests.".vim"`

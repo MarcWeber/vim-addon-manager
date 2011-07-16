@@ -129,12 +129,6 @@ addtofile $T.ok install-tgz2.ok <(cat install-tgz2.ok | \
 T=update-tgz2-nodiff
 cat update-tgz2-dodiff.in | grep -v 'do_diff' > $T.in
 addtofile $T.ok install-tgz2.ok install-tgz2.ok comments-tgz2-nodiff.lst
-#▶1 AddonInfo
-T=addoninfo
-cat > $T.in << EOF
-:call vam#install#Install(["vam_test_hg"])
-:call WriteFile(sort(map(items(vam#AddonInfo('vam_test_hg')), 'string(v:val)')))
-EOF
 #▶1 Use cloned vam-test-known
 for test in *.in ; do
     cp -r vam-init vam-$test:r
