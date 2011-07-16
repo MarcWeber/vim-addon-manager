@@ -269,6 +269,9 @@ fun! vam#utils#StripComponents(dir, num, keepdirs)
         call add(tomove, [path, a:dir.'/'.fnamemodify(path, ':t')])
       endfor
     endfor
+    if strip_single_dir && !empty(toremove) && toremove[0]=~#'\v/%(autoload|colors|compiler|ftplugin|indent|keymap|lang|plugin|print|spell|syntax)$'
+      return
+    endif
     call map(tomove, 'rename(v:val[0], v:val[1])')
     call map(toremove, 'vam#utils#RmFR(v:val)')
   endfor

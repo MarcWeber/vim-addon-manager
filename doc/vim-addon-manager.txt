@@ -483,9 +483,11 @@ repository                                             *addon-info-repository*
                 this message and will have to confirm installation.
         strip-components
                 Strip first {strip-components} directories after unpacking an
-                archive. If it is equal to special value `-1' (default value),
-                then it will strip either one directory (if archive contains
-                the only directory) or will not strip anything at all.
+                archive. If it is equal to special value `-1' (default), then
+                it will strip either one directory (if archive contains the
+                only directory that is not special) or will not strip anything
+                at all. Recognized special directories: [ft]plugin, autoload,
+                colors, compiler, indent, keymap, lang, print, spell, syntax.
 
 dependencies                                         *addon-info-dependencies*
         Describes plugins that are required for the plugin, must contain
