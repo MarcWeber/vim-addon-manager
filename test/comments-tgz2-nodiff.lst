@@ -1,0 +1,43 @@
+"▶1 Header
+"▶1 Variable initialization
+"▶2 s:
+"▶2 Messages
+"▶1 s:Eval
+"▶1 expandplid      :: String → plid
+" Expands @... sequences at the start of plugin ID
+"▶1 compareversions :: version, version → -1|0|1
+"▶1 normpath        :: path + FS → path
+"▶1 parseplugpath   :: filename + FS → (plugtype, plid, runtimepath)
+"▶1 recdictmap      :: dict, expr[, path, processed] → dict + ?
+"▶1 createconsfunc  :: efid, fname, consargs, suf → function
+"▶1 createcons      :: plugdict, shadowdict, feature → dict
+"▶1 addcons         :: plugdict + s:f.cons → + p:_f
+"▶1 featcomp        :: feature, feature + s:selfdeps → -1|0|1
+" " Can't add s:FeatComp to _functions because it is required for unloadplugin 
+" " to  work and thus should not be removed by unloadpre event
+" let function('s:FeatComp')=function('s:FeatComp')
+"▶1 getfeatures     :: plugdict, {: feature} → [feature]
+"▶1 runfeatures     :: plugdict, fkey + shadowdict, +s:f → plugdict + shadowdict
+"▶1 initfeatures    :: plugdict + shadowdict → + shadowdict
+"▶1 newplugin       :: version, sid, file, dependencies, oneload, g → +s:pls,
+"▶1 addfeature      :: plugdict, feature(ircl)[, load] → + shadowdict
+"▶1 getordereddeps  :: plugdict + s:dependents → [plugdict]
+"▶1 loadplugin      :: Either plugdict plid → 0|1|2 + plugdict, …
+"▶1 getdeps         :: plugdict, hasdep::{plid: _} + s:dependents,… → [plugdict]
+"▶1 depcomp         :: plugdict, plugdict + s:dependents → -1|0|1
+" Makes plugins which are being less depended on first in a list when passed as 
+" a second argument to sort()
+"▶1 unloadplugin    :: Either plugdict plid + … → [filename]
+" Returns a list of files that should be sourced to load plugin back
+"▶1 _unload
+"▶1 FraworRegister
+"▶1 FraworLoad
+"▶1 FraworUnload
+"▶1 isfunc          :: funcref, key, fname, plid → + throw
+"▶1 features.newfeature.cons   :: {f}, fid, fopts → + s:features, shadowdict, …
+"▶1 features.newfeature.unload :: {f} → + s:features, shadowdict, s:f
+"▶1 Plugin registration
+"▶1 warn feature    :: {f}, msgid, … + p:_messages → message + echomsg
+"▶1 throw feature   :: {f}, msgid, … → + throw
+"▶1
+" vim: fmr=▶,▲ sw=4 ts=4 sts=4 et tw=80

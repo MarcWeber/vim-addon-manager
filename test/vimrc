@@ -9,6 +9,7 @@ else
     let g:vim_addon_manager.plugin_sources={
                 \'vam-test-known': {'type': 'archive',
                 \                    'url': 'http://vimpluginloader.git.sourceforge.net/git/gitweb.cgi?p=vimpluginloader/vam-test-repository;a=snapshot;h=HEAD;sf=tgz',
+                \                'version': '9999',
                 \           'archive_name': 'vam-test-known.tar.gz'},
             \}
 endif

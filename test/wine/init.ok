@@ -1,0 +1,7 @@
+.\vam-test-known
+.\vam-test-known\archive
+.\vam-test-known\archive\vam-test-known.tar.gz
+.\vam-test-known\pax_global_header
+.\vam-test-known\plugin
+.\vam-test-known\plugin\vim-addon-manager-known-repositories.vim
+.\vam-test-known\version
