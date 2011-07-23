@@ -86,7 +86,14 @@ manually:
 3. Add ~/vim-addons/vim-addon-manager to your runtimepath by adding the
    following lines to your vimrc: >
         fun SetupVAM()
-          set runtimepath+=~/vim-addons/vim-addon-manager
+          let addons_base = expand('$HOME') . '/vim-addons'
+          exec 'set runtimepath+='.addons_base.'/vim-addon-manager'
+
+          " unix based os users may want to use this code checking out VAM
+          " if !isdirectory(addons_base)
+          "   exec '!p='.shellescape(addons_base).'; mkdir -p "$p" && cd "$p" && git clone git://github.com/MarcWeber/vim-addon-manager.git'
+          " endif
+
           " commenting try .. endtry because trace is lost if you use it.
           " There should be no exception anyway
           " try
@@ -300,7 +307,7 @@ The following options are used by vim-addon-manager-known-repositories, not by
 VAM itself. So if you set |vim-addon-manager-known| to another value they may
 have no effect.
 
-scm_merge_stategy                        *vim-addon-manager-scm_merge_stategy*
+scm_merge_strategy                        *vim-addon-manager-scm_merge_stategy*
         String, valid values: `force' (default), `keep' and `never'. Defines,
         whether SCM sources should be used instead of www.vim.org sources:
         `forces' stands for prefering SCM over www.vim.org, `keep' means that
@@ -528,7 +535,7 @@ Eg if you want to patch -known-repository sources try this: >
       " run default:
       call vam_known_repositories#MergeSources(a:plugin_sources, a:www_vim_org, a:scm_plugin_sources)
 
-      " patch sources the way you like. This example adds username und password
+      " patch sources the way you like. This example adds username and password
       " for SVN repositories. As alternative you could overwrite git urls etc ..
       for your_plugin in ['svn-driven-key1', ...]
         let a:plugin_sources[your_plugin]['username'] = 'svn user'
