@@ -50,7 +50,7 @@ fun! vcs_checkouts#Checkout(targetDir, repository)
     return
   endif
   if !isdirectory(a:targetDir)
-    throw "Failed checking out ".a:targetDir."!"
+    throw "Failure. Plugin directory ".a:targetDir." should have been created but does not exist !"
   endif
 endf
 
