@@ -89,9 +89,7 @@ fun! vam#ReadAddonInfo(path)
       " using eval is now safe!
       return eval(body)
   else
-    echohl ErrorMsg
-    echom "Invalid JSON in ".a:path."!"
-    echohl None
+    call vam#Notice( "Invalid JSON in ".a:path."!")
     return {}
   endif
 
@@ -279,6 +277,15 @@ fun! vam#AddonInfoFile(name)
   endfor
   return default
 endf
+
+" looks like an error but is not. Catches users attention. Logs to :messages
+fun! vam#Notice(s)
+  echohl WarningMsg
+  for l in split(a:s, "\n")
+    exec 'echomsg '.string(l)
+  endfor
+  echohl None
+endfun
 
 " If you want these commands witohut activating plugins call
 " vam#ActivateAddons([]) with empty list. Not moving them into plugin/vam.vim

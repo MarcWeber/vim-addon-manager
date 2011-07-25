@@ -61,9 +61,7 @@ fun! vam#install#ReplaceAndFetchUrls(list)
     if exists('t')
       let dic = vam#ReadAddonInfo(t)
       if !has_key(dic,'name') || !has_key(dic, 'repository')
-        echohl ErrorMsg
-        echom n." is no valid addon-info file. It must contain both keys: name and repository"
-        echohl None
+        call vam#Notice( n." is no valid addon-info file. It must contain both keys: name and repository")
         continue
       endif
       let s:c['plugin_sources'][dic['name']] = dic['repository']
@@ -100,9 +98,7 @@ fun! vam#install#Install(toBeInstalledList, ...)
       if exists('repository')
         echom 'Name '.name.' expanded to :'.string(repository)
       else
-        echohl ErrorMsg
-        echom "No repository location info known for plugin ".name."! (typo?)"
-        echohl None
+        call vam#Notice( "No repository location info known for plugin ".name."! (typo?)")
         continue " due to abort this won't take place ?
       endif
     endif
@@ -162,9 +158,7 @@ fun! vam#install#UpdateAddon(name)
       return 1
     endif
   catch /.*/
-    echohl ErrorMsg
-    echom v:exception
-    echohl None
+    call vam#Notice( v:exception)
     return 0
   endtry
 
@@ -174,9 +168,7 @@ fun! vam#install#UpdateAddon(name)
   call vam#install#LoadKnownRepos({})
   let repository = get(s:c['plugin_sources'], a:name, {})
   if empty(repository)
-    echohl WarningMsg
-    echom "Don't know how to update ".a:name." because it is (no longer?) contained in plugin_sources"
-    echohl None
+    call vam#Notice( "Don't know how to update ".a:name." because it is (no longer?) contained in plugin_sources")
     return 0
   endif
   let newVersion = get(repository,'version','?')
@@ -208,9 +200,7 @@ fun! vam#install#UpdateAddon(name)
       let archiveName = vam#install#ArchiveNameFromDict(repository)
       let archiveFileBackup = pluginDirBackup.'/archive/'.archiveName
       if !filereadable(archiveFileBackup)
-        echohl WarningMsg
-        echom "Old archive file ".archiveFileBackup." is gone, can't try to create diff."
-        echohl None
+        call vam#Notice( "Old archive file ".archiveFileBackup." is gone, can't try to create diff.")
       else
         let archiveFile = pluginDir.'/archive/'.archiveName
         call mkdir(pluginDir.'/archive','p')
@@ -246,14 +236,10 @@ fun! vam#install#UpdateAddon(name)
           let patch_failure = 0
         catch /.*/
           let patch_failure = 1
-          echohl ErrorMsg
-          echom "Failed applying patch ".diff_file." kept old dir in ".pluginDirBackup
-          echohl None
+          call vam#Notice( "Failed applying patch ".diff_file." kept old dir in ".pluginDirBackup)
         endtry
       else
-        echohl ErrorMsg
-        echom "Failed trying to apply diff. patch exectubale not found"
-        echohl None
+        call vam#Notice( "Failed trying to apply diff. patch exectubale not found")
         let patch_failure = 1
       endif
     endif
@@ -263,9 +249,7 @@ fun! vam#install#UpdateAddon(name)
       call vam#utils#RmFR(pluginDirBackup)
     endif
   else
-    echohl WarningMsg
-    echom "Not updating plugin ".a:name." because there is no version according to version key"
-    echohl None
+    call vam#Notice( "Not updating plugin ".a:name." because there is no version according to version key")
   endif
   return 1
 endf
@@ -289,9 +273,7 @@ fun! vam#install#Update(list)
     endif
   endfor
   if !empty(failed)
-    echohl ErrorMsg
-    echom "Failed updating plugins: ".string(failed)."."
-    echohl None
+    call vam#Notice( "Failed updating plugins: ".string(failed).".")
   endif
 endf
 
@@ -391,11 +373,11 @@ endf
 " may throw EXCEPTION_UNPACK
 fun! vam#install#Checkout(targetDir, repository) abort
   if get(a:repository, 'script-type') is 'patch'
-    echohl WarningMsg
-    echom "This plugin requires patching and recompiling vim."
-    echom "VAM could not do this, so you have to apply patch"
-    echom "manually."
-    echohl None
+    call vam#Notice(
+          \ "This plugin requires patching and recompiling vim.\n"
+          \ ."VAM could not do this, so you have to apply patch\n"
+          \ ."manually."
+          \ )
   endif
   if get(a:repository,'type','') =~ 'git\|hg\|svn\|bzr'
     call vcs_checkouts#Checkout(a:targetDir, a:repository)
