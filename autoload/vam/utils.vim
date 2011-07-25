@@ -9,7 +9,7 @@ let s:curl = exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o'
 "
 " the / \ annoyance of Windows is fixed by calling expand which replaces / by
 " \ on Windows. This only happens by the $p substitution
-fun! vam#utils#ShellDSL(cmd, ...)
+fun! vam#utils#ShellDSL(cmd, ...) abort
   let list = copy(a:000)
   let r = ''
   let l = split(a:cmd, '\V$', 1)
@@ -25,20 +25,20 @@ fun! vam#utils#ShellDSL(cmd, ...)
   return r
 endf
 
-fun! s:Cmd(expect_code_0, cmd)
-  let s.c.last_shell_command = a:cmd
+fun! s:Cmd(expect_code_0, cmd) abort
+  call vam#Log(a:cmd, "None")
   exe (s:c.silent_shell_commands ?  "silent " : "").'!'. a:cmd
   if a:expect_code_0 && v:shell_error != 0
+    let s:c.last_shell_command = a:cmd
     throw "error executing ". a:cmd
   endif
+  return v:shell_error
 endf
 
 " TODO improve this and move somewhere else?
 fun! vam#utils#RunShell(...) abort
   let cmd = call('vam#utils#ShellDSL', a:000)
-  call s:Cmd(0,cmd)
-  redraw
-  return !v:shell_error
+  return s:Cmd(0,cmd)
 endf
 
 " cmds = list of {'d':  dir to run command in, 'c': the command line to be run }

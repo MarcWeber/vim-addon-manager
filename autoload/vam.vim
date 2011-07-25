@@ -89,7 +89,7 @@ fun! vam#ReadAddonInfo(path)
       " using eval is now safe!
       return eval(body)
   else
-    call vam#Notice( "Invalid JSON in ".a:path."!")
+    call vam#Log( "Invalid JSON in ".a:path."!")
     return {}
   endif
 
@@ -279,8 +279,9 @@ fun! vam#AddonInfoFile(name)
 endf
 
 " looks like an error but is not. Catches users attention. Logs to :messages
-fun! vam#Notice(s)
-  echohl WarningMsg
+fun! vam#Log(s, ...)
+  let hi = a:0 > 0 ? a:1 : 'WarningMsg'
+  exec 'echohl '. hi
   for l in split(a:s, "\n")
     exec 'echomsg '.string(l)
   endfor
