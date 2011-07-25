@@ -104,6 +104,7 @@ fun! vam#install#Install(toBeInstalledList, ...)
     endif
 
     let confirmed = 0
+    let origin = get(repository,'type','').' '.get(repository,'url','')
 
     " tell user about target directory. Some users don't get it the first time..
     let pluginDir = vam#PluginDirByName(name)
@@ -114,7 +115,8 @@ fun! vam#install#Install(toBeInstalledList, ...)
       echom "!> Deprecation warning package ".name. ":"
       echom d
       " even for auto_install make user confirm the deprecation case
-      if s:confirm('Plugin '.name.' is deprecated, see warning above. Install it?', 1)
+      if  !vam#Log('origin: '.origin ,"None")
+          \ && s:confirm('Plugin '.name.' is deprecated, see warning above. Install it?', 1)
         let confirmed = 1
       else
         continue
@@ -123,7 +125,10 @@ fun! vam#install#Install(toBeInstalledList, ...)
 
     " ask user for to confirm installation unless he set auto_install
 
-    if auto_install || confirmed || s:confirm("Install plugin `".name."'?")
+    if auto_install 
+        \ || confirmed 
+        \ || (!vam#Log('origin: '.origin ,"None")
+              \ && s:confirm("Install plugin `".name."'?"))
 
       let infoFile = vam#AddonInfoFile(name)
       call vam#install#Checkout(pluginDir, repository)
