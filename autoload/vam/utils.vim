@@ -26,6 +26,7 @@ fun! vam#utils#ShellDSL(cmd, ...)
 endf
 
 fun! s:Cmd(expect_code_0, cmd)
+  let s.c.last_shell_command = a:cmd
   exe (s:c.silent_shell_commands ?  "silent " : "").'!'. a:cmd
   if a:expect_code_0 && v:shell_error != 0
     throw "error executing ". a:cmd
