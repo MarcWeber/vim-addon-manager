@@ -178,6 +178,20 @@ fun! vam#install#UpdateAddon(name)
   endif
   let newVersion = get(repository,'version','?')
 
+
+  if a:name == 'vim-addon-manager'
+    " load utils before the file is moved below
+    call vam#utils#Load()
+  endif
+
+  if get(repository, 'type', '') != 'archive'
+    call vam#Log( "Not updating ".a:name." because the repository description suggests using VCS ".get(repository,'type','unkown').'.'
+          \ ."\n Your install seems to be of type archive/manual/www.vim.org/unkown."
+          \ ."\n If you want to udpate ".a:name." remove ".pluginDir." and let VAM check it out again."
+          \ )
+    return 0
+  endif
+
   let versionFile = pluginDir.'/version'
   let oldVersion = filereadable(versionFile) ? readfile(versionFile, 1)[0] : "?"
   if oldVersion != newVersion || newVersion == '?'
