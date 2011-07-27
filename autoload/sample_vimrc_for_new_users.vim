@@ -102,6 +102,8 @@ noremap \go :exec 'e '. fnameescape(tlib#input#List('s','select file', split(glo
 " dir to runtimepath using :set runtimpeth+=ROOT
 fun! sample_vimrc_for_new_users#Load()
   " no code. If this function is called this file is sourced
+  " As alternative this can be used:
+  " runtime autoload/sample_vimrc_for_new_users.vim
 endf
 
 finish

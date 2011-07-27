@@ -2,7 +2,7 @@
 ==============================================================================
 CONTENTS                                          *vim-addon-manager-contents*
 
-   (0. HELP - something dosen't work)
+    0. GETTING STARTED & LOOKING FOR HELP <<
 
     1. Intro                           |vim-addon-manager-intro|
     2. Installation                    |vim-addon-manager-installation|
@@ -27,8 +27,14 @@ CONTENTS                                          *vim-addon-manager-contents*
         (rtp different from ~/.vim)
 
 ==============================================================================
-(0. HELP - something doesn't work)
 
+0. GETTING STARTED & LOOKING FOR HELP - something doesn't work
+
+Getting started fast: ~
+Read: |vim-addon-manager-installation| and |vim-addon-manager-install-plugins|
+
+
+NEED HELP: ~
 Join irc.freenode.net, /join #vim. Ask there. VAM has many users
 MarcWeber is hanging around often so ping him or create a github ticket [1] and
 people will try to help you. You should skim the docs before asking for
@@ -59,10 +65,6 @@ Dependencies:
 What does "Declarative package manager" mean? The final behaviour of Vim
 should be declared once. Your ~/.vimrc and :UpdateAddons should be enough
 to cause same Vim behaviour everywhere. [2]
-
-------------------------------------------------------------------------------
-Getting started fast: ~
-Read: |vim-addon-manager-installation| and |vim-addon-manager-install-plugins|
 
 ==============================================================================
 2. Installation                               *vim-addon-manager-installation*

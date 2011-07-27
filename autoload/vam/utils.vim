@@ -4,10 +4,6 @@ if !exists('g:vim_addon_manager') | let g:vim_addon_manager = {} | endif | let s
 " let users override curl command. Reuse netrw setting
 let s:curl = exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o'
 
-fun! vam#utils#Load()
-  " dummy function sourcing this file
-endf
-
 " insert arguments at placeholders $ shell escaping the value
 " usage: s:shellescape("rm --arg $ -fr $p $p $p", [string, file1, file2, file3])
 "

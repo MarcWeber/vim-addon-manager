@@ -181,7 +181,7 @@ fun! vam#install#UpdateAddon(name)
 
   if a:name == 'vim-addon-manager'
     " load utils before the file is moved below
-    call vam#utils#Load()
+    runtime autoload/vam/util.vim
   endif
 
   if get(repository, 'type', '') != 'archive'
