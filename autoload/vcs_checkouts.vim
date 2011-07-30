@@ -13,7 +13,7 @@ let s:se.git = get(s:c,'git', [s:c.shallow_clones ? '--depth 1' : ''])
 fun! vcs_checkouts#Update(dir)
   let directory = a:dir
   if isdirectory(directory.'/.git')
-    call s:exec_in_dir([{'d': directory, 'c': 'git fetch'}])
+    call s:exec_in_dir([{'d': directory, 'c': 'git pull'}])
   elseif isdirectory(directory.'/.svn')
     call s:exec_in_dir([{'d': directory, 'c': 'svn update'}])
   elseif isdirectory(directory.'/.bzr')
