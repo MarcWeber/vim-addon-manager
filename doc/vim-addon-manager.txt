@@ -92,8 +92,8 @@ manually:
           exec 'set runtimepath+='.addons_base.'/vim-addon-manager'
 
           " unix based os users may want to use this code checking out VAM
-          " if !isdirectory(addons_base)
-          "   exec '!p='.shellescape(addons_base).'; mkdir -p "$p" && cd "$p" && git clone git://github.com/MarcWeber/vim-addon-manager.git'
+          " if !isdirectory(addons_base.'/vim-addon-manager')
+          "   exec '!p='.shellescape(addons_base).'; mkdir -p "$p" && cd "$p" && git clone --depth 1 git://github.com/MarcWeber/vim-addon-manager.git'
           " endif
 
           " commenting try .. endtry because trace is lost if you use it.

@@ -62,7 +62,7 @@ noremap \go
 " for python or perl files only
 " eg command -buffer DoStuff call DoStuff()
 " or map <buffer> \dostuff :call DoStuff()<cr>
-noremap \ft :exec 'e ~/.vim/ftplugin/'.&filetype.'_you.vim'<cr>
+noremap \ft :exec 'e ~/.vim/after/ftplugin/'.&filetype.'_you.vim'<cr>
 
 " for windows: make backspace work. Doesn't hurt on linux. This should be
 " default!
@@ -109,6 +109,11 @@ endf
 finish
 
 DON'T MISS THESE {{{1
+
+" create directory for files before Vim tries writing them:
+augroup CREATE_MISSING_DIR_ON_BUF_WRITE
+  autocmd BufWritePre * if !isdirectory(expand('%:h')) | call mkdir(expand('%:h'),'p') | endif
+augroup end
 
 digraphs: type chars which are untypable:
 c-k =e  : types € (see :h digraph)
