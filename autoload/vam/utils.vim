@@ -9,18 +9,40 @@ let s:curl = exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o'
 "
 " the / \ annoyance of Windows is fixed by calling expand which replaces / by
 " \ on Windows. This only happens by the $p substitution
+" if $ is followed by a number its treated as index
+
+" EXamples:
+" vam#utils#ShellDSL('$', 'escape this/\') == '''escape this/\''' 
+" vam#utils#ShellDSL('$1 $[1p]', 'escape this/\') =='''escape this/\'' ''escape this\\''' 
+" vam#utils#ShellDSL('$.url $[1p.url] $1p.url', {'url':'URL'} ) =='''URL'' ''URL'' ''URL''' 
 fun! vam#utils#ShellDSL(cmd, ...) abort
-  let list = copy(a:000)
+  let args = a:000
   let r = ''
   let l = split(a:cmd, '\V$', 1)
   let r = l[0]
+  let i = 0
   for x in l[1:]
-    let i = remove(list, 0)
-    if x[0] == 'p'
-      let x = x[1:]
-      let i = expand(fnameescape(i))
+    let list = matchlist(x, '\[\?\(\d*\)\(p\)\?\(\.[^ \t\]]*\)\?\]\?')
+    if len(list) ==0
+      " should not happen
+      throw 'vam#utils#ShellDSL, bad : '.x
     endif
-    let r .= shellescape(i,1).x
+    if list[1] == ''
+      let p = args[i]
+      let i += 1
+    else
+      let p= args[list[2]]
+    endif
+    if list[3] != ''
+      for path in split(list[3],'\.')
+        let tmp = p[path] | unlet p | let p = tmp
+      endfor
+    endif
+    if list[2] == 'p'
+      let p = expand(fnameescape(p))
+    endif
+    let r .= shellescape(p,1).x[len(list[0]):]
+    unlet p
   endfor
   return r
 endf
