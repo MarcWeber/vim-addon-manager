@@ -71,8 +71,9 @@ to cause same Vim behaviour everywhere. [2]
 
 Windows users: see |vim-addon-manager-windows|.
 Gentoo users: see |vim-addon-manager-gentoo|.
-linux/cygwin/OSX (anything support /bin/sh like shells) script:
-             see |linux-installation-script|.
+linux/cygwin/OSX (anything support /bin/sh like shells) users:
+Just uncomment lines starting with "unix based os" below and Vim will checkout
+VAM.
 
 manually:
 1. Create a separate directory that will hold your plugins, for example
@@ -88,7 +89,8 @@ manually:
 3. Add ~/vim-addons/vim-addon-manager to your runtimepath by adding the
    following lines to your vimrc: >
         fun SetupVAM()
-          let addons_base = expand('$HOME') . '/vim-addons'
+          " YES, you can customize this addons_base path and everything still works!
+          let addons_base = expand('$HOME') . '/.vim/vim-addons'
           exec 'set runtimepath+='.addons_base.'/vim-addon-manager'
 
           " unix based os users may want to use this code checking out VAM
@@ -272,7 +274,7 @@ plugin_root_dir                            *vim-addon-manager-plugin_root_dir*
         it defaults to directory in question (so, if user has installed
         vim-addon-manager to ~/.vim/bundle/vim-addon-manager, this will be
         equal to ~/.vim/bundle). If autoload/vam.vim is not
-        writeable by the user, then it defaults to ~/vim-addons. Note that you
+        writeable by the user, then it defaults to ~/.vim/vim-addons. Note that you
         must set this variable before calling any vam function.
                              *vim-addon-manager-known_repos_activation_policy*
 known_repos_activation_policy
@@ -344,7 +346,7 @@ at startup [3].
 You can use |:ActivateAddons|'s tab completion to find the plugin name fast.
 
 Usually you add the names of the addons this way to your .vimrc: >
-   set runtimepath+=~/vim-addons/vim-addon-manager
+   set runtimepath+=~/.vim/vim-addons/vim-addon-manager
    call vam#ActivateAddons(["pluginA","pluginB"])
 <
 You can use the InstallAddons function to install plugins only.
@@ -634,9 +636,9 @@ What features are missing?
 9. Testing this plugin                             *vim-addon-manager-testing*
 
 Run >
-    # Replace ~/vim-addons/vim-addon-manager with the path you installed this
+    # Replace ~/.vim/vim-addons/vim-addon-manager with the path you installed this
     # plugin to
-    cd ~/vim-addons/vim-addon-manager
+    cd ~/.vim/vim-addons/vim-addon-manager
     sh vim-addon-manager-test.sh
 .
 You should see >
@@ -651,7 +653,7 @@ point.
 
 Win32 tools for vim-addon-manager
 
-Fast: put curl into ~/vim-addons/binary-utils/dist then call this function
+Fast: put curl into ~/.vim/vim-addons/binary-utils/dist then call this function
 to setup the remaining tools (tar, bzip, gzip, unzip)
 >
     call vam#install#FetchAdditionalWindowsTools()
@@ -988,34 +990,18 @@ Some older plugins expect to be installed into ~/.vim. Probably they can be
 patched easily by replacing ~/.vim by a path relative to the file running the
 code: >
 
-  " this is ~/vim-addons/foo/autoload/x.vim
+  " this is ~/.vim/vim-addons/foo/autoload/x.vim
   " does not work inside a function!
   let s:plugin_base_dir = expand('<sfile>:p:h:h')
-  " now s:plugin_base_dir contains ~/vim-addons/foo
+  " now s:plugin_base_dir contains ~/.vim/vim-addons/foo
 <
 Then plugins can find additional resources (templates, python files, ..)
 relative to s:parent_dir_of_this_file
 
 ==============================================================================
+The linux script is gone. Search for "unix based os" to learn about its
+replacment.
 
-*linux-installation-script* paste into your shell:
-
-VAM_PLUGINS=~/vim-addons
-mkdir -p $VAM_PLUGINS
-git clone --depth 1 git://github.com/MarcWeber/vim-addon-manager.git $VAM_PLUGINS/vim-addon-manager
-cat >> ~/.vimrc << EOF
-fun SetupVAM()
-  set runtimepath+=$VAM_PLUGINS/vim-addon-manager
-  call vam#ActivateAddons([],{'auto_install' : 0})
-  " eg replace [] by ["github:YourName"] or ["matchit.zip","ttoc",".."]
-endf
-call SetupVAM()
-" experimental: run after gui has been started [3]
-" option1:  au VimEnter * call SetupVAM()
-" option2:  au GUIEnter * call SetupVAM()
-" call sample_vimrc_for_new_users#Load()
-EOF
-
-The following line need not be pasted. It exists to set Vim formatting
-options. See :h 'modeline' to learn about it.
+See :h 'modeline' to learn about the following line setting up defaults.
+Usually you'd prefer ftplugin files (do it once).
 vim:tw=78:fo=tcq2:ts=8:ft=help:norl:
