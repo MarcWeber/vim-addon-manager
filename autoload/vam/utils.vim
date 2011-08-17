@@ -13,7 +13,7 @@ let s:curl = exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o'
 
 " EXamples:
 " vam#utils#ShellDSL('$', 'escape this/\') == '''escape this/\''' 
-" vam#utils#ShellDSL('$1 $[1p]', 'escape this/\') =='''escape this/\'' ''escape this\\''' 
+" vam#utils#ShellDSL('$1 $[2p] $1p', 'escape this/\',\'other\') =='''escape this/'' ''other'' ''escape this/''' 
 " vam#utils#ShellDSL('$.url $[1p.url] $1p.url', {'url':'URL'} ) =='''URL'' ''URL'' ''URL''' 
 fun! vam#utils#ShellDSL(cmd, ...) abort
   let args = a:000
@@ -27,11 +27,11 @@ fun! vam#utils#ShellDSL(cmd, ...) abort
       " should not happen
       throw 'vam#utils#ShellDSL, bad : '.x
     endif
-    if list[1] == ''
+    if list[1] != ''
+      let p= args[list[1]-1]
+    else
       let p = args[i]
       let i += 1
-    else
-      let p= args[list[2]]
     endif
     if list[3] != ''
       for path in split(list[3],'\.')

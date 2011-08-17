@@ -34,7 +34,7 @@ let s:c.bzr_update = get(s:c, 'bzr_update', { 'f': 'vam#utils#RunShell', 'a': ['
 let s:c.svn_update = get(s:c, 'svn_update', { 'f': 'vam#utils#RunShell', 'a': ['cd $p && svn update']})
 
 fun! vcs_checkouts#SVNCheckout(repository, targetDir)
-  let args=['svn checkout $ $p', a:repository, a:repository.url, a:targetDir]
+  let args=['svn checkout $.url $3p', a:repository, a:repository.url, a:targetDir]
   for key in filter(['username', 'password'], 'has_key(a:repository, v:val)')
     let args[0].=' --'.key.' $'
     let args+=[a:repository[key]]
