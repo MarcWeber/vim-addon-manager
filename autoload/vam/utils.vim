@@ -153,7 +153,7 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
     call writefile(readfile(a:archive,'b'), dir.'/'.fnamemodify(a:archive, ':t'), 'b')
 
   " .gz .bzip2 (or .vba.* or .tar.*)
-  elseif s:EndsWith(a:archive, keys(gzbzip2) )
+  elseif call(function('s:EndsWith'), [a:archive] + keys(gzbzip2) )
     " I was told tar on Windows is buggy and can't handle xj or xz correctly
     " so unpack in two phases:
 
@@ -223,7 +223,7 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
     call vam#utils#RunShell('7z x -o$ $', a:targetDir, a:archive)
     exec strip
 
-  elseif s:EndsWith(a:archive, '.vba')
+  elseif s:EndsWith(a:archive, '.vba','.vmb')
     " .vba reuse vimball#Vimball() function
     exec 'sp '.fnameescape(a:archive)
     call vimball#Vimball(1,a:targetDir)
