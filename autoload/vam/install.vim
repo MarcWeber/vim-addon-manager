@@ -267,6 +267,9 @@ fun! vam#install#UpdateAddon(name)
     if !patch_failure
       call vam#utils#RmFR(pluginDirBackup)
     endif
+  elseif oldVersion == newVersion
+    call vam#Log( "Not updating plugin ".a:name.", ".newVersion." is current")
+    return 1
   else
     call vam#Log( "Not updating plugin ".a:name." because there is no version according to version key")
   endif
