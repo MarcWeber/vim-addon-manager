@@ -155,6 +155,7 @@ endf
 
 " this function will be refactored slightly soon by either me or ZyX.
 fun! vam#install#UpdateAddon(name)
+  call vam#Log( "Consediring ".a:name." for update" ,'type','unkown')
   let pluginDir = vam#PluginDirByName(a:name)
   " First, try updating using VCS. Return 1 if everything is ok, 0 if exception 
   " is thrown
