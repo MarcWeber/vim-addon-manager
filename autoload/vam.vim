@@ -294,7 +294,7 @@ endfun
 command! -nargs=* -complete=customlist,vam#install#AddonCompletion InstallAddons :call vam#install#Install([<f-args>])
 command! -nargs=* -complete=customlist,vam#install#AddonCompletion ActivateAddons :call vam#ActivateAddons([<f-args>])
 command! -nargs=* -complete=customlist,vam#install#InstalledAddonCompletion ActivateInstalledAddons :call vam#ActivateAddons([<f-args>])
-command! -nargs=* -complete=customlist,vam#install#AddonCompletion UpdateAddons :call vam#install#Update([<f-args>])
+command! -nargs=* -complete=customlist,vam#install#UpdateCompletion UpdateAddons :call vam#install#Update([<f-args>])
 command! -nargs=* -complete=customlist,vam#install#UninstallCompletion UninstallNotLoadedAddons :call vam#install#UninstallAddons([<f-args>])
 
 " vim: et ts=8 sts=2 sw=2

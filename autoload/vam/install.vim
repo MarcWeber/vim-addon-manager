@@ -301,12 +301,14 @@ endf
 " optional arg = 0: only installed
 "          arg = 1: installed and names from known-repositories
 fun! vam#install#KnownAddons(...)
-  let installable = a:0 > 0 ? a:1 : ''
+  let which = a:0 > 0 ? a:1 : ''
   let list = filter(split(glob(vam#PluginDirByName('*')),"\n"), 'isdirectory(v:val)')
   let list = map(list, "fnamemodify(v:val,':t')")
-  if installable == "installable"
+  if which == "installable"
     call vam#install#LoadKnownRepos({})
     call extend(list, keys(s:c['plugin_sources']))
+  elseif which == "installed"
+    " hard to find out. Doing glob is best thing to do..
   endif
   " uniq items:
   let dict = {}
@@ -323,7 +325,7 @@ fun! vam#install#DoCompletion(A,L,P,...)
   let beforeC= a:L[:a:P-1]
   let word = matchstr(beforeC, '\zs\S*$')
   " allow glob patterns
-  let word = substitute('\*','.*',word,'g')
+  let word = substitute(word, '\*','.*','g')
 
   let not_loaded = config == "uninstall"
     \ ? " && index(keys(s:c['activated_plugins']), v:val) == -1"
@@ -342,6 +344,10 @@ endf
 
 fun! vam#install#UninstallCompletion(...)
   return call('vam#install#DoCompletion',a:000+["uninstall"])
+endf
+
+fun! vam#install#UpdateCompletion(...)
+  return call('vam#install#DoCompletion',a:000+["installed"])
 endf
 "}}}
 
