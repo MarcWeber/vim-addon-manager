@@ -653,6 +653,12 @@ point.
 ==============================================================================
 10. Some notes for windows users                   *vim-addon-manager-windows*
 
+Finally the nightmare came to an end:
+http://mawercer.de/~marc/vam/index.php
+Enter plugins names, download final .zip. Be happy and enjoy VAM.
+
+OLD docs:
+
 Win32 tools for vim-addon-manager
 
 Fast: put curl into ~/.vim/vim-addons/binary-utils/dist then call this function
