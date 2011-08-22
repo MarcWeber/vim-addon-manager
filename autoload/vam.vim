@@ -86,10 +86,9 @@ fun! vam#ReadAddonInfo(path)
   " using eval is evil!
   let body = join(readfile(a:path),"")
 
-  if s:c.dont_source || executable('php')
-    if '1' != system('php', '<?php echo is_array(json_decode(file_get_contents('.string(a:path).'), true));')
-      call vam#Log( "Invalid JSON in ".a:path."!")
-    endif
+  if s:c.dont_source && '1' != system('php', '<?php echo is_array(json_decode(file_get_contents('.string(a:path).'), true));')
+    call vam#Log( "Invalid JSON in ".a:path."!")
+    return {}
   endif
 
   if vam#VerifyIsJSON(body)
