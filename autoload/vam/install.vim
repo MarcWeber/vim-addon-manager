@@ -623,7 +623,7 @@ if g:is_win
     if !isdirectory(s:c['binary_utils'].'\dist')
       call mkdir(s:c['binary_utils'].'\dist','p')
     endif
-    " we have curl, so we can fetch remaingin deps using Download and Unpack
+    " we have curl, so we can fetch remaining deps using Download and Unpack
     let tools = {
       \ 'gzip': ['mirror://sourceforge/gnuwin32/gzip/1.3.12-1/', "gzip-1.3.12-1-bin.zip", ["gzip", "7z"]],
       \ 'bzip2':['mirror://sourceforge/gnuwin32/bzip2/1.0.5/', "bzip2-1.0.5-bin.zip", ["bzip2", "7z"] ],

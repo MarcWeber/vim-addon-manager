@@ -44,8 +44,11 @@ help though. Also see |vim-addon-manager-author|
 ==============================================================================
 1. Intro                                             *vim-addon-manager-intro*
 
-This plugin allows users to install and uninstall plugins with a minimum of
-work. Features:
+Consider reading |plugin| (follow this link by g ctlr-]) to understand the
+manualy way of installing plugins. VAM helps keeping ~/.vim clean by
+separating plugins from each other.
+
+Features:
 
     - Separate directories for each plugins
     - Dependency resolution
@@ -1003,4 +1006,4 @@ replacment.
 
 See :h 'modeline' to learn about the following line setting up defaults.
 Usually you'd prefer ftplugin files (do it once).
-vim:tw=78:fo=tcq2:ts=8:ft=help:norl:
+vim:tw=78:fo=tcq2:ts=8:ft=help:norl:bt=help

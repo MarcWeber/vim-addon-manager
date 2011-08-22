@@ -45,6 +45,7 @@ let s:c['plugin_root_dir'] = expand(s:c['plugin_root_dir'])
 let s:c['known'] = get(s:c,'known','vim-addon-manager-known-repositories')
 let s:c['change_to_unix_ff'] = get(s:c, 'change_to_unix_ff', (g:os=~#'unix'))
 let s:c['do_diff'] = get(s:c, 'do_diff', 1)
+let s:c['dont_source'] = get(s:c, 'dont_source', 0)
 
 " for testing it is necessary to avoid the "Press enter to continue lines"
 " (cygwin?). Thus provide an option making all shell commands silent
@@ -84,6 +85,12 @@ fun! vam#ReadAddonInfo(path)
 
   " using eval is evil!
   let body = join(readfile(a:path),"")
+
+  if s:c.dont_source || executable('php')
+    if '1' != system('php', '<?php echo is_array(json_decode(file_get_contents('.string(a:path).'), true));')
+      call vam#Log( "Invalid JSON in ".a:path."!")
+    endif
+  endif
 
   if vam#VerifyIsJSON(body)
       " using eval is now safe!
@@ -218,10 +225,12 @@ fun! vam#ActivateAddons(...) abort
     let rtp = split(&runtimepath, '\v(\\@<!(\\.)*\\)@<!\,')
     let escapeComma = 'escape(v:val, '','')'
     let after = filter(map(copy(new_runtime_paths), 'v:val."/after"'), 'isdirectory(v:val)')
-    let &runtimepath=join(rtp[:0] + map(copy(new_runtime_paths), escapeComma)
-                \                 + rtp[1:]
-                \                 + map(after, escapeComma),
-                \         ",")
+    if !s:c.dont_source
+      let &runtimepath=join(rtp[:0] + map(copy(new_runtime_paths), escapeComma)
+                  \                 + rtp[1:]
+                  \                 + map(after, escapeComma),
+                  \         ",")
+    endif
     unlet rtp
 
     if !has('vim_starting')
@@ -239,6 +248,7 @@ fun! vam#ActivateAddons(...) abort
 endfun
 
 fun! vam#GlobThenSource(glob)
+  if s:c.dont_source | return | endif
   for file in split(glob(a:glob),"\n")
     exec 'source '.fnameescape(file)
   endfor
