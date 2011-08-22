@@ -49,7 +49,7 @@ fun! vam#install#ReplaceAndFetchUrls(list)
   let l = a:list
   let idx = 0
   for idx in range(0, len(l)-1)
-    silent! unlet t
+    if exists('t') | unlet t | endif
     let n = l[idx]
     " assume n is either an url or a path
     if n =~ '^http://' && s:confirm('Fetch plugin info from URL '.n.'?')
