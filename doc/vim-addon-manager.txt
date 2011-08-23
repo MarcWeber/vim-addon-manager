@@ -78,30 +78,22 @@ linux/cygwin/OSX (anything support /bin/sh like shells) users:
 Just uncomment lines starting with "unix based os" below and Vim will checkout
 VAM.
 
-manually:
-1. Create a separate directory that will hold your plugins, for example
-   ~/vim-addons. The addon manager intentionally installs each addon
-   into its own directory which is not ~/.vim .
+Add the following to your .vimrc and uncomment the lines for unix >
 
-2. Install vim-addon-manager to ~/vim-addons/vim-addon-manager. If you use
-   git, you should do the following: >
-        cd ~/vim-addons
-        git clone git://github.com/MarcWeber/vim-addon-manager.git
-<  Git will create ~/vim-addons/vim-addon-manager for you.
-
-3. Add ~/vim-addons/vim-addon-manager to your runtimepath by adding the
-   following lines to your vimrc: >
         fun SetupVAM()
           " YES, you can customize this vam_install_path path and everything still works!
           let vam_install_path = expand('$HOME') . '/.vim/vim-addons'
           exec 'set runtimepath+='.vam_install_path.'/vim-addon-manager'
 
-          " unix based os users may want to use this code checking out VAM
-          " if !isdirectory(vam_install_path.'/vim-addon-manager') && 1 == confirm("git clone VAM into ".vam_install_path."?","&Y\n&N")
-          "   " I'm sorry having to add this reminder. Eventually it'll pay off.
-          "   call confirm("Remind yourself that most plugins ship with documentation (README*, doc/*.txt). Its your first source of knowledge. If you can't find the info you're looking for in reasonable time ask maintainers to improve documentation")
-          "   exec '!p='.shellescape(vam_install_path).'; mkdir -p "$p" && cd "$p" && git clone --depth 1 git://github.com/MarcWeber/vim-addon-manager.git'
-          " endif
+          " * unix based os users may want to use this code checking out VAM
+          " * windows users want to use http://mawercer.de/~marc/vam/index.php
+          "   to fetch VAM, VAM-known-repositories and the listed plugins
+          "   without having to install curl, unzip, git tool chain first
+          if !isdirectory(vam_install_path.'/vim-addon-manager') && 1 == confirm("git clone VAM into ".vam_install_path."?","&Y\n&N")
+            " I'm sorry having to add this reminder. Eventually it'll pay off.
+            call confirm("Remind yourself that most plugins ship with documentation (README*, doc/*.txt). Its your first source of knowledge. If you can't find the info you're looking for in reasonable time ask maintainers to improve documentation")
+            exec '!p='.shellescape(vam_install_path).'; mkdir -p "$p" && cd "$p" && git clone --depth 1 git://github.com/MarcWeber/vim-addon-manager.git'
+          endif
 
           call vam#ActivateAddons([], {'auto_install' : 0})
           " sample: call vam#ActivateAddons(['pluginA','pluginB', ...], {'auto_install' : 0})
@@ -115,12 +107,18 @@ manually:
         " option2:  au GUIEnter * call SetupVAM()
         " See BUGS sections below [*]
 
-<   Note: Depending on the way you choose to run ActivateAddons Vim may not be
+<   Note: Depending on the option you choose to run ActivateAddons Vim may not be
     able to show the questions correctly asking you to install a plugin.
     If that's the case (for whatever reason) I recommend installing the plugin
     using :ActivateAddons before adding it to the list in .vimrc
 
-4. Optionally generate helptags: >
+    Of course you can also fetch vim-addon-manager and
+    vim-addon-manager-known-repositories manually and keep full control.
+    Then you have to keep the runtimepath line and call vam#ActivateAddons(..
+    in the func above only.
+
+4. Optionally generate helptags (this will be done automatically for all
+    plugins which are installed by VAM, but VAM can't install itself obviously): >
        UpdateAddon vim-addon-manager
 
 Tip: Press q once intsead of pressing <cr> each time Vim asks you to press
@@ -959,7 +957,8 @@ sufficient to prepare patches.
 vs Pathogen 
 -------------
 
-  1) helptags is run automatically always
+  1) helptags is run automatically always when updating or installing plugins
+    only
 
   2) Because there is a maintained pool of plugins you can patch or
     deprecate them:
@@ -973,7 +972,10 @@ vs Pathogen
   5) Automatic downloading of scripts from vim.org.
 
   6) It works around some incomplete implementations of rtp in Vim.
-    Eg Vim does not load after directories of rtp paths.
+    Eg Vim does not load after and ftdetect files of rtp paths.
+
+    update: https://github.com/tpope/vim-pathogen/issues/29
+    indicates that Pathogen will cope with ftdetect in the future
 
   7) You can easily load plugins at runtime.
 
