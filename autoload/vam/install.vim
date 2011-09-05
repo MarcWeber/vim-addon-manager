@@ -105,17 +105,19 @@ fun! vam#install#Install(toBeInstalledList, ...)
 
     let confirmed = 0
     let origin = get(repository,'type','').' '.get(repository,'url','')
+    call vam#Log('Plugin Name: '.name.' ver. '.get(repository, 'version', ''), 'None')
+    call vam#Log('Script Nr: '.get(repository, 'vim_script_nr', 'none'), 'None') 
 
     " tell user about target directory. Some users don't get it the first time..
     let pluginDir = vam#PluginDirByName(name)
-    echom name." target: ".pluginDir
+    echom "Target: ".pluginDir
 
     let d = get(repository, 'deprecated', '')
     if type(d) == type('') && d != ''
       echom "!> Deprecation warning package ".name. ":"
       echom d
       " even for auto_install make user confirm the deprecation case
-      if  !vam#Log('origin: '.origin ,"None")
+      if  !vam#Log('Origin: '.origin ,"None")
           \ && s:confirm('Plugin '.name.' is deprecated, see warning above. Install it?', 1)
         let confirmed = 1
       else
@@ -127,7 +129,7 @@ fun! vam#install#Install(toBeInstalledList, ...)
 
     if auto_install 
         \ || confirmed 
-        \ || (!vam#Log('origin: '.origin ,"None")
+        \ || (!vam#Log('Origin: '.origin ,"None")
               \ && s:confirm("Install plugin `".name."'?"))
 
       let infoFile = vam#AddonInfoFile(name)
