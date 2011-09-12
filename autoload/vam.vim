@@ -246,6 +246,24 @@ fun! vam#ActivateAddons(...) abort
   endif
 endfun
 
+fun! vam#DisplayAddonInfo(name)
+  if !has_key(g:vim_addon_manager['plugin_sources'], a:name)
+    echo "Invalid plugin name: " . a:name
+    return
+  endif
+  let plugin = g:vim_addon_manager['plugin_sources'][a:name]
+  for key in keys(plugin)
+    echo key . ': ' . plugin[key]
+  endfor
+endfun
+
+fun! vam#DisplayAddonsInfo(names)
+  call vam#install#LoadKnownRepos({})
+  for name in a:names
+    call vam#DisplayAddonInfo(name)
+  endfor
+endfun
+
 fun! vam#GlobThenSource(glob)
   if s:c.dont_source | return | endif
   for file in split(glob(a:glob),"\n")
@@ -302,6 +320,7 @@ endfun
 " to prevent additional IO seeks.
 command! -nargs=* -complete=customlist,vam#install#AddonCompletion InstallAddons :call vam#install#Install([<f-args>])
 command! -nargs=* -complete=customlist,vam#install#AddonCompletion ActivateAddons :call vam#ActivateAddons([<f-args>])
+command! -nargs=* -complete=customlist,vam#install#AddonCompletion AddonsInfo :call vam#DisplayAddonsInfo([<f-args>])
 command! -nargs=* -complete=customlist,vam#install#InstalledAddonCompletion ActivateInstalledAddons :call vam#ActivateAddons([<f-args>])
 command! -nargs=* -complete=customlist,vam#install#UpdateCompletion UpdateAddons :call vam#install#Update([<f-args>])
 command! -nargs=* -complete=customlist,vam#install#UninstallCompletion UninstallNotLoadedAddons :call vam#install#UninstallAddons([<f-args>])
