@@ -2,7 +2,7 @@
 " its very short probably VAM will keep a copy
 
 exec vam#DefineAndBind('s:c','g:vim_addon_manager','{}')
-let s:c.shallow_clones = get(s:c,'shallow_clones',1)
+let s:c.shallow_clones = get(s:c,'shallow_clones', executable('git') && system('git clone --help') =~ '--depth')
 let s:c.scm_extra_args = get(s:c,'scm_extra_args',{})
 
 let s:se = s:c.scm_extra_args
