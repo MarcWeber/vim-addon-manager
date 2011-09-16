@@ -835,6 +835,10 @@ what's going to happen.
     :echo &shell
     :echo &shellslash (some windows users seem to set this differently?)
 
+  older vim's eg 7.0...
+  jolan78 has fixed one issue with older vims. There are likely to be more:
+  https://github.com/MarcWeber/vim-addon-manager/issues/51#issuecomment-2112747
+
 [*]: Comment about calling ActivateAddons() using autocommands:
 
   Obviously GUIEnter is only an option if you use gvim only.
