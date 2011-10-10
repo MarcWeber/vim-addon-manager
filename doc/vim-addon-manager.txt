@@ -121,8 +121,14 @@ Add the following to your .vimrc and uncomment the lines for unix >
     plugins which are installed by VAM, but VAM can't install itself obviously): >
        UpdateAddon vim-addon-manager
 
-Tip: Press q once intsead of pressing <cr> each time Vim asks you to press
-Enter.
+Tip: 
+If you're annoyed by the message: >
+  "Press enter to continue"
+< There are at least two solutions you can try:
+
+  - press q once and Vim should stop asking
+  - set auto_install = 1 (to make Vim stop asking you any questions. However you
+    won't know if knew dependencies are fetched in that case etc)
 
 Continue reading |vim-addon-manager-install-plugins|.
 
@@ -363,6 +369,9 @@ if you add pathes to runtimepath after Vim has startup. vim-addon-manager
 takes care of that for you.
 
 addon names & how to find the plugin you're looking for ~
+Fast: Try :AddonsInfo SCRIPT_ID, pick the "VAM name" value.
+
+long description:
 Open the vim-addon-manager-known-repositories/plugin/vim-addon-manager-known-repositories.vim
 There you'll find the two types of dictionaries which are used to find and
 install plugins. You'll find lines like this:

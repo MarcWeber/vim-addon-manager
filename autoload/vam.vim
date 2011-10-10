@@ -247,11 +247,20 @@ fun! vam#ActivateAddons(...) abort
 endfun
 
 fun! vam#DisplayAddonInfo(name)
-  if !has_key(g:vim_addon_manager['plugin_sources'], a:name)
+  let plugin = get(g:vim_addon_manager['plugin_sources'], a:name, {})
+  let name = a:name
+  if plugin == {} && a:name =~ '^\d\+$'
+    " try to find by script id
+    let dict = filter(copy(g:vim_addon_manager['plugin_sources']), 'string(get(v:val,"vim_script_nr","")) == '.a:name)
+    let plugin = get(values(dict), 0, {})
+    let name = keys(dict)[0]
+  end
+  if plugin == {}
     echo "Invalid plugin name: " . a:name
     return
   endif
-  let plugin = g:vim_addon_manager['plugin_sources'][a:name]
+  echo '========================'
+  echo 'VAM name: '.name
   for key in keys(plugin)
     echo key . ': ' . plugin[key]
   endfor
@@ -318,6 +327,13 @@ endfun
 " If you want these commands witohut activating plugins call
 " vam#ActivateAddons([]) with empty list. Not moving them into plugin/vam.vim
 " to prevent additional IO seeks.
+
+" its likely that the command names change introducing nice naming sheme
+" Not sure which is best. Options:
+" 1) *VAM  2) Addon* 3) VAM*
+" 3 seems to be best but is more to type.
+" Using 1) you can still show all commands by :*VAM<c-d> but this scheme is
+" less common. So 2) is my favorite right now. I'm too lazy to break things at
 command! -nargs=* -complete=customlist,vam#install#AddonCompletion InstallAddons :call vam#install#Install([<f-args>])
 command! -nargs=* -complete=customlist,vam#install#AddonCompletion ActivateAddons :call vam#ActivateAddons([<f-args>])
 command! -nargs=* -complete=customlist,vam#install#AddonCompletion AddonsInfo :call vam#DisplayAddonsInfo([<f-args>])
