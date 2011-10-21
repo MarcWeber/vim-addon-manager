@@ -54,9 +54,6 @@ noremap \e :e<space>**/*
 " :bn = :bnext  @: repeats last command
 noremap \n :n<space>**/*
 
-" minimal command-t like alternative using tlib: (_g_lob _o_pen)
-noremap \go
-
 " open a filetype file. Those files are sourced by Vim to setup filetype
 " specific mappings. Eg use it for defining commands / mappings which apply
 " for python or perl files only
