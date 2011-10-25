@@ -89,7 +89,7 @@ Add the following to your .vimrc and uncomment the lines for unix >
           " * windows users want to use http://mawercer.de/~marc/vam/index.php
           "   to fetch VAM, VAM-known-repositories and the listed plugins
           "   without having to install curl, unzip, git tool chain first
-          if !isdirectory(vam_install_path.'/vim-addon-manager') && 1 == confirm("git clone VAM into ".vam_install_path."?","&Y\n&N")
+          if !filereadable(vam_install_path.'/vim-addon-manager/.git/config') && 1 == confirm("git clone VAM into ".vam_install_path."?","&Y\n&N")
             " I'm sorry having to add this reminder. Eventually it'll pay off.
             call confirm("Remind yourself that most plugins ship with documentation (README*, doc/*.txt). Its your first source of knowledge. If you can't find the info you're looking for in reasonable time ask maintainers to improve documentation")
             exec '!p='.shellescape(vam_install_path).'; mkdir -p "$p" && cd "$p" && git clone --depth 1 git://github.com/MarcWeber/vim-addon-manager.git'
@@ -106,6 +106,7 @@ Add the following to your .vimrc and uncomment the lines for unix >
         " option1:  au VimEnter * call SetupVAM()
         " option2:  au GUIEnter * call SetupVAM()
         " See BUGS sections below [*]
+        " Vim 7.0 users see BUGS section [3]
 
 <   Note: Depending on the option you choose to run ActivateAddons Vim may not be
     able to show the questions correctly asking you to install a plugin.
@@ -880,6 +881,23 @@ what's going to happen.
   let g:vim_addon_manager.filter_scms = filter(['git','svn','bzr','hg'], '!executable(v:val)')
   If you feel strong about it comment the closed bug on the github bug
   tracker.
+
+[3]: VAM does not work nicely with older versions of Vim (won't fix)
+  For vim-7.0 you can make it work easily by adding loading all .vim files
+  always:
+
+  1) replace shellescape( [...] ,1) by shellescape([...])
+
+  2) add to SetupVAM (because function(..) does not behave correctly load
+  all files always): >
+
+  " slow performance. This could be optimized some more - I do no longer
+  " care about such old Vim versions. Think about upgrading.
+  for f in split(glob(vam_install_path.'/vim-addon-manager*/**/*.vim'),"\n")
+    if f =~ 'plugin/vim-addon-manager-known-repositories.vim' | continue | endif
+    exec 'source '.fnameescape(f)
+  endfor
+<
 
 
 TODOs:
