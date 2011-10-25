@@ -992,6 +992,17 @@ vs Pathogen
 
   7) You can easily load plugins at runtime.
 
+vs vundle
+---------
+
+    Vundle seems to source after/* files for you (since March 2011)
+
+    BUT: It doesn't take care about ordering when adding to rtp.
+    Thus ~/.vim/after/ftplugin/* is sourced before
+    ~/.vim/bundle/PLUGIN/ftplugin but should be the other way round.
+
+    However its unlikely that you run into this issue (I know about one case).
+
 
 vs X
 ---------
