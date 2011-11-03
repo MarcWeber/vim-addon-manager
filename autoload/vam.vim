@@ -119,7 +119,7 @@ fun! vam#IsPluginInstalled(name)
   let d = vam#PluginDirByName(a:name)
 
   let old_path=s:c.plugin_root_dir.'/'.substitute(a:name, '[\\/:]\+', '', 'g')
-  if !s:c.ask_for_rename && d isnot# old_path && isdirectory(old_path) && confirm("VAM has changed addon names policy: any sequence of slashes and colons is now transformed into '-' (formerly it was removed). May I rename ".old_path" to ".d."?", "&Yes\n&No") == 1
+  if s:c.ask_for_rename && d isnot# old_path && isdirectory(old_path) && confirm("VAM has changed addon names policy: any sequence of slashes and colons is now transformed into '-' (formerly it was removed). May I rename ".old_path" to ".d."?", "&Yes\n&No") == 1
     call rename(old_path, d)
   else
     echomsg 'You can disable this dialog by setting g:vim_addon_manager.ask_for_rename to 1'
