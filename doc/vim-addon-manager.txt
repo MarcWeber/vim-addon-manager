@@ -258,6 +258,12 @@ vam#install#RewriteName({name})                    *vam#install#RewriteName()*
                         "url": "git://github.com/{N}/{Repo}"}
     git:{URL}          {"type": "git", "url": {URL}} (experimental)
 
+vam#Dirname({name})                                            *vam#Dirname()*
+    Function that strips back and forward slashes and colons from
+    string and prepends |vim-addon-manager-plugin_root_dir|. It is used to
+    transform name of the plugin into directory name by default (see
+    |vim-addon-manager-dirname_fun|).
+
 ==============================================================================
 4. Options                                         *vim-addon-manager-options*
                                                          *g:vim_addon_manager*
@@ -281,8 +287,9 @@ plugin_root_dir                            *vim-addon-manager-plugin_root_dir*
         it defaults to directory in question (so, if user has installed
         vim-addon-manager to ~/.vim/bundle/vim-addon-manager, this will be
         equal to ~/.vim/bundle). If autoload/vam.vim is not
-        writeable by the user, then it defaults to ~/.vim/vim-addons. Note that you
-        must set this variable before calling any vam function.
+        writeable by the user, then it defaults to ~/.vim/vim-addons.
+        Note that you must set this variable before calling any vam function.
+        Note 2: it may be ignored in custom |vim-addon-manager-dirname_fun|.
                              *vim-addon-manager-known_repos_activation_policy*
 known_repos_activation_policy
         String, valid values: `ask', `never' and `autoload' (default). Defines
@@ -313,6 +320,10 @@ name_rewriting                              *vim-addon-manager-name_rewriting*
         Value will be extended with >
             {"99git+github": "vam#install#RewriteName"}
 <       after it is read (see |vam#install#RewriteName()|).
+dirname_fun                                    *vim-addon-manager-dirname_fun*
+        Function name or function reference which is to be used to transform
+        plugin name into absolute path of the plugin. Function must return
+        path without trailing path separators. Default is |vam#Dirname()|.
 
 The following options are used by vim-addon-manager-known-repositories, not by
 VAM itself. So if you set |vim-addon-manager-known| to another value they may

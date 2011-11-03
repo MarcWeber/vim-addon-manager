@@ -46,6 +46,8 @@ let s:c['known'] = get(s:c,'known','vim-addon-manager-known-repositories')
 let s:c['change_to_unix_ff'] = get(s:c, 'change_to_unix_ff', (g:os=~#'unix'))
 let s:c['do_diff'] = get(s:c, 'do_diff', 1)
 let s:c['dont_source'] = get(s:c, 'dont_source', 0)
+let s:c['dirname_fun'] = get(s:c, 'dirname_fun', 'vam#Dirname')
+let s:c['ask_for_rename'] = get(s:c, 'ask_for_rename', 1)
 
 " for testing it is necessary to avoid the "Press enter to continue lines"
 " (cygwin?). Thus provide an option making all shell commands silent
@@ -101,8 +103,11 @@ fun! vam#ReadAddonInfo(path)
 
 endf
 
-fun! vam#PluginDirByName(name)
-  return s:c['plugin_root_dir'].'/'.substitute(a:name,'[\\/:]','','g')
+fun! vam#Dirname(name)
+  return s:c.plugin_root_dir.'/'.substitute(a:name, '[\\/:]\+', '-', 'g')
+endfun
+fun! vam#PluginDirByName(...)
+  return call(s:c.dirname_fun, a:000, {})
 endf
 fun! vam#PluginRuntimePath(name)
   let info = vam#AddonInfo(a:name)
@@ -112,6 +117,14 @@ endf
 " doesn't check dependencies!
 fun! vam#IsPluginInstalled(name)
   let d = vam#PluginDirByName(a:name)
+
+  let old_path=s:c.plugin_root_dir.'/'.substitute(a:name, '[\\/:]\+', '', 'g')
+  if !s:c.ask_for_rename && d isnot# old_path && isdirectory(old_path) && confirm("VAM has changed addon names policy: any sequence of slashes and colons is now transformed into '-' (formerly it was removed). May I rename ".old_path" to ".d."?", "&Yes\n&No") == 1
+    call rename(old_path, d)
+  else
+    echomsg 'You can disable this dialog by setting g:vim_addon_manager.ask_for_rename to 1'
+  endif
+
   " if dir exists and its not a failed download
   " (empty archive directory)
   return isdirectory(d)

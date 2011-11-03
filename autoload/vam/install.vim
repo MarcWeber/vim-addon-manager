@@ -217,7 +217,7 @@ fun! vam#install#UpdateAddon(name)
 
     " try creating diff by checking out old version again
     if s:c['do_diff'] && executable('diff')
-      let diff_file = s:c['plugin_root_dir'].'/'.a:name.'-'.oldVersion.'.diff'
+      let diff_file = pluginDir.'-'.oldVersion.'.diff'
       " try to create a diff
       let archiveName = vam#install#ArchiveNameFromDict(repository)
       let archiveFileBackup = pluginDirBackup.'/archive/'.archiveName
@@ -232,7 +232,7 @@ fun! vam#install#UpdateAddon(name)
         call vam#install#Checkout(pluginDir, rep_copy)
         silent! call delete(pluginDir.'/version')
         try
-          call vam#utils#ExecInDir([{'d': s:c['plugin_root_dir'], 'c': vam#utils#ShellDSL('diff -U3 -r -a --binary $p $p', fnamemodify(pluginDir,':t'), fnamemodify(pluginDirBackup,':t')).' > '.diff_file}])
+          call vam#utils#ExecInDir([{'d': fnamemodify(pluginDir, ':p'), 'c': vam#utils#ShellDSL('diff -U3 -r -a --binary $p $p', fnamemodify(pluginDir,':t'), fnamemodify(pluginDirBackup,':t')).' > '.diff_file}])
           silent! call delete(diff_file)
         catch /.*/
           " :-( this is expected. diff returns non zero exit status. This is hacky
