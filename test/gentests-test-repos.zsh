@@ -34,7 +34,7 @@ function addtofile()
 typeset -a TESTS
 (( ISWINE )) || TESTS+=( git bzr )
 (( ISWINE )) && sed -r -i -e 's:/:\\:g' files-*.lst
-TESTS+=( hg svn tar tgz tgz2 tbz tbz2 zip vba vgz vbz archive_name )
+TESTS+=( hg svn tar tgz tgz2 tbz tbz2 zip vba vmb vgz vbz archive_name )
 for t in $TESTS ; do
 local ANAME=vam_test_$t
 #▶2 activate
@@ -137,4 +137,9 @@ done
 cat > init.in << EOF
 :call WriteGlob()
 EOF
+#▶1 Add `:source addmessages.vim'
+for f in *.in ; do
+    cat >> $f <<< $':source addmessages.vim\n'
+done
+#▲1
 # vim: fmr=▶,▲ fenc=utf-8 et ts=4 sts=4 sw=4 ft=zsh cms=#%s

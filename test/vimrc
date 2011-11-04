@@ -8,7 +8,7 @@ if executable('git')
 else
     let g:vim_addon_manager.plugin_sources={
                 \'vam-test-known': {'type': 'archive',
-                \                    'url': 'http://vimpluginloader.git.sourceforge.net/git/gitweb.cgi?p=vimpluginloader/vam-test-repository;a=snapshot;h=HEAD;sf=tgz',
+                \                    'url': 'http://downloads.sourceforge.net/project/vimpluginloader/vam-test/vam-test-repository.tar.gz',
                 \                'version': '9999',
                 \           'archive_name': 'vam-test-known.tar.gz'},
             \}
@@ -16,6 +16,7 @@ endif
 let g:vim_addon_manager.auto_install=1
 let g:vim_addon_manager.do_diff=0
 let g:vim_addon_manager.plugin_root_dir=fnamemodify('./vam-'.g:curtest, ':p')
+let g:vim_addon_manager.silent_shell_commands=1
 let s:outfile=fnamemodify(g:outfile, ':p')
 let s:errfile=fnamemodify(g:outfile, ':p:r').'.fail'
 function WriteFile(...)

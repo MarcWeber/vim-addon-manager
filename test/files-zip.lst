@@ -1,6 +1,8 @@
 ./vam_test_zip
 ./vam_test_zip/archive
 ./vam_test_zip/archive/vam_test_zip.zip
+./vam_test_zip/autoload
+./vam_test_zip/autoload/frawor.vim
 ./vam_test_zip/doc
 ./vam_test_zip/doc/json.rux
 ./vam_test_zip/doc/json.txt

@@ -1,6 +1,8 @@
 ./vam_test_vgz
 ./vam_test_vgz/archive
 ./vam_test_vgz/archive/vam_test_vgz.vba.gz
+./vam_test_vgz/autoload
+./vam_test_vgz/autoload/frawor.vim
 ./vam_test_vgz/doc
 ./vam_test_vgz/doc/json.rux
 ./vam_test_vgz/doc/json.txt

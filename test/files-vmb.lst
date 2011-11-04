@@ -1,0 +1,13 @@
+./vam_test_vmb
+./vam_test_vmb/archive
+./vam_test_vmb/archive/vam_test_vmb.vmb
+./vam_test_vmb/autoload
+./vam_test_vmb/autoload/frawor.vim
+./vam_test_vmb/doc
+./vam_test_vmb/doc/json.rux
+./vam_test_vmb/doc/json.txt
+./vam_test_vmb/doc/tags
+./vam_test_vmb/doc/tags-ru
+./vam_test_vmb/plugin
+./vam_test_vmb/plugin/json.vim
+./vam_test_vmb/version
