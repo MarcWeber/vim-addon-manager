@@ -46,7 +46,7 @@ let s:c['known'] = get(s:c,'known','vim-addon-manager-known-repositories')
 let s:c['change_to_unix_ff'] = get(s:c, 'change_to_unix_ff', (g:os=~#'unix'))
 let s:c['do_diff'] = get(s:c, 'do_diff', 1)
 let s:c['dont_source'] = get(s:c, 'dont_source', 0)
-let s:c['dirname_fun'] = get(s:c, 'dirname_fun', 'vam#Dirname')
+let s:c['dirname_fun'] = get(s:c, 'dirname_fun', 'vam#AddonDirname')
 let s:c['ask_for_rename'] = get(s:c, 'ask_for_rename', 1)
 
 " for testing it is necessary to avoid the "Press enter to continue lines"
@@ -103,7 +103,7 @@ fun! vam#ReadAddonInfo(path)
 
 endf
 
-fun! vam#Dirname(name)
+fun! vam#AddonDirname(name)
   return s:c.plugin_root_dir.'/'.substitute(a:name, '[\\/:]\+', '-', 'g')
 endfun
 fun! vam#PluginDirByName(...)
@@ -266,13 +266,13 @@ endfun
 fun! vam#DisplayAddonInfo(name)
   let plugin = get(g:vim_addon_manager['plugin_sources'], a:name, {})
   let name = a:name
-  if plugin == {} && a:name =~ '^\d\+$'
+  if empty(plugin) && a:name =~ '^\d\+$'
     " try to find by script id
     let dict = filter(copy(g:vim_addon_manager['plugin_sources']), 'string(get(v:val,"vim_script_nr","")) == '.a:name)
     let plugin = get(values(dict), 0, {})
     let name = keys(dict)[0]
   end
-  if plugin == {}
+  if empty(plugin)
     echo "Invalid plugin name: " . a:name
     return
   endif

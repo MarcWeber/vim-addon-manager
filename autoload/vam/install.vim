@@ -365,7 +365,7 @@ fun! vam#install#UninstallAddons(list)
     return
   endif
   call map(list, 'vam#PluginDirByName(v:val)')
-  if s:confirm('Confirm running rm -fr on directories: '.join(list,", ").'?')
+  if s:confirm('Will now remove '.join(list, ', ').'. Confirm?')
     call map(list, 'vam#utils#RmFR(v:val)')
   endif
 endf

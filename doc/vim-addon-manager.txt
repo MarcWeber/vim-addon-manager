@@ -258,12 +258,6 @@ vam#install#RewriteName({name})                    *vam#install#RewriteName()*
                         "url": "git://github.com/{N}/{Repo}"}
     git:{URL}          {"type": "git", "url": {URL}} (experimental)
 
-vam#Dirname({name})                                            *vam#Dirname()*
-    Function that strips back and forward slashes and colons from
-    string and prepends |vim-addon-manager-plugin_root_dir|. It is used to
-    transform name of the plugin into directory name by default (see
-    |vim-addon-manager-dirname_fun|).
-
 ==============================================================================
 4. Options                                         *vim-addon-manager-options*
                                                          *g:vim_addon_manager*
@@ -321,9 +315,9 @@ name_rewriting                              *vim-addon-manager-name_rewriting*
             {"99git+github": "vam#install#RewriteName"}
 <       after it is read (see |vam#install#RewriteName()|).
 dirname_fun                                    *vim-addon-manager-dirname_fun*
-        Function name or function reference which is to be used to transform
-        plugin name into absolute path of the plugin. Function must return
-        path without trailing path separators. Default is |vam#Dirname()|.
+        Function name or function reference which is used to transform plugin
+        name into absolute path of the plugin. Function must return path
+        without trailing path separators. Default is "vam#AddonDirname".
 
 The following options are used by vim-addon-manager-known-repositories, not by
 VAM itself. So if you set |vim-addon-manager-known| to another value they may
