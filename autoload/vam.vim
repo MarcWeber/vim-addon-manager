@@ -335,8 +335,12 @@ endf
 fun! vam#Log(s, ...)
   let hi = a:0 > 0 ? a:1 : 'WarningMsg'
   exec 'echohl '. hi
-  for l in split(a:s, "\n")
-    exec 'echomsg '.string(l)
+  for l in split(a:s, "\n", 1)
+    if empty(l)
+      echom ' '
+    else
+      echom l
+    endif
   endfor
   echohl None
 endfun

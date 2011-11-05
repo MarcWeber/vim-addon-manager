@@ -166,7 +166,7 @@ fun! vam#install#UpdateAddon(name)
       return 1
     endif
   catch /.*/
-    call vam#Log( v:exception)
+    call vam#Log(v:exception)
     return 0
   endtry
 
@@ -176,28 +176,28 @@ fun! vam#install#UpdateAddon(name)
   call vam#install#LoadKnownRepos({})
   let repository = get(s:c['plugin_sources'], a:name, {})
   if empty(repository)
-    call vam#Log( "Don't know how to update ".a:name." because it is (no longer?) contained in plugin_sources")
+    call vam#Log("Don't know how to update ".a:name." because it is not contained in plugin_sources")
     return 0
   endif
-  let newVersion = get(repository,'version','?')
+  let newVersion = get(repository, 'version', '?')
 
 
-  if a:name == 'vim-addon-manager'
+  if a:name is# 'vim-addon-manager'
     " load utils before the file is moved below
     runtime autoload/vam/util.vim
   endif
 
   if get(repository, 'type', '') != 'archive'
-    call vam#Log( "Not updating ".a:name." because the repository description suggests using VCS ".get(repository,'type','unknown').'.'
-          \ ."\n Your install seems to be of type archive/manual/www.vim.org/unknown."
-          \ ."\n If you want to udpate ".a:name." remove ".pluginDir." and let VAM check it out again."
+    call vam#Log("Not updating ".a:name." because the repository description suggests using VCS ".get(repository, 'type', 'unknown').'.'
+          \ ."\nYour install seems to be of type archive/manual/www.vim.org/unknown."
+          \ ."\nIf you want to udpate ".a:name." remove ".pluginDir." and let VAM check it out again."
           \ )
     return 0
   endif
 
   let versionFile = pluginDir.'/version'
   let oldVersion = filereadable(versionFile) ? readfile(versionFile, 1)[0] : "?"
-  if oldVersion != newVersion || newVersion == '?'
+  if oldVersion !=# newVersion || newVersion == '?'
     " update plugin
     echom "Updating plugin ".a:name." because ".(newVersion == '?' ? 'version is unknown' : 'there is a different version')
 
@@ -232,7 +232,7 @@ fun! vam#install#UpdateAddon(name)
         call vam#install#Checkout(pluginDir, rep_copy)
         silent! call delete(pluginDir.'/version')
         try
-          call vam#utils#ExecInDir([{'d': fnamemodify(pluginDir, ':p'), 'c': vam#utils#ShellDSL('diff -U3 -r -a --binary $p $p', fnamemodify(pluginDir,':t'), fnamemodify(pluginDirBackup,':t')).' > '.diff_file}])
+          call vam#utils#ExecInDir([{'d': fnamemodify(pluginDir, ':h'), 'c': vam#utils#ShellDSL('diff -U3 -r -a --binary $p $p', fnamemodify(pluginDir,':t'), fnamemodify(pluginDirBackup,':t')).' > '.diff_file}])
           silent! call delete(diff_file)
         catch /.*/
           " :-( this is expected. diff returns non zero exit status. This is hacky
@@ -329,7 +329,7 @@ fun! vam#install#DoCompletion(A,L,P,...)
   let names = vam#install#KnownAddons(config)
 
   let beforeC= a:L[:a:P-1]
-  let word = matchstr(beforeC, '\zs\S*$')
+  let word = matchstr(beforeC, '\S*$')
   " allow glob patterns
   let word = substitute(word, '\*','.*','g')
 
@@ -393,8 +393,8 @@ endf
 
 " basename of url. if archive_name is given use that instead
 fun! vam#install#ArchiveNameFromDict(repository)
-    let archiveName = fnamemodify(substitute(get(a:repository,'archive_name',''), '\.\zsVIM$', 'vim', ''),':t')
-    if archiveName == ''
+    let archiveName = fnamemodify(substitute(get(a:repository,'archive_name',''), '\.\@<=VIM$', 'vim', ''),':t')
+    if empty(archiveName)
       let archiveName = fnamemodify(a:repository['url'],':t')
     endif
     return archiveName
