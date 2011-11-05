@@ -32,6 +32,7 @@ function WriteFile(...)
     call writefile(r, s:outfile, 'b')
     return ''
 endfunction
+command -bar -nargs=1 W :call WriteFile(<q-args>)
 function WriteGlob()
     cd `="vam-".g:curtest`
     call WriteFile(split(glob('./**'), "\n"))
@@ -49,6 +50,7 @@ function Try(cmd)
         endif
     endtry
 endfunction
+command -nargs=1 Try :call Try(<q-args>)
 if filereadable(g:curtest.'.vim')
-    source `=g:curtests.".vim"`
+    source `=g:curtest.".vim"`
 endif

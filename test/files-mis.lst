@@ -1,0 +1,10 @@
+./vam_test_mis
+./vam_test_mis/addon-info.json
+./vam_test_mis/archive
+./vam_test_mis/archive/vam_test_mis.tar.bz2
+./vam_test_mis/plugin
+./vam_test_mis/plugin/rtp.vim
+./vam_test_mis/rtp
+./vam_test_mis/rtp/plugin
+./vam_test_mis/rtp/plugin/rtp.vim
+./vam_test_mis/version

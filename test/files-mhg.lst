@@ -1,0 +1,7 @@
+./vam_test_mhg
+./vam_test_mhg/addon-info.json
+./vam_test_mhg/plugin
+./vam_test_mhg/plugin/rtp.vim
+./vam_test_mhg/rtp
+./vam_test_mhg/rtp/plugin
+./vam_test_mhg/rtp/plugin/rtp.vim

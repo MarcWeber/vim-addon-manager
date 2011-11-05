@@ -35,6 +35,7 @@ typeset -a TESTS
 (( ISWINE )) || TESTS+=( git bzr )
 (( ISWINE )) && sed -r -i -e 's:/:\\:g' files-*.lst
 TESTS+=( hg svn tar tgz tgz2 tbz tbz2 zip vba vmb vgz vbz archive_name )
+TESTS+=( mis mhg )
 for t in $TESTS ; do
 local ANAME=vam_test_$t
 #▶2 activate
@@ -43,6 +44,14 @@ cat > activate-$t.in <<EOF
 :call WriteGlob()
 EOF
 addtofile activate-$t.ok init.ok files-$t.lst
+#▶2 activate-vimrc
+cat > activate-vimrc-$t.vim << EOF
+call vam#ActivateAddons("$ANAME")
+EOF
+cat > activate-vimrc-$t.in << EOF
+:call WriteGlob()
+EOF
+cp activate-$t.ok activate-vimrc-$t.ok
 #▶2 install
 cat > install-$t.in <<EOF
 :runtime! autoload/vam.vim
