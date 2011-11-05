@@ -157,7 +157,7 @@ endf
 
 " this function will be refactored slightly soon by either me or ZyX.
 fun! vam#install#UpdateAddon(name)
-  call vam#Log( "Considering ".a:name." for update" ,'type','unkown')
+  call vam#Log( "Considering ".a:name." for update" ,'type','unknown')
   let pluginDir = vam#PluginDirByName(a:name)
   " First, try updating using VCS. Return 1 if everything is ok, 0 if exception 
   " is thrown
@@ -188,8 +188,8 @@ fun! vam#install#UpdateAddon(name)
   endif
 
   if get(repository, 'type', '') != 'archive'
-    call vam#Log( "Not updating ".a:name." because the repository description suggests using VCS ".get(repository,'type','unkown').'.'
-          \ ."\n Your install seems to be of type archive/manual/www.vim.org/unkown."
+    call vam#Log( "Not updating ".a:name." because the repository description suggests using VCS ".get(repository,'type','unknown').'.'
+          \ ."\n Your install seems to be of type archive/manual/www.vim.org/unknown."
           \ ."\n If you want to udpate ".a:name." remove ".pluginDir." and let VAM check it out again."
           \ )
     return 0
@@ -199,7 +199,7 @@ fun! vam#install#UpdateAddon(name)
   let oldVersion = filereadable(versionFile) ? readfile(versionFile, 1)[0] : "?"
   if oldVersion != newVersion || newVersion == '?'
     " update plugin
-    echom "Updating plugin ".a:name." because ".(newVersion == '?' ? 'version is unkown' : 'there is a different version')
+    echom "Updating plugin ".a:name." because ".(newVersion == '?' ? 'version is unknown' : 'there is a different version')
 
     " move plugin to backup destination:
     let pluginDirBackup = pluginDir.'-'.oldVersion

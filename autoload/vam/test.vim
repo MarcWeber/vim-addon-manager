@@ -120,7 +120,7 @@ fun! vam#test#TestUpdate(case) abort
     let g:vim_addon_manager['plugin_sources'][plugin_name] = {'type': 'archive', 'url': 'file://'.plugin_source_file, 'version' : '2.0' , 'script-type': 'plugin' }
     exec 'UpdateAddons '.plugin_name
   else
-    throw "unkown case"
+    throw "unknown case"
 
   endif
 endfun
