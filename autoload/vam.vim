@@ -102,6 +102,8 @@ fun! vam#ReadAddonInfo(path)
 endf
 
 fun! vam#PluginDirByName(name)
+  " Note that if this function returns nested directories
+  " the completion of UninstallNotLoadedAddons will fail.
   return s:c['plugin_root_dir'].'/'.substitute(a:name,'[\\/:]','','g')
 endf
 fun! vam#PluginRuntimePath(name)
