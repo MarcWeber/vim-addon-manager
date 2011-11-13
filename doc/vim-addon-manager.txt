@@ -71,7 +71,7 @@ Dependencies:
 
 What does "Declarative package manager" mean? The final behaviour of Vim
 should be declared once. Your ~/.vimrc and :UpdateAddons should be enough
-to cause same Vim behaviour everywhere. [2]
+to cause same Vim behaviour everywhere.
 
 
 ==============================================================================
@@ -101,6 +101,14 @@ Add the following to your .vimrc >
             " VAM run helptags automatically if you install or update plugins
             exec 'helptags '.fnameescape(vam_install_path.'/vim-addon-manager/doc')
           endif
+
+          " disable sources whose version control command line tool is not
+          " installed. If you need more control override the MergeSources
+          " function
+          " if (!exists('g:vim_addon_manager')) | let g:vim_addon_manager = {} | endif
+          " for scm in ['hg', 'git', 'svn', 'bzr']
+          "   let g:vim_addon_manager[scm.'_support'] = executable(scm)
+          " endfor
 
           call vam#ActivateAddons([], {'auto_install' : 0})
           " sample: call vam#ActivateAddons(['pluginA','pluginB', ...], {'auto_install' : 0})
@@ -426,6 +434,14 @@ name_rewriting                              *VAM-name_rewriting*
         Value will be extended with >
             {"99git+github": "vam#install#RewriteName"}
 <       after it is read (see |vam#install#RewriteName()|).
+
+git_supoprt
+hg_support
+svn_support
+bzr_support
+        set to 0 to drop scm soucres of that type. Useful if you don't want to
+        install support for than version control system on your operating
+        system. See SetupVAM example
 
 The following options are used by |VAM-kr|, not by
 VAM itself. So if you set |VAM-known| to another value they may
@@ -890,17 +906,6 @@ what's going to happen.
   the (all) buffers on command line immediately ..).
   You get the idea why I'm not going to maintain this. Putting it into your
   .vimrc should be easy enough.
-
-[2]: VAM's behaviour depends on PATH
-  If you don't have git in PATH git sources are dropped. ZyX comitted it
-  making me somewhat unhappy. However a warning is echoed so its ok.
-  This means that VAM falls back to vim.sf.net if possible if you don't have
-  git installed.
-  I should fix this by making this filtering explicit by asking users to put
-  this into their ~/.vimrc:
-  let g:vim_addon_manager.filter_scms = filter(['git','svn','bzr','hg'], '!executable(v:val)')
-  If you feel strong about it comment the closed bug on the github bug
-  tracker.
 
 [3]: VAM does not work nicely with older versions of Vim (won't fix)
   For vim-7.0 you can make it work easily by adding loading all .vim files
