@@ -104,7 +104,8 @@ Add the following to your .vimrc >
 
           " disable sources whose version control command line tool is not
           " installed. If you need more control override the MergeSources
-          " function
+          " function. Note: Many plugins will then be fetched from www.vim.org
+          " instead
           " if (!exists('g:vim_addon_manager')) | let g:vim_addon_manager = {} | endif
           " for scm in ['hg', 'git', 'svn', 'bzr']
           "   let g:vim_addon_manager[scm.'_support'] = executable(scm)
