@@ -1,25 +1,25 @@
 *vim-addon-manager.txt* Declarative package manager for Vim
 ==============================================================================
-CONTENTS                                          *vim-addon-manager-contents*
+CONTENTS                                                        *VAM-contents*
 
     0. GETTING STARTED & LOOKING FOR HELP <<
 
-    1. Intro                           |vim-addon-manager-intro|
-    2. Installation                    |vim-addon-manager-installation|
-        2.1 Example: personal          |vim-addon-manager-complex-setup-sample|
-            configurable setup,
-    3. Functionality provided          |vim-addon-manager-functionality|
-        3.1. Commands                  |vim-addon-manager-commands|
-        3.2. Functions                 |vim-addon-manager-functions|
-    4. Options                         |vim-addon-manager-options|
-    5. Installing plugins              |vim-addon-manager-install-plugins|
-    6. Uninstalling plugins            |vim-addon-manager-uninstall-plugins|
-    7. Addon-info file                 |vim-addon-manager-addon-info|
-    8. Author, credits, some notes     |vim-addon-manager-related|
-    9. Testing this plugin             |vim-addon-manager-testing|
-   10. Some notes for windows users    |vim-addon-manager-windows|
-   11. Some notes for Gentoo users     |vim-addon-manager-gentoo|
-   12. Troubleshooting and known bug   |vim-addon-manager-trouble-shooting|
+    1. Intro                                  |VAM-intro|
+    2 Installation & installing plugins       |VAM-installation|
+        2.2 names of addons and addon soucres |VAM-addon-names|
+        2.3 Example: personal                 |VAM-complex-setup-sample|
+            configurable setup
+    3. Functionality provided                 |VAM-functionality|
+        3.1. Commands                         |VAM-commands|
+        3.2. Functions                        |VAM-functions|
+    4. Options                                |VAM-options|
+    6. Uninstalling plugins                   |VAM-uninstall-plugins|
+    7. Addon-info file                        |VAM-addon-info|
+    8. Author, credits, some notes            |VAM-related|
+    9. Testing this plugin                    |VAM-testing|
+   10. Some notes for windows users           |VAM-windows|
+   11. Some notes for Gentoo users            |VAM-gentoo|
+   12. Troubleshooting and known bug          |VAM-trouble-shooting|
        and TODOs as well as "I want .."
    13. VAM vs ...
 
@@ -31,22 +31,25 @@ CONTENTS                                          *vim-addon-manager-contents*
 0. GETTING STARTED & LOOKING FOR HELP - something doesn't work
 
 Getting started fast: ~
-Read: |vim-addon-manager-installation| and |vim-addon-manager-install-plugins|
+Read: |VAM-installation| and |VAM-addon-names|
 
 
 NEED HELP: ~
 Join irc.freenode.net, /join #vim. Ask there. VAM has many users
 MarcWeber is hanging around often so ping him or create a github ticket [1] and
 people will try to help you. You should skim the docs before asking for
-help though. Also see |vim-addon-manager-author|
+help though. Also see |VAM-author|
 [1] https://github.com/MarcWeber/vim-addon-manager/issues
 
 ==============================================================================
-1. Intro                                             *vim-addon-manager-intro*
+1. Intro                                                           *VAM-intro*
 
-Consider reading |plugin| (follow this link by g ctlr-]) to understand the
-manualy way of installing plugins. VAM helps keeping ~/.vim clean by
-separating plugins from each other.
+VAM is a shortcut for vim-addon-manager.
+Difference addon/plugin: None.
+>
+ :h plugin
+tells you about the old manual manual way of installing plugins. VAM helps 
+keeping ~/.vim clean by separating plugins from each other.
 
 Features:
 
@@ -66,19 +69,20 @@ Dependencies:
       is included by default)
 
 What does "Declarative package manager" mean? The final behaviour of Vim
-should be declared once. Your ~/.vimrc and :UpdateAddons should be enough
-to cause same Vim behaviour everywhere. [2]
+should be declared once. Your ~/.vimrc and |:UpdateAddons| should be enough
+to cause same Vim behaviour everywhere.
+
 
 ==============================================================================
-2. Installation                               *vim-addon-manager-installation*
+2. Installation                                             *VAM-installation*
 
-Windows users: see |vim-addon-manager-windows|.
-Gentoo users: see |vim-addon-manager-gentoo|.
+Windows users: see |VAM-windows|.
+Gentoo users: see |VAM-gentoo|.
 linux/cygwin/OSX (anything support /bin/sh like shells) users:
-Just uncomment lines starting with "unix based os" below and Vim will checkout
-VAM.
 
-Add the following to your .vimrc and uncomment the lines for unix >
+recommended setup: make .vimrc checking out VAM:
+
+Add the following to your .vimrc >
 
         fun SetupVAM()
           " YES, you can customize this vam_install_path path and everything still works!
@@ -93,11 +97,21 @@ Add the following to your .vimrc and uncomment the lines for unix >
             " I'm sorry having to add this reminder. Eventually it'll pay off.
             call confirm("Remind yourself that most plugins ship with documentation (README*, doc/*.txt). Its your first source of knowledge. If you can't find the info you're looking for in reasonable time ask maintainers to improve documentation")
             exec '!p='.shellescape(vam_install_path).'; mkdir -p "$p" && cd "$p" && git clone --depth 1 git://github.com/MarcWeber/vim-addon-manager.git'
+            " VAM run helptags automatically if you install or update plugins
+            exec 'helptags '.fnameescape(vam_install_path.'/vim-addon-manager/doc')
           endif
+
+          " disable sources whose version control command line tool is not
+          " installed. If you need more control override the MergeSources
+          " function
+          " if (!exists('g:vim_addon_manager')) | let g:vim_addon_manager = {} | endif
+          " for scm in ['hg', 'git', 'svn', 'bzr']
+          "   let g:vim_addon_manager[scm.'_support'] = executable(scm)
+          " endfor
 
           call vam#ActivateAddons([], {'auto_install' : 0})
           " sample: call vam#ActivateAddons(['pluginA','pluginB', ...], {'auto_install' : 0})
-          " where pluginA could be github:YourName or snipmate-snippets see vam#install#RewriteName()
+          " where 'pluginA' could be "git://" "github:YourName" or "snipmate-snippets" see vam#install#RewriteName()
           " also see section "5. Installing plugins" in VAM's documentation
           " which will tell you how to find the plugin names of a plugin
         endf
@@ -108,24 +122,23 @@ Add the following to your .vimrc and uncomment the lines for unix >
         " See BUGS sections below [*]
         " Vim 7.0 users see BUGS section [3]
 
-<   Note: Depending on the option you choose to run ActivateAddons Vim may not be
-    able to show the questions correctly asking you to install a plugin.
-    If that's the case (for whatever reason) I recommend installing the plugin
-    using :ActivateAddons before adding it to the list in .vimrc
 
-    Of course you can also fetch vim-addon-manager and
-    vim-addon-manager-known-repositories manually and keep full control.
-    Then you have to keep the runtimepath line and call vam#ActivateAddons(..
-    in the func above only.
+minimal setup ~
+>
+  set rtp+=PATH-TO-VAM
+  call vam#ActivateAddons([], {'auto_install' : 0})
 
-4. Optionally generate helptags (this will be done automatically for all
-    plugins which are installed by VAM, but VAM can't install itself obviously): >
-       UpdateAddon vim-addon-manager
 
-Tip: 
-If you're annoyed by the message: >
-  "Press enter to continue"
-< There are at least two solutions you can try:
+NOTES: ~
+
+   Depending on the option you choose to run ActivateAddons Vim may not be
+   able to show the questions correctly asking you to install a plugin.
+   If that's the case (for whatever reason) I recommend installing the plugin
+   using |:InstallAddon| or |:ActivateAddon| before adding it to the list in .vimrc
+
+   If you're annoyed by the message: >
+   "Press enter to continue"
+<  There are at least two solutions you can try:
 
   - press q once and Vim should stop asking
   - set auto_install = 1 (to make Vim stop asking you any questions. However you
@@ -134,7 +147,84 @@ If you're annoyed by the message: >
 Continue reading |vim-addon-manager-install-plugins|.
 
 ------------------------------------------------------------------------------
-2.1 Example: personal configurable setup *vim-addon-manager-complex-setup-sample*
+2.2 names of addons and addon sources                        *VAM-addon-names*
+
+Which addon-names can be passed to |vam#ActivateAddons()|, |:InstallAddons|,
+|:ActivateAddons| ?
+
+VAM installs addons by name. Thus there is a pool mapping names to plugin
+sources. You can either manipulate the default pool
+|VAM-kr| or use the quick and dirty hack
+and pass git/hg/svn/bazaar/.. urls directly as names. Name syntax see
+|vam#install#RewriteName()|.
+If you want to depend on a plugin consider registering its name in |VAM-kr|.
+See |VAM-kr-patching|
+
+
+determining addon names ~
+- by id: |:AddonsInfo| SCRIPT_ID, pick the "VAM name" value.
+- use |:InstallAddons|'s name completion by typing some chars then pressing
+  <c-d> then <tab>.
+
+long description:
+Open the vim-addon-manager-known-repositories/plugin/vim-addon-manager-known-repositories.vim (-> |VAM-kr|
+There you'll find the two types of dictionaries which are used to find and
+install plugins. You'll find lines like this:
+>
+  let s:plugin_sources['Align294'] = {'title': 'Align', 'version': '35/41', 'url': 'http://www.vim.org/scripts/download_script.php?src_id=10110', 'vim_version': '7.0', 'date': '2009-03-04', 'vim_script_nr': 294, 'type': 'archive', 'script-type': 'utility', 'archive_name': 'Align.vba.gz', 'author': 'Charles Campbell'}
+  let s:plugin_sources['Align1497'] = {'title': 'Align.vim', 'version': '0.15', 'url': 'http://www.vim.org/scripts/download_script.php?src_id=5451', 'vim_version': '6.0', 'date': '2006-03-17', 'vim_script_nr': 1497, 'type': 'archive', 'script-type': 'utility', 'archive_name': 'Align.vim', 'author': 'Michael Gnezdov'}
+<
+In this example both titles are stripped to "Align" which would result in a
+name collision. Thus the gather script appends the script ids.
+The script id can be found in the plugin web url.
+
+There is a second type of dict containing bleeding edge versions:
+>
+  let s:scm_plugin_sources['tmru'] = {'type': 'git', 'url': 'git://github.com/tomtom/tmru_vim.git' }
+<
+The keys (eg tmru, Align294, Align1497) must be used instead of {name}.
+>
+  :ActivateAddons Align<c-d>[<tab>]
+< showes a list of all names containing "Align" which is often enough to
+identify the plugin you're looking for.
+
+
+*VAM-kr* : The default pool. Its checkout out by |vim-addon-manager| by
+default. its long name is *vim-addon-manager-known-repositories* .
+
+*VAM-kr-patching*
+Both dicts are merged. The default is to prefer the scm version but you can
+choose. (-> MergeSources). You can either overwrite the merge function or just
+predefine the dictionary and add your own sources for testing before
+submitting to |VAM-kr|:
+
+You can add your own sources to the pool easily: >
+  let g:vim_addon_manager = {}
+  let g:vim_addon_manager.plugin_sources = {}
+  let g:vim_addon_manager.plugin_sources['your_plugin_name'] = { plugin dictionary }
+<
+
+Or overwrite the MergeSources function: >
+
+    fun MyMergeSources(plugin_sources, www_vim_org, scm_plugin_sources)
+      " run default:
+      call vam_known_repositories#MergeSources(a:plugin_sources, a:www_vim_org, a:scm_plugin_sources)
+
+      " patch sources the way you like. This example adds username and password
+      " for SVN repositories. As alternative you could overwrite git urls etc ..
+      for your_plugin in ['svn-driven-key1', ...]
+        let a:plugin_sources[your_plugin]['username'] = 'svn user'
+        let a:plugin_sources[your_plugin]['password'] = 'svn user'
+       endfor
+    endf
+    " tell VAM to use your MergeSources function:
+    let g:vim_addon_manager = {}
+    let g:vim_addon_manager['MergeSources'] = function('MyMergeSources')
+<
+
+
+------------------------------------------------------------------------------
+2.3 Example: personal configurable setup *VAM-complex-setup-sample*
 >
   call vam#ActivateAddons(["github:YOURNAME"],{'auto_install' : 0})
   " this initializes Vim the way *you* want also loading more plugins:
@@ -152,10 +242,10 @@ Continue reading |vim-addon-manager-install-plugins|.
   This section was written to inspire you only.
 
 ==============================================================================
-3. Functionality provided                    *vim-addon-manager-functionality*
+3. Functionality provided                                  *VAM-functionality*
 
 ------------------------------------------------------------------------------
-3.1. Commands                                     *vim-addon-manager-commands*
+3.1. Commands                                                   *VAM-commands*
 
 InstallAddons {name} ...                                      *:InstallAddons*
         Install addons with given names. See |vam#install#InstallAddons()| for
@@ -179,8 +269,11 @@ UninstallNotLoadedAddons {name} ...                *:UninstallNotLoadedAddons*
         Unistall addons with given names. See
         |vam#install#UninstallAddons()| for more details.
 
+AddonInfo {id/name}  *:AddonInfo*
+        show addon info and addon name
+
 ------------------------------------------------------------------------------
-3.2. Functions                                   *vim-addon-manager-functions*
+3.2. Functions                                                 *VAM-functions*
 
 vam#ActivateAddons({addons}[, {opts}])                  *vam#ActivateAddons()*
         Installs and activates plugins listed in {addons} (see description of
@@ -190,13 +283,27 @@ vam#ActivateAddons({addons}[, {opts}])                  *vam#ActivateAddons()*
         directory to 'runtimepath'. If vim has already started VAM will also
         source plugin/**/*.vim (in other case sourcing is done by vim).
 
-        Optional {opts} argument should be a dictionary with key
-        "auto_install". It will be used to override global option
-        |vim-addon-manager-auto_install|. Other possible keys are for internal
-        use only.
+        Optional {opts} argument should be a dictionary with key 
+        "auto_install". It will be used to override global option 
+        |VAM-auto_install|. Other possible keys are for internal use only. In 
+        order to manually activate plugins try using |:ActivateAddons| which 
+        also provides completion.
 
         In order to manually activate plugins try using |:ActivateAddons|
         which also provides completion.
+
+        Implementation details: ~
+        Vim's startup behaviour is:
+            1. source ~/.vimrc
+            2. find all plugin/*.vim files in &rtp
+            3. source them
+            4. emit the VimEnter au command
+
+
+        Now it does not do its job 2. properly: some after/* files are not
+        sources. If you add paths rtp at runtime plugin/* files aren't sourced
+        either. VAM takes care of this for you - but changing source order may
+        fail in rare cases.
 
 vam#install#Install({addons}[, {opts}])                *vam#install#Install()*
         Installs plugins listed in {addons} list. Each list item must be one
@@ -209,14 +316,15 @@ vam#install#Install({addons}[, {opts}])                *vam#install#Install()*
               `http://'.
         After installing the plugin help tags are updated, see |:helptags|.
 
+        {addons}: See |VAM-addon-names|
+
         {opts} argument is described in |vam#ActivateAddons()|.
 
 vam#install#Update({addons})                            *vam#install#Update()*
         Updates plugins which names are listed in {addons}. If an empty list
         is given, then updates all plugins. vam#install#Update also updates
         the help tags. Note that if plugin is not under control of some VCS,
-        it tries to retain user changes unless |vim-addon-manager-do_diff| is
-        disabled.
+        it tries to retain user changes unless |VAM-do_diff| is disabled.
 
 vam#AddonInfo({name})                                        *vam#AddonInfo()*
         Returns dictionary that contains information given in |addon-info.txt|
@@ -259,22 +367,22 @@ vam#install#RewriteName({name})                    *vam#install#RewriteName()*
     git:{URL}          {"type": "git", "url": {URL}} (experimental)
 
 ==============================================================================
-4. Options                                         *vim-addon-manager-options*
+4. Options                                                       *VAM-options*
                                                          *g:vim_addon_manager*
 
 All options are located in the global dictionary g:vim_addon_manager. It also
 contains some stuff that user should never modify if he wants to see this
 plugin working. Possible keys:
 
-auto_install                                  *vim-addon-manager-auto_install*
+auto_install                                                *VAM-auto_install*
         This options disables plugin installation confirmation. It will not
         disable deprecation warnings and other prompts.
-plugin_sources                              *vim-addon-manager-plugin_sources*
+plugin_sources                                            *VAM-plugin_sources*
         This option contains a dictionary where keys are plugin names and
         values are described by |addon-info-repository|. Values defined in
         this dictionary override corresponding values in |addon-info.txt|
         files, so be careful when you extend it.
-plugin_root_dir                            *vim-addon-manager-plugin_root_dir*
+plugin_root_dir                                          *VAM-plugin_root_dir*
         Defines a directory where plugins will be installed to. If directory
         where this plugin is installed to (three levels up relative to
         autoload/vam.vim: autoload/../..) is writeable by user, then
@@ -284,26 +392,26 @@ plugin_root_dir                            *vim-addon-manager-plugin_root_dir*
         writeable by the user, then it defaults to ~/.vim/vim-addons.
         Note that you must set this variable before calling any vam function.
         Note 2: it may be ignored in custom |vim-addon-manager-dirname_fun|.
-                             *vim-addon-manager-known_repos_activation_policy*
+                                           *VAM-known_repos_activation_policy*
 known_repos_activation_policy
-        String, valid values: `ask', `never' and `autoload' (default). Defines
-        when |vim-addon-manager-known| plugin should be loaded. `Ask' means
-        that user will be prompted when this option is required. `Never' means
-        that |vim-addon-manager-known| will not be loaded and the user will
-        not get any prompts. `Autoload' means that it will be loaded when it
-        is required, user also won't get asked.
-known                                                *vim-addon-manager-known*
+        String, valid values: `ask', `never' and `autoload' (default). Defines 
+        when |VAM-known| plugin should be loaded. `Ask' means that user will 
+        be prompted when this option is required. `Never' means that 
+        |VAM-known| will not be loaded and the user will not get any prompts. 
+        `Autoload' means that it will be loaded when it is required, user also 
+        won't get asked.
+        known                                                      *VAM-known*
         String, specifies the name of plugin which provides list of
-        repositories. Default is vim-addon-manager-known-repositories.
-change_to_unix_ff                        *vim-addon-manager-change_to_unix_ff*
+        repositories. Default is VAM-known-repositories.
+change_to_unix_ff                                      *VAM-change_to_unix_ff*
         Remove CR symbols before LF symbols in any vim files (changes dos and
         mixed dos/unix line endings to unix line endings). Is on by default if
         you are on unix (unix, win32unix, macunix), off otherwise.
-do_diff                                            *vim-addon-manager-do_diff*
+do_diff                                                          *VAM-do_diff*
         If this option is true (default), then try to retain user changes to
         installed plugins (unless they are under SCM control). Requires diff
         and patch programs installed.
-name_rewriting                              *vim-addon-manager-name_rewriting*
+name_rewriting                                            *VAM-name_rewriting*
         Set this to a dictionary with functions each taking a plugin name and
         returning either a dictionary with repository location (see
         |addon-info-repository|) for given name or zero. Location will be set
@@ -314,7 +422,7 @@ name_rewriting                              *vim-addon-manager-name_rewriting*
         Value will be extended with >
             {"99git+github": "vam#install#RewriteName"}
 <       after it is read (see |vam#install#RewriteName()|).
-dirname_fun                                    *vim-addon-manager-dirname_fun*
+dirname_fun                                                  *VAM-dirname_fun*
         Function name or function reference which is used to transform plugin
         name into absolute path of the plugin. Function must return path
         without trailing path separators. Default is "vam#AddonDirname".
@@ -322,90 +430,34 @@ dirname_fun                                    *vim-addon-manager-dirname_fun*
 The following options are used by vim-addon-manager-known-repositories, not by
 VAM itself. So if you set |vim-addon-manager-known| to another value they may
 have no effect.
+                                                        *VAM-SCM_support*
+git_supoprt                                             *VAM-git_support*
+hg_support                                              *VAM-hg_support*
+svn_support                                             *VAM-svn_support*
+bzr_support                                             *VAM-bzr_support*
+        Determines whether given SCM sources should be merged to 
+        |VAM-plugin_sources| dictionary. Has no effect if 
+        |VAM-scm_merge_strategy| is set to "never". See SetupVAM example.
 
-scm_merge_strategy                        *vim-addon-manager-scm_merge_stategy*
+scm_merge_strategy                                      *VAM-scm_merge_stategy*
         String, valid values: `force' (default), `keep' and `never'. Defines,
         whether SCM sources should be used instead of www.vim.org sources:
         `forces' stands for prefering SCM over www.vim.org, `keep' means that
         SCM sources will be used only if the plugin is not available from
         www.vim.org, `never' means that SCM sources will be never used.
-MergeSources                                  *vim-addon-manager-MergeSources*
+MergeSources                                                *VAM-MergeSources*
         Function reference, defines a function that will be used to merge
-        user, |vim-addon-manager-known-repositories| and SCM sources.
-        Overrides |vim-addon-manager-scm_merge_stategy|. Will be called with
-        three arguments: user sources (most of time it is an empty
-        dictionary), non-SCM sources defined in
-        |vim-addon-manager-known-repositories| and SCM sources also defined
-        there. If MergeSources function is a dictionary function, it will be
-        provided an empty dictionary as |self| dictionary.
+        user, |VAM-kr| and SCM sources.
+        Overrides |VAM-scm_merge_stategy| and |VAM-SCM_support|. Will be 
+        called with three arguments: user sources (most of time it is an empty 
+        dictionary), non-SCM sources defined in |VAM-kr| and SCM sources also 
+        defined there. If MergeSources function is a dictionary function, it 
+        will be provided an empty dictionary as |self| dictionary.
 
         An Example can be found in this file.
 
 ==============================================================================
-5. Installing plugins                      *vim-addon-manager-install-plugins*
-
-First read |vim-addon-manager-installation|.
-
-As documented |vam#Activate| or |:ActivateAddons| will fetch
-(=install) the plugin if it failed to find requested addon in your addons
-directory.
-
-I recommend using |:ActivateAddons| to "preview" a plugin and if it both works
-and you like it add it to ~/.vimrc.
-This also works around the issue with questions not being displayed correctly
-at startup [3].
-
-You can use |:ActivateAddons|'s tab completion to find the plugin name fast.
-
-Usually you add the names of the addons this way to your .vimrc: >
-   set runtimepath+=~/.vim/vim-addons/vim-addon-manager
-   call vam#ActivateAddons(["pluginA","pluginB"])
-<
-You can use the InstallAddons function to install plugins only.
-You should do this if you don't trust foreign code. Then you can review it
-before it'll be executed. Otherwise use ActivateAddons
-
-You can install plugins by URL. See |vam#install#Install()|.
-I prefer you telling me about your repository location, though.
-Also see |vim-addon-manager-repository-locations|.
-
-Implementation details: ~
-Vim does not source plugin/*.vim and after/plugin/*.vim automatically
-if you add pathes to runtimepath after Vim has startup. vim-addon-manager
-takes care of that for you.
-
-addon names & how to find the plugin you're looking for ~
-Fast: Try :AddonsInfo SCRIPT_ID, pick the "VAM name" value.
-
-long description:
-Open the vim-addon-manager-known-repositories/plugin/vim-addon-manager-known-repositories.vim
-There you'll find the two types of dictionaries which are used to find and
-install plugins. You'll find lines like this:
->
-  let s:plugin_sources['Align294'] = {'title': 'Align', 'version': '35/41', 'url': 'http://www.vim.org/scripts/download_script.php?src_id=10110', 'vim_version': '7.0', 'date': '2009-03-04', 'vim_script_nr': 294, 'type': 'archive', 'script-type': 'utility', 'archive_name': 'Align.vba.gz', 'author': 'Charles Campbell'}
-  let s:plugin_sources['Align1497'] = {'title': 'Align.vim', 'version': '0.15', 'url': 'http://www.vim.org/scripts/download_script.php?src_id=5451', 'vim_version': '6.0', 'date': '2006-03-17', 'vim_script_nr': 1497, 'type': 'archive', 'script-type': 'utility', 'archive_name': 'Align.vim', 'author': 'Michael Gnezdov'}
-<
-In this example both titles are stripped to "Align" which would result in a
-name collision. Thus the gather script appends the script ids.
-The script id can be found in the plugin web url.
-
-There is a second type of dict containing bleeding edge versions:
->
-  let s:scm_plugin_sources['tmru'] = {'type': 'git', 'url': 'git://github.com/tomtom/tmru_vim.git' }
-<
-Both dicts are merged. The default is to prefer the scm version but you can
-choose. (-> MergeSources)
-
-The keys (eg tmru, Align294, Align1497) must be used instead of {name}.
->
-  :ActivateAddons Align<c-d>[<tab>]
-< showes a list of all names containing "Align" which is often enough to
-identify the plugin you're looking for.
-
-Maybe a :ShowScriptNameOfSciptId X command should be added (?)
-
-==============================================================================
-6. Uninstalling Plugins                  *vim-addon-manager-uninstall-plugins*
+6. Uninstalling Plugins                                *VAM-uninstall-plugins*
 
 Follow these steps:
 
@@ -417,8 +469,8 @@ Follow these steps:
 < or rm -fr those directories manually.
 
 ==============================================================================
-7. Addon-info file                              *vim-addon-manager-addon-info*
-                                                              *addon-info.txt*
+7. Addon-info file                                            *VAM-addon-info*
+                                            *addon-info.json* *addon-info.txt*
 
 Each plugin that intends to use vim-addon-manager for distributing itself
 needs to have addon-info.json [1] file in its root,
@@ -519,9 +571,9 @@ repository                                             *addon-info-repository*
 dependencies                                         *addon-info-dependencies*
         Describes plugins that are required for the plugin, must contain
         a dictionary where keys are plugin names and values describe where
-        appropriate plugins should be fetched from (overriden by
-        |vim-addon-manager-plugin_sources|). The format of the values is the
-        same as |addon-info-repository|.
+        appropriate plugins should be fetched from (overriden by 
+        |VAM-plugin_sources|). The format of the values is the same as 
+        |addon-info-repository|.
 
 
 version                                                   *addon-info-version*
@@ -533,40 +585,7 @@ homepage                                                 *addon-info-homepage*
         but setting them to the real values will not do any harm.
 
 ==============================================================================
-8. Author, credits, some notes                     *vim-addon-manager-related*
-
-                                      *vim-addon-manager-repository-locations*
-List of known repositories is defined in a separate plugin called
-|vim-addon-manager-known-repositories|. If you want your plugin to be added to
-this list, then contact the author. Note that this list is also populated
-automatically from www.vim.org site, so sometimes you do not need to do
-anything.
-
-As alternative you can specify them in your .vimrc like what that plugin is
-doing: Add your own dicts to: >
-    let g:vim_addon_manager = {}
-    let g:vim_addon_manager['plugin_sources'] = {}
-    let g:vim_addon_manager['plugin_sources']['your-plugin-name'] = { ... }
-
-<
-Eg if you want to patch -known-repository sources try this: >
-    fun MyMergeSources(plugin_sources, www_vim_org, scm_plugin_sources)
-      " run default:
-      call vam_known_repositories#MergeSources(a:plugin_sources, a:www_vim_org, a:scm_plugin_sources)
-
-      " patch sources the way you like. This example adds username and password
-      " for SVN repositories. As alternative you could overwrite git urls etc ..
-      for your_plugin in ['svn-driven-key1', ...]
-        let a:plugin_sources[your_plugin]['username'] = 'svn user'
-        let a:plugin_sources[your_plugin]['password'] = 'svn user'
-       endfor
-    endf
-    " tell VAM to use your MergeSources function:
-    let g:vim_addon_manager = {}
-    let g:vim_addon_manager['MergeSources'] = function('MyMergeSources')
-
-<
-In your .vimrc or somewhere else (see |vim-addon-manager-plugin_sources|).
+8. Author, credits, some notes                                   *VAM-related*
 
 Related work: ~
 
@@ -576,10 +595,6 @@ PATHOGEN:
     shows that it may become a competitive VAM alternative?
     http://www.vim.org/scripts/script.php?script_id=2332
     http://vim-scripts.org/index.html
-
-ZyX branch:
-    http://github.com/ZyX-I/vim-addon-manager
-    See |marc-weber-vim-addon-manager-design-notes|
 
 There are also some other package managers for vim:
     http://github.com/c9s/Vimana
@@ -597,13 +612,13 @@ http://packages.debian.org/sid/vim-addon-manager
 The author (Jamessan) is fine with this project sharing the same name.
 
 ------------------------------------------------------------------------------
-7.1. Author contacts                                *vim-addon-manager-author*
+7.1. Author contacts                                              *VAM-author*
 
 Github account: MarcWeber
 Email: marco-oweber@gmx.de
 
 ------------------------------------------------------------------------------
-7.2. Contributors                             *vim-addon-manager-contributors*
+7.2. Contributors                                           *VAM-contributors*
 
 (Incomplete list):
 Tim Pope (+)  (tpope on github)
@@ -648,7 +663,7 @@ What features are missing?
 
 
 ==============================================================================
-9. Testing this plugin                             *vim-addon-manager-testing*
+9. Testing this plugin                                           *VAM-testing*
 
 Run >
     # Replace ~/.vim/vim-addons/vim-addon-manager with the path you installed this
@@ -664,7 +679,7 @@ at the end. Written for Linux only. Code coverage is bad. Its a starting
 point.
 
 ==============================================================================
-10. Some notes for windows users                   *vim-addon-manager-windows*
+10. Some notes for windows users                                 *VAM-windows*
 
 Finally the nightmare came to an end:
 http://mawercer.de/~marc/vam/index.php
@@ -768,7 +783,7 @@ have to install svn,hg,.. to use plugins only.
 If you want something like this to happen contact me.
 
 ==============================================================================
-11. Some notes for Gentoo users                     *vim-addon-manager-gentoo*
+11. Some notes for Gentoo users                                   *VAM-gentoo*
 
 Gentoo users may consider installing this plugin from pluginloader overlay
 which is accessible via mercurial, url:
@@ -813,7 +828,7 @@ For portage+layman users:
 
 
 ==============================================================================
-*marc-weber-vim-addon-manager-design-notes*
+*marc-weber-VAM-design-notes*
 
 Until now I tried following the "New Jersey", KISS, MIT principles:
 - Try to achieve 80% of value by spending 20% of effort
@@ -828,7 +843,7 @@ See related work to get it instead of this. Lets watch it and be curious about
 what's going to happen.
 
 ==============================================================================
-12. Troubleshooting and known bugs        *vim-addon-manager-trouble-shooting*
+12. Troubleshooting and known bugs                      *VAM-trouble-shooting*
 
   runtimepath manipulation should be separated from installation / update
   logic. This way you can have different implementation for updating plugins
@@ -876,17 +891,6 @@ what's going to happen.
   You get the idea why I'm not going to maintain this. Putting it into your
   .vimrc should be easy enough.
 
-[2]: VAM's behaviour depends on PATH
-  If you don't have git in PATH git sources are dropped. ZyX comitted it
-  making me somewhat unhappy. However a warning is echoed so its ok.
-  This means that VAM falls back to vim.sf.net if possible if you don't have
-  git installed.
-  I should fix this by making this filtering explicit by asking users to put
-  this into their ~/.vimrc:
-  let g:vim_addon_manager.filter_scms = filter(['git','svn','bzr','hg'], '!executable(v:val)')
-  If you feel strong about it comment the closed bug on the github bug
-  tracker.
-
 [3]: VAM does not work nicely with older versions of Vim (won't fix)
   For vim-7.0 you can make it work easily by adding loading all .vim files
   always:
@@ -910,8 +914,7 @@ TODOs:
   git repositories only. I think the general idea is great. However we have to
   take care to keep patches which were written for git/hg in sync.
 
-  If you want this feature tell me. I'll add the sources to
-  |vim-addon-manager-known-repositories| then.
+  If you want this feature tell me. I'll add the sources to |VAM-kr| then.
 
 - there should be a AddonInfo command or such.
   A draft implementation can be found here:
@@ -931,10 +934,10 @@ Marc Weber: Your suggestion VAM as abbreviation is fine. Let's use that.
             Switching the name means a lot of work and many dead links.
             I'm not going to switch the name for 'uncoolness' reasons soon.
 
-Don't have those commands? See |vim-addon-manager-installation|.
+Don't have those commands? See |VAM-installation|.
 Windows installation is more tedious than on Linux - yes.
 
-Still trouble? Get in touch, see |vim-addon-manager-author|
+Still trouble? Get in touch, see |VAM-author|
 
 The help file should be using VAM. (Yes - but its too much work to get it
 right for now)
