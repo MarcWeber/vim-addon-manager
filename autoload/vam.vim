@@ -33,13 +33,13 @@ let s:c['plugin_sources'] = get(s:c,'plugin_sources', {})
 " if a plugin has an item here the dict value contents will be written as plugin info file
 let s:c['missing_addon_infos'] = get(s:c,'missing_addon_infos', {})
 let s:c['activated_plugins'] = get(s:c,'activated_plugins', {})
-" If directory where plugin is installed is writeable, then this plugin was
-" likely installed by user according to the instruction. If it is not, then it
-" is likely a system-wide installation.
-let s:c['system_wide'] = !filewritable(expand('<sfile>:h:h:h'))
-let s:c['plugin_root_dir'] = get(s:c, 'plugin_root_dir', ((s:c['system_wide'])?
-            \                                               ('~/vim-addons'):
-            \                                               (expand('<sfile>:h:h:h'))))
+
+" gentoo users may install VAM system wide. In that case s:d is not writeable.
+" In the future this may be put into a gentoo specific patch.
+let s:d = expand('<sfile>:h:h:h')
+let s:c['plugin_root_dir'] = get(s:c, 'plugin_root_dir', filewritable(s:d) ? s:d : '~/.vim/vim-addons' )
+unlet s:d
+
 " ensure we have absolute paths (windows doesn't like ~/.. ) :
 let s:c['plugin_root_dir'] = expand(s:c['plugin_root_dir'])
 let s:c['known'] = get(s:c,'known','vim-addon-manager-known-repositories')
