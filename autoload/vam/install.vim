@@ -288,7 +288,7 @@ fun! vam#install#Update(list)
     call vam#install#LoadKnownRepos({}, ' so that its updated as well')
     " include vim-addon-manager in list only if writeable (non gentoo system
     " wide installation)
-    if writeable(vam#PluginDirByName('vim-addon-manager'))
+    if filewritable(vam#PluginDirByName('vim-addon-manager'))==2
       call vam#ActivateAddons(['vim-addon-manager'])
     endif
     let list = keys(s:c['activated_plugins'])
