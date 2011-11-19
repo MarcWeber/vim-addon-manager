@@ -431,6 +431,49 @@ plugin_dir_by_name                                    *VAM-plugin_dir_by_name*
         Note: If not all plugins are contained in the same direcotry
               completion for |:UninstallAddons| breaks because simple globbing
               is used.
+scms                                                                *VAM-scms*
+        This option determines how sources with supported SCM's should be
+        checked out and updated. It is a dictionary where keys are known SCM's
+        and values are dictionaries with the following keys:
+            Key         Value ~
+            clone       Determines how sources should be checked out.
+                        Additional arguments: repository url, target
+                                              directory.
+            update      Determines how sources that are already checked out
+                        should be updated.
+                        Additional argument: updated directory.
+            executable  Determines SCM executable name, possibly relative to
+                        $PATH.
+            dir         Read-only, defined by VAM itself. Determines presense
+                        of which directory under plugin root directory should
+                        indicate that specific source was checked out using
+                        specific SCM. You can still set this value if you add
+                        support for SCM not known by VAM.
+        Values of keys `clone' and `executable' should be lists that look like
+        if you want to call them with call("call", {value}), but with
+        additional arguments added to the second element of the list.
+        Example: >
+            function GitCheckout(url, target)
+                execute 'silent! !git clone' a:url shellescape(a:target, 1)
+            endfunction
+            function GitUpdate(command, directory) dict
+                execute 'sil! !cd' shellescape(a:directory, 1) '&&' a:command
+            endfunction
+            {'git': {'clone': ['GitCheckout', []],
+                   \'update': [function("GitUpdate"), ['git pull']],\
+                   \'executable': $HOME.'/bin/git'}}
+scms_support                                                *VAM-scms_support*
+        This option can be either one of three string values or a dictionary
+        of a form {{scm}: (0|1)}. Using dictionary form you can forbid
+        specific SCM sources (note that in this case they are all enabled by
+        default). Accepted string values:
+            Value   Description ~
+            auto    Default. Specific SCM source will be enabled if SCM
+                    executable is found.
+            no      No SCM sources are enabled at all.
+            all     All SCM sources are enabled. If specific SCM is not
+                    installed, this will throw an error.
+        Note: This option is only used to set values of |VAM-SCM_support|.
 
 The following options are used by vim-addon-manager-known-repositories, not by
 VAM itself. So if you set |vim-addon-manager-known| to another value they may
@@ -443,6 +486,8 @@ bzr_support                                             *VAM-bzr_support*
         Determines whether given SCM sources should be merged to 
         |VAM-plugin_sources| dictionary. Has no effect if 
         |VAM-scm_merge_strategy| is set to "never". See SetupVAM example.
+        All options are set by |VAM-scm_support|, you should not modify them
+        by hand.
 
 scm_merge_strategy                                      *VAM-scm_merge_stategy*
         String, valid values: `force' (default), `keep' and `never'. Defines,
