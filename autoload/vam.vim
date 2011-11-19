@@ -46,7 +46,7 @@ let s:c['known'] = get(s:c,'known','vim-addon-manager-known-repositories')
 let s:c['change_to_unix_ff'] = get(s:c, 'change_to_unix_ff', (g:os=~#'unix'))
 let s:c['do_diff'] = get(s:c, 'do_diff', 1)
 let s:c['dont_source'] = get(s:c, 'dont_source', 0)
-let s:c['plugin_dir_by_name'] = get(s:c, 'addon_path_by_name', 'vam#PluginDirByNameDefaultImplementation')
+let s:c['plugin_dir_by_name'] = get(s:c, 'plugin_dir_by_name', 'vam#DefaultPluginDirByName')
 
 " for testing it is necessary to avoid the "Press enter to continue lines"
 " (cygwin?). Thus provide an option making all shell commands silent
@@ -102,7 +102,7 @@ fun! vam#ReadAddonInfo(path)
 
 endf
 
-fun! vam#PluginDirByNameDefaultImplementation(name)
+fun! vam#DefaultPluginDirByName(name)
   " this function maps addon names to their storage location. \/: are replaced
   " by - (See name rewriting)
   return s:c.plugin_root_dir.'/'.substitute(a:name, '[\\/:]\+', '-', 'g')
