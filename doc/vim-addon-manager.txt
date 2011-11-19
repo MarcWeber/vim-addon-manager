@@ -391,8 +391,8 @@ plugin_root_dir                                          *VAM-plugin_root_dir*
         vim-addon-manager to ~/.vim/bundle/vim-addon-manager, this will be
         equal to ~/.vim/bundle). If autoload/vam.vim is not
         writeable by the user, then it defaults to ~/.vim/vim-addons.
-        Note that you must set this variable before calling any vam function.
-        Note 2: it may be ignored in custom |vim-addon-manager-dirname_fun|.
+        Note that you must set this variable before calling any vam function
+        Note 2: it may be ignored in custom |VAM-plugin_dir_by_name|.
                                            *VAM-known_repos_activation_policy*
 known_repos_activation_policy
         String, valid values: `ask', `never' and `autoload' (default). Defines 
@@ -423,10 +423,11 @@ name_rewriting                                            *VAM-name_rewriting*
         Value will be extended with >
             {"99git+github": "vam#install#RewriteName"}
 <       after it is read (see |vam#install#RewriteName()|).
-dirname_fun                                                  *VAM-dirname_fun*
-        Function name or function reference which is used to transform plugin
-        name into absolute path of the plugin. Function must return path
-        without trailing path separators. Default is "vam#AddonDirname".
+plugin_dir_by_name                             *VAM-plugin_dir_by_name*
+        Function mapping plugin names to absolute paths plugins are installed
+        into. See "vam#PluginDirByNameDefaultImplementation".
+        If not all plugins are contained in the same direcotry completion
+        for |:UninstallAddons| breaks because simple globbing is used.
 
 The following options are used by vim-addon-manager-known-repositories, not by
 VAM itself. So if you set |vim-addon-manager-known| to another value they may

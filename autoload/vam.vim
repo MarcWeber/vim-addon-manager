@@ -46,8 +46,7 @@ let s:c['known'] = get(s:c,'known','vim-addon-manager-known-repositories')
 let s:c['change_to_unix_ff'] = get(s:c, 'change_to_unix_ff', (g:os=~#'unix'))
 let s:c['do_diff'] = get(s:c, 'do_diff', 1)
 let s:c['dont_source'] = get(s:c, 'dont_source', 0)
-let s:c['dirname_fun'] = get(s:c, 'dirname_fun', 'vam#AddonDirname')
-let s:c['ask_for_rename'] = get(s:c, 'ask_for_rename', 1)
+let s:c['plugin_dir_by_name'] = get(s:c, 'addon_path_by_name', 'vam#PluginDirByNameDefaultImplementation')
 
 " for testing it is necessary to avoid the "Press enter to continue lines"
 " (cygwin?). Thus provide an option making all shell commands silent
@@ -103,11 +102,13 @@ fun! vam#ReadAddonInfo(path)
 
 endf
 
-fun! vam#AddonDirname(name)
+fun! vam#PluginDirByNameDefaultImplementation(name)
+  " this function maps addon names to their storage location. \/: are replaced
+  " by - (See name rewriting)
   return s:c.plugin_root_dir.'/'.substitute(a:name, '[\\/:]\+', '-', 'g')
 endfun
 fun! vam#PluginDirByName(...)
-  return call(s:c.dirname_fun, a:000, {})
+  return call(s:c.plugin_dir_by_name, a:000, {})
 endf
 fun! vam#PluginRuntimePath(name)
   let info = vam#AddonInfo(a:name)
@@ -118,14 +119,11 @@ endf
 fun! vam#IsPluginInstalled(name)
   let d = vam#PluginDirByName(a:name)
 
-  if s:c.ask_for_rename
-    let old_path=s:c.plugin_root_dir.'/'.substitute(a:name, '[\\/:]\+', '', 'g')
-    if d isnot# old_path && isdirectory(old_path)
-      if confirm("VAM has changed addon names policy: any sequence of slashes and colons is now transformed into '-' (formerly it was removed). May I rename ".old_path" to ".d."?", "&Yes\n&No") == 1
-        call rename(old_path, d)
-      else
-        echomsg 'You can disable this dialog by setting g:vim_addon_manager.ask_for_rename to 1'
-      endif
+  " this will be dropped in about 12 months which is end of 2012
+  let old_path=s:c.plugin_root_dir.'/'.substitute(a:name, '[\\/:]\+', '', 'g')
+  if d != old_path && isdirectory(old_path)
+    if confirm("VAM has changed addon names policy for name rewriting. Rename ".old_path." to ".d."?", "&Ok") == 1
+      call rename(old_path, d)
     endif
   endif
 
