@@ -442,13 +442,6 @@ scms                                                                *VAM-scms*
             update      Determines how sources that are already checked out
                         should be updated.
                         Additional argument: updated directory.
-            executable  Determines SCM executable name, possibly relative to
-                        $PATH.
-            dir         Read-only, defined by VAM itself. Determines presense
-                        of which directory under plugin root directory should
-                        indicate that specific source was checked out using
-                        specific SCM. You can still set this value if you add
-                        support for SCM not known by VAM.
         Values of keys `clone' and `executable' should be lists that look like
         if you want to call them with call("call", {value}), but with
         additional arguments added to the second element of the list.

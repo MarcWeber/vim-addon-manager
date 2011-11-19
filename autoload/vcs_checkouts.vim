@@ -2,10 +2,7 @@
 " its very short probably VAM will keep a copy
 
 exec vam#DefineAndBind('s:c','g:vim_addon_manager','{}')
-let s:c.shallow_clones = get(s:c,'shallow_clones', executable('git') && system('git clone --help') =~ '--depth')
-let s:c.scm_extra_args = get(s:c,'scm_extra_args',{'git': [(s:c.shallow_clones ? '--depth 1': '')]})
 let s:c.scms_support = get(s:c, 'scms_support', 'auto')
-let s:se = s:c.scm_extra_args
 let s:c.scms = get(s:c, 'scms', {})
 
 " What's important about these configurations ?
@@ -46,15 +43,14 @@ for [s:scm, s:val] in items(s:scm_defaults)
   else
     let s:c.scms[s:scm]=s:val
   endif
-  let s:c.scms[s:scm].dir='.'.s:scm
 endfor
+call map(copy(s:c.scms), 'extend(v:val, {"dir": ".".v:key})')
 unlet s:scm s:val
-call map(copy(s:c.scms), 'extend(v:val, {"executable": v:key}, "keep")')
 
 fun! vcs_checkouts#SetSCMSupport()
   if s:c.scms_support is# 'auto'
     for [scm, sdescr] in items(s:c.scms)
-      let s:c[scm.'_support']=executable(sdescr.executable)
+      let s:c[scm.'_support']=executable(scm)
     endfor
   elseif s:c.scms_support is# 'no' || s:c.scms_support is# 'all'
     let supportvalue=(s:c.scms_support is# 'all')
