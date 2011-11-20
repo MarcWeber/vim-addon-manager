@@ -453,7 +453,7 @@ scms                                                                *VAM-scms*
             {'git': {'clone': ['GitCheckout', []],
                    \'update': [function("GitUpdate"), ['git pull']],\
                    \'executable': $HOME.'/bin/git'}}
-scms_support                                                *VAM-scms_support*
+drop_scms_sources                                      *VAM-drop_scms_sources*
         This option can be either one of three string values or a dictionary
         of a form {{scm}: (0|1)}. Using dictionary form you can forbid
         specific SCM sources (note that in this case they are all enabled by
@@ -461,8 +461,8 @@ scms_support                                                *VAM-scms_support*
             Value   Description ~
             auto    Specific SCM source will be enabled if SCM executable is
                     found.
-            no      No SCM sources are enabled at all.
-            all     Default. All SCM sources are enabled. If specific SCM is
+            all     No SCM sources are enabled at all.
+            none    Default. All SCM sources are enabled. If specific SCM is
                     not installed, this will throw an error.
         Note: This option is only used to set values of |VAM-SCM_support|.
 

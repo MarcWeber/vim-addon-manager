@@ -2,7 +2,7 @@
 " its very short probably VAM will keep a copy
 
 exec vam#DefineAndBind('s:c','g:vim_addon_manager','{}')
-let s:c.scms_support = get(s:c, 'scms_support', 'all')
+let s:c.drop_scms_sources = get(s:c, 'drop_scms_sources', 'none')
 let s:c.scms = get(s:c, 'scms', {})
 
 " What's important about these configurations ?
@@ -48,17 +48,17 @@ call map(copy(s:c.scms), 'extend(v:val, {"dir": ".".v:key})')
 unlet s:scm s:val
 
 fun! vcs_checkouts#SetSCMSupport()
-  if s:c.scms_support is# 'auto'
+  if s:c.drop_scms_sources is# 'auto'
     for [scm, sdescr] in items(s:c.scms)
       let s:c[scm.'_support']=executable(scm)
     endfor
-  elseif s:c.scms_support is# 'no' || s:c.scms_support is# 'all'
-    let supportvalue=(s:c.scms_support is# 'all')
+  elseif s:c.drop_scms_sources is# 'none' || s:c.drop_scms_sources is# 'all'
+    let supportvalue=(s:c.drop_scms_sources is# 'none')
     for scm in keys(s:c.scms)
       let s:c[scm.'_support']=supportvalue
     endfor
-  elseif type(s:c.scms_support)==type({})
-    for [scm, val] in items(s:c.scms_support)
+  elseif type(s:c.drop_scms_sources)==type({})
+    for [scm, val] in items(s:c.drop_scms_sources)
       let s:c[scm.'_support']=val
     endfor
   endif
