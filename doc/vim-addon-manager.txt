@@ -103,12 +103,10 @@ Add the following to your .vimrc >
 
           " disable sources whose version control command line tool is not
           " installed. If you need more control override the MergeSources
-          " function. Note: Many plugins will then be fetched from www.vim.org
+          " function. Note: Many plugins may then be fetched from www.vim.org
           " instead
           " if (!exists('g:vim_addon_manager')) | let g:vim_addon_manager = {} | endif
-          " for scm in ['hg', 'git', 'svn', 'bzr']
-          "   let g:vim_addon_manager[scm.'_support'] = executable(scm)
-          " endfor
+          " let g:vim_addon_manager.scms_support="auto"
 
           call vam#ActivateAddons([], {'auto_install' : 0})
           " sample: call vam#ActivateAddons(['pluginA','pluginB', ...], {'auto_install' : 0})
@@ -461,11 +459,11 @@ scms_support                                                *VAM-scms_support*
         specific SCM sources (note that in this case they are all enabled by
         default). Accepted string values:
             Value   Description ~
-            auto    Default. Specific SCM source will be enabled if SCM
-                    executable is found.
+            auto    Specific SCM source will be enabled if SCM executable is
+                    found.
             no      No SCM sources are enabled at all.
-            all     All SCM sources are enabled. If specific SCM is not
-                    installed, this will throw an error.
+            all     Default. All SCM sources are enabled. If specific SCM is
+                    not installed, this will throw an error.
         Note: This option is only used to set values of |VAM-SCM_support|.
 
 The following options are used by vim-addon-manager-known-repositories, not by
@@ -478,7 +476,8 @@ svn_support                                             *VAM-svn_support*
 bzr_support                                             *VAM-bzr_support*
         Determines whether given SCM sources should be merged to 
         |VAM-plugin_sources| dictionary. Has no effect if 
-        |VAM-scm_merge_strategy| is set to "never". See SetupVAM example.
+        |VAM-scm_merge_strategy| is set to "never" or |VAM-scm_support|
+        is not a dictionary that does not contain key {SCM}.
         All options are set by |VAM-scm_support|, you should not modify them
         by hand.
 

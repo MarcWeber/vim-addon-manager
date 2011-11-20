@@ -2,7 +2,7 @@
 " its very short probably VAM will keep a copy
 
 exec vam#DefineAndBind('s:c','g:vim_addon_manager','{}')
-let s:c.scms_support = get(s:c, 'scms_support', 'auto')
+let s:c.scms_support = get(s:c, 'scms_support', 'all')
 let s:c.scms = get(s:c, 'scms', {})
 
 " What's important about these configurations ?
