@@ -430,16 +430,16 @@ plugin_dir_by_name                                    *VAM-plugin_dir_by_name*
 The following options are used by vim-addon-manager-known-repositories, not by
 VAM itself. So if you set |vim-addon-manager-known| to another value they may
 have no effect.
-                                                        *VAM-SCM_support*
-git_supoprt                                             *VAM-git_support*
-hg_support                                              *VAM-hg_support*
-svn_support                                             *VAM-svn_support*
-bzr_support                                             *VAM-bzr_support*
-        Determines whether given SCM sources should be merged to 
-        |VAM-plugin_sources| dictionary. Has no effect if 
-        |VAM-scm_merge_strategy| is set to "never". See SetupVAM example.
+                                                        *VAM-drop_SCM_sources*
+drop_git_sources                                             *VAM-drop_git_sources*
+drop_hg_sources                                              *VAM-drop_hg_sources*
+drop_svn_sources                                             *VAM-drop_svn_sources*
+drop_bzr_sources                                             *VAM-drop_bzr_sources*
+        Determines whether given SCM sources should be dropped before merging
+        scm sources by |scm_merge_strategy|. This way you can force using
+        www.vim.org sources. But you may get different plugin versions
 
-scm_merge_strategy                                      *VAM-scm_merge_stategy*
+scm_merge_strategy                                      *VAM-scm_merge_strategy*
         String, valid values: `force' (default), `keep' and `never'. Defines,
         whether SCM sources should be used instead of www.vim.org sources:
         `forces' stands for prefering SCM over www.vim.org, `keep' means that
@@ -448,7 +448,7 @@ scm_merge_strategy                                      *VAM-scm_merge_stategy*
 MergeSources                                                *VAM-MergeSources*
         Function reference, defines a function that will be used to merge
         user, |VAM-kr| and SCM sources.
-        Overrides |VAM-scm_merge_stategy| and |VAM-SCM_support|. Will be 
+        Overrides |VAM-scm_merge_strategy| and |VAM-drop_SCM_sources|. Will be 
         called with three arguments: user sources (most of time it is an empty 
         dictionary), non-SCM sources defined in |VAM-kr| and SCM sources also 
         defined there. If MergeSources function is a dictionary function, it 
