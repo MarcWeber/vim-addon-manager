@@ -101,14 +101,9 @@ Add the following to your .vimrc >
             exec 'helptags '.fnameescape(vam_install_path.'/vim-addon-manager/doc')
           endif
 
-          " disable sources whose version control command line tool is not
-          " installed. If you need more control override the MergeSources
-          " function. Note: Many plugins will then be fetched from www.vim.org
-          " instead
-          " if (!exists('g:vim_addon_manager')) | let g:vim_addon_manager = {} | endif
-          " for scm in ['hg', 'git', 'svn', 'bzr']
-          "   let g:vim_addon_manager[scm.'_support'] = executable(scm)
-          " endfor
+          " Example drop git sources unless git is in PATH. Same plugins can
+          " be installed form www.vim.org. Lookup MergeSources to get more control
+          " let g:vim_addon_manager['drop_git_sources'] = !executable('git')
 
           call vam#ActivateAddons([], {'auto_install' : 0})
           " sample: call vam#ActivateAddons(['pluginA','pluginB', ...], {'auto_install' : 0})
