@@ -388,4 +388,32 @@ fun! vam#utils#TempDir(name)
   " expand make \ out of / on Windows
   return expand(s:tmpDir.'/'.a:name)
 endf
+
+fun! vam#utils#DisplayAddonInfo(name)
+  let plugin = get(g:vim_addon_manager['plugin_sources'], a:name, {})
+  let name = a:name
+  if empty(plugin) && a:name =~ '^\d\+$'
+    " try to find by script id
+    let dict = filter(copy(g:vim_addon_manager['plugin_sources']), 'string(get(v:val,"vim_script_nr","")) == '.a:name)
+    let plugin = get(values(dict), 0, {})
+    let name = keys(dict)[0]
+  end
+  if empty(plugin)
+    echo "Invalid plugin name: " . a:name
+    return
+  endif
+  echo '========================'
+  echo 'VAM name: '.name
+  for key in keys(plugin)
+    echo key . ': ' . plugin[key]
+  endfor
+endfun
+
+fun! vam#utils#DisplayAddonsInfo(names)
+  call vam#install#LoadKnownRepos({})
+  for name in a:names
+    call vam#utils#DisplayAddonInfo(name)
+  endfor
+endfun
+
 " vim: et ts=8 sts=2 sw=2
