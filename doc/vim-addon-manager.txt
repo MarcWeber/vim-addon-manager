@@ -93,7 +93,7 @@ Add the following to your .vimrc >
           " * windows users want to use http://mawercer.de/~marc/vam/index.php
           "   to fetch VAM, VAM-known-repositories and the listed plugins
           "   without having to install curl, unzip, git tool chain first
-          " -> BUG [4]
+          " -> BUG [4] (git-less installation)
           if !filereadable(vam_install_path.'/vim-addon-manager/.git/config') && 1 == confirm("git clone VAM into ".vam_install_path."?","&Y\n&N")
             " I'm sorry having to add this reminder. Eventually it'll pay off.
             call confirm("Remind yourself that most plugins ship with documentation (README*, doc/*.txt). Its your first source of knowledge. If you can't find the info you're looking for in reasonable time ask maintainers to improve documentation")
@@ -929,6 +929,9 @@ what's going to happen.
 
   Tell the VAM team if you want git-less installations to be easier and
   supported, please. Right now we're lazy.
+
+  For windows users there is: http://mawercer.de/~marc/vam/index.php
+  which will also work on sytems not having git but an unzip implementation.
 
 TODOs:
 - support vim-scripts.org. This will let you get all www.vim.org scripts using
