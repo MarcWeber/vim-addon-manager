@@ -93,6 +93,7 @@ Add the following to your .vimrc >
           " * windows users want to use http://mawercer.de/~marc/vam/index.php
           "   to fetch VAM, VAM-known-repositories and the listed plugins
           "   without having to install curl, unzip, git tool chain first
+          " -> BUG [4]
           if !filereadable(vam_install_path.'/vim-addon-manager/.git/config') && 1 == confirm("git clone VAM into ".vam_install_path."?","&Y\n&N")
             " I'm sorry having to add this reminder. Eventually it'll pay off.
             call confirm("Remind yourself that most plugins ship with documentation (README*, doc/*.txt). Its your first source of knowledge. If you can't find the info you're looking for in reasonable time ask maintainers to improve documentation")
@@ -684,6 +685,10 @@ point.
 Finally the nightmare came to an end:
 http://mawercer.de/~marc/vam/index.php
 Enter plugins names, download final .zip. Be happy and enjoy VAM.
+We could create a vim-addon-curl-unzip-for-windowns plugin providing those
+executables. Then VAM would be able to install many plugins after
+bootstrapping without help of the vam/index.php url. Tell me to work on it.
+Also see BUG [4]
 
 OLD docs:
 
@@ -908,6 +913,22 @@ what's going to happen.
   endfor
 <
 
+[4]: VAM depends on git. Why does it?
+  VAM-kr is checkout out by git which contains the default merge function.
+  As advanced user you can define your own sources and define your own merge
+  function trivially - that somehow defeats the idea of having one working
+  maitained pool of sources though.
+  It can be fixed: Eg github allows downloading zip files. However then you
+  still have to
+  (1) download sources (curl, wget, python support + urllib, ...)
+      which is not the default for windows.
+  (2) implement a way to determine when updates should take place eg when a
+      repo is outdated. Again probably there are ways to query github even
+      though I know about web scraping only .. But isn't installing git or
+      using the web interface for Windows users much nicer?
+
+  Tell the VAM team if you want git-less installations to be easier and
+  supported, please. Right now we're lazy.
 
 TODOs:
 - support vim-scripts.org. This will let you get all www.vim.org scripts using
