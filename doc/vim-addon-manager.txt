@@ -940,9 +940,16 @@ TODOs:
 
   If you want this feature tell me. I'll add the sources to |VAM-kr| then.
 
-- there should be a AddonInfo command or such.
-  A draft implementation can be found here:
-  https://github.com/MarcWeber/vim-addon-manager/issues/41
+- full update must be done by
+  :UpdateAddons -known<tab>
+  restart
+  :UpdateAddons
+
+  Running :UpdateAddons once should be enough
+
+  The fix is to force users to use MergeFunction when patching
+  and moving the sources into autoload functions you can reload.
+  Then you can rerun the MergeFunc to get up to date pool in Vim memory.
 
 Sometimes it happens that some small bugs appear. Most of the time they are
 easy to identify and trivial fix. Usually fixes happen very fast (within less
