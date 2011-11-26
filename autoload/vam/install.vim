@@ -468,7 +468,6 @@ fun! vam#install#LoadKnownRepos(opts, ...)
     endif
     if reply == 3 | let s:c.known_repos_activation_policy = "never" | endif
     if reply == 1
-      call vcs_checkouts#SetSCMSupport()
       " don't pass opts so that new_runtime_paths is not set which will
       " trigger topLevel adding -known-repos to rtp immediately
       call vam#ActivateAddons([known], {})

@@ -2,7 +2,6 @@
 " its very short probably VAM will keep a copy
 
 exec vam#DefineAndBind('s:c','g:vim_addon_manager','{}')
-let s:c.drop_scms_sources = get(s:c, 'drop_scms_sources', 'none')
 let s:c.scms = get(s:c, 'scms', {})
 
 " What's important about these configurations ?
@@ -37,32 +36,10 @@ let s:scm_defaults={
 if executable('git') && stridx(system('git clone --help'), '--depth')!=-1
   let s:scm_defaults.git.clone[1][0]='git clone --depth 1 $.url $p'
 endif
-for [s:scm, s:val] in items(s:scm_defaults)
-  if has_key(s:c.scms, s:scm)
-    call extend(s:c.scms[s:scm], s:val, 'keep')
-  else
-    let s:c.scms[s:scm]=s:val
-  endif
-endfor
+let s:c.scms=get(s:c, 'scms', {})
+call map(filter(copy(s:c.scms), 'has_key(s:scm_defaults, v:key)'), 'extend(v:val, s:scm_defaults[v:key], "keep")')
+call extend(s:c.scms, s:scm_defaults, 'keep')
 call map(copy(s:c.scms), 'extend(v:val, {"dir": ".".v:key})')
-unlet s:scm s:val
-
-fun! vcs_checkouts#SetSCMSupport()
-  if s:c.drop_scms_sources is# 'auto'
-    for [scm, sdescr] in items(s:c.scms)
-      let s:c[scm.'_support']=executable(scm)
-    endfor
-  elseif s:c.drop_scms_sources is# 'none' || s:c.drop_scms_sources is# 'all'
-    let supportvalue=(s:c.drop_scms_sources is# 'none')
-    for scm in keys(s:c.scms)
-      let s:c[scm.'_support']=supportvalue
-    endfor
-  elseif type(s:c.drop_scms_sources)==type({})
-    for [scm, val] in items(s:c.drop_scms_sources)
-      let s:c[scm.'_support']=val
-    endfor
-  endif
-endfun
 
 fun! vcs_checkouts#SVNCheckout(repository, targetDir)
   let args=['svn checkout $.url $3p', a:repository, a:repository.url, a:targetDir]
