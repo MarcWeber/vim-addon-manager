@@ -286,8 +286,6 @@ fun! vam#install#Update(list)
   let list = a:list
   if empty(list) && s:confirm('Update all loaded plugins?')
     call vam#install#LoadKnownRepos({}, ' so that its updated as well')
-    " include vim-addon-manager in list only if writeable (non gentoo system
-    " wide installation)
     if filewritable(vam#PluginDirByName('vim-addon-manager'))==2
       call vam#ActivateAddons(['vim-addon-manager'])
     endif
@@ -470,6 +468,7 @@ fun! vam#install#LoadKnownRepos(opts, ...)
     endif
     if reply == 3 | let s:c.known_repos_activation_policy = "never" | endif
     if reply == 1
+      call vcs_checkouts#SetSCMSupport()
       " don't pass opts so that new_runtime_paths is not set which will
       " trigger topLevel adding -known-repos to rtp immediately
       call vam#ActivateAddons([known], {})

@@ -261,33 +261,6 @@ fun! vam#ActivateAddons(...) abort
   endif
 endfun
 
-fun! vam#DisplayAddonInfo(name)
-  let plugin = get(g:vim_addon_manager['plugin_sources'], a:name, {})
-  let name = a:name
-  if empty(plugin) && a:name =~ '^\d\+$'
-    " try to find by script id
-    let dict = filter(copy(g:vim_addon_manager['plugin_sources']), 'string(get(v:val,"vim_script_nr","")) == '.a:name)
-    let plugin = get(values(dict), 0, {})
-    let name = keys(dict)[0]
-  end
-  if empty(plugin)
-    echo "Invalid plugin name: " . a:name
-    return
-  endif
-  echo '========================'
-  echo 'VAM name: '.name
-  for key in keys(plugin)
-    echo key . ': ' . plugin[key]
-  endfor
-endfun
-
-fun! vam#DisplayAddonsInfo(names)
-  call vam#install#LoadKnownRepos({})
-  for name in a:names
-    call vam#DisplayAddonInfo(name)
-  endfor
-endfun
-
 fun! vam#GlobThenSource(glob)
   if s:c.dont_source | return | endif
   for file in split(glob(a:glob),"\n")
@@ -355,7 +328,7 @@ endfun
 " less common. So 2) is my favorite right now. I'm too lazy to break things at
 command! -nargs=* -complete=customlist,vam#install#AddonCompletion InstallAddons :call vam#install#Install([<f-args>])
 command! -nargs=* -complete=customlist,vam#install#AddonCompletion ActivateAddons :call vam#ActivateAddons([<f-args>])
-command! -nargs=* -complete=customlist,vam#install#AddonCompletion AddonsInfo :call vam#DisplayAddonsInfo([<f-args>])
+command! -nargs=* -complete=customlist,vam#install#AddonCompletion AddonsInfo :call vam#utils#DisplayAddonsInfo([<f-args>])
 command! -nargs=* -complete=customlist,vam#install#InstalledAddonCompletion ActivateInstalledAddons :call vam#ActivateAddons([<f-args>])
 command! -nargs=* -complete=customlist,vam#install#UpdateCompletion UpdateAddons :call vam#install#Update([<f-args>])
 command! -nargs=* -complete=customlist,vam#install#UninstallCompletion UninstallNotLoadedAddons :call vam#install#UninstallAddons([<f-args>])
