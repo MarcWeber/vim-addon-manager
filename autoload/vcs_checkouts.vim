@@ -23,8 +23,12 @@ let s:c.scms = get(s:c, 'scms', {})
 "
 " Later we can even add additional implementations telling user that upstream
 " has changed etc .. (TODO)
+let s:git_checkout='git clone $.url $p'
+if executable('git') && stridx(system('git clone --help'), '--depth')!=-1
+  let s:git_checkout='git clone --depth 1 $.url $p'
+endif
 let s:scm_defaults={
-      \'git': {'clone': ['vam#utils#RunShell', ['git clone $.url $p' ]],
+      \'git': {'clone': ['vam#utils#RunShell', [s:git_checkout       ]],
       \       'update': ['vam#utils#RunShell', ['cd $p && git pull'  ]],},
       \ 'hg': {'clone': ['vam#utils#RunShell', ['hg clone $.url $p'  ]],
       \       'update': ['vam#utils#RunShell', ['hg pull -u -R $p'   ]],},
@@ -32,14 +36,79 @@ let s:scm_defaults={
       \       'update': ['vam#utils#RunShell', ['bzr pull -d $p'     ]],},
       \'svn': {'clone': ['vcs_checkouts#SVNCheckout', []],
       \       'update': ['vam#utils#RunShell', ['svn update $p'      ]],},
+      \'_bundle': {'update': ['vcs_checkouts#UpdateBundle', []],},
     \}
-if executable('git') && stridx(system('git clone --help'), '--depth')!=-1
-  let s:scm_defaults.git.clone[1][0]='git clone --depth 1 $.url $p'
-endif
 let s:c.scms=get(s:c, 'scms', {})
 call map(filter(copy(s:c.scms), 'has_key(s:scm_defaults, v:key)'), 'extend(v:val, s:scm_defaults[v:key], "keep")')
 call extend(s:c.scms, s:scm_defaults, 'keep')
 call map(copy(s:c.scms), 'extend(v:val, {"dir": ".".v:key})')
+
+fun! vcs_checkouts#GetBundle(repository, targetDir)
+  let [dummystr, protocol, user, domain, port, path; dummylst]=
+              \matchlist(a:repository, '\v^%(([^:]+)\:\/\/)?'.
+              \                           '%(([^@/:]+)\@)?'.
+              \                            '([^/:]*)'.
+              \                           '%(\:(\d+))?'.
+              \                            '(.*)$')
+  if domain is? 'github.com'
+    let url="https://".domain."/".'.s:ghpath.'."/zipball/master"
+    let archive='master.zip'
+  elseif domain is? 'bitbucket.org'
+    let url="https://".domain.path."/get/default.zip"
+    let archive='default.zip'
+  elseif domain is? 'git.devnull.li'
+    let url="http://".domain.path."/snapshot/master.tar.gz"
+    let archive='master.tar.gz'
+  else
+    throw 'Don’t know how to get bundle from '.domain
+  endif
+  call vam#install#Checkout(a:targetDir, {'type': 'archive', 'url': url, 'archive': archive})
+  call mkdir(a:targetDir.'/._bundle')
+  call writefile([url, archive], a:targetDir.'/._bundle/opts', 'b')
+endfun
+
+fun! vcs_checkouts#UpdateBundle(targetDir)
+  let [url, archive]=readfile(a:targetDir.'/._bundle/url', 'b')
+  call vam#utils#RmFR(a:targetDir)
+  call vam#install#Checkout(a:targetDir, {'type': 'archive', 'url': url, 'archive': archive})
+endfun
+
+fun! s:TryCmd(...)
+  try
+    call call('vam#utils#RunShell', a:000)
+    return 1
+  catch
+    return 0
+  endtry
+endfun
+
+fun! vcs_checkouts#GitCheckout(repository, targetDir)
+  if executable('git')
+    call vam#utils#RunShell(s:git_checkout, a:repository, a:targetDir)
+  elseif executable('hg') && s:TryCmd('hg clone $.url $p', a:repository, a:targetDir)
+    return
+  else
+    call vcs_checkouts#GetBundle(a:repository, a:targetDir)
+  endif
+endfun
+
+fun! vcs_checkouts#MercurialCheckout(repository, targetDir)
+  if executable('hg')
+    call vam#utils#RunShell('hg clone $.url $p', a:repository, a:targetDir)
+  else
+    call vcs_checkouts#GetBundle(a:repository, a:targetDir)
+  endif
+endfun
+
+fun! vcs_checkouts#SubversionCheckout(repository, targetDir)
+  if executable('svn')
+    call vcs_checkouts#SVNCheckout(a:repository, a:targetDir)
+  elseif executable('hg') && s:TryCmd('hg clone $.url $p', a:repository, a:targetDir)
+    return
+  elseif executable('bzr') && s:TryCmd('bzr branch $.url $p', a:repository, a:targetDir)
+    return
+  endif
+endfun
 
 fun! vcs_checkouts#SVNCheckout(repository, targetDir)
   let args=['svn checkout $.url $3p', a:repository, a:repository.url, a:targetDir]
