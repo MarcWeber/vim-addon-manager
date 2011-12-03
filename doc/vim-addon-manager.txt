@@ -195,7 +195,7 @@ choose. (-> MergeSources). You can either overwrite the merge function or just
 predefine the dictionary and add your own sources for testing before
 submitting to |VAM-kr|:
 
-You can add your own sources to the pool easily: >
+You can add your own sources to the pool easily (BUG/TODO [5]): >
   let g:vim_addon_manager = {}
   let g:vim_addon_manager.plugin_sources = {}
   let g:vim_addon_manager.plugin_sources['your_plugin_name'] = { plugin dictionary }
@@ -213,6 +213,8 @@ Or overwrite the MergeSources function: >
         let a:plugin_sources[your_plugin]['username'] = 'svn user'
         let a:plugin_sources[your_plugin]['password'] = 'svn user'
        endfor
+
+      let a:plugin_sources['your_plugin_name'] = { plugin dictionary }
     endf
     " tell VAM to use your MergeSources function:
     let g:vim_addon_manager = {}
@@ -940,6 +942,7 @@ TODOs:
 
   If you want this feature tell me. I'll add the sources to |VAM-kr| then.
 
+[5]
 - full update must be done by
   :UpdateAddons -known<tab>
   restart

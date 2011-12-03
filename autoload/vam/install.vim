@@ -449,6 +449,9 @@ fun! vam#install#Copy(f,t)
 endfun
 
 
+" VAM does call this function for you when using {Activate/Install}Addon() or
+" one of those commands. Read doc/vim-addon-manager.txt to learn about the
+" pool of plugin sources. Also see option "known_repos_activation_policy"
 fun! vam#install#LoadKnownRepos(opts, ...)
   " opts: only used to pass topLevel argument
 
