@@ -80,6 +80,7 @@ Windows users: see |VAM-windows|.
 Gentoo users: see |VAM-gentoo|.
 linux/cygwin/OSX (anything support /bin/sh like shells) users:
 
+You install plugins by adding names to |vam#ActivateAddons()|
 recommended setup: make .vimrc checking out VAM:
 
 Add the following to your .vimrc >
@@ -140,8 +141,6 @@ NOTES: ~
   - press q once and Vim should stop asking
   - set auto_install = 1 (to make Vim stop asking you any questions. However you
     won't know if knew dependencies are fetched in that case etc)
-
-Continue reading |vim-addon-manager-install-plugins|.
 
 ------------------------------------------------------------------------------
 2.2 names of addons and addon sources                        *VAM-addon-names*
@@ -263,6 +262,10 @@ ActivateInstalledAddons {name} ...                  *:ActivateInstalledAddons*
 UpdateAddons [{name} ...]                                      *:UpdateAddons*
         Update addons with given names. Without arguments updates all addons.
         See |vam#install#Update()| for more details.
+
+UpdateActivatedAddons
+        pass list of activated addon names to UpdateAddons
+
 
 UninstallNotLoadedAddons {name} ...                *:UninstallNotLoadedAddons*
         Unistall addons with given names. See

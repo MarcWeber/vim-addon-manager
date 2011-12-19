@@ -193,7 +193,7 @@ fun! vam#install#UpdateAddon(name)
   if get(repository, 'type', '') != 'archive'
     call vam#Log("Not updating ".a:name." because the repository description suggests using VCS ".get(repository, 'type', 'unknown').'.'
           \ ."\nYour install seems to be of type archive/manual/www.vim.org/unknown."
-          \ ."\nIf you want to udpate ".a:name." remove ".pluginDir." and let VAM check it out again."
+          \ ."\nIf you want to update ".a:name." remove ".pluginDir." and let VAM check it out again."
           \ )
     return 0
   endif

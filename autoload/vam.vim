@@ -362,6 +362,7 @@ command! -nargs=* -complete=customlist,vam#install#AddonCompletion ActivateAddon
 command! -nargs=* -complete=customlist,vam#install#AddonCompletion AddonsInfo :call vam#DisplayAddonsInfo([<f-args>])
 command! -nargs=* -complete=customlist,vam#install#InstalledAddonCompletion ActivateInstalledAddons :call vam#ActivateAddons([<f-args>])
 command! -nargs=* -complete=customlist,vam#install#UpdateCompletion UpdateAddons :call vam#install#Update([<f-args>])
+command! -nargs=0 UpdateActivatedAddons exec 'UpdateAddons '.join(keys(g:vim_addon_manager['activated_plugins']),' ')
 command! -nargs=* -complete=customlist,vam#install#UninstallCompletion UninstallNotLoadedAddons :call vam#install#UninstallAddons([<f-args>])
 
 " vim: et ts=8 sts=2 sw=2
