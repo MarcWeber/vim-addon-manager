@@ -267,8 +267,12 @@ fun! vam#DisplayAddonInfo(name)
   if empty(plugin) && a:name =~ '^\d\+$'
     " try to find by script id
     let dict = filter(copy(g:vim_addon_manager['plugin_sources']), 'string(get(v:val,"vim_script_nr","")) == '.a:name)
-    let plugin = get(values(dict), 0, {})
-    let name = keys(dict)[0]
+    if (empty(dict))
+      throw "unkown script ".a:name
+    else
+      let plugin = get(values(dict), 0, {})
+      let name = keys(dict)[0]
+    endif
   end
   if empty(plugin)
     echo "Invalid plugin name: " . a:name
