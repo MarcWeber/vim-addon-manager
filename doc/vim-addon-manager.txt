@@ -9,6 +9,7 @@ CONTENTS                                                        *VAM-contents*
         2.2 names of addons and addon soucres |VAM-addon-names|
         2.3 Example: personal                 |VAM-complex-setup-sample|
             configurable setup
+        2.4 unattended installation
     3. Functionality provided                 |VAM-functionality|
         3.1. Commands                         |VAM-commands|
         3.2. Functions                        |VAM-functions|
@@ -238,6 +239,26 @@ Or overwrite the MergeSources function: >
   V=c-dev,ruby-dev vim
 <
   This section was written to inspire you only.
+
+------------------------------------------------------------------------------
+2.4 unattended installation
+
+Note: You should always review foreign code before running it. That said this
+is how you can update or install unattended (without confirmations ..):
+
+    redir! > /tmp/log-vim.txt
+    silent! ACTION
+    messages
+
+where ACTION is either UpdateActivatedAddons or vam#InstallAddons()
+
+This works for http://mawercer.de/~marc/vam/index.php.
+
+There is also the undocumented g:vim_addon_manager['dont_source'] option
+adding additionally json syntax checks on addon-info.json files which are
+evaled by Vim which should be used if you want to checkout eventually
+untrusted code! If you're going to use the plugins anyway its of no use.
+You also want to set auto_install.
 
 ==============================================================================
 3. Functionality provided                                  *VAM-functionality*
@@ -1030,6 +1051,12 @@ sufficient to prepare patches.
 ==============================================================================
 13. VAM vs ...
 
+
+- ftdetect files are loaded if you set "filetype on".
+  Thus if you do it after calling pathogen/vundle/.. everything should be
+  fine. (Thanks to graywh for telling me)
+
+
 vs Pathogen 
 -------------
 
@@ -1046,12 +1073,6 @@ vs Pathogen
   4) supports all common VCS (svn, bazaar, git, mercurial)
 
   5) Automatic downloading of scripts from vim.org.
-
-  6) It works around some incomplete implementations of rtp in Vim.
-    Eg Vim does not load after and ftdetect files of rtp paths.
-
-    update: https://github.com/tpope/vim-pathogen/issues/29
-    indicates that Pathogen will cope with ftdetect in the future
 
   7) You can easily load plugins at runtime.
 

@@ -255,6 +255,7 @@ fun! vam#ActivateAddons(...) abort
     endif
 
     for rtp in new_runtime_paths
+      " filetype off/on would do the same ?
       call vam#GlobThenSource(rtp.'/ftdetect/*.vim')
     endfor
 
