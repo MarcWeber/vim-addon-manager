@@ -142,7 +142,7 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
     " hook for plugin / syntax files: Move into the correct direcotry:
     let dir = a:targetDir.'/plugin'
     let type = opts['script-type']
-    if type  =~# '\v^%(syntax|indent|ftplugin)$'
+    if type  =~# '\v^%(%(after\/)?syntax|indent|ftplugin)$'
       let dir = a:targetDir.'/'.type
     elseif type is 'color scheme'
       let dir = a:targetDir.'/colors'
