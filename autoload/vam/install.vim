@@ -101,7 +101,24 @@ fun! vam#install#Install(toBeInstalledList, ...)
       if exists('repository')
         echom 'Name '.name.' expanded to :'.string(repository)
       else
-        call vam#Log( "No repository location info known for plugin ".name."! (typo?)")
+        try
+          let namenrshist=vamkr#GetNamesDb()
+        catch /Vim(let):E117:/
+        endtry
+        if exists('namenrshist') && has_key(namenrshist, name)
+          let dbitem=get(namenrshist[name], 0, 0)
+          if dbitem is 0
+            call vam#Log("Plugin ".name." was known to VAM-kr, but is now removed. Consider finding a replacement.")
+          elseif type(dbitem)==type(0)
+            let nrnameshist=vamkr#GetNrsDb()
+            let new_name=get(get(nrnameshist, dbitem, []), 0, 0)
+            call vam#Log("Name ".name." used to belong to vimscript #".dbitem.", which is now named ".new_name)
+          else
+            call vam#Log("Plugin ".name." was renamed to ".dbitem)
+          endif
+        else
+          call vam#Log("No repository location info known for plugin ".name."! (typo?)")
+        endif
         continue " due to abort this won't take place ?
       endif
     endif
