@@ -107,9 +107,7 @@ fun! vam#install#Install(toBeInstalledList, ...)
         endtry
         if exists('namenrshist') && has_key(namenrshist, name)
           let dbitem=get(namenrshist[name], 0, 0)
-          if dbitem is 0
-            call vam#Log("Plugin ".name." was known to VAM-kr, but is now removed. Consider finding a replacement.")
-          elseif type(dbitem)==type(0)
+          if type(dbitem)==type(0)
             let nrnameshist=vamkr#GetNrsDb()
             let new_name=get(get(nrnameshist, dbitem, []), 0, 0)
             call vam#Log("Name ".name." used to belong to vimscript #".dbitem.", which is now named ".new_name)
