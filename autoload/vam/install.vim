@@ -4,6 +4,7 @@ let s:curl = exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o'
 exec vam#DefineAndBind('s:c','g:vim_addon_manager','{}')
 
 let s:c.name_rewriting = get(s:c, 'name_rewriting', {})
+
 call extend(s:c.name_rewriting, {'99git+github': 'vam#install#RewriteName'})
 
 fun! s:confirm(msg, ...)
@@ -85,7 +86,7 @@ fun! vam#install#Install(toBeInstalledList, ...)
     if vam#IsPluginInstalled(name)
       continue
     endif
-    if name != s:c['known'] | call vam#install#LoadKnownRepos(opts) | endif
+    if name != s:c['known'] | call vam#install#LoadPool() |endif
 
     let repository = get(s:c['plugin_sources'], name, get(opts, name,0))
 
@@ -153,8 +154,8 @@ fun! vam#install#Install(toBeInstalledList, ...)
       let infoFile = vam#AddonInfoFile(name)
       call vam#install#Checkout(pluginDir, repository)
 
-      if !filereadable(infoFile) && has_key(s:c['missing_addon_infos'], name)
-        call writefile([s:c['missing_addon_infos'][name]], infoFile)
+      if !filereadable(infoFile) && has_key(repository, 'addon-info')
+        call writefile([string(repository['addon-info'])], infoFile)
       endif
 
       " install dependencies
@@ -191,7 +192,7 @@ fun! vam#install#UpdateAddon(name)
   "Next, try updating plugin by archive
 
   " we have to find out whether there is a new version:
-  call vam#install#LoadKnownRepos({})
+  call vam#install#LoadPool()
   let repository = get(s:c['plugin_sources'], a:name, {})
   if empty(repository)
     call vam#Log("Don't know how to update ".a:name." because it is not contained in plugin_sources")
@@ -299,13 +300,19 @@ endf
 
 fun! vam#install#Update(list)
   let list = a:list
+
+
+  " include vim-addon-manager in list only if writeable (non gentoo system
+  " wide installation)
+  if s:c.pool_fun == 'vam_known_repositories#Pool'
+   \ && filewritable(vam#PluginDirByName('vim-addon-manager'))==2
+    call vam#install#UpdateAddon('vim-addon-manager-known-repositories')
+    call vam#install#HelpTags('vim-addon-manager-known-repositories')
+  endif
+  " refresh sources:
+  call vam#install#LoadPool(1)
+
   if empty(list) && s:confirm('Update all loaded plugins?')
-    call vam#install#LoadKnownRepos({}, ' so that its updated as well')
-    " include vim-addon-manager in list only if writeable (non gentoo system
-    " wide installation)
-    if filewritable(vam#PluginDirByName('vim-addon-manager'))==2
-      call vam#ActivateAddons(['vim-addon-manager'])
-    endif
     let list = keys(s:c['activated_plugins'])
   endif
   let failed = []
@@ -330,7 +337,7 @@ fun! vam#install#KnownAddons(...)
   let list = filter(split(glob(vam#PluginDirByName('*')),"\n"), 'isdirectory(v:val)')
   let list = map(list, "fnamemodify(v:val,':t')")
   if which == "installable"
-    call vam#install#LoadKnownRepos({})
+    call vam#install#LoadPool()
     call extend(list, keys(s:c['plugin_sources']))
   elseif which == "installed"
     " hard to find out. Doing glob is best thing to do..
@@ -463,11 +470,13 @@ fun! vam#install#Copy(f,t)
   endif
 endfun
 
+" fun! vam#install#LoadKnownRepos(opts, ...):
+" OLD code: replaced by vam_known_repositories#Pool() See VAM-kr
 
 " VAM does call this function for you when using {Activate/Install}Addon() or
 " one of those commands. Read doc/vim-addon-manager.txt to learn about the
 " pool of plugin sources. Also see option "known_repos_activation_policy"
-fun! vam#install#LoadKnownRepos(opts, ...)
+fun! vam#install#LoadKnownRepos()
   " opts: only used to pass topLevel argument
 
   " this could be done better: see BUGS section in documantation "force".
@@ -494,13 +503,28 @@ fun! vam#install#LoadKnownRepos(opts, ...)
       if has('vim_starting')
         " This is not done in .vimrc because Vim loads plugin/*.vim files after
         " having finished processing .vimrc. So do it manually
-        exec 'source '.vam#PluginDirByName(known).'/plugin/vim-addon-manager-known-repositories.vim'
+        let rtp.=','.vam#PluginDirByName(known)
+        " exec 'source '.vam#PluginDirByName(known).'/plugin/vim-addon-manager-known-repositories.vim'
       endif
     endif
   endif
   unlet g:in_load_known_repositories
 endf
 
+" (re)loads pool of known plugins
+fun! vam#install#LoadPool(...)
+  let force = a:0 > 0 ? a:1 : 0
+  if force || !has_key(s:c, 'pool_loaded')
+    if s:c.pool_fun == 'vam_known_repositories#Pool'
+      call vam#install#LoadKnownRepos()
+    endif
+
+    " update plugin_sources
+    let s:c.plugin_sources = call(s:c.pool_fun,[])
+
+    let s:c.pool_loaded = 1
+  endif
+endf
 
 fun! vam#install#MergeTarget()
   return split(&runtimepath,",")[0].'/after/plugin/vim-addon-manager-merged.vim'
