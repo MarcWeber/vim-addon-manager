@@ -31,7 +31,6 @@ let s:c['auto_install'] = get(s:c,'auto_install', 0)
 " repository locations:
 let s:c['plugin_sources'] = get(s:c,'plugin_sources', {})
 " if a plugin has an item here the dict value contents will be written as plugin info file
-let s:c['missing_addon_infos'] = get(s:c,'missing_addon_infos', {})
 let s:c['activated_plugins'] = get(s:c,'activated_plugins', {})
 
 " gentoo users may install VAM system wide. In that case s:d is not writeable.
@@ -47,6 +46,10 @@ let s:c['change_to_unix_ff'] = get(s:c, 'change_to_unix_ff', (g:os=~#'unix'))
 let s:c['do_diff'] = get(s:c, 'do_diff', 1)
 let s:c['dont_source'] = get(s:c, 'dont_source', 0)
 let s:c['plugin_dir_by_name'] = get(s:c, 'plugin_dir_by_name', 'vam#DefaultPluginDirByName')
+" the function returning the list of known repositories
+let s:c['MergeSources'] = get(s:c, 'MergeSources', 'vam_known_repositories#MergeSources')
+let s:c['pool_fun'] = get(s:c, 'pool_fun', 'vam_known_repositories#Pool')
+let s:c['renamings_fun'] = get(s:c, 'renamings_fun', 'vamkr#rename_dict_parts_generated#Renamings')
 
 " for testing it is necessary to avoid the "Press enter to continue lines"
 " (cygwin?). Thus provide an option making all shell commands silent
@@ -287,7 +290,7 @@ fun! vam#DisplayAddonInfo(name)
 endfun
 
 fun! vam#DisplayAddonsInfo(names)
-  call vam#install#LoadKnownRepos({})
+  call vam#install#LoadPool()
   for name in a:names
     call vam#DisplayAddonInfo(name)
   endfor

@@ -483,6 +483,14 @@ MergeSources                                                *VAM-MergeSources*
 
         An Example can be found in this file.
 
+pool_fun                                                *VAM-pool_fun*
+        Function reference returning list of known plugins VAM knows about.
+        If default function vam_known_repositories#Pool is used VAM-kr is
+        activated .. See |VAM-known_repos_activation_policy|
+renamings_fun *VAM-renamings_fun*
+        Function reference returning list of renamings used by VAM-kr and
+        InstallAddons() function.
+
 ==============================================================================
 6. Uninstalling Plugins                                *VAM-uninstall-plugins*
 
