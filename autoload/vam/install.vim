@@ -62,11 +62,11 @@ fun! vam#install#GetRepo(name)
       echom 'Name '.a:name.' expanded to :'.string(repository)
     else
       try
-        let namenrshist=vamkr#GetNameNrsHist()
+        let namemap=vamkr#GetNameNrOrNewNameMap()
       catch /Vim(let):E117:/
       endtry
-      if exists('namenrshist') && has_key(namenrshist, a:name)
-        let dbitem=get(namenrshist[a:name], 0, 0)
+      if exists('namemap') && has_key(namemap, a:name)
+        let dbitem=namemap[a:name]
         if type(dbitem)==type(0)
           let nrnameshist=vamkr#GetNrNamesHist()
           let new_name=get(get(nrnameshist, dbitem, []), 0, 0)
