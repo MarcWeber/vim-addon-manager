@@ -46,6 +46,43 @@ fun! vam#install#RewriteName(name)
   endif
 endfun
 
+fun! vam#install#GetRepo(name)
+  if a:name != s:c['known'] | call vam#install#LoadPool() |endif
+
+  let repository = get(s:c['plugin_sources'], a:name, get(opts, a:name, 0))
+  if repository is 0
+    for key in sort(keys(s:c.name_rewriting))
+      let repository=call(s:c.name_rewriting[key], [a:name], {})
+      if type(repository) == type({})
+        break
+      endif
+      unlet repository
+    endfor
+    if exists('repository')
+      echom 'Name '.a:name.' expanded to :'.string(repository)
+    else
+      try
+        let namenrshist=vamkr#GetNameNrsHist()
+      catch /Vim(let):E117:/
+      endtry
+      if exists('namenrshist') && has_key(namenrshist, a:name)
+        let dbitem=get(namenrshist[a:name], 0, 0)
+        if type(dbitem)==type(0)
+          let nrnameshist=vamkr#GetNrNamesHist()
+          let new_name=get(get(nrnameshist, dbitem, []), 0, 0)
+          call vam#Log("Name ".a:name." used to belong to vimscript #".dbitem.", which is now named ".new_name)
+        else
+          call vam#Log("Plugin ".a:name." was renamed to ".dbitem)
+        endif
+      else
+        call vam#Log("No repository location info known for plugin ".a:name."! (typo?)")
+      endif
+      return 0
+    endif
+  endif
+  return repository
+endfun
+
 " Install let's you install plugins by passing the url of a addon-info file
 " This preprocessor replaces the urls by the plugin-names putting the
 " repository information into the global dict
@@ -81,45 +118,11 @@ fun! vam#install#Install(toBeInstalledList, ...)
   let toBeInstalledList = vam#install#ReplaceAndFetchUrls(a:toBeInstalledList)
   let opts = a:0 == 0 ? {} : a:1
   let auto_install = s:c['auto_install'] || get(opts,'auto_install',0)
-  for name in toBeInstalledList
+  for name in filter(copy(toBeInstalledList), '!vam#IsPluginInstalled(v:val)')
+    let repository = vam#install#GetRepo(name)
     " make sure all sources are known
-    if vam#IsPluginInstalled(name)
+    if repository is 0
       continue
-    endif
-    if name != s:c['known'] | call vam#install#LoadPool() |endif
-
-    let repository = get(s:c['plugin_sources'], name, get(opts, name,0))
-
-    if type(repository) == type(0) && repository == 0
-      unlet repository
-      for key in sort(keys(s:c.name_rewriting))
-        let repository=call(s:c.name_rewriting[key], [name], {})
-        if type(repository) == type({})
-          break
-        endif
-        unlet repository
-      endfor
-      if exists('repository')
-        echom 'Name '.name.' expanded to :'.string(repository)
-      else
-        try
-          let namenrshist=vamkr#GetNamesDb()
-        catch /Vim(let):E117:/
-        endtry
-        if exists('namenrshist') && has_key(namenrshist, name)
-          let dbitem=get(namenrshist[name], 0, 0)
-          if type(dbitem)==type(0)
-            let nrnameshist=vamkr#GetNrsDb()
-            let new_name=get(get(nrnameshist, dbitem, []), 0, 0)
-            call vam#Log("Name ".name." used to belong to vimscript #".dbitem.", which is now named ".new_name)
-          else
-            call vam#Log("Plugin ".name." was renamed to ".dbitem)
-          endif
-        else
-          call vam#Log("No repository location info known for plugin ".name."! (typo?)")
-        endif
-        continue " due to abort this won't take place ?
-      endif
     endif
 
     let confirmed = 0

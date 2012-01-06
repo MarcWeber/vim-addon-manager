@@ -335,7 +335,7 @@ fun! vam#AddonInfoFile(name)
     endif
   endfor
   return default
-endf
+endfun
 
 " looks like an error but is not. Catches users attention. Logs to :messages
 fun! vam#Log(s, ...)
