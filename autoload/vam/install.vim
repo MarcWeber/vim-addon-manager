@@ -73,7 +73,7 @@ fun! vam#install#GetRepo(name, opts)
       try
         " using try because pool implementations other then VAM-kr could be
         " used
-        " call extend(maybe_fixes, vamkr#SuggestNewName(a:name))
+        call extend(maybe_fixes, vamkr#SuggestNewName(a:name))
       catch /Vim(let):E117:/
         " If VAM-kr activation policy is never, then the above will yield 
         " unknown function error
