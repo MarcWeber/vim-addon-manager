@@ -47,7 +47,7 @@ fun! vam#install#RewriteName(name)
 endfun
 
 fun! vam#install#GetRepo(name, opts)
-  if a:name != s:c['known'] | call vam#install#LoadPool() |endif
+  if a:name isnot# s:c['known'] | call vam#install#LoadPool() |endif
 
   let repository = get(s:c['plugin_sources'], a:name, get(a:opts, a:name, 0))
   if repository is 0
@@ -74,7 +74,7 @@ fun! vam#install#GetRepo(name, opts)
         " using try because pool implementations other then VAM-kr could be
         " used
         call extend(maybe_fixes, vamkr#SuggestNewName(a:name))
-      catch /Vim(let):E117:/
+      catch /Vim(call):E117:/
         " If VAM-kr activation policy is never, then the above will yield 
         " unknown function error
       endtry
@@ -306,13 +306,10 @@ endf
 fun! vam#install#Update(list)
   let list = a:list
 
-
-  " include vim-addon-manager in list only if writeable (non gentoo system
-  " wide installation)
-  if s:c.pool_fun == 'vam_known_repositories#Pool'
-   \ && filewritable(vam#PluginDirByName('vim-addon-manager'))==2
-    call vam#install#UpdateAddon('vim-addon-manager-known-repositories')
-    call vam#install#HelpTags('vim-addon-manager-known-repositories')
+  if s:c.known isnot 0
+    if vam#install#UpdateAddon(s:c.known)
+      call vam#install#HelpTags(s:c.known)
+    endif
   endif
   " refresh sources:
   call vam#install#LoadPool(1)
@@ -490,6 +487,9 @@ fun! vam#install#LoadKnownRepos()
   let g:in_load_known_repositories = 1
 
   let known = s:c['known']
+  if known is 0
+    return
+  endif
   let reason = a:0 > 0 ? a:1 : 'get more plugin sources'
   if 0 == get(s:c['activated_plugins'], known, 0)
     let policy=get(s:c, 'known_repos_activation_policy', 'autoload')
@@ -508,7 +508,7 @@ fun! vam#install#LoadKnownRepos()
       if has('vim_starting')
         " This is not done in .vimrc because Vim loads plugin/*.vim files after
         " having finished processing .vimrc. So do it manually
-        let rtp.=','.vam#PluginDirByName(known)
+        let &rtp.=','.vam#PluginDirByName(known)
         " exec 'source '.vam#PluginDirByName(known).'/plugin/vim-addon-manager-known-repositories.vim'
       endif
     endif
@@ -520,12 +520,10 @@ endf
 fun! vam#install#LoadPool(...)
   let force = a:0 > 0 ? a:1 : 0
   if force || !has_key(s:c, 'pool_loaded')
-    if s:c.pool_fun == 'vam_known_repositories#Pool'
-      call vam#install#LoadKnownRepos()
-    endif
+    call vam#install#LoadKnownRepos()
 
     " update plugin_sources
-    let s:c.plugin_sources = call(s:c.pool_fun,[])
+    let s:c.plugin_sources = call(s:c.pool_fun, [], {})
 
     let s:c.pool_loaded = 1
   endif

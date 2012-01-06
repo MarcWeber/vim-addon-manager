@@ -75,8 +75,10 @@ else
 endif
 
 fun! vam#VerifyIsJSON(s)
-  let stringless_body = substitute(a:s,'"\%(\\.\|[^"\\]\)*"','','g')
-  return stringless_body !~# "[^,:{}\\[\\]0-9.\\-+Eaeflnr-u \t]"
+  " You must allow single-quoted strings in order for writefile([string()]) that 
+  " adds missing addon information to work
+  let stringless_body = substitute(a:s, '\v\"%(\\.|[^"\\])*\"|''%(''''|[^''])*''', '', 'g')
+  return stringless_body !~# "[^,:{}[\\]0-9.\\-+Eaeflnr-u \t]"
 endf
 
 " use join so that you can break the dict into multiple lines. This makes
@@ -89,11 +91,6 @@ fun! vam#ReadAddonInfo(path)
 
   " using eval is evil!
   let body = join(readfile(a:path),"")
-
-  if s:c.dont_source && '1' != system('php', '<?php echo is_array(json_decode(file_get_contents('.string(a:path).'), true));')
-    call vam#Log( "Invalid JSON in ".a:path."!")
-    return {}
-  endif
 
   if vam#VerifyIsJSON(body)
       " using eval is now safe!
