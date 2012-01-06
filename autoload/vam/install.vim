@@ -61,6 +61,7 @@ fun! vam#install#GetRepo(name, opts)
     if exists('repository')
       echom 'Name '.a:name.' expanded to :'.string(repository)
     else
+      call vam#Log("Plugin ".a:name." is not known to VAM, so it won’t be installed")
       try
         let [new_name, corrections]=vamkr#SuggestNewName(a:name)
       catch /Vim(let):E117:/
