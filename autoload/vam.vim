@@ -77,8 +77,8 @@ endif
 fun! vam#VerifyIsJSON(s)
   " You must allow single-quoted strings in order for writefile([string()]) that 
   " adds missing addon information to work
-  let stringless_body = substitute(a:s, '\v\"%(\\.|[^"\\])*\"|\''%(''{2}|[^''])*\''|true|false|null', '', 'g')
-  return stringless_body !~# "[^,:{}[\\]0-9.\\-+Ee \t]"
+  let scalarless_body = substitute(a:s, '\v\"%(\\.|[^"\\])*\"|\''%(''{2}|[^''])*\''|true|false|null|[+-]?\d+%(\.\d+%([Ee][+-]?\d+)?)?', '', 'g')
+  return scalarless_body !~# "[^,:{}[\\] \t]"
 endf
 
 " use join so that you can break the dict into multiple lines. This makes
