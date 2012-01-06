@@ -883,7 +883,7 @@ what's going to happen.
 ==============================================================================
 12. Troubleshooting and known bugs                      *VAM-trouble-shooting*
 
-  runtimepath manipulation should be separated from installation / update
+  Runtimepath manipulation should be separated from installation / update
   logic. This way you can have different implementation for updating plugins
   eg one being written in python which you can run from commandline.
   However to keep it portable this means we had to support

@@ -77,8 +77,8 @@ endif
 fun! vam#VerifyIsJSON(s)
   " You must allow single-quoted strings in order for writefile([string()]) that 
   " adds missing addon information to work
-  let stringless_body = substitute(a:s, '\v\"%(\\.|[^"\\])*\"|''%(''''|[^''])*''', '', 'g')
-  return stringless_body !~# "[^,:{}[\\]0-9.\\-+Eaeflnr-u \t]"
+  let stringless_body = substitute(a:s, '\v\"%(\\.|[^"\\])*\"|\''%(''{2}|[^''])*\''|true|false|null', '', 'g')
+  return stringless_body !~# "[^,:{}[\\]0-9.\\-+Ee \t]"
 endf
 
 " use join so that you can break the dict into multiple lines. This makes
@@ -93,8 +93,11 @@ fun! vam#ReadAddonInfo(path)
   let body = join(readfile(a:path),"")
 
   if vam#VerifyIsJSON(body)
-      " using eval is now safe!
-      return eval(body)
+    let true=1
+    let false=0
+    let null=''
+    " using eval is now safe!
+    return eval(body)
   else
     call vam#Log( "Invalid JSON in ".a:path."!")
     return {}
