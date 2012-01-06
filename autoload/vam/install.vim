@@ -505,12 +505,6 @@ fun! vam#install#LoadKnownRepos()
       " don't pass opts so that new_runtime_paths is not set which will
       " trigger topLevel adding -known-repos to rtp immediately
       call vam#ActivateAddons([known], {})
-      if has('vim_starting')
-        " This is not done in .vimrc because Vim loads plugin/*.vim files after
-        " having finished processing .vimrc. So do it manually
-        let &rtp.=','.vam#PluginDirByName(known)
-        " exec 'source '.vam#PluginDirByName(known).'/plugin/vim-addon-manager-known-repositories.vim'
-      endif
     endif
   endif
   unlet g:in_load_known_repositories
