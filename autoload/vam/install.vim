@@ -46,10 +46,10 @@ fun! vam#install#RewriteName(name)
   endif
 endfun
 
-fun! vam#install#GetRepo(name)
+fun! vam#install#GetRepo(name, opts)
   if a:name != s:c['known'] | call vam#install#LoadPool() |endif
 
-  let repository = get(s:c['plugin_sources'], a:name, get(opts, a:name, 0))
+  let repository = get(s:c['plugin_sources'], a:name, get(a:opts, a:name, 0))
   if repository is 0
     for key in sort(keys(s:c.name_rewriting))
       let repository=call(s:c.name_rewriting[key], [a:name], {})
@@ -117,7 +117,7 @@ fun! vam#install#Install(toBeInstalledList, ...)
   let opts = a:0 == 0 ? {} : a:1
   let auto_install = s:c['auto_install'] || get(opts,'auto_install',0)
   for name in filter(copy(toBeInstalledList), '!vam#IsPluginInstalled(v:val)')
-    let repository = vam#install#GetRepo(name)
+    let repository = vam#install#GetRepo(name, opts)
     " make sure all sources are known
     if repository is 0
       continue
