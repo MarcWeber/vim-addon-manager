@@ -61,21 +61,24 @@ fun! vam#install#GetRepo(name, opts)
     if exists('repository')
       echom 'Name '.a:name.' expanded to :'.string(repository)
     else
-      call vam#Log("Plugin ".a:name." is not known to VAM, so it won’t be installed")
+      " try to find typos and renamings. Tell user about failure
+      let maybe_fixes = []
+      let name_ = vam#utils#TypoFix(a:name)
+      for x in keys(s:c.plugin_sources)
+        if vam#utils#TypoFix(x) == name_
+          call add(maybe_fixes, a:name.' might be a typo, did you mean: '.x.' ?')
+        endif
+      endfor
+      " try finding new name (VAM-kr only)
       try
-        let [new_name, corrections]=vamkr#SuggestNewName(a:name)
+        " using try because pool implementations other then VAM-kr could be
+        " used
+        " call extend(maybe_fixes, vamkr#SuggestNewName(a:name))
       catch /Vim(let):E117:/
         " If VAM-kr activation policy is never, then the above will yield 
         " unknown function error
       endtry
-      if exists('new_name')
-        if new_name isnot 0
-          call vam#Log('Plugin '.a:name.' was renamed to '.new_name)
-        endif
-        if !empty(corrections)
-          call vam#Log('Plugin '.a:name.' is not known to VAM. Guess it may be one of the following: '.join(corrections, ', '))
-        endif
-      endif
+      call vam#Log(join(["No repository location info known for plugin ".a:name."."] + maybe_fixes,"\n"))
       return 0
     endif
   endif
