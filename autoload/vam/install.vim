@@ -62,20 +62,18 @@ fun! vam#install#GetRepo(name)
       echom 'Name '.a:name.' expanded to :'.string(repository)
     else
       try
-        let namemap=vamkr#GetNameNrOrNewNameMap()
+        let [new_name, corrections]=vamkr#SuggestNewName(a:name)
       catch /Vim(let):E117:/
+        " If VAM-kr activation policy is never, then the above will yield 
+        " unknown function error
       endtry
-      if exists('namemap') && has_key(namemap, a:name)
-        let dbitem=namemap[a:name]
-        if type(dbitem)==type(0)
-          let nrnameshist=vamkr#GetNrNamesHist()
-          let new_name=get(get(nrnameshist, dbitem, []), 0, 0)
-          call vam#Log("Name ".a:name." used to belong to vimscript #".dbitem.", which is now named ".new_name)
-        else
-          call vam#Log("Plugin ".a:name." was renamed to ".dbitem)
+      if exists('new_name')
+        if new_name isnot 0
+          call vam#Log('Plugin '.a:name.' was renamed to '.new_name)
         endif
-      else
-        call vam#Log("No repository location info known for plugin ".a:name."! (typo?)")
+        if !empty(corrections)
+          call vam#Log('Plugin '.a:name.' is not known to VAM. Guess it may be one of the following: '.join(corrections, ', '))
+        endif
       endif
       return 0
     endif
