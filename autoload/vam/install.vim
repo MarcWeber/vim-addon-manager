@@ -479,13 +479,6 @@ endfun
 " one of those commands. Read doc/vim-addon-manager.txt to learn about the
 " pool of plugin sources. Also see option "known_repos_activation_policy"
 fun! vam#install#LoadKnownRepos()
-  " opts: only used to pass topLevel argument
-
-  " this could be done better: see BUGS section in documantation "force".
-  " Unletting in case of failure is not important because this only
-  " deactivates a warning
-  let g:in_load_known_repositories = 1
-
   let known = s:c['known']
   if known is 0
     return
@@ -507,7 +500,6 @@ fun! vam#install#LoadKnownRepos()
       call vam#ActivateAddons([known], {})
     endif
   endif
-  unlet g:in_load_known_repositories
 endf
 
 " (re)loads pool of known plugins

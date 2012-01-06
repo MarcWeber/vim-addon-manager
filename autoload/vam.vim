@@ -221,12 +221,6 @@ fun! vam#ActivateAddons(...) abort
 
   call call('vam#ActivateRecursively', args)
 
-  " don't know why activating known-repos causes trouble Silex reported it
-  " does. Doing so is not recommended. So prevent it
-  if !exists('g:in_load_known_repositories') && index(args[0],"vim-addon-manager-known-repositories") != -1
-    throw "You should not activate vim-addon-manager-known-repositories. vim-addon-mananger will do so for you when needed. This way Vim starts up faster in the common case. Also try vam#install#LoadKnownRepos() instead."
-  endif
-
   if topLevel
     " deferred tasks:
     " - add addons to runtimepath
