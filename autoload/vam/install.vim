@@ -337,52 +337,56 @@ endf
 
 " completion {{{
 
-" optional arg = 0: only installed
-"          arg = 1: installed and names from known-repositories
-fun! vam#install#KnownAddons(...)
-  let which = a:0 > 0 ? a:1 : ''
-  let list = filter(split(glob(vam#PluginDirByName('*')),"\n"), 'isdirectory(v:val)')
-  let list = map(list, "fnamemodify(v:val,':t')")
-  if which == "installable"
-    call vam#install#LoadPool()
-    call extend(list, keys(s:c['plugin_sources']))
-  elseif which == "installed"
-    " hard to find out. Doing glob is best thing to do..
-  endif
-  " uniq items:
-  let dict = {}
-  for name in list
-    let dict[name] = 1
-  endfor
-  return keys(dict)
+fun! vam#install#KnownAddons()
+  call vam#install#LoadPool()
+  return keys(s:c['plugin_sources'])
 endf
 
-fun! vam#install#DoCompletion(A,L,P,...)
-  let config = a:0 > 0 ? a:1 : ''
-  let names = vam#install#KnownAddons(config)
-
-  let beforeC= a:L[:a:P-1]
-  let word = matchstr(beforeC, '\S*$')
-  " allow glob patterns
-  let word = substitute(word, '\*','.*','g')
-
-  let not_loaded = config == "uninstall"
-    \ ? " && index(keys(s:c['activated_plugins']), v:val) == -1"
-    \ : ''
-
-  return filter(names,'v:val =~? '.string(word) . not_loaded)
-endf
+let s:smartfilters=[
+            \'v:val[:(lstr)]==?str',
+            \'stridx(tolower(v:val), tolower(str))!=-1',
+            \'v:val=~?reg',
+            \'v:val=~?reg2',
+            \]
+let s:postfilters={
+      \'installed':    'isdirectory(vam#PluginDirByName(v:val))',
+      \'notloaded':    '(!has_key(s:c.activated_plugins, v:val)) && '.
+      \                'isdirectory(vam#PluginDirByName(v:val))',
+      \'notinstalled': '!isdirectory(vam#PluginDirByName(v:val))',
+    \}
+fun! vam#install#DoCompletion(A, L, P, ...)
+    let list=sort(vam#install#KnownAddons())
+    let str=matchstr(a:L[:a:P-1], '\S*$')
+    let lstr=len(str)-1
+    let estr=escape(str, '\')
+    let reg='\V'.join(split(estr, '\v[[:punct:]]@<=|[[:punct:]]@='), '\.\*')
+    let reg2='\V'.join(map(split(str,'\v\_.@='),'escape(v:val,"\\")'), '\.\*')
+    let r=[]
+    for filter in s:smartfilters
+        let newlist=[]
+        call map(list, '('.filter.')?(add(r, v:val)):(add(newlist, v:val))')
+        let list=newlist
+    endfor
+    if a:0
+      call filter(r, s:postfilters[a:1])
+    endif
+    return r
+endfun
 
 fun! vam#install#AddonCompletion(...)
-  return call('vam#install#DoCompletion',a:000+["installable"])
-endf
-
-fun! vam#install#InstalledAddonCompletion(...)
   return call('vam#install#DoCompletion',a:000)
 endf
 
+fun! vam#install#NotInstalledAddonCompletion(...)
+  return call('vam#install#DoCompletion',a:000+["notinstalled"])
+endf
+
+fun! vam#install#InstalledAddonCompletion(...)
+  return call('vam#install#DoCompletion',a:000+["installed"])
+endf
+
 fun! vam#install#UninstallCompletion(...)
-  return call('vam#install#DoCompletion',a:000+["uninstall"])
+  return call('vam#install#DoCompletion',a:000+["notloaded"])
 endf
 
 fun! vam#install#UpdateCompletion(...)
