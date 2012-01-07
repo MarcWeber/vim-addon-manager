@@ -478,10 +478,16 @@ MergeSources                                                *VAM-MergeSources*
         Function reference, defines a function that will be used to merge
         user, |VAM-kr| and SCM sources.
         Overrides |VAM-scm_merge_strategy| and |VAM-drop_SCM_sources|. Will be 
-        called with three arguments: user sources (most of time it is an empty 
-        dictionary), non-SCM sources defined in |VAM-kr| and SCM sources also 
-        defined there. If MergeSources function is a dictionary function, it 
-        will be provided an empty dictionary as |self| dictionary.
+        called with five arguments: user sources (most of time it is an empty 
+        dictionary), non-SCM sources defined in |VAM-kr|, SCM sources also 
+        defined there, patch function name and snr_to_name dictionary. Patch 
+        function is a function that being given sources dictionary (like one 
+        of first three arguments) and snr_to_name dictionary patches first 
+        adding missing information (like missing dependencies). Last 
+        dictionary is a map of vim.org script numbers to VAM-kr names.
+
+        If MergeSources function is a dictionary function, it will be provided 
+        an empty dictionary as |self| dictionary.
 
         An Example can be found in this file.
 
@@ -544,8 +550,10 @@ repository                                             *addon-info-repository*
                  VCS. If `type' key contains an empty string, then it should
                  contain location of the archive.
         script-type
-                 One of `plugin', `syntax', or `indent'. The .vim file will be
-                 moved into the specific subdirectory.
+                 One of `plugin', `syntax', `color scheme', or `indent'. The 
+                 .vim file will be moved into the specific subdirectory.
+                 Also accepts `after/syntax' which is a hack that makes VAM 
+                 move source into after/syntax directory.
         archive_name
                  If `type' key contains an empty string, then archive which
                  location is described by the `url' key will be saved in file
@@ -603,6 +611,9 @@ repository                                             *addon-info-repository*
                 only directory that is not special) or will not strip anything
                 at all. Recognized special directories: [ft]plugin, autoload,
                 colors, compiler, indent, keymap, lang, print, spell, syntax.
+        addon-info
+                Contains addon information in case plugin does not supply its 
+                own addon-info file.
 
 dependencies                                         *addon-info-dependencies*
         Describes plugins that are required for the plugin, must contain
