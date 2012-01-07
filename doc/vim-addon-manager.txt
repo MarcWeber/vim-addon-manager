@@ -896,6 +896,8 @@ what's going to happen.
 ==============================================================================
 12. Troubleshooting and known bugs                      *VAM-trouble-shooting*
 
+  Think about how to integrate ideas found in ipi http://www.vim.org/scripts/script.php?script_id=3809
+
   Runtimepath manipulation should be separated from installation / update
   logic. This way you can have different implementation for updating plugins
   eg one being written in python which you can run from commandline.
