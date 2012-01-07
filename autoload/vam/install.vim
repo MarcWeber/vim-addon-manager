@@ -8,6 +8,7 @@ let s:c['do_diff'] = get(s:c, 'do_diff', 1)
 let s:c['known'] = get(s:c,'known','vim-addon-manager-known-repositories')
 let s:c['MergeSources'] = get(s:c, 'MergeSources', 'vam_known_repositories#MergeSources')
 let s:c['pool_fun'] = get(s:c, 'pool_fun', 'vam#install#Pool')
+let s:c['name_rewriting'] = get(s:c, 'name_rewriting', {})
 
 call extend(s:c.name_rewriting, {'99git+github': 'vam#install#RewriteName'})
 
