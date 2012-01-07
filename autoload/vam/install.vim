@@ -3,7 +3,11 @@
 let s:curl = exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o'
 exec vam#DefineAndBind('s:c','g:vim_addon_manager','{}')
 
-let s:c.name_rewriting = get(s:c, 'name_rewriting', {})
+let s:c['change_to_unix_ff'] = get(s:c, 'change_to_unix_ff', (g:os=~#'unix'))
+let s:c['do_diff'] = get(s:c, 'do_diff', 1)
+let s:c['known'] = get(s:c,'known','vim-addon-manager-known-repositories')
+let s:c['MergeSources'] = get(s:c, 'MergeSources', 'vam_known_repositories#MergeSources')
+let s:c['pool_fun'] = get(s:c, 'pool_fun', 'vam#install#Pool')
 
 call extend(s:c.name_rewriting, {'99git+github': 'vam#install#RewriteName'})
 
@@ -472,49 +476,6 @@ fun! vam#install#Copy(f,t)
   endif
 endfun
 
-" fun! vam#install#LoadKnownRepos(opts, ...):
-" OLD code: replaced by vam_known_repositories#Pool() See VAM-kr
-
-" VAM does call this function for you when using {Activate/Install}Addon() or
-" one of those commands. Read doc/vim-addon-manager.txt to learn about the
-" pool of plugin sources. Also see option "known_repos_activation_policy"
-fun! vam#install#LoadKnownRepos()
-  let known = s:c['known']
-  if known is 0
-    return
-  endif
-  let reason = a:0 > 0 ? a:1 : 'get more plugin sources'
-  if 0 == get(s:c['activated_plugins'], known, 0)
-    let policy=get(s:c, 'known_repos_activation_policy', 'autoload')
-    if policy==?"ask"
-      let reply = s:confirm('Activate plugin '.known.' to '.reason."?", "&Yes\n&No\nN&ever (during session)")
-    elseif policy==?"never"
-      let reply=2
-    else
-      let reply=1
-    endif
-    if reply == 3 | let s:c.known_repos_activation_policy = "never" | endif
-    if reply == 1
-      " don't pass opts so that new_runtime_paths is not set which will
-      " trigger topLevel adding -known-repos to rtp immediately
-      call vam#ActivateAddons([known], {})
-    endif
-  endif
-endf
-
-" (re)loads pool of known plugins
-fun! vam#install#LoadPool(...)
-  let force = a:0 > 0 ? a:1 : 0
-  if force || !has_key(s:c, 'pool_loaded')
-    call vam#install#LoadKnownRepos()
-
-    " update plugin_sources
-    let s:c.plugin_sources = call(s:c.pool_fun, [], {})
-
-    let s:c.pool_loaded = 1
-  endif
-endf
-
 fun! vam#install#MergeTarget()
   return split(&runtimepath,",")[0].'/after/plugin/vim-addon-manager-merged.vim'
 endf
@@ -650,6 +611,48 @@ fun! vam#install#UnmergePluginFiles()
   endfor
   call delete(vam#install#MergeTarget())
 endfun
+
+"{{{1 Pool
+" VAM does call this function for you when using {Activate/Install}Addon() or
+" one of those commands. Read doc/vim-addon-manager.txt to learn about the
+" pool of plugin sources. Also see option "known_repos_activation_policy"
+fun! vam#install#LoadKnownRepos()
+  let known = s:c['known']
+  let reason = a:0 > 0 ? a:1 : 'get more plugin sources'
+  if 0 == get(s:c['activated_plugins'], known, 0)
+    let policy=get(s:c, 'known_repos_activation_policy', 'autoload')
+    if policy==?"ask"
+      let reply = s:confirm('Activate plugin '.known.' to '.reason."?", "&Yes\n&No\nN&ever (during session)")
+    elseif policy==?"never"
+      let reply=2
+    else
+      let reply=1
+    endif
+    if reply == 3 | let s:c.known_repos_activation_policy = "never" | endif
+    if reply == 1
+      " don't pass opts so that new_runtime_paths is not set which will
+      " trigger topLevel adding -known-repos to rtp immediately
+      call vam#ActivateAddons([known], {})
+    endif
+  endif
+endfun
+
+fun! vam#install#Pool()
+  call vam#install#LoadKnownRepos()
+  return vam_known_repositories#Pool()
+endfun
+
+" (re)loads pool of known plugins
+fun! vam#install#LoadPool(...)
+  let force = a:0 > 0 ? a:1 : 0
+  if force || !has_key(s:c, 'pool_loaded')
+    " update plugin_sources
+    let s:c.plugin_sources = call(s:c.pool_fun, [], {})
+
+    let s:c.pool_loaded = 1
+  endif
+endf
+"}}}1
 
 
 if g:is_win

@@ -426,8 +426,6 @@ known_repos_activation_policy
 known                                                              *VAM-known*
         String, specifies the name of plugin which provides list of
         repositories. Default is vim-addon-manager-known-repositories.
-        If you overwrite |VAM-pool_fun| and do not want VAM-kr to get loaded 
-        set this to 0 instead of a real name.
 change_to_unix_ff                                      *VAM-change_to_unix_ff*
         Remove CR symbols before LF symbols in any vim files (changes dos and
         mixed dos/unix line endings to unix line endings). Is on by default if
@@ -459,7 +457,7 @@ pool_fun                                                        *VAM-pool_fun*
         Name or reference of a function that must return dictionary contains 
         {{plugin-name}: {repository}} ({repository} is described under 
         |addon-info-repository|) map.
-        Default is vam_known_repositories#Pool.
+        Default is "vam#install#Pool".
 
 The following options are used by vim-addon-manager-known-repositories, not by
 VAM itself. So if you set |vim-addon-manager-known| to another value they may
@@ -472,7 +470,6 @@ drop_bzr_sources                                        *VAM-drop_bzr_sources*
         Determines whether given SCM sources should be dropped before merging
         scm sources by |scm_merge_strategy|. This way you can force using
         www.vim.org sources. But you may get different plugin versions
-
 scm_merge_strategy                                    *VAM-scm_merge_strategy*
         String, valid values: `force' (default), `keep' and `never'. Defines,
         whether SCM sources should be used instead of www.vim.org sources:

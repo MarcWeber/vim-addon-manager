@@ -41,15 +41,8 @@ unlet s:d
 
 " ensure we have absolute paths (windows doesn't like ~/.. ) :
 let s:c['plugin_root_dir'] = expand(s:c['plugin_root_dir'])
-let s:c['known'] = get(s:c,'known','vim-addon-manager-known-repositories')
-let s:c['change_to_unix_ff'] = get(s:c, 'change_to_unix_ff', (g:os=~#'unix'))
-let s:c['do_diff'] = get(s:c, 'do_diff', 1)
 let s:c['dont_source'] = get(s:c, 'dont_source', 0)
 let s:c['plugin_dir_by_name'] = get(s:c, 'plugin_dir_by_name', 'vam#DefaultPluginDirByName')
-" the function returning the list of known repositories
-let s:c['MergeSources'] = get(s:c, 'MergeSources', 'vam_known_repositories#MergeSources')
-let s:c['pool_fun'] = get(s:c, 'pool_fun', 'vam_known_repositories#Pool')
-let s:c['renamings_fun'] = get(s:c, 'renamings_fun', 'vamkr#rename_dict_parts_generated#Renamings')
 
 " for testing it is necessary to avoid the "Press enter to continue lines"
 " (cygwin?). Thus provide an option making all shell commands silent
@@ -77,7 +70,7 @@ endif
 fun! vam#VerifyIsJSON(s)
   " You must allow single-quoted strings in order for writefile([string()]) that 
   " adds missing addon information to work
-  let scalarless_body = substitute(a:s, '\v\"%(\\.|[^"\\])*\"|\''%(''{2}|[^''])*\''|true|false|null|[+-]?\d+%(\.\d+%([Ee][+-]?\d+)?)?', '', 'g')
+  let scalarless_body = substitute(a:s, '\v\"%(\\.|[^"\\])*\"|\''%(\''{2}|[^''])*\''|true|false|null|[+-]?\d+%(\.\d+%([Ee][+-]?\d+)?)?', '', 'g')
   return scalarless_body !~# "[^,:{}[\\] \t]"
 endf
 
