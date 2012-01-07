@@ -44,6 +44,9 @@ let s:c['plugin_root_dir'] = expand(s:c['plugin_root_dir'])
 let s:c['dont_source'] = get(s:c, 'dont_source', 0)
 let s:c['plugin_dir_by_name'] = get(s:c, 'plugin_dir_by_name', 'vam#DefaultPluginDirByName')
 
+" More options that are used for plugins’ installation are listed in 
+" autoload/vam/install.vim
+
 " for testing it is necessary to avoid the "Press enter to continue lines"
 " (cygwin?). Thus provide an option making all shell commands silent
 " However don't set this to 1 by default. If something goes wrong I want users
