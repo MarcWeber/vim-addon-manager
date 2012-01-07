@@ -76,9 +76,10 @@ fi
 done
 #▶1 Update
 UPDATETGZ2HEADER="\
-:let desc=g:vim_addon_manager.plugin_sources.vam_test_tgz2
+:let desc=copy(g:vim_addon_manager.plugin_sources.vam_test_tgz2)
 :let desc.version='0.1.8'
-:let desc.url=desc.url[:-5].'-nodoc.tar.bz2'"
+:let desc.url=desc.url[:-5].'-nodoc.tar.bz2'
+:let patch={'vam_test_tgz2': desc}"
 #▶2 Update activate plugin
 T=update-tgz2
 cp activate-tgz2.in $T.in
@@ -112,10 +113,11 @@ addtofile $T.ok install-tgz2.ok install-tgz2.ok
 T=update-tgz2-dodiff
 cp activate-tgz2.in $T.in
 cat >> $T.in << EOF
-:let desc=g:vim_addon_manager.plugin_sources.vam_test_tgz2
+:let desc=copy(g:vim_addon_manager.plugin_sources.vam_test_tgz2)
 :let desc.version='0.1.8'
 :let desc.archive_name=matchstr(desc.url, '\v[^/]+$')
 :let desc.url=desc.url[:-5].'-2.tgz'
+:let patch={'vam_test_tgz2': desc}
 :let file=g:vim_addon_manager.plugin_root_dir."/vam_test_tgz2/plugin/frawor.vim"
 :let g:vim_addon_manager.do_diff=1
 :execute "edit ".fnameescape(file)

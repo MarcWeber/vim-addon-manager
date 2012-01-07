@@ -3,7 +3,13 @@
 let s:curl = exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o'
 exec vam#DefineAndBind('s:c','g:vim_addon_manager','{}')
 
-let s:c.name_rewriting = get(s:c, 'name_rewriting', {})
+let s:c['change_to_unix_ff'] = get(s:c, 'change_to_unix_ff', (g:os=~#'unix'))
+let s:c['do_diff'] = get(s:c, 'do_diff', 1)
+let s:c['known'] = get(s:c,'known','vim-addon-manager-known-repositories')
+let s:c['MergeSources'] = get(s:c, 'MergeSources', 'vam_known_repositories#MergeSources')
+let s:c['pool_fun'] = get(s:c, 'pool_fun', 'vam#install#Pool')
+let s:c['name_rewriting'] = get(s:c, 'name_rewriting', {})
+
 call extend(s:c.name_rewriting, {'99git+github': 'vam#install#RewriteName'})
 
 fun! s:confirm(msg, ...)
@@ -45,6 +51,45 @@ fun! vam#install#RewriteName(name)
   endif
 endfun
 
+fun! vam#install#GetRepo(name, opts)
+  if a:name isnot# s:c['known'] | call vam#install#LoadPool() |endif
+
+  let repository = get(s:c['plugin_sources'], a:name, get(a:opts, a:name, 0))
+  if repository is 0
+    for key in sort(keys(s:c.name_rewriting))
+      let repository=call(s:c.name_rewriting[key], [a:name], {})
+      if type(repository) == type({})
+        break
+      endif
+      unlet repository
+    endfor
+    if exists('repository')
+      echom 'Name '.a:name.' expanded to :'.string(repository)
+    else
+      " try to find typos and renamings. Tell user about failure
+      let maybe_fixes = []
+      let name_ = vam#utils#TypoFix(a:name)
+      for x in keys(s:c.plugin_sources)
+        if vam#utils#TypoFix(x) == name_
+          call add(maybe_fixes, a:name.' might be a typo, did you mean: '.x.' ?')
+        endif
+      endfor
+      " try finding new name (VAM-kr only)
+      try
+        " using try because pool implementations other then VAM-kr could be
+        " used
+        call extend(maybe_fixes, vamkr#SuggestNewName(a:name))
+      catch /Vim(call):E117:/
+        " If VAM-kr activation policy is never, then the above will yield 
+        " unknown function error
+      endtry
+      call vam#Log(join(["No repository location info known for plugin ".a:name."."] + maybe_fixes,"\n"))
+      return 0
+    endif
+  endif
+  return repository
+endfun
+
 " Install let's you install plugins by passing the url of a addon-info file
 " This preprocessor replaces the urls by the plugin-names putting the
 " repository information into the global dict
@@ -80,30 +125,11 @@ fun! vam#install#Install(toBeInstalledList, ...)
   let toBeInstalledList = vam#install#ReplaceAndFetchUrls(a:toBeInstalledList)
   let opts = a:0 == 0 ? {} : a:1
   let auto_install = s:c['auto_install'] || get(opts,'auto_install',0)
-  for name in toBeInstalledList
+  for name in filter(copy(toBeInstalledList), '!vam#IsPluginInstalled(v:val)')
+    let repository = vam#install#GetRepo(name, opts)
     " make sure all sources are known
-    if vam#IsPluginInstalled(name)
+    if repository is 0
       continue
-    endif
-    if name != s:c['known'] | call vam#install#LoadKnownRepos(opts) | endif
-
-    let repository = get(s:c['plugin_sources'], name, get(opts, name,0))
-
-    if type(repository) == type(0) && repository == 0
-      unlet repository
-      for key in sort(keys(s:c.name_rewriting))
-        let repository=call(s:c.name_rewriting[key], [name], {})
-        if type(repository) == type({})
-          break
-        endif
-        unlet repository
-      endfor
-      if exists('repository')
-        echom 'Name '.name.' expanded to :'.string(repository)
-      else
-        call vam#Log( "No repository location info known for plugin ".name."! (typo?)")
-        continue " due to abort this won't take place ?
-      endif
     endif
 
     let confirmed = 0
@@ -138,8 +164,8 @@ fun! vam#install#Install(toBeInstalledList, ...)
       let infoFile = vam#AddonInfoFile(name)
       call vam#install#Checkout(pluginDir, repository)
 
-      if !filereadable(infoFile) && has_key(s:c['missing_addon_infos'], name)
-        call writefile([s:c['missing_addon_infos'][name]], infoFile)
+      if !filereadable(infoFile) && has_key(repository, 'addon-info')
+        call writefile([string(repository['addon-info'])], infoFile)
       endif
 
       " install dependencies
@@ -176,7 +202,7 @@ fun! vam#install#UpdateAddon(name)
   "Next, try updating plugin by archive
 
   " we have to find out whether there is a new version:
-  call vam#install#LoadKnownRepos({})
+  call vam#install#LoadPool()
   let repository = get(s:c['plugin_sources'], a:name, {})
   if empty(repository)
     call vam#Log("Don't know how to update ".a:name." because it is not contained in plugin_sources")
@@ -284,13 +310,16 @@ endf
 
 fun! vam#install#Update(list)
   let list = a:list
-  if empty(list) && s:confirm('Update all loaded plugins?')
-    call vam#install#LoadKnownRepos({}, ' so that its updated as well')
-    " include vim-addon-manager in list only if writeable (non gentoo system
-    " wide installation)
-    if filewritable(vam#PluginDirByName('vim-addon-manager'))==2
-      call vam#ActivateAddons(['vim-addon-manager'])
+
+  if s:c.known isnot 0
+    if vam#install#UpdateAddon(s:c.known)
+      call vam#install#HelpTags(s:c.known)
     endif
+  endif
+  " refresh sources:
+  call vam#install#LoadPool(1)
+
+  if empty(list) && s:confirm('Update all loaded plugins?')
     let list = keys(s:c['activated_plugins'])
   endif
   let failed = []
@@ -315,7 +344,7 @@ fun! vam#install#KnownAddons(...)
   let list = filter(split(glob(vam#PluginDirByName('*')),"\n"), 'isdirectory(v:val)')
   let list = map(list, "fnamemodify(v:val,':t')")
   if which == "installable"
-    call vam#install#LoadKnownRepos({})
+    call vam#install#LoadPool()
     call extend(list, keys(s:c['plugin_sources']))
   elseif which == "installed"
     " hard to find out. Doing glob is best thing to do..
@@ -447,45 +476,6 @@ fun! vam#install#Copy(f,t)
     call vam#utils#RunShell('cp -r $ $', a:f, a:t)
   endif
 endfun
-
-
-" VAM does call this function for you when using {Activate/Install}Addon() or
-" one of those commands. Read doc/vim-addon-manager.txt to learn about the
-" pool of plugin sources. Also see option "known_repos_activation_policy"
-fun! vam#install#LoadKnownRepos(opts, ...)
-  " opts: only used to pass topLevel argument
-
-  " this could be done better: see BUGS section in documantation "force".
-  " Unletting in case of failure is not important because this only
-  " deactivates a warning
-  let g:in_load_known_repositories = 1
-
-  let known = s:c['known']
-  let reason = a:0 > 0 ? a:1 : 'get more plugin sources'
-  if 0 == get(s:c['activated_plugins'], known, 0)
-    let policy=get(s:c, 'known_repos_activation_policy', 'autoload')
-    if policy==?"ask"
-      let reply = s:confirm('Activate plugin '.known.' to '.reason."?", "&Yes\n&No\nN&ever (during session)")
-    elseif policy==?"never"
-      let reply=2
-    else
-      let reply=1
-    endif
-    if reply == 3 | let s:c.known_repos_activation_policy = "never" | endif
-    if reply == 1
-      " don't pass opts so that new_runtime_paths is not set which will
-      " trigger topLevel adding -known-repos to rtp immediately
-      call vam#ActivateAddons([known], {})
-      if has('vim_starting')
-        " This is not done in .vimrc because Vim loads plugin/*.vim files after
-        " having finished processing .vimrc. So do it manually
-        exec 'source '.vam#PluginDirByName(known).'/plugin/vim-addon-manager-known-repositories.vim'
-      endif
-    endif
-  endif
-  unlet g:in_load_known_repositories
-endf
-
 
 fun! vam#install#MergeTarget()
   return split(&runtimepath,",")[0].'/after/plugin/vim-addon-manager-merged.vim'
@@ -622,6 +612,49 @@ fun! vam#install#UnmergePluginFiles()
   endfor
   call delete(vam#install#MergeTarget())
 endfun
+
+"{{{1 Pool
+" VAM does call this function for you when using {Activate/Install}Addon() or
+" one of those commands. Read doc/vim-addon-manager.txt to learn about the
+" pool of plugin sources. Also see option "known_repos_activation_policy"
+fun! vam#install#LoadKnownRepos()
+  let known = s:c['known']
+  let reason = a:0 > 0 ? a:1 : 'get more plugin sources'
+  if 0 == get(s:c['activated_plugins'], known, 0)
+    let policy=get(s:c, 'known_repos_activation_policy', 'autoload')
+    if policy==?"ask"
+      let reply = s:confirm('Activate plugin '.known.' to '.reason."?", "&Yes\n&No\nN&ever (during session)")
+    elseif policy==?"never"
+      let reply=2
+    else
+      let reply=1
+    endif
+    if reply == 3 | let s:c.known_repos_activation_policy = "never" | endif
+    if reply == 1
+      " don't pass opts so that new_runtime_paths is not set which will
+      " trigger topLevel adding -known-repos to rtp immediately
+      call vam#ActivateAddons([known], {})
+    endif
+  endif
+endfun
+
+" The default pool of know plugins for VAM: vim-addon-manager-known-repositories
+fun! vam#install#Pool()
+  call vam#install#LoadKnownRepos()
+  return vam_known_repositories#Pool()
+endfun
+
+" (re)loads pool of known plugins
+fun! vam#install#LoadPool(...)
+  let force = a:0 > 0 ? a:1 : 0
+  if force || !has_key(s:c, 'pool_loaded')
+    " update plugin_sources
+    let s:c.plugin_sources = call(s:c.pool_fun, [], {})
+
+    let s:c.pool_loaded = 1
+  endif
+endf
+"}}}1
 
 
 if g:is_win

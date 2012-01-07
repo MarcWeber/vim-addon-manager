@@ -388,4 +388,12 @@ fun! vam#utils#TempDir(name)
   " expand make \ out of / on Windows
   return expand(s:tmpDir.'/'.a:name)
 endf
+
+" tries finding a new name if a plugin was renamed.
+" Also tries to provide suggestions if you made trivial typos (case,
+" forgetting _ special characters and such)
+fun! vam#utils#TypoFix(name)
+   return substitute(tolower(a:name), '[_/\-]*', '', 'g')
+endf
+
 " vim: et ts=8 sts=2 sw=2
