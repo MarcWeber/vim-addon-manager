@@ -31,7 +31,6 @@ let s:c['auto_install'] = get(s:c,'auto_install', 0)
 " repository locations:
 let s:c['plugin_sources'] = get(s:c,'plugin_sources', {})
 " if a plugin has an item here the dict value contents will be written as plugin info file
-let s:c['missing_addon_infos'] = get(s:c,'missing_addon_infos', {})
 let s:c['activated_plugins'] = get(s:c,'activated_plugins', {})
 
 " gentoo users may install VAM system wide. In that case s:d is not writeable.
@@ -42,11 +41,11 @@ unlet s:d
 
 " ensure we have absolute paths (windows doesn't like ~/.. ) :
 let s:c['plugin_root_dir'] = expand(s:c['plugin_root_dir'])
-let s:c['known'] = get(s:c,'known','vim-addon-manager-known-repositories')
-let s:c['change_to_unix_ff'] = get(s:c, 'change_to_unix_ff', (g:os=~#'unix'))
-let s:c['do_diff'] = get(s:c, 'do_diff', 1)
 let s:c['dont_source'] = get(s:c, 'dont_source', 0)
 let s:c['plugin_dir_by_name'] = get(s:c, 'plugin_dir_by_name', 'vam#DefaultPluginDirByName')
+
+" More options that are used for plugins’ installation are listed in 
+" autoload/vam/install.vim
 
 " for testing it is necessary to avoid the "Press enter to continue lines"
 " (cygwin?). Thus provide an option making all shell commands silent
@@ -72,8 +71,10 @@ else
 endif
 
 fun! vam#VerifyIsJSON(s)
-  let stringless_body = substitute(a:s,'"\%(\\.\|[^"\\]\)*"','','g')
-  return stringless_body !~# "[^,:{}\\[\\]0-9.\\-+Eaeflnr-u \t]"
+  " You must allow single-quoted strings in order for writefile([string()]) that 
+  " adds missing addon information to work
+  let scalarless_body = substitute(a:s, '\v\"%(\\.|[^"\\])*\"|\''%(\''{2}|[^''])*\''|true|false|null|[+-]?\d+%(\.\d+%([Ee][+-]?\d+)?)?', '', 'g')
+  return scalarless_body !~# "[^,:{}[\\] \t]"
 endf
 
 " use join so that you can break the dict into multiple lines. This makes
@@ -87,14 +88,12 @@ fun! vam#ReadAddonInfo(path)
   " using eval is evil!
   let body = join(readfile(a:path),"")
 
-  if s:c.dont_source && '1' != system('php', '<?php echo is_array(json_decode(file_get_contents('.string(a:path).'), true));')
-    call vam#Log( "Invalid JSON in ".a:path."!")
-    return {}
-  endif
-
   if vam#VerifyIsJSON(body)
-      " using eval is now safe!
-      return eval(body)
+    let true=1
+    let false=0
+    let null=''
+    " using eval is now safe!
+    return eval(body)
   else
     call vam#Log( "Invalid JSON in ".a:path."!")
     return {}
@@ -221,12 +220,6 @@ fun! vam#ActivateAddons(...) abort
 
   call call('vam#ActivateRecursively', args)
 
-  " don't know why activating known-repos causes trouble Silex reported it
-  " does. Doing so is not recommended. So prevent it
-  if !exists('g:in_load_known_repositories') && index(args[0],"vim-addon-manager-known-repositories") != -1
-    throw "You should not activate vim-addon-manager-known-repositories. vim-addon-mananger will do so for you when needed. This way Vim starts up faster in the common case. Also try vam#install#LoadKnownRepos() instead."
-  endif
-
   if topLevel
     " deferred tasks:
     " - add addons to runtimepath
@@ -287,7 +280,7 @@ fun! vam#DisplayAddonInfo(name)
 endfun
 
 fun! vam#DisplayAddonsInfo(names)
-  call vam#install#LoadKnownRepos({})
+  call vam#install#LoadPool()
   for name in a:names
     call vam#DisplayAddonInfo(name)
   endfor
@@ -332,7 +325,7 @@ fun! vam#AddonInfoFile(name)
     endif
   endfor
   return default
-endf
+endfun
 
 " looks like an error but is not. Catches users attention. Logs to :messages
 fun! vam#Log(s, ...)

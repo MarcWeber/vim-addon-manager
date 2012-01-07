@@ -49,7 +49,7 @@ fun! vam#test#TestUnpack(test) abort
 
   let tmpDir = vam#utils#TempDir("vim-addon-manager-test")
 
-  call vam#install#LoadKnownRepos({})
+  call vam#install#LoadPool()
 
   for [k,v] in items(tests)
     if k !~ a:test | continue | endif
@@ -73,7 +73,7 @@ endf
 " tests that creating and applying diffs when updating archive plugins (found
 " on www.vim.org) works as expected.
 fun! vam#test#TestUpdate(case) abort
-  call vam#install#LoadKnownRepos({})
+  call vam#install#LoadPool()
   let tmpDir = vam#utils#TempDir("vim-addon-manager-test")
   let plugin_name = "www_vim_org_update_test"
   let plugin_source_file = tmpDir.'/'.plugin_name.'.vim'
