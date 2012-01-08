@@ -447,7 +447,7 @@ plugin_dir_by_name                                    *VAM-plugin_dir_by_name*
         Function name or function reference that transforms plugin names into
         absolute paths plugins are to be installed into. Function must return
         path without trailing path separators or |VAM-do_diff| will break.
-        Default is "vam#DefaultPluginDirByName".
+        Default is "vam#DefaultPluginDirFromName".
         Note: If not all plugins are contained in the same direcotry
               completion for |:UninstallAddons| breaks because simple globbing
               is used.

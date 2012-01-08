@@ -42,7 +42,7 @@ unlet s:d
 " ensure we have absolute paths (windows doesn't like ~/.. ) :
 let s:c['plugin_root_dir'] = expand(s:c['plugin_root_dir'])
 let s:c['dont_source'] = get(s:c, 'dont_source', 0)
-let s:c['plugin_dir_by_name'] = get(s:c, 'plugin_dir_by_name', 'vam#DefaultPluginDirByName')
+let s:c['plugin_dir_by_name'] = get(s:c, 'plugin_dir_by_name', 'vam#DefaultPluginDirFromName')
 
 " More options that are used for plugins’ installation are listed in 
 " autoload/vam/install.vim
@@ -101,22 +101,22 @@ fun! vam#ReadAddonInfo(path)
 
 endf
 
-fun! vam#DefaultPluginDirByName(name)
+fun! vam#DefaultPluginDirFromName(name)
   " this function maps addon names to their storage location. \/: are replaced
   " by - (See name rewriting)
   return s:c.plugin_root_dir.'/'.substitute(a:name, '[\\/:]\+', '-', 'g')
 endfun
-fun! vam#PluginDirByName(...)
+fun! vam#PluginDirFromName(...)
   return call(s:c.plugin_dir_by_name, a:000, {})
 endf
 fun! vam#PluginRuntimePath(name)
   let info = vam#AddonInfo(a:name)
-  return vam#PluginDirByName(a:name).(has_key(info, 'runtimepath') ? '/'.info['runtimepath'] : '')
+  return vam#PluginDirFromName(a:name).(has_key(info, 'runtimepath') ? '/'.info['runtimepath'] : '')
 endf
 
 " doesn't check dependencies!
 fun! vam#IsPluginInstalled(name)
-  let d = vam#PluginDirByName(a:name)
+  let d = vam#PluginDirFromName(a:name)
 
   " this will be dropped in about 12 months which is end of 2012
   let old_path=s:c.plugin_root_dir.'/'.substitute(a:name, '[\\/:]\+', '', 'g')
@@ -303,7 +303,7 @@ augroup end
 fun! vam#Hack()
   " now source after/plugin/**/*.vim files explicitly. Vim doesn't do it (hack!)
   for p in keys(s:c['activated_plugins'])
-      call vam#GlobThenSource(vam#PluginDirByName(p).'/after/plugin/**/*.vim')
+      call vam#GlobThenSource(vam#PluginDirFromName(p).'/after/plugin/**/*.vim')
   endfor
 endf
 
@@ -316,7 +316,7 @@ fun! vam#AddonInfoFile(name)
   "   - json says all about its contents (Let's hope all browsers still render
   "     it in a readable way
 
-  let p = vam#PluginDirByName(a:name)
+  let p = vam#PluginDirFromName(a:name)
   let default = p.'/addon-info.json'
   let choices = [ default , p.'/plugin-info.txt', p.'/'.a:name.'-addon-info.txt']
   for f in choices

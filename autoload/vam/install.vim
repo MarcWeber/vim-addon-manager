@@ -138,7 +138,7 @@ fun! vam#install#Install(toBeInstalledList, ...)
     call vam#Log('Script Nr: '.get(repository, 'vim_script_nr', 'none'), 'None') 
 
     " tell user about target directory. Some users don't get it the first time..
-    let pluginDir = vam#PluginDirByName(name)
+    let pluginDir = vam#PluginDirFromName(name)
     echom "Target: ".pluginDir
 
     let d = get(repository, 'deprecated', '')
@@ -187,7 +187,7 @@ endf
 " this function will be refactored slightly soon by either me or ZyX.
 fun! vam#install#UpdateAddon(name)
   call vam#Log( "Considering ".a:name." for update" ,'type','unknown')
-  let pluginDir = vam#PluginDirByName(a:name)
+  let pluginDir = vam#PluginDirFromName(a:name)
   " First, try updating using VCS. Return 1 if everything is ok, 0 if exception 
   " is thrown
   try
@@ -349,10 +349,10 @@ let s:smartfilters=[
             \'v:val=~?reg2',
             \]
 let s:postfilters={
-      \'installed':    'isdirectory(vam#PluginDirByName(v:val))',
+      \'installed':    'isdirectory(vam#PluginDirFromName(v:val))',
       \'notloaded':    '(!has_key(s:c.activated_plugins, v:val)) && '.
-      \                'isdirectory(vam#PluginDirByName(v:val))',
-      \'notinstalled': '!isdirectory(vam#PluginDirByName(v:val))',
+      \                'isdirectory(vam#PluginDirFromName(v:val))',
+      \'notinstalled': '!isdirectory(vam#PluginDirFromName(v:val))',
     \}
 fun! vam#install#DoCompletion(A, L, P, ...)
     let list=sort(vam#install#KnownAddons())
@@ -401,14 +401,14 @@ fun! vam#install#UninstallAddons(list)
     echo "No plugins selected. If you ran UninstallNotLoadedAddons use <tab> or <c-d> to get a list of not loaded plugins."
     return
   endif
-  call map(list, 'vam#PluginDirByName(v:val)')
+  call map(list, 'vam#PluginDirFromName(v:val)')
   if s:confirm('Will now remove '.join(list, ', ').'. Confirm?')
     call map(list, 'vam#utils#RmFR(v:val)')
   endif
 endf
 
 fun! vam#install#HelpTags(name)
-  let d=vam#PluginDirByName(a:name).'/doc'
+  let d=vam#PluginDirFromName(a:name).'/doc'
   if isdirectory(d) | exec 'helptags '.d | endif
 endf
 
