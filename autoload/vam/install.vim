@@ -56,6 +56,7 @@ fun! vam#install#GetRepo(name, opts)
 
   let repository = get(s:c['plugin_sources'], a:name, get(a:opts, a:name, 0))
   if repository is 0
+    unlet repository
     for key in sort(keys(s:c.name_rewriting))
       let repository=call(s:c.name_rewriting[key], [a:name], {})
       if type(repository) == type({})
