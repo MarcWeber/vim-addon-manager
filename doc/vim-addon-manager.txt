@@ -110,7 +110,7 @@ Add the following to your .vimrc >
           " where 'pluginA' could be "git://" "github:YourName" or "snipmate-snippets" see vam#install#RewriteName()
           " also see section "5. Installing plugins" in VAM's documentation
           " which will tell you how to find the plugin names of a plugin
-        endf
+        endfun
         call SetupVAM()
         " experimental: run after gui has been started (gvim) [3]
         " option1:  au VimEnter * call SetupVAM()
