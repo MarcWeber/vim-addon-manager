@@ -5,6 +5,11 @@ The author (Jamessan) is fine with this project sharing the same name.
 
 VIM ADDON MANAGER (VAM)
 =======================
+1) installation, configuration:
+   http://github.com/MarcWeber/vim-addon-manager/blob/master/doc/vim-addon-manager.txt)
+
+The following text is a common github README file so that github visitors
+immediately see what VAM is about:
 
 VAM installs and updates additional scripts augmenting the feature list of the
 text editor Vim.
@@ -52,7 +57,6 @@ Feature list:
 
 
 Continue reading the documentation: doc/vim-addon-manager.txt (online:
-http://github.com/MarcWeber/vim-addon-manager/blob/master/doc/vim-addon-manager.txt)
 
 I could quote several people who told me how "awesome" this small tool is.
 But I prefer letting you explore it yourself.

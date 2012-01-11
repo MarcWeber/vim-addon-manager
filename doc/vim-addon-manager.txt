@@ -78,8 +78,15 @@ Windows users: see |VAM-windows|.
 Gentoo users: see |VAM-gentoo|.
 linux/cygwin/OSX (anything support /bin/sh like shells) users:
 
-You install plugins by adding names to |vam#ActivateAddons()|
-recommended setup: make .vimrc checking out VAM:
+The recommended setup is shown below. It installs VAM if it is not on your disk
+using a short shell script.
+
+Then it adds its PATH to Vim's |runtimepath|. If you don't like vam_install_path
+default setting change it.
+
+You make VAM install plugins by adding their names to the list in
+ |vam#ActivateAddons()|. Try understanding the comments. They'll help you get
+started fast.
 
 Add the following to your .vimrc >
 
