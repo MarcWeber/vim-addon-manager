@@ -115,7 +115,7 @@ Add the following to your .vimrc >
           call vam#ActivateAddons([], {'auto_install' : 0})
           " sample: call vam#ActivateAddons(['pluginA','pluginB', ...], {'auto_install' : 0})
           " where 'pluginA' could be "git://" "github:YourName" or "snipmate-snippets" see vam#install#RewriteName()
-          " also see section "5. Installing plugins" in VAM's documentation
+          " also see section "2.2. names of addons and addon sources" in VAM's documentation
           " which will tell you how to find the plugin names of a plugin
         endfun
         call SetupVAM()
