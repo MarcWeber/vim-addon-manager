@@ -728,11 +728,12 @@ function! vam#install#SplitAtCursor()
   return [strpart(line,0,pos), strpart(line, pos, len(line)-pos)]
 endfunction
 
+
 fun! vam#install#CompleteAddonName(findstart, base)
   if a:findstart
     let [bc,ac] = vam#install#SplitAtCursor()
-    let s:match_text = matchstr(bc, "\zs[^ '\"()[\]{}\t ]*$")
-    let s:start = len(bc)-len(s:match_text)
+    let s:match_text = matchstr(bc, "\\zs[^'\"()[\\]{}\\t ]*$")
+    return len(bc)-len(s:match_text)
   else
     " ! duplicate code !
     " let lstr=len(a:base)
