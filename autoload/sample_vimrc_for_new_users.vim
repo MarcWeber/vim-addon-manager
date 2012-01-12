@@ -61,6 +61,11 @@ noremap \n :n<space>**/*
 " or map <buffer> \dostuff :call DoStuff()<cr>
 noremap \ft :exec 'e ~/.vim/after/ftplugin/'.&filetype.'_you.vim'<cr>
 
+" when pasting code you may want to enable paste option so that Vim doesn't
+" treat the pasted text like typed text. Typed text casues vim to to repeating
+" comments and change indentation - when pasting you don't want this.
+noremap \ip :set invpaste<bar>echo &paste ? 'pasting is on' : 'pasting is off'
+
 " for windows: make backspace work. Doesn't hurt on linux. This should be
 " default!
 set bs=2
