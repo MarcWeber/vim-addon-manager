@@ -260,7 +260,7 @@ fun! vam#DisplayAddonInfo(name)
   let name = a:name
   if empty(plugin) && a:name =~ '^\d\+$'
     " try to find by script id
-    let dict = filter(copy(g:vim_addon_manager['plugin_sources']), 'get(v:val,"vim_script_nr","")."" == '.a:name)
+    let dict = filter(copy(g:vim_addon_manager['plugin_sources']), 'get(v:val,"vim_script_nr","")."" == '.string(1*a:name))
     if (empty(dict))
       throw "unkown script ".a:name
     else
@@ -358,5 +358,17 @@ command! -nargs=* -complete=customlist,vam#install#InstalledAddonCompletion Acti
 command! -nargs=* -complete=customlist,vam#install#UpdateCompletion UpdateAddons :call vam#install#Update([<f-args>])
 command! -nargs=0 UpdateActivatedAddons exec 'UpdateAddons '.join(keys(g:vim_addon_manager['activated_plugins']),' ')
 command! -nargs=* -complete=customlist,vam#install#UninstallCompletion UninstallNotLoadedAddons :call vam#install#UninstallAddons([<f-args>])
+
+
+" plugin name completion function:
+augroup VAM
+  " yes, this overwrites omnifunc set by vim-dev plugin for instance. I don't
+  " care. You install plugins, then you usually restart anyway.
+  autocmd BufRead,BufNewFile *.vim,*vimrc inoremap <buffer> <C-x><c-p> <c-o>:setlocal omnifunc=vam#install#CompleteAddonName<cr><c-x><c-o>
+augroup end
+
+" plugin completion:
+
+
 
 " vim: et ts=8 sts=2 sw=2

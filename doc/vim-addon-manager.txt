@@ -115,8 +115,8 @@ Add the following to your .vimrc >
           call vam#ActivateAddons([], {'auto_install' : 0})
           " sample: call vam#ActivateAddons(['pluginA','pluginB', ...], {'auto_install' : 0})
           " where 'pluginA' could be "git://" "github:YourName" or "snipmate-snippets" see vam#install#RewriteName()
-          " also see section "2.2. names of addons and addon sources" in VAM's documentation
-          " which will tell you how to find the plugin names of a plugin
+          " use <c-x><c-p> to complete plugin names.
+          " Also see section "2.2. names of addons and addon sources" in VAM's documentation
         endfun
         call SetupVAM()
         " experimental: run after gui has been started (gvim) [3]
@@ -166,6 +166,7 @@ determining addon names ~
 - by id: |:AddonsInfo| SCRIPT_ID, pick the "VAM name" value.
 - use |:InstallAddons|'s name completion by typing some chars then pressing
   <c-d> then <tab>.
+- use <c-x> <c-p> completion (yes, this overwrites 'omnifunc' setting)
 
 long description:
 Open the vim-addon-manager-known-repositories/plugin/vim-addon-manager-known-repositories.vim (-> |VAM-kr|

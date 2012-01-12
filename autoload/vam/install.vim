@@ -717,4 +717,48 @@ if g:is_win
 
   endf
 endif
+
+" addon name completion {{{1
+" TODO tidy up, refactor so that common code (find plugin name fuzzily) is in
+" one function only
+
+function! vam#install#SplitAtCursor()
+  let pos = col('.') -1
+  let line = getline('.')
+  return [strpart(line,0,pos), strpart(line, pos, len(line)-pos)]
+endfunction
+
+fun! vam#install#CompleteAddonName(findstart, base)
+  if a:findstart
+    let [bc,ac] = vam#install#SplitAtCursor()
+    let s:match_text = matchstr(bc, "\zs[^ '\"()[\]{}\t ]*$")
+    let s:start = len(bc)-len(s:match_text)
+  else
+    " ! duplicate code !
+    " let lstr=len(a:base)
+    " let str = a:base
+    " let estr=escape(str, '\')
+    " let reg='\V'.join(split(estr, '\v[[:punct:]]@<=|[[:punct:]]@='), '\.\*')
+    " let reg2='\V'.join(map(split(str,'\v\_.@='),'escape(v:val,"\\")'), '\.\*')
+
+    let list = vam#install#KnownAddons()
+    call filter(list, 'v:val =~ '.string('\c'.a:base))
+    " let r=[]
+    " for filter in s:smartfilters
+    "     let newlist=[]
+    "     call map(list, '('.filter.')?(add(r, v:val)):(add(newlist, v:val))')
+    "     let list=newlist
+    " endfor
+
+    for name in list
+      let d = s:c.plugin_sources[name]
+      let script_id = has_key(d, 'vim_script_nr') ? 'script-id: '.d.vim_script_nr : ''
+      call complete_add({'word': name, 'menu': script_id})
+    endfor
+    return []
+  endif
+endf
+
+" }}}
+
 " vim: et ts=8 sts=2 sw=2
