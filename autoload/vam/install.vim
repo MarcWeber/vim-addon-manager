@@ -137,6 +137,9 @@ fun! vam#install#Install(toBeInstalledList, ...)
     let origin = get(repository,'type','').' '.get(repository,'url','')
     call vam#Log('Plugin Name: '.name.' ver. '.get(repository, 'version', ''), 'None')
     call vam#Log('Script Nr: '.get(repository, 'vim_script_nr', 'none'), 'None') 
+    if (has_key(opts, 'requested_by'))
+      call vam#Log('dependency chain: '.name.' < '.join(opts.requested_by,' < '))
+    endif
 
     " tell user about target directory. Some users don't get it the first time..
     let pluginDir = vam#PluginDirFromName(name)
@@ -179,7 +182,10 @@ fun! vam#install#Install(toBeInstalledList, ...)
       " install dependencies merging opts with given repository sources
       " sources given in opts will win
       call vam#install#Install(keys(dependencies),
-        \ extend(copy(opts), { 'plugin_sources' : extend(copy(dependencies), get(opts, 'plugin_sources',{}))}))
+        \ extend(copy(opts), {
+       \ 'plugin_sources' : extend(copy(dependencies), get(opts, 'plugin_sources',{})),
+       \ 'requested_by' : [name] + get(opts, 'requested_by', [])
+       \ }))
     endif
     call vam#install#HelpTags(name)
   endfor

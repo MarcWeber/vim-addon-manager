@@ -165,7 +165,10 @@ fun! vam#ActivateRecursively(list_of_names, ...)
       " activate dependencies merging opts with given repository sources
       " sources given in opts will win
       call vam#ActivateAddons(keys(dependencies),
-        \ extend(copy(opts), { 'plugin_sources' : extend(copy(dependencies), get(opts, 'plugin_sources',{}))}))
+        \ extend(copy(opts), {
+            \ 'plugin_sources' : extend(copy(dependencies), get(opts, 'plugin_sources',{})),
+            \ 'requested_by' : [name] + get(opts, 'requested_by', [])
+        \ }))
 
       " source plugin/* files ?
       let rtp = vam#PluginRuntimePath(name)
