@@ -114,8 +114,11 @@ Add the following to your .vimrc >
 
           call vam#ActivateAddons([], {'auto_install' : 0})
           " sample: call vam#ActivateAddons(['pluginA','pluginB', ...], {'auto_install' : 0})
-          " where 'pluginA' could be "git://" "github:YourName" or "snipmate-snippets" see vam#install#RewriteName()
-          " use <c-x><c-p> to complete plugin names.
+          "  - look up source from pool (<c-x><c-p> complete plugin names):
+          "    ActivateAddons(["foo",  ..
+          "  - name rewritings: 
+          "    ..ActivateAddons(["github:foo", .. => github://foo/vim-addon-foo
+          "    ..ActivateAddons(["github:user/repo", .. => github://user/repo
           " Also see section "2.2. names of addons and addon sources" in VAM's documentation
         endfun
         call SetupVAM()
@@ -150,25 +153,37 @@ NOTES: ~
 ------------------------------------------------------------------------------
 2.2 names of addons and addon sources                        *VAM-addon-names*
 
-Which addon-names can be passed to |vam#ActivateAddons()|, |:InstallAddons|,
-|:ActivateAddons| ?
+Because we are human VAM uses readable names as unique identifier for plugins.
+Those identifieres (= plugin names) are passed to |vam#ActivateAddons()|, |:InstallAddons|,
+|:ActivateAddons| . THe name is automatically derived from plugin titels at
+www.vim.org.
 
-VAM installs addons by name. Thus there is a pool mapping names to plugin
-sources. You can either manipulate the default pool
-|VAM-kr| or use the quick and dirty hack
-and pass git/hg/svn/bazaar/.. urls directly as names. Name syntax see
-|vam#install#RewriteName()|.
-If you want to depend on a plugin consider registering its name in |VAM-kr|.
-See |VAM-kr-patching|
+types of names:
+  1) plugin name (which is looked up in pool. Try :AddonInfo NAME) >
+  "NAME"
+<
+  determining addon names ~
+  - by id: |:AddonsInfo| SCRIPT_ID, pick the "VAM name" value.
+  - use |:InstallAddons|'s name completion by typing some chars then pressing
+    <c-d> then <tab>.
+  - use <c-x> <c-p> completion (yes, this overwrites 'omnifunc' setting)
 
+  2) name which gets rewritten internally >
+    github:{Name}      =>  {"type": "git", "url": "git://github.com/{Name}/vim-addon-{Name}}
+    github:{N}/{Repo}  =>  {"type": "git", "url": "git://github.com/{N}/{Repo}"}
+<  Don't use if you expect others to create plugins depending on yours. Add
+   your plugin to |VAM-kr| instead.
 
-determining addon names ~
-- by id: |:AddonsInfo| SCRIPT_ID, pick the "VAM name" value.
-- use |:InstallAddons|'s name completion by typing some chars then pressing
-  <c-d> then <tab>.
-- use <c-x> <c-p> completion (yes, this overwrites 'omnifunc' setting)
+  See |vam#install#RewriteName()|
 
-long description:
+Instead of telling us to add your plugin to |VAM-kr| you can also patch the
+pool easily: |VAM-kr-patching| - however if you contribute to |VAM-kr| the
+community will benefit much more.
+
+  long descritpion (how to modify the pool - how does the pool look like - !little bit outdated! ~
+
+Read code in |VAM-kr|. The text below gives you an idea:
+
 Open the vim-addon-manager-known-repositories/plugin/vim-addon-manager-known-repositories.vim (-> |VAM-kr|
 There you'll find the two types of dictionaries which are used to find and
 install plugins. You'll find lines like this:
@@ -970,7 +985,7 @@ what's going to happen.
 <
 
 [4]: VAM depends on git. Why does it?
-  VAM-kr is checkout out by git which contains the default merge function.
+  VAM-kr is checked out by git which contains the default merge function.
   As advanced user you can define your own sources and define your own merge
   function trivially - that somehow defeats the idea of having one working
   maitained pool of sources though.

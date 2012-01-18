@@ -100,6 +100,17 @@ noremap \r :TRecentlyUsedFiles<cr>
 " plugin etc)
 noremap \go :exec 'e '. fnameescape(tlib#input#List('s','select file', split(glob(input('glob pattern, curr dir:','**/*')),"\n") ))<cr>
 
+" sometimes when using tags the list is too long. filtering it by library or
+" such can easily be achived by such code: {{{'
+    fun! SelectTag(regex)
+      let tag = eval(tlib#input#List('s','select tag', map(taglist(a:regex), 'string([v:val.kind, v:val.filename, v:val.cmd])')))
+      exec 'e '.fnameescape(tag[1])
+      exec tag[2]
+    endf
+    command!-nargs=1 TJump call SelectTag(<f-args>)
+
+" }}}
+
 " dummy func to enabling you to load this file after adding the top level {{{1
 " dir to runtimepath using :set runtimpeth+=ROOT
 fun! sample_vimrc_for_new_users#Load()
