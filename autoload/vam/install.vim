@@ -368,16 +368,22 @@ endf
 " 1. Start of the name must be the same as completed name
 " 2. Part of the name must be the same as completed name
 " 3. Word may be a “glob” (supports only stars)
-" 4. There may be missing characters somewhere at the word boundary
-" 5. There may be some missing charaters inside a word
-" 6. Name has completely wrong order of characters
+" 4. There may be missing characters somewhere at the word boundary, but user 
+"    correctly entered start of the word
+" 5. There may be missing characters somewhere at the word boundary, but first 
+"    character is correct
+" 6. Name has completely wrong order of characters, but not the first character
+" 7. There may be missing characters somewhere at the word boundary
+" 8. There may be some missing charaters inside a word
 let s:smartfilters=[
       \'v:val[:(lstr)]==?str',
       \'v:val=~?regglob',
       \'stridx(tolower(v:val), tolower(str))!=-1',
+      \'v:val=~?"\\v^".regboundary',
+      \'v:val=~?"\\v^".reginside',
+      \'v:val=~?regwrongorder',
       \'v:val=~?regboundary',
       \'v:val=~?reginside',
-      \'v:val=~?regwrongorder',
     \]
 let s:postfilters={
       \'installed':    'isdirectory(vam#PluginDirFromName(v:val))',
@@ -393,12 +399,17 @@ fun! vam#install#DoCompletion(A, L, P, ...)
   let estrchars=map(split(str,'\v\_.@='), 'escape(v:val, "\\")')
   let regglob='\V'.substitute(estr, '\*', '\\.\\*', 'g')
   let regboundary='\V'.join(map(split(str, '\v[[:punct:]]@<=|[[:punct:]]@='), 'escape(v:val, "\\")'), '\.\*')
+  let regwrongorder='\V\^'.estrchars[0].'\%(\.\*'.join(estrchars[1:], '\)\@=\%(\.\*').'\)\@='
   let reginside='\V'.join(estrchars, '\.\*')
-  let regwrongorder='\V\(\.\*'.join(estrchars, '\)\@=\(\.\*').'\)\@='
   let r=[]
   for filter in s:smartfilters
     let newlist=[]
     call map(list, '('.filter.')?(add(r, v:val)):(add(newlist, v:val))')
+    " We already have enough results to show, so stop thinking that user needs 
+    " more variants
+    if len(r)>8
+      break
+    endif
     let list=newlist
   endfor
   if a:0
