@@ -344,26 +344,41 @@ endf
 
 " completion {{{
 
-fun! vam#install#KnownAddons()
+fun! vam#install#KnownAddons(type)
   call vam#install#LoadPool()
   let k = {}
   " from pool
   call extend(k, s:c.plugin_sources)
-  " disk completion using default plugin dir location
-  if s:c.plugin_dir_by_name == 'vam#DefaultPluginDirFromName'
+  " Disk completion using default plugin dir location.
+  " Don’t do this if plugin_root_dir contains newline: split(glob) does not work 
+  " properly in this case. Also don’t do this if we require notinstalled 
+  " plugins.
+  if a:type isnot# 'notinstalled' &&
+        \s:c.plugin_dir_by_name is# 'vam#DefaultPluginDirFromName' &&
+        \stridx(s:c.plugin_root_dir, "\n")==-1
     for n in split(glob(s:c.plugin_root_dir.'/*', "\n"))
-      let k[fnamemodify(n,':t')] = {'type': 'found on disk'}
+      " We don’t care about values: so no need to make it complex
+      let k[fnamemodify(n, ':t')] = 1
     endfor
   endif
   return keys(k)
 endf
 
+" Filters:
+" 1. Start of the name must be the same as completed name
+" 2. Part of the name must be the same as completed name
+" 3. Word may be a “glob” (supports only stars)
+" 4. There may be missing characters somewhere at the word boundary
+" 5. There may be some missing charaters inside a word
+" 6. Name has completely wrong order of characters
 let s:smartfilters=[
-            \'v:val[:(lstr)]==?str',
-            \'stridx(tolower(v:val), tolower(str))!=-1',
-            \'v:val=~?reg',
-            \'v:val=~?reg2',
-            \]
+      \'v:val[:(lstr)]==?str',
+      \'v:val=~?regglob',
+      \'stridx(tolower(v:val), tolower(str))!=-1',
+      \'v:val=~?regboundary',
+      \'v:val=~?reginside',
+      \'v:val=~?regwrongorder',
+    \]
 let s:postfilters={
       \'installed':    'isdirectory(vam#PluginDirFromName(v:val))',
       \'notloaded':    '(!has_key(s:c.activated_plugins, v:val)) && '.
@@ -371,22 +386,25 @@ let s:postfilters={
       \'notinstalled': '!isdirectory(vam#PluginDirFromName(v:val))',
     \}
 fun! vam#install#DoCompletion(A, L, P, ...)
-    let list=sort(vam#install#KnownAddons())
-    let str=matchstr(a:L[:a:P-1], '\S*$')
-    let lstr=len(str)-1
-    let estr=escape(str, '\')
-    let reg='\V'.join(split(estr, '\v[[:punct:]]@<=|[[:punct:]]@='), '\.\*')
-    let reg2='\V'.join(map(split(str,'\v\_.@='),'escape(v:val,"\\")'), '\.\*')
-    let r=[]
-    for filter in s:smartfilters
-        let newlist=[]
-        call map(list, '('.filter.')?(add(r, v:val)):(add(newlist, v:val))')
-        let list=newlist
-    endfor
-    if a:0
-      call filter(r, s:postfilters[a:1])
-    endif
-    return r
+  let list=sort(vam#install#KnownAddons(get(a:000, 0, 0)))
+  let str=matchstr(a:L[:a:P-1], '\S*$')
+  let lstr=len(str)-1
+  let estr=escape(str, '\')
+  let estrchars=map(split(str,'\v\_.@='), 'escape(v:val, "\\")')
+  let regglob='\V'.substitute(estr, '\*', '\\.\\*', 'g')
+  let regboundary='\V'.join(map(split(str, '\v[[:punct:]]@<=|[[:punct:]]@='), 'escape(v:val, "\\")'), '\.\*')
+  let reginside='\V'.join(estrchars, '\.\*')
+  let regwrongorder='\V\(\.\*'.join(estrchars, '\)\@=\(\.\*').'\)\@='
+  let r=[]
+  for filter in s:smartfilters
+    let newlist=[]
+    call map(list, '('.filter.')?(add(r, v:val)):(add(newlist, v:val))')
+    let list=newlist
+  endfor
+  if a:0
+    call filter(r, s:postfilters[a:1])
+  endif
+  return r
 endfun
 
 fun! vam#install#AddonCompletion(...)
