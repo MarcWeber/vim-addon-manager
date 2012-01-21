@@ -305,16 +305,17 @@ UpdateAddons [{name} ...]                                      *:UpdateAddons*
         Update addons with given names. Without arguments updates all addons.
         See |vam#install#Update()| for more details.
 
-UpdateActivatedAddons
-        pass list of activated addon names to UpdateAddons
-
+UpdateActivatedAddons                                 *:UpdateActivatedAddons*
+        Like |:UpdateAdons| with a list of all activated plugins in place of 
+        its arguments.
 
 UninstallNotLoadedAddons {name} ...                *:UninstallNotLoadedAddons*
         Unistall addons with given names. See
         |vam#install#UninstallAddons()| for more details.
 
-AddonInfo {id/name}  *:AddonInfo*
-        show addon info and addon name
+AddonsInfo {id/name} ...                                         *:AddonsInfo*
+        Shows addon information. Accepts both VAM script names and www.vim.org 
+        script numbers.
 
 ------------------------------------------------------------------------------
 3.2. Functions                                                 *VAM-functions*
