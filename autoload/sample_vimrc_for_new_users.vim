@@ -1,3 +1,6 @@
+" minimal useful unbiased recommended .vimrc: http://vim.wikia.com/wiki/Example_vimrc
+
+
 " kept recoding the same things over and over again.
 " So I write what I think is useful to you here.
 "

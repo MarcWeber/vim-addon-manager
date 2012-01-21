@@ -346,7 +346,16 @@ endf
 
 fun! vam#install#KnownAddons()
   call vam#install#LoadPool()
-  return keys(s:c['plugin_sources'])
+  let k = {}
+  " from pool
+  call extend(k, s:c.plugin_sources)
+  " disk completion using default plugin dir location
+  if s:c.plugin_dir_by_name == 'vam#DefaultPluginDirFromName'
+    for n in split(glob(s:c.plugin_root_dir.'/*', "\n"))
+      let k[fnamemodify(n,':t')] = {'type': 'found on disk'}
+    endfor
+  endif
+  return keys(k)
 endf
 
 let s:smartfilters=[
