@@ -358,35 +358,48 @@ fun! vam#install#KnownAddons()
   return keys(k)
 endf
 
-let s:smartfilters=[
-            \'v:val[:(lstr)]==?str',
-            \'stridx(tolower(v:val), tolower(str))!=-1',
-            \'v:val=~?reg',
-            \'v:val=~?reg2',
-            \]
-let s:postfilters={
-      \'installed':    'isdirectory(vam#PluginDirFromName(v:val))',
-      \'notloaded':    '(!has_key(s:c.activated_plugins, v:val)) && '.
-      \                'isdirectory(vam#PluginDirFromName(v:val))',
-      \'notinstalled': '!isdirectory(vam#PluginDirFromName(v:val))',
-    \}
-fun! vam#install#DoCompletion(A, L, P, ...)
-    let list=sort(vam#install#KnownAddons())
-    let str=matchstr(a:L[:a:P-1], '\S*$')
-    let lstr=len(str)-1
-    let estr=escape(str, '\')
-    let reg='\V'.join(split(estr, '\v[[:punct:]]@<=|[[:punct:]]@='), '\.\*')
-    let reg2='\V'.join(map(split(str,'\v\_.@='),'escape(v:val,"\\")'), '\.\*')
-    let r=[]
-    for filter in s:smartfilters
-        let newlist=[]
-        call map(list, '('.filter.')?(add(r, v:val)):(add(newlist, v:val))')
-        let list=newlist
+fun! vam#install#FilterAddonNamesByCondition(n, names, kind)
+  if a:n == ""
+    return a:names
+  endif
+
+  " kind one of installed, notinstalled, ...
+  let p = {}
+  let p.installed = 'isdirectory(vam#PluginDirByName(name))'
+  " let p.notinstalled = '!'. p.installed
+  " let p.notloaded = '(!has_key(s:c.activated_plugins, name))'
+  "                   \ .' && '. p.installed
+
+  let consider_name = get(p, a:kind, '1')
+
+  " c['DESCRIPTION'] = [list idx see below, condition]
+  let c = {}
+  let c['0 match start same case'] = [0, 'name =~# "^".a:n ']
+  let c['1 match ignoring case anywhere'] = [1, 'name =~? a:n ']
+
+  " ZyX readd if you care about it
+  " let reg='\V'.join(split(estr, '\v[[:punct:]]@<=|[[:punct:]]@='), '\.\*')
+  " let reg2='\V'.join(map(split(str,'\v\_.@='),'escape(v:val,"\\")'), '\.\*')
+
+  " earlier lists higher match priority
+  let m = [[],[]]
+  for name in a:names
+    exec 'if  ! ('.consider_name.') | continue | endif'
+    for [i, cond] in values(c)
+      exec 'let ok = '.cond
+      if ok 
+        call add(m[i], name)
+        break
+      endif
     endfor
-    if a:0
-      call filter(r, s:postfilters[a:1])
-    endif
-    return r
+  endfo
+  return sort(m[0]) + sort(m[1])
+endf
+
+fun! vam#install#DoCompletion(A, L, P, ...)
+  let kind = a:0 > 0 ? a:1 : "all"
+  let str=matchstr(a:L[:a:P-1], '\S*$')
+  return vam#install#FilterAddonNamesByCondition(str, vam#install#KnownAddons(), kind)
 endfun
 
 fun! vam#install#AddonCompletion(...)
@@ -750,24 +763,9 @@ fun! vam#install#CompleteAddonName(findstart, base)
     let s:match_text = matchstr(bc, "\\zs[^'\"()[\\]{}\\t ]*$")
     return len(bc)-len(s:match_text)
   else
-    " ! duplicate code !
-    " let lstr=len(a:base)
-    " let str = a:base
-    " let estr=escape(str, '\')
-    " let reg='\V'.join(split(estr, '\v[[:punct:]]@<=|[[:punct:]]@='), '\.\*')
-    " let reg2='\V'.join(map(split(str,'\v\_.@='),'escape(v:val,"\\")'), '\.\*')
 
-    let list = vam#install#KnownAddons()
-    call filter(list, 'v:val =~ '.string('\c'.a:base))
-    " let r=[]
-    " for filter in s:smartfilters
-    "     let newlist=[]
-    "     call map(list, '('.filter.')?(add(r, v:val)):(add(newlist, v:val))')
-    "     let list=newlist
-    " endfor
-
-    for name in list
-      let d = s:c.plugin_sources[name]
+    for name in vam#install#FilterAddonNamesByCondition(a:base, vam#install#KnownAddons(), "all")
+      let d = get(s:c.plugin_sources, name, {})
       let script_id = has_key(d, 'vim_script_nr') ? 'script-id: '.d.vim_script_nr : ''
       call complete_add({'word': name, 'menu': script_id})
     endfor
