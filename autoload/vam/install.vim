@@ -359,7 +359,10 @@ fun! vam#install#KnownAddons()
 endf
 
 fun! vam#install#FilterAddonNamesByCondition(n, names, kind)
-  if a:n == ""
+  " allow glob patterns which are more common in command line
+  let n = substitute(a:n,'\.','.*','g')
+
+  if n == ""
     return a:names
   endif
 
@@ -373,19 +376,20 @@ fun! vam#install#FilterAddonNamesByCondition(n, names, kind)
   let consider_name = get(p, a:kind, '1')
 
   " c['DESCRIPTION'] = [list idx see below, condition]
-  let c = {}
-  let c['0 match start same case'] = [0, 'name =~# "^".a:n ']
-  let c['1 match ignoring case anywhere'] = [1, 'name =~? a:n ']
-
+  let c = [
+        \ [0, 'name =~# "^".n '],
+        \ [1, 'name =~? "^".n '],
+        \ [2, 'name =~? n ']
+        \ ]
   " ZyX readd if you care about it
   " let reg='\V'.join(split(estr, '\v[[:punct:]]@<=|[[:punct:]]@='), '\.\*')
   " let reg2='\V'.join(map(split(str,'\v\_.@='),'escape(v:val,"\\")'), '\.\*')
 
   " earlier lists higher match priority
-  let m = [[],[]]
+  let m = [[],[],[]]
   for name in a:names
     exec 'if  ! ('.consider_name.') | continue | endif'
-    for [i, cond] in values(c)
+    for [i, cond] in c
       exec 'let ok = '.cond
       if ok 
         call add(m[i], name)
@@ -393,7 +397,7 @@ fun! vam#install#FilterAddonNamesByCondition(n, names, kind)
       endif
     endfor
   endfo
-  return sort(m[0]) + sort(m[1])
+  return sort(m[0]) + sort(m[1]) + sort(m[2])
 endf
 
 fun! vam#install#DoCompletion(A, L, P, ...)
