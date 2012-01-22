@@ -376,15 +376,23 @@ endf
 " 7. There may be missing characters somewhere at the word boundary
 " 8. There may be some missing charaters inside a word
 let s:smartfilters=[
-      \'v:val[:(lstr)]==?str',
-      \'v:val=~?regglob',
-      \'stridx(tolower(v:val), tolower(str))!=-1',
-      \'v:val=~?"\\v^".regboundary',
-      \'v:val=~?"\\v^".reginside',
-      \'v:val=~?regwrongorder',
-      \'v:val=~?regboundary',
-      \'v:val=~?reginside',
+      \'"v:val[:".(len(a:str)-1)."]==?".string(a:str)',
+      \'"v:val=~?".string("\\V".substitute(escape(a:str, "\\"), "\\*", ''\\.\\*'', "g"))',
+      \'"stridx(tolower(v:val), ".string(tolower(a:str)).")!=-1"',
+      \'"v:val=~?".string("\\v^".regboundary)',
+      \'"v:val=~?".string("\\v^".reginside)',
+      \'"v:val=~?".string(regwrongorder)',
+      \'"v:val=~?".string(regboundary)',
+      \'"v:val=~?".string(reginside)',
     \]
+fun! vam#install#GetFilters(str)
+  let estrchars=map(split(a:str,'\v\_.@='), 'escape(v:val, "\\")')
+  let regwrongorder='\V\^'.estrchars[0].'\%(\.\*'.join(estrchars[1:], '\)\@=\%(\.\*').'\)\@='
+  let regboundary='\V'.join(map(split(a:str, '\v[[:punct:]]@<=|[[:punct:]]@='), 'escape(v:val, "\\")'), '\.\*')
+  let reginside='\V'.join(estrchars, '\.\*')
+  return map(copy(s:smartfilters), 'eval(v:val)')
+endfun
+
 let s:postfilters={
       \'installed':    'isdirectory(vam#PluginDirFromName(v:val))',
       \'notloaded':    '(!has_key(s:c.activated_plugins, v:val)) && '.
@@ -394,15 +402,8 @@ let s:postfilters={
 fun! vam#install#DoCompletion(A, L, P, ...)
   let list=sort(vam#install#KnownAddons(get(a:000, 0, 0)))
   let str=matchstr(a:L[:a:P-1], '\S*$')
-  let lstr=len(str)-1
-  let estr=escape(str, '\')
-  let estrchars=map(split(str,'\v\_.@='), 'escape(v:val, "\\")')
-  let regglob='\V'.substitute(estr, '\*', '\\.\\*', 'g')
-  let regboundary='\V'.join(map(split(str, '\v[[:punct:]]@<=|[[:punct:]]@='), 'escape(v:val, "\\")'), '\.\*')
-  let regwrongorder='\V\^'.estrchars[0].'\%(\.\*'.join(estrchars[1:], '\)\@=\%(\.\*').'\)\@='
-  let reginside='\V'.join(estrchars, '\.\*')
   let r=[]
-  for filter in s:smartfilters
+  for filter in vam#install#GetFilters(str)
     let newlist=[]
     call map(list, '('.filter.')?(add(r, v:val)):(add(newlist, v:val))')
     " We already have enough results to show, so stop thinking that user needs 
