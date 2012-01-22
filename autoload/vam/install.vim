@@ -376,21 +376,26 @@ endf
 " 7. There may be missing characters somewhere at the word boundary
 " 8. There may be some missing charaters inside a word
 let s:smartfilters=[
-      \'"v:val[:".(len(a:str)-1)."]==?".string(a:str)',
-      \'"v:val=~?".string("\\V".substitute(escape(a:str, "\\"), "\\*", ''\\.\\*'', "g"))',
-      \'"stridx(tolower(v:val), ".string(tolower(a:str)).")!=-1"',
-      \'"v:val=~?".string("\\v^".regboundary)',
-      \'"v:val=~?".string("\\v^".reginside)',
-      \'"v:val=~?".string(regwrongorder)',
-      \'"v:val=~?".string(regboundary)',
-      \'"v:val=~?".string(reginside)',
+      \['1',                      '"v:val[:".(len(a:str)-1)."]==?".string(a:str)'],
+      \['stridx(a:str, "*")!=-1', '"v:val=~?".string("\\V".substitute(escape(a:str, "\\"), "\\*", ''\\.\\*'', "g"))'],
+      \['1',                      '"stridx(tolower(v:val), ".string(tolower(a:str)).")!=-1"'],
+      \['haspunct',               '"v:val=~?".string("\\v^".regboundary)'],
+      \['lstr>1',                 '"v:val=~?".string("\\v^".reginside)'],
+      \['lstr>1',                 '"v:val=~?".string(regwrongorder)'],
+      \['haspunct',               '"v:val=~?".string(regboundary)'],
+      \['lstr>1',                 '"v:val=~?".string(reginside)'],
     \]
 fun! vam#install#GetFilters(str)
+  if empty(a:str)
+    return ['1']
+  endif
+  let lstr=len(a:str)
+  let haspunct=(match(a:str, "[[:punct:]]")!=-1)
   let estrchars=map(split(a:str,'\v\_.@='), 'escape(v:val, "\\")')
   let regwrongorder='\V\^'.estrchars[0].'\%(\.\*'.join(estrchars[1:], '\)\@=\%(\.\*').'\)\@='
   let regboundary='\V'.join(map(split(a:str, '\v[[:punct:]]@<=|[[:punct:]]@='), 'escape(v:val, "\\")'), '\.\*')
   let reginside='\V'.join(estrchars, '\.\*')
-  return map(copy(s:smartfilters), 'eval(v:val)')
+  return map(filter(copy(s:smartfilters), 'eval(v:val[0])'), 'eval(v:val[1])')
 endfun
 
 let s:postfilters={
