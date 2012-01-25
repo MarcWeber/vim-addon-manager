@@ -361,7 +361,7 @@ fun! vam#install#KnownAddons(type)
       let k[fnamemodify(n, ':t')] = 1
     endfor
   endif
-  return keys(k)
+  return sort(keys(k))
 endf
 
 " Filters:
@@ -419,6 +419,20 @@ fun! vam#install#FilterVariants(str, variants)
   return r
 endfun
 
+fun! vam#install#CompleteAddonName(findstart, base)
+  if a:findstart
+    let match_text=matchstr(getline('.')[:col('.')-1], "[^'\"()[\\]{}\t ]*$")
+    return col('.')-len(match_text)-1
+  else
+    call map(vam#install#FilterVariants(a:base, vam#install#KnownAddons(0)),
+          \  'complete_add({"word": v:val, '.
+          \                '"menu": "Script id: ".'.
+          \                        'get(get(s:c.plugin_sources, v:val, {}), '.
+          \                            '"vim_script_nr", "NA")})')
+    return []
+  endif
+endfun
+
 let s:postfilters={
       \'installed':    'isdirectory(vam#PluginDirFromName(v:val))',
       \'notloaded':    '(!has_key(s:c.activated_plugins, v:val)) && '.
@@ -426,7 +440,7 @@ let s:postfilters={
       \'notinstalled': '!isdirectory(vam#PluginDirFromName(v:val))',
     \}
 fun! vam#install#DoCompletion(A, L, P, ...)
-  let list=sort(vam#install#KnownAddons(get(a:000, 0, 0)))
+  let list=vam#install#KnownAddons(get(a:000, 0, 0))
   let str=matchstr(a:L[:a:P-1], '\S*$')
   let r=vam#install#FilterVariants(str, list)
   if a:0
@@ -778,49 +792,5 @@ if g:is_win
 
   endf
 endif
-
-" addon name completion {{{1
-" TODO tidy up, refactor so that common code (find plugin name fuzzily) is in
-" one function only
-
-function! vam#install#SplitAtCursor()
-  let pos = col('.') -1
-  let line = getline('.')
-  return [strpart(line,0,pos), strpart(line, pos, len(line)-pos)]
-endfunction
-
-
-fun! vam#install#CompleteAddonName(findstart, base)
-  if a:findstart
-    let [bc,ac] = vam#install#SplitAtCursor()
-    let s:match_text = matchstr(bc, "\\zs[^'\"()[\\]{}\\t ]*$")
-    return len(bc)-len(s:match_text)
-  else
-    " ! duplicate code !
-    " let lstr=len(a:base)
-    " let str = a:base
-    " let estr=escape(str, '\')
-    " let reg='\V'.join(split(estr, '\v[[:punct:]]@<=|[[:punct:]]@='), '\.\*')
-    " let reg2='\V'.join(map(split(str,'\v\_.@='),'escape(v:val,"\\")'), '\.\*')
-
-    let list = vam#install#KnownAddons()
-    call filter(list, 'v:val =~ '.string('\c'.a:base))
-    " let r=[]
-    " for filter in s:smartfilters
-    "     let newlist=[]
-    "     call map(list, '('.filter.')?(add(r, v:val)):(add(newlist, v:val))')
-    "     let list=newlist
-    " endfor
-
-    for name in list
-      let d = s:c.plugin_sources[name]
-      let script_id = has_key(d, 'vim_script_nr') ? 'script-id: '.d.vim_script_nr : ''
-      call complete_add({'word': name, 'menu': script_id})
-    endfor
-    return []
-  endif
-endf
-
-" }}}
 
 " vim: et ts=8 sts=2 sw=2

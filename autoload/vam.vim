@@ -365,13 +365,12 @@ command! -nargs=* -complete=customlist,vam#install#UninstallCompletion Uninstall
 
 " plugin name completion function:
 augroup VAM
-  " yes, this overwrites omnifunc set by vim-dev plugin for instance. I don't
-  " care. You install plugins, then you usually restart anyway.
-  autocmd BufRead,BufNewFile *.vim,*vimrc inoremap <buffer> <C-x><c-p> <c-o>:setlocal omnifunc=vam#install#CompleteAddonName<cr><c-x><c-o>
-augroup end
-
-" plugin completion:
-
-
+  function! s:CompleteAddonName()
+    let savedof=&l:omnifunc
+    let &l:omnifunc='vam#install#CompleteAddonName'
+    return "\<C-x>\<C-o>\<C-r>=['', setbufvar('%', '&omnifunc', ".string(savedof).")][0]\n"
+  endfunction
+  autocmd FileType vim inoremap <buffer> <expr> <C-x><C-p> <SID>CompleteAddonName()
+augroup END
 
 " vim: et ts=8 sts=2 sw=2
