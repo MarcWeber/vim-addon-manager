@@ -411,6 +411,10 @@ vam#install#RewriteName({name})                    *vam#install#RewriteName()*
                         "url": "git://github.com/{N}/{Repo}"}
     git:{URL}          {"type": "git", "url": {URL}} (experimental)
 
+vam#install#CompleteAddonName                *vam#install#CompleteAddonName()*
+    Function suitable to be a completion function for omni completion 
+    ('omnifunc'). Completes addon names. See also |VAM-addon_completion_lhs|.
+
 ==============================================================================
 4. Options                                                       *VAM-options*
                                                          *g:vim_addon_manager*
@@ -480,6 +484,9 @@ pool_fun                                                        *VAM-pool_fun*
         {{plugin-name}: {repository}} ({repository} is described under 
         |addon-info-repository|) map.
         Default is "vam#install#Pool".
+addon_completion_lhs                                *VAM-addon_completion_lhs*
+        {lhs} of the mapping that uses |vam#install#CompleteAddonName()| for 
+        completion. Default: "<C-x><C-p>". Spaces and bars are escaped.
 
 The following options are used by vim-addon-manager-known-repositories, not by
 VAM itself. So if you set |vim-addon-manager-known| to another value they may
