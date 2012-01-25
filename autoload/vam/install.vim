@@ -367,23 +367,27 @@ endf
 " Filters:
 " 1. Start of the name must be the same as completed name
 " 2. Part of the name must be the same as completed name
-" 3. Word may be a “glob” (supports only stars)
+" 3. User correctly entered start of the string, but punctuation characters 
+"    inside were mistaken. Also takes globs as '*'=~'[[:punct:]]'.
 " 4. There may be missing characters somewhere at the word boundary, but user 
 "    correctly entered start of the word
 " 5. There may be missing characters somewhere at the word boundary, but first 
 "    character is correct
 " 6. Name has completely wrong order of characters, but not the first character
-" 7. There may be missing characters somewhere at the word boundary
-" 8. There may be some missing charaters inside a word
+" 7. Punctuation characters inside string were mistaken.
+"    Also takes globs as '*'=~'[[:punct:]]'.
+" 8. There may be missing characters somewhere at the word boundary
+" 9. There may be some missing charaters inside a word
 let s:smartfilters=[
-      \['1',                      '"v:val[:".(len(a:str)-1)."]==?".string(a:str)'],
-      \['stridx(a:str, "*")!=-1', '"v:val=~?".string("\\V".substitute(escape(a:str, "\\"), "\\*", ''\\.\\*'', "g"))'],
-      \['1',                      '"stridx(tolower(v:val), ".string(tolower(a:str)).")!=-1"'],
-      \['haspunct',               '"v:val=~?".string("\\v^".regboundary)'],
-      \['lstr>1',                 '"v:val=~?".string("\\v^".reginside)'],
-      \['lstr>1',                 '"v:val=~?".string(regwrongorder)'],
-      \['haspunct',               '"v:val=~?".string(regboundary)'],
-      \['lstr>1',                 '"v:val=~?".string(reginside)'],
+      \['1',        '"v:val[:".(len(a:str)-1)."]==?".string(a:str)'],
+      \['1',        '"stridx(tolower(v:val), ".string(tolower(a:str)).")!=-1"'],
+      \['haspunct', '"v:val=~?".string("\\v^".regnopunct)'],
+      \['haspunct', '"v:val=~?".string("\\v^".regboundary)'],
+      \['lstr>1',   '"v:val=~?".string("\\v^".reginside)'],
+      \['lstr>1',   '"v:val=~?".string(regwrongorder)'],
+      \['haspunct', '"v:val=~?".string(regnopunct)'],
+      \['haspunct', '"v:val=~?".string(regboundary)'],
+      \['lstr>1',   '"v:val=~?".string(reginside)'],
     \]
 fun! vam#install#GetFilters(str)
   if empty(a:str)
@@ -391,11 +395,28 @@ fun! vam#install#GetFilters(str)
   endif
   let lstr=len(a:str)
   let haspunct=(match(a:str, "[[:punct:]]")!=-1)
+  let regnopunct='\V'.substitute(a:str, '\v[[:punct:]]+', '\\.\\*', 'g')
   let estrchars=map(split(a:str,'\v\_.@='), 'escape(v:val, "\\")')
   let regwrongorder='\V\^'.estrchars[0].'\%(\.\*'.join(estrchars[1:], '\)\@=\%(\.\*').'\)\@='
   let regboundary='\V'.join(map(split(a:str, '\v[[:punct:]]@<=|[[:punct:]]@='), 'escape(v:val, "\\")'), '\.\*')
   let reginside='\V'.join(estrchars, '\.\*')
   return map(filter(copy(s:smartfilters), 'eval(v:val[0])'), 'eval(v:val[1])')
+endfun
+
+fun! vam#install#FilterVariants(str, variants)
+  let list=copy(a:variants)
+  let r=[]
+  for filter in vam#install#GetFilters(a:str)
+    let newlist=[]
+    call map(list, '('.filter.')?(add(r, v:val)):(add(newlist, v:val))')
+    " We already have enough results to show, so stop thinking that user needs 
+    " more variants
+    if len(r)>8
+      break
+    endif
+    let list=newlist
+  endfor
+  return r
 endfun
 
 let s:postfilters={
@@ -407,17 +428,7 @@ let s:postfilters={
 fun! vam#install#DoCompletion(A, L, P, ...)
   let list=sort(vam#install#KnownAddons(get(a:000, 0, 0)))
   let str=matchstr(a:L[:a:P-1], '\S*$')
-  let r=[]
-  for filter in vam#install#GetFilters(str)
-    let newlist=[]
-    call map(list, '('.filter.')?(add(r, v:val)):(add(newlist, v:val))')
-    " We already have enough results to show, so stop thinking that user needs 
-    " more variants
-    if len(r)>8
-      break
-    endif
-    let list=newlist
-  endfor
+  let r=vam#install#FilterVariants(str, list)
   if a:0
     call filter(r, s:postfilters[a:1])
   endif
