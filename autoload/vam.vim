@@ -6,7 +6,7 @@
 
 " don't need a plugin. If you want to use this plugin you call Activate once
 " anyway
-augroup VIM_ADDON_MANAGER
+augroup VAM_addon_info_handlers
   autocmd!
   autocmd BufRead,BufNewFile *-addon-info.txt,addon-info.json
     \ setlocal ft=addon-info
@@ -43,6 +43,7 @@ unlet s:d
 let s:c['plugin_root_dir'] = expand(s:c['plugin_root_dir'])
 let s:c['dont_source'] = get(s:c, 'dont_source', 0)
 let s:c['plugin_dir_by_name'] = get(s:c, 'plugin_dir_by_name', 'vam#DefaultPluginDirFromName')
+let s:c['addon_completion_lhs'] = get(s:c, 'addon_completion_lhs', '<C-x><C-p>')
 
 " More options that are used for plugins’ installation are listed in 
 " autoload/vam/install.vim
@@ -364,13 +365,17 @@ command! -nargs=* -complete=customlist,vam#install#UninstallCompletion Uninstall
 
 
 " plugin name completion function:
-augroup VAM
-  function! s:CompleteAddonName()
-    let savedof=&l:omnifunc
-    let &l:omnifunc='vam#install#CompleteAddonName'
-    return "\<C-x>\<C-o>\<C-r>=['', setbufvar('%', '&omnifunc', ".string(savedof).")][0]\n"
-  endfunction
-  autocmd FileType vim inoremap <buffer> <expr> <C-x><C-p> <SID>CompleteAddonName()
-augroup END
+if !empty(s:c.addon_completion_lhs)
+  augroup VAM_addon_name_completion
+    autocmd!
+    function! s:CompleteAddonName()
+      let savedof=&l:omnifunc
+      let &l:omnifunc='vam#install#CompleteAddonName'
+      return "\<C-x>\<C-o>\<C-r>=['', setbufvar('%', '&omnifunc', ".string(savedof).")][0]\n"
+    endfunction
+    let s:lhs=escape(substitute(s:c.addon_completion_lhs, ' ', '<Space>', 'g'), '|')
+    execute 'autocmd FileType vim inoremap <buffer> <expr> '.s:lhs.' <SID>CompleteAddonName()'
+  augroup END
+endif
 
 " vim: et ts=8 sts=2 sw=2
