@@ -244,7 +244,7 @@ Or overwrite the MergeSources function: >
 
 
 ------------------------------------------------------------------------------
-2.3 Example: personal configurable setup *VAM-complex-setup-sample*
+2.3 Example: personal configurable setup            *VAM-complex-setup-sample*
 >
   call vam#ActivateAddons(["github:YOURNAME"],{'auto_install' : 0})
   " this initializes Vim the way *you* want also loading more plugins:
@@ -410,6 +410,12 @@ vam#install#RewriteName({name})                    *vam#install#RewriteName()*
     github:{N}/{Repo}  {"type": "git",
                         "url": "git://github.com/{N}/{Repo}"}
     git:{URL}          {"type": "git", "url": {URL}} (experimental)
+
+vam#install#CompleteAddonName                *vam#install#CompleteAddonName()*
+    Function suitable to be a completion function for omni completion 
+    ('omnifunc'). Completes addon names. Value of 'omnifunction' option will 
+    be set by VAM for files with “vim” filetype iff this option is empty (uses 
+    |FileType| event).
 
 ==============================================================================
 4. Options                                                       *VAM-options*

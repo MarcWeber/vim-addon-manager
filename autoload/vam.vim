@@ -364,13 +364,6 @@ command! -nargs=* -complete=customlist,vam#install#UninstallCompletion Uninstall
 
 
 " plugin name completion function:
-augroup VAM
-  function! s:CompleteAddonName()
-    let savedof=&l:omnifunc
-    let &l:omnifunc='vam#install#CompleteAddonName'
-    return "\<C-x>\<C-o>\<C-r>=['', setbufvar('%', '&omnifunc', ".string(savedof).")][0]\n"
-  endfunction
-  autocmd FileType vim inoremap <buffer> <expr> <C-x><C-p> <SID>CompleteAddonName()
-augroup END
+autocmd FileType vim if empty(&omnifunc) | setlocal omnifunc=vam#install#CompleteAddonName | endif
 
 " vim: et ts=8 sts=2 sw=2
