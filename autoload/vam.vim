@@ -378,8 +378,7 @@ if !empty(s:c.addon_completion_lhs)
       let &l:omnifunc='vam#install#CompleteAddonName'
       return "\<C-x>\<C-o>\<C-r>=['', setbufvar('%', '&omnifunc', ".string(savedof).")][0]\n"
     endfunction
-    let s:lhs=escape(substitute(s:c.addon_completion_lhs, ' ', '<Space>', 'g'), '|')
-    execute 'autocmd FileType vim inoremap <buffer> <expr> '.s:lhs.' <SID>CompleteAddonName()'
+    execute 'autocmd FileType vim inoremap <buffer> <expr> '.s:c.addon_completion_lhs.' <SID>CompleteAddonName()'
   augroup END
 endif
 
