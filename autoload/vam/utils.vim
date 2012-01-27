@@ -396,4 +396,16 @@ fun! vam#utils#TypoFix(name)
    return substitute(tolower(a:name), '[_/\-]*', '', 'g')
 endf
 
+
+" sample usage:
+" inoremap <buffer> <expr> \start_completion vam#utils#CompleteWith("vam#install#CompleteAddonName")'
+function! vam#utils#CompleteWith(fun)
+  " after this characters have been process reset completion function.
+  " feedkeys must be used, returning same chars with return will hide the
+  " completion menue.
+  call feedkeys("\<C-r>=['', setbufvar('%', '&omnifunc', ".string(&l:omnifunc).")][0]\<cr>",'t')
+  let &l:omnifunc=a:fun
+  return "\<C-x>\<C-o>"
+endfunction
+
 " vim: et ts=8 sts=2 sw=2

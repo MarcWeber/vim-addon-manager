@@ -373,12 +373,7 @@ command! -nargs=* -complete=customlist,vam#install#UninstallCompletion Uninstall
 if !empty(s:c.addon_completion_lhs)
   augroup VAM_addon_name_completion
     autocmd!
-    function! s:CompleteAddonName()
-      let savedof=&l:omnifunc
-      let &l:omnifunc='vam#install#CompleteAddonName'
-      return "\<C-x>\<C-o>\<C-r>=['', setbufvar('%', '&omnifunc', ".string(savedof).")][0]\n"
-    endfunction
-    execute 'autocmd FileType vim inoremap <buffer> <expr> '.s:c.addon_completion_lhs.' <SID>CompleteAddonName()'
+    execute 'autocmd FileType vim inoremap <buffer> <expr> '.s:c.addon_completion_lhs.' vam#utils#CompleteWith("vam#install#CompleteAddonName")'
   augroup END
 endif
 
