@@ -39,6 +39,11 @@ let s:d = expand('<sfile>:h:h:h')
 let s:c['plugin_root_dir'] = get(s:c, 'plugin_root_dir', filewritable(s:d) ? s:d : '~/.vim/vim-addons' )
 unlet s:d
 
+if s:c['plugin_root_dir'] == expand('$HOME')
+  echoe "VAM: Don't install VAM into ~/.vim the normal way. See docs -> SetupVAM function. Put it int ~/.vim/vim-addons/vim-addon-manager for example."
+  finish
+endif
+
 " ensure we have absolute paths (windows doesn't like ~/.. ) :
 let s:c['plugin_root_dir'] = expand(s:c['plugin_root_dir'])
 let s:c['dont_source'] = get(s:c, 'dont_source', 0)
