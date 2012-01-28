@@ -397,15 +397,35 @@ fun! vam#utils#TypoFix(name)
 endf
 
 
+"{{{1 Completion
 " sample usage:
 " inoremap <buffer> <expr> \start_completion vam#utils#CompleteWith("vam#install#CompleteAddonName")'
+let s:savedomnifuncs={}
 function! vam#utils#CompleteWith(fun)
-  " after this characters have been process reset completion function.
-  " feedkeys must be used, returning same chars with return will hide the
-  " completion menue.
-  call feedkeys("\<C-r>=['', setbufvar('%', '&omnifunc', ".string(&l:omnifunc).")][0]\<cr>",'t')
-  let &l:omnifunc=a:fun
+  if &l:omnifunc isnot# a:fun
+    let s:savedomnifuncs[bufnr('%')]=&l:omnifunc
+    call s:SetRestoringOmnifuncAutocommands()
+    let &l:omnifunc=a:fun
+  endif
   return "\<C-x>\<C-o>"
 endfunction
+
+" Restore &omnifunc when different events are launched
+function! s:SetRestoringOmnifuncAutocommands()
+  let buf=bufnr('%')
+  let restoreofcode='if has_key(s:savedomnifuncs, '.buf.') | '.
+        \               'let &l:omnifunc=remove(s:savedomnifuncs, '.buf.') | '.
+        \           'endif'
+  let restoreofifnotpumvisible='if !pumvisible() | '.restoreofcode.' | endif'
+  augroup VAM_restore_completion
+    if exists('##InsertCharPre')
+      execute 'autocmd! InsertCharPre <buffer> '.restoreofifnotpumvisible
+    else
+      execute 'autocmd! CursorHoldI   <buffer> '.restoreofifnotpumvisible
+    endif
+    execute 'autocmd! InsertLeave <buffer> '.restoreofcode
+  augroup END
+endfunction
+"}}}1
 
 " vim: et ts=8 sts=2 sw=2
