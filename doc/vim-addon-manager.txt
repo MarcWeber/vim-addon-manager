@@ -171,6 +171,7 @@ types of names:
   2) name which gets rewritten internally >
     github:{Name}      =>  {"type": "git", "url": "git://github.com/{Name}/vim-addon-{Name}}
     github:{N}/{Repo}  =>  {"type": "git", "url": "git://github.com/{N}/{Repo}"}
+    git:{GIT_URL}  =>  {"type": "git", "url": "GIT_URL"}
 <  Don't use if you expect others to create plugins depending on yours. Add
    your plugin to |VAM-kr| instead.
 
@@ -410,6 +411,7 @@ vam#install#RewriteName({name})                    *vam#install#RewriteName()*
     github:{N}/{Repo}  {"type": "git",
                         "url": "git://github.com/{N}/{Repo}"}
     git:{URL}          {"type": "git", "url": {URL}} (experimental)
+    hg:{URL}           {"type": "hg", "url": {URL}} (experimental)
 
 vam#install#CompleteAddonName                *vam#install#CompleteAddonName()*
     Function suitable to be a completion function for omni completion 

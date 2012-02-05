@@ -48,7 +48,10 @@ fun! vam#install#RewriteName(name)
   elseif a:name[:3]==#'git:'
     " git:{URL}          {"type": "git", "url": {URL}}
     return {'type' : 'git', 'url' : a:name[len('git:'):]}
+  elseif a:name[:2]==#'hg:'
+    return {'type' : 'hg', 'url' : a:name[len('hg:'):]}
   endif
+
 endfun
 
 fun! vam#install#GetRepo(name, opts)
