@@ -150,6 +150,17 @@ NOTES: ~
   - set auto_install = 1 (to make Vim stop asking you any questions. However you
     won't know if knew dependencies are fetched in that case etc)
 
+
+  Example how to patch vcs checkout functions (eg if you're behind a proxy and
+  need to checkout github urls by http://): >
+    let g:vim_addon_manager = {}
+    let g:vim_addon_manager['git_checkout'] = {'f': 'MyGitCheckout', 'a': []}
+    fun! MyGitCheckout(repository, targetDir)
+        let a:repository.url = substitute(a:repository.url, '^git:\/\/github', 'http://gihtub', '')
+        call vam#utils#RunShell('git clone --depth=1 $.url $p', a:repository, a:targetDir)
+    endfun
+<
+
 ------------------------------------------------------------------------------
 2.2 names of addons and addon sources                        *VAM-addon-names*
 
