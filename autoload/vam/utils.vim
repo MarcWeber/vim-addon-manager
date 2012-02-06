@@ -139,7 +139,7 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
 
 
   let fix_dir = a:targetDir.'/plugin'
-  let type = opts['script-type']
+  let type = get(opts, 'script-type', 'plugin')
   if type  =~# '\v^%(%(after\/)?syntax|indent|ftplugin)$'
     let fix_dir = a:targetDir.'/'.type
   elseif type is 'color scheme'
