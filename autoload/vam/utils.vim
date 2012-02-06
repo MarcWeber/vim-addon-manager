@@ -252,7 +252,7 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
     endif
     for f in split(glob(a:targetDir."/*.vim"),"\n")
       let f = fnamemodify(f, ':t')
-      debug call rename(a:targetDir.'/'.f, fix_dir.'/'.f)
+      call rename(a:targetDir.'/'.f, fix_dir.'/'.f)
     endfor
   endif
 
