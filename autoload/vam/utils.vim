@@ -137,20 +137,23 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
         \ '.tbz2':  [-4,'ar','bzip2 -d'],
         \ }
 
+
+  let fix_dir = a:targetDir.'/plugin'
+  let type = opts['script-type']
+  if type  =~# '\v^%(%(after\/)?syntax|indent|ftplugin)$'
+    let fix_dir = a:targetDir.'/'.type
+  elseif type is 'color scheme'
+    let fix_dir = a:targetDir.'/colors'
+  endif
+
   " .vim file and type syntax?
   if a:archive =~? '\.vim$'
     " hook for plugin / syntax files: Move into the correct direcotry:
-    let dir = a:targetDir.'/plugin'
-    let type = opts['script-type']
-    if type  =~# '\v^%(%(after\/)?syntax|indent|ftplugin)$'
-      let dir = a:targetDir.'/'.type
-    elseif type is 'color scheme'
-      let dir = a:targetDir.'/colors'
+    if (!isdirectory(fix_dir))
+      call mkdir(fix_dir, 'p')
     endif
-    if (!isdirectory(dir))
-      call mkdir(dir, 'p')
-    endif
-    call writefile(readfile(a:archive,'b'), dir.'/'.fnamemodify(a:archive, ':t'), 'b')
+    " also see [fix-layout]
+    call writefile(readfile(a:archive,'b'), fix_dir.'/'.fnamemodify(a:archive, ':t'), 'b')
 
   " .gz .bzip2 (or .vba.* or .tar.*)
   elseif call(function('s:EndsWith'), [a:archive] + keys(gzbzip2) )
@@ -235,6 +238,27 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
 
   if delSource && !filereadable(a:archive)
     call delete(a:archive)
+  endif
+
+  " if there are *.vim files but no */**/*.vim files they layout is likely to
+  " be broken. Try fixing it
+  if (glob(a:targetDir."/*/**/*.vim") == '' && '' != glob(a:targetDir.'/*.vim'))
+    " also see [fix-layout]
+
+    " fixing .vim file locations was missed above. So fix it now
+    " example plugin requiring this: sketch
+    if (!isdirectory(fix_dir))
+      call mkdir(fix_dir, 'p')
+    endif
+    for f in split(glob(a:targetDir."/*.vim"),"\n")
+      let f = fnamemodify(f, ':t')
+      debug call rename(a:targetDir.'/'.f, fix_dir.'/'.f)
+    endfor
+  endif
+
+  " allow running arbitrary code. Shoud be used with caution
+  if has_key(opts, 'post_exec')
+    exec opts.post_exec
   endif
 
   " Do not use `has("unix")' here: it may be useful on `win32unix' (cygwin) and 
