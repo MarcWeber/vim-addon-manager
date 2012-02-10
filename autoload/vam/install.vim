@@ -139,14 +139,14 @@ fun! vam#install#Install(toBeInstalledList, ...)
     let confirmed = 0
     let origin = get(repository,'type','').' '.get(repository,'url','')
     call vam#Log('Plugin Name: '.name.' ver. '.get(repository, 'version', ''), 'None')
-    call vam#Log('Script Nr: '.get(repository, 'vim_script_nr', 'none'), 'None') 
+    call vam#Log('Script Nr: '.get(repository, 'vim_script_nr', 'none'), 'None')
     if (has_key(opts, 'requested_by'))
       call vam#Log('dependency chain: '.name.' < '.join(opts.requested_by,' < '))
     endif
 
     " tell user about target directory. Some users don't get it the first time..
     let pluginDir = vam#PluginDirFromName(name)
-    echom "Target: ".pluginDir
+    call vam#Log('Target: '.pluginDir, 'None')
 
     let d = get(repository, 'deprecated', '')
     if type(d) == type('') && d != ''
@@ -163,24 +163,22 @@ fun! vam#install#Install(toBeInstalledList, ...)
 
     " ask user for to confirm installation unless he set auto_install
 
-    if auto_install 
-        \ || confirmed 
+    if auto_install
+        \ || confirmed
         \ || (!vam#Log('Origin: '.origin ,"None")
               \ && s:confirm("Install plugin `".name."'?"))
 
-      let infoFile = vam#AddonInfoFile(name)
       call vam#install#Checkout(pluginDir, repository)
 
-      if !filereadable(infoFile) && has_key(repository, 'addon-info')
+      let infoFile = vam#AddonInfoFile(name)
+      if has_key(repository, 'addon-info') && !filereadable(infoFile)
         call writefile([string(repository['addon-info'])], infoFile)
       endif
 
       " install dependencies
-
-      let infoFile = vam#AddonInfoFile(name)
       let info = vam#AddonInfo(name)
 
-      let dependencies = get(info,'dependencies', {})
+      let dependencies = get(info, 'dependencies', {})
 
       " install dependencies merging opts with given repository sources
       " sources given in opts will win
@@ -189,8 +187,9 @@ fun! vam#install#Install(toBeInstalledList, ...)
        \ 'plugin_sources' : extend(copy(dependencies), get(opts, 'plugin_sources',{})),
        \ 'requested_by' : [name] + get(opts, 'requested_by', [])
        \ }))
+
+      call vam#install#HelpTags(name)
     endif
-    call vam#install#HelpTags(name)
   endfor
 endf
 
