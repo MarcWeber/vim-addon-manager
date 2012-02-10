@@ -102,6 +102,34 @@ fun! s:EndsWith(name, ...)
   return  a:name =~? '\%('.substitute(join(a:000,'\|'),'\.','\\.','g').'\)$'
 endf
 
+" Warning: Currently hooks should not depend on order of their execution
+let s:post_unpack_hooks={}
+function s:post_unpack_hooks.fix_layout(opts, targetDir, fixDir)
+  " if there are *.vim files but no */**/*.vim files they layout is likely to
+  " be broken. Try fixing it
+  let rtpvimfiles=glob(a:targetDir.'/*.vim')
+  if  !empty(rtpvimfiles) && empty(glob(a:targetDir.'/*/**/*.vim'))
+    " also see [fix-layout]
+
+    " fixing .vim file locations was missed above. So fix it now
+    " example plugin requiring this: sketch
+    if (!isdirectory(a:fixDir))
+      call mkdir(a:fixDir, 'p')
+    endif
+    for f in map(split(rtpvimfiles, "\n"), 'fnamemodify(v:val, ":t")')
+      call rename(a:targetDir.'/'.f, a:fixDir.'/'.f)
+    endfor
+  endif
+endfunction
+function s:post_unpack_hooks.change_to_unix_ff(opts, targetDir, fixDir)
+  if get(a:opts, 'unix_ff', 0)
+    for f in filter(vam#utils#Glob(a:targetDir.'/**/*.vim'), 'filewritable(v:val)==1')
+      call writefile(map(readfile(f, 'b'),
+                  \'((v:val[-1:] is# "\r")?(v:val[:-2]):(v:val))'), f, 'b')
+    endfor
+  endif
+endfunction
+
 " may throw EXCEPTION_UNPACK.*
 " most packages are shipped in a directory. Eg ADDON/plugin/*
 " strip-components=1 strips of this ADDON directory (implemented for tar.* " archives only)
@@ -122,7 +150,7 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
   let tgt = [{'d': a:targetDir}]
 
   if strip_components > 0 || strip_components == -1
-    " when stripping don' strip which was there before unpacking
+    " When stripping don't strip which was there before unpacking
     let keep = vam#utils#Glob(a:targetDir.'/*')
     let strip = 'call vam#utils#StripComponents(a:targetDir, strip_components, keep)'
   else
@@ -138,22 +166,22 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
         \ }
 
 
-  let fix_dir = a:targetDir.'/plugin'
+  let fixDir = a:targetDir.'/plugin'
   let type = get(opts, 'script-type', 'plugin')
   if type  =~# '\v^%(%(after\/)?syntax|indent|ftplugin)$'
-    let fix_dir = a:targetDir.'/'.type
+    let fixDir = a:targetDir.'/'.type
   elseif type is 'color scheme'
-    let fix_dir = a:targetDir.'/colors'
+    let fixDir = a:targetDir.'/colors'
   endif
 
   " .vim file and type syntax?
   if a:archive =~? '\.vim$'
     " hook for plugin / syntax files: Move into the correct direcotry:
-    if (!isdirectory(fix_dir))
-      call mkdir(fix_dir, 'p')
+    if (!isdirectory(fixDir))
+      call mkdir(fixDir, 'p')
     endif
     " also see [fix-layout]
-    call writefile(readfile(a:archive,'b'), fix_dir.'/'.fnamemodify(a:archive, ':t'), 'b')
+    call writefile(readfile(a:archive,'b'), fixDir.'/'.fnamemodify(a:archive, ':t'), 'b')
 
   " .gz .bzip2 (or .vba.* or .tar.*)
   elseif call(function('s:EndsWith'), [a:archive] + keys(gzbzip2) )
@@ -236,41 +264,14 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
     throw "EXCEPTION_UNPACK: don't know how to unpack ". a:archive
   endif
 
-  if delSource && !filereadable(a:archive)
+  if delSource && filereadable(a:archive)
     call delete(a:archive)
   endif
 
-  " if there are *.vim files but no */**/*.vim files they layout is likely to
-  " be broken. Try fixing it
-  if (glob(a:targetDir."/*/**/*.vim") == '' && '' != glob(a:targetDir.'/*.vim'))
-    " also see [fix-layout]
-
-    " fixing .vim file locations was missed above. So fix it now
-    " example plugin requiring this: sketch
-    if (!isdirectory(fix_dir))
-      call mkdir(fix_dir, 'p')
-    endif
-    for f in split(glob(a:targetDir."/*.vim"),"\n")
-      let f = fnamemodify(f, ':t')
-      call rename(a:targetDir.'/'.f, fix_dir.'/'.f)
-    endfor
-  endif
-
-  " allow running arbitrary code. Shoud be used with caution
-  if has_key(opts, 'post_exec')
-    exec opts.post_exec
-  endif
-
-  " Do not use `has("unix")' here: it may be useful on `win32unix' (cygwin) and 
-  " `macunix' (someone should ask users of these vims about that)
-  if get(opts, 'unix_ff', 0)
-    for f in filter(vam#utils#Glob(a:targetDir.'/**/*.vim'), 'filewritable(v:val)==1')
-      call writefile(map(readfile(f, 'b'),
-                  \'((v:val[-1:]==#"\r")?(v:val[:-2]):(v:val))'), f, 'b')
-    endfor
-  endif
-  " Using :sp will fire unneeded autocommands
-
+  let hargs=[opts, a:targetDir, fixDir]
+  for key in keys(s:post_unpack_hooks)
+    call call(s:post_unpack_hooks[key], hargs, {})
+  endfor
 endf
 
 " Usage: Glob($HOME.'/*')
