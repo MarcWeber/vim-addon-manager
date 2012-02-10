@@ -501,6 +501,22 @@ addon_completion_lhs                                *VAM-addon_completion_lhs*
         {lhs} of the mapping that uses |vam#install#CompleteAddonName()| for 
         completion. Default: "<C-x><C-p>". Spaces and bars are escaped.
 
+                                                                   *VAM-hooks*
+post_install_hook_functions                  *VAM-post_install_hook_functions*
+pre_update_hook_functions                    *VAM-pre_update_hook_functions*
+post_update_hook_functions                   *VAM-post_update_hook_functions*
+        Lists of function names or function references that will be called 
+        when hook is executed (see |addon-info-hooks|). All functions get four 
+        arguments: addon info dictionary, repository dictionary, plugin 
+        directory location and hook options dictionary.
+        Default values:
+            post_install_hook_functions: absent
+            pre_update_hook_functions: ["vam#install#CreatePatch"]
+            post_update_hook_functions: ["vam#install#ApplyPatch"]
+        Note: update hooks values are required for |VAM-do_diff| to work, 
+              vam#install#CreatePatch must be the last function and 
+              vam#install#ApplyPatch should be the first.
+
 The following options are used by vim-addon-manager-known-repositories, not by
 VAM itself. So if you set |vim-addon-manager-known| to another value they may
 have no effect.
@@ -665,12 +681,15 @@ post-update-hook                                *addon-info-post-update-hook*
 pre-update-hook                                 *addon-info-pre-update-hook*
         Contains VimL command (string), that is |:execute|d after some 
         replacements are done: “%d” gets replaced with |expression| evaluating 
-        to plugin root directory, “%i” – to addon-info dictionary.
+        to plugin root directory, “%i” – to addon-info dictionary and “%r” – 
+        to repository dictionary, “%o” – to opts dictionary (used to save 
+        information between “pre-” and “post-” hooks).
         Hooks are executed in the following cases:
             Hook           Case ~
             post-install   After successfully installing a plugin.
             pre-update     Before a non-VCS source update.
             post-update    After a non-VCS source update.
+        In *-update hooks opts dictionary also contains oldVersion value.
 
 dependencies                                         *addon-info-dependencies*
         Describes plugins that are required for the plugin, must contain

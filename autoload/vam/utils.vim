@@ -369,8 +369,8 @@ fun! vam#utils#RmFR(dir_or_file)
   else
     let cmd = "rm -fr"
   endif
-  if cmd == ""
-    throw "don't know how to RmFR on this system: ".g:os
+  if empty(cmd)
+    throw "Don't know how to recursively remove directory on ".g:os." system"
   else
     call vam#utils#RunShell(cmd.' $', a:dir_or_file)
   endif
