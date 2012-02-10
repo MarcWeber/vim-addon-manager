@@ -155,7 +155,7 @@ fun! vam#install#Install(toBeInstalledList, ...)
 
     " tell user about target directory. Some users don't get it the first time..
     let pluginDir = vam#PluginDirFromName(name)
-    echom "Target: ".pluginDir
+    call vam#Log('Target: '.pluginDir, 'None')
 
     let d = get(repository, 'deprecated', '')
     if type(d) == type('') && d != ''
@@ -173,7 +173,7 @@ fun! vam#install#Install(toBeInstalledList, ...)
     " ask user for to confirm installation unless he set auto_install
 
     if auto_install
-        \ || confirmed 
+        \ || confirmed
         \ || (!vam#Log('Origin: '.origin ,"None")
               \ && s:confirm("Install plugin `".name."'?"))
 
