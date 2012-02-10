@@ -130,6 +130,16 @@ function s:post_unpack_hooks.change_to_unix_ff(opts, targetDir, fixDir)
   endif
 endfunction
 
+function s:StripIfNeeded(opts, targetDir)
+  let strip_components = get(a:opts, 'strip-components', -1)
+
+  if strip_components > 0 || strip_components == -1
+    " When stripping don't strip which was there before unpacking
+    let keep = vam#utils#Glob(a:targetDir.'/*')
+    call vam#utils#StripComponents(a:targetDir, strip_components, keep)
+  endif
+endfunction
+
 " may throw EXCEPTION_UNPACK.*
 " most packages are shipped in a directory. Eg ADDON/plugin/*
 " strip-components=1 strips of this ADDON directory (implemented for tar.* " archives only)
@@ -143,19 +153,10 @@ endfunction
 " !! If you change this run the test, please: call vim_addon_manager_tests#Tests('.')
 fun! vam#utils#Unpack(archive, targetDir, ...)
   let opts = a:0 > 0 ? a:1 : {}
-  let strip_components = get(opts, 'strip-components', -1)
   let delSource = get(opts, 'del-source', 0)
 
   let esc_archive = vam#utils#ShellDSL('$', a:archive)
   let tgt = [{'d': a:targetDir}]
-
-  if strip_components > 0 || strip_components == -1
-    " When stripping don't strip which was there before unpacking
-    let keep = vam#utils#Glob(a:targetDir.'/*')
-    let strip = 'call vam#utils#StripComponents(a:targetDir, strip_components, keep)'
-  else
-    let strip = ''
-  endif
 
   " [ ending, chars to strip, chars to add, command to do the unpacking ]
   let gzbzip2 = {
@@ -236,7 +237,7 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
     else
       call s:exec_in_dir(tgt + [{'c': 'tar -xf '.esc_archive }])
     endif
-    exec strip
+    call s:StripIfNeeded(opts, a:targetDir)
 
     " .zip
   elseif s:EndsWith(a:archive, '.zip')
@@ -245,14 +246,14 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
     else
       call s:exec_in_dir(tgt + [{'c': 'unzip '.esc_archive }])
     endif
-    exec strip
+    call s:StripIfNeeded(opts, a:targetDir)
 
     " .7z, .cab, .rar, .arj, .jar
     " (I have actually seen only .7z and .rar, but 7z supports other formats 
     " too)
   elseif s:EndsWith(a:archive,  '.7z','.cab','.arj','.rar','.jar')
     call vam#utils#RunShell('7z x -o$ $', a:targetDir, a:archive)
-    exec strip
+    call s:StripIfNeeded(opts, a:targetDir)
 
   elseif s:EndsWith(a:archive, '.vba','.vmb')
     " .vba reuse vimball#Vimball() function
