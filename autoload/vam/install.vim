@@ -243,11 +243,14 @@ fun! vam#install#UpdateAddon(name)
     return 0
   endif
 
+
   let versionFile = pluginDir.'/version'
   let oldVersion = filereadable(versionFile) ? readfile(versionFile, 1)[0] : "?"
   if oldVersion !=# newVersion || newVersion == '?'
     " update plugin
     echom "Updating plugin ".a:name." because ".(newVersion == '?' ? 'version is unknown' : 'there is a different version')
+
+    call s:RunHook('pre-update', vam#AddonInfo(a:name), pluginDir)
 
     " move plugin to backup destination:
     let pluginDirBackup = pluginDir.'-'.oldVersion

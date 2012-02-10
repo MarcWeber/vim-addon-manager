@@ -662,13 +662,15 @@ repository                                             *addon-info-repository*
                                                 *addon-info-hooks*
 post-install-hook                               *addon-info-post-install-hook*
 post-update-hook                                *addon-info-post-update-hook*
+pre-update-hook                                 *addon-info-pre-update-hook*
         Contains VimL command (string), that is |:execute|d after some 
         replacements are done: “%d” gets replaced with |expression| evaluating 
         to plugin root directory, “%i” – to addon-info dictionary.
         Hooks are executed in the following cases:
             Hook           Case ~
             post-install   After successfully installing a plugin.
-            post-update    After non-VCS source update.
+            pre-update     Before a non-VCS source update.
+            post-update    After a non-VCS source update.
 
 dependencies                                         *addon-info-dependencies*
         Describes plugins that are required for the plugin, must contain
