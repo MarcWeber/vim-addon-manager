@@ -123,6 +123,15 @@ fun! vam#install#ReplaceAndFetchUrls(list)
   return l
 endfun
 
+fun! s:RunHook(hook, info, pluginDir)
+  let hkey=a:hook.'-hook'
+  if !has_key(a:info, hkey)
+    return
+  endif
+  execute substitute(substitute(a:info[hkey],
+        \'%d', 'a:pluginDir', 'g'),
+        \'%i', 'a:info',      'g')
+endfu
 
 " opts: same as ActivateAddons
 fun! vam#install#Install(toBeInstalledList, ...)
@@ -163,24 +172,22 @@ fun! vam#install#Install(toBeInstalledList, ...)
 
     " ask user for to confirm installation unless he set auto_install
 
-    if auto_install 
+    if auto_install
         \ || confirmed 
         \ || (!vam#Log('Origin: '.origin ,"None")
               \ && s:confirm("Install plugin `".name."'?"))
 
-      let infoFile = vam#AddonInfoFile(name)
       call vam#install#Checkout(pluginDir, repository)
 
-      if !filereadable(infoFile) && has_key(repository, 'addon-info')
+      let infoFile = vam#AddonInfoFile(name)
+      if has_key(repository, 'addon-info') && !filereadable(infoFile)
         call writefile([string(repository['addon-info'])], infoFile)
       endif
 
       " install dependencies
-
-      let infoFile = vam#AddonInfoFile(name)
       let info = vam#AddonInfo(name)
 
-      let dependencies = get(info,'dependencies', {})
+      let dependencies = get(info, 'dependencies', {})
 
       " install dependencies merging opts with given repository sources
       " sources given in opts will win
@@ -189,8 +196,10 @@ fun! vam#install#Install(toBeInstalledList, ...)
        \ 'plugin_sources' : extend(copy(dependencies), get(opts, 'plugin_sources',{})),
        \ 'requested_by' : [name] + get(opts, 'requested_by', [])
        \ }))
+
+      call vam#install#HelpTags(name)
+      call s:RunHook('post-install', info, pluginDir)
     endif
-    call vam#install#HelpTags(name)
   endfor
 endf
 
@@ -309,6 +318,7 @@ fun! vam#install#UpdateAddon(name)
     if !patch_failure
       call vam#utils#RmFR(pluginDirBackup)
     endif
+    call s:RunHook('post-update', vam#AddonInfo(a:name), pluginDir)
   elseif oldVersion == newVersion
     call vam#Log( "Not updating plugin ".a:name.", ".newVersion." is current")
     return 1

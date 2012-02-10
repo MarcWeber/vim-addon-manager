@@ -659,6 +659,17 @@ repository                                             *addon-info-repository*
                 Contains addon information in case plugin does not supply its 
                 own addon-info file.
 
+                                                *addon-info-hooks*
+post-install-hook                               *addon-info-post-install-hook*
+post-update-hook                                *addon-info-post-update-hook*
+        Contains VimL command (string), that is |:execute|d after some 
+        replacements are done: “%d” gets replaced with |expression| evaluating 
+        to plugin root directory, “%i” – to addon-info dictionary.
+        Hooks are executed in the following cases:
+            Hook           Case ~
+            post-install   After successfully installing a plugin.
+            post-update    After non-VCS source update.
+
 dependencies                                         *addon-info-dependencies*
         Describes plugins that are required for the plugin, must contain
         a dictionary where keys are plugin names and values describe where
