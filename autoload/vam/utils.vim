@@ -107,7 +107,7 @@ endf
 
 " Warning: Currently hooks should not depend on order of their execution
 let s:post_unpack_hooks={}
-function s:post_unpack_hooks.fix_layout(opts, targetDir, fixDir)
+fun s:post_unpack_hooks.fix_layout(opts, targetDir, fixDir)
   " if there are *.vim files but no */**/*.vim files they layout is likely to
   " be broken. Try fixing it
   let rtpvimfiles=glob(a:targetDir.'/*.vim')
@@ -123,23 +123,23 @@ function s:post_unpack_hooks.fix_layout(opts, targetDir, fixDir)
       call rename(a:targetDir.'/'.f, a:fixDir.'/'.f)
     endfor
   endif
-endfunction
-function s:post_unpack_hooks.change_to_unix_ff(opts, targetDir, fixDir)
+endfun
+fun s:post_unpack_hooks.change_to_unix_ff(opts, targetDir, fixDir)
   if get(a:opts, 'unix_ff', 0)
     for f in filter(vam#utils#Glob(a:targetDir.'/**/*.vim'), 'filewritable(v:val)==1')
       call writefile(map(readfile(f, 'b'),
                   \'((v:val[-1:] is# "\r")?(v:val[:-2]):(v:val))'), f, 'b')
     endfor
   endif
-endfunction
+endfun
 
-function s:StripIfNeeded(opts, targetDir)
+fun! s:StripIfNeeded(opts, targetDir)
   let strip_components = get(a:opts, 'strip-components', -1)
 
   if strip_components!=0
     call vam#utils#StripComponents(a:targetDir, strip_components, [a:targetDir.'/archive'])
   endif
-endfunction
+endfun
 
 " may throw EXCEPTION_UNPACK.*
 " most packages are shipped in a directory. Eg ADDON/plugin/*
@@ -429,17 +429,17 @@ endf
 " sample usage:
 " inoremap <buffer> <expr> \start_completion vam#utils#CompleteWith("vam#install#CompleteAddonName")'
 let s:savedomnifuncs={}
-function! vam#utils#CompleteWith(fun)
+fun! vam#utils#CompleteWith(fun)
   if &l:omnifunc isnot# a:fun
     let s:savedomnifuncs[bufnr('%')]=&l:omnifunc
     call s:SetRestoringOmnifuncAutocommands()
     let &l:omnifunc=a:fun
   endif
   return "\<C-x>\<C-o>"
-endfunction
+endfun
 
 " Restore &omnifunc when different events are launched
-function! s:SetRestoringOmnifuncAutocommands()
+fun! s:SetRestoringOmnifuncAutocommands()
   let buf=bufnr('%')
   let restoreofcode='if has_key(s:savedomnifuncs, '.buf.') | '.
         \               'let &l:omnifunc=remove(s:savedomnifuncs, '.buf.') | '.
@@ -453,7 +453,7 @@ function! s:SetRestoringOmnifuncAutocommands()
     endif
     execute 'autocmd! InsertLeave <buffer> '.restoreofcode
   augroup END
-endfunction
+endfun
 "}}}1
 
 " vim: et ts=8 sts=2 sw=2
