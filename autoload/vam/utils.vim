@@ -1,6 +1,9 @@
 " vam#DefineAndBind('s:c','g:vim_addon_manager','{}')
 if !exists('g:vim_addon_manager') | let g:vim_addon_manager = {} | endif | let s:c = g:vim_addon_manager
 
+" Defaulting to 7z why or why not?
+let s:c.omit_7z=get(s:c, 'omit_7z', 0)
+
 " let users override curl command. Reuse netrw setting
 let s:curl = exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o'
 
@@ -133,10 +136,8 @@ endfunction
 function s:StripIfNeeded(opts, targetDir)
   let strip_components = get(a:opts, 'strip-components', -1)
 
-  if strip_components > 0 || strip_components == -1
-    " When stripping don't strip which was there before unpacking
-    let keep = vam#utils#Glob(a:targetDir.'/*')
-    call vam#utils#StripComponents(a:targetDir, strip_components, keep)
+  if strip_components!=0
+    call vam#utils#StripComponents(a:targetDir, strip_components, [a:targetDir.'/archive'])
   endif
 endfunction
 
@@ -175,6 +176,13 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
     let fixDir = a:targetDir.'/colors'
   endif
 
+  " 7z renames .tbz, .tbz2, .tar.bz2 to .tar, but it preserves names stored by 
+  " gzip (if any): if you do
+  "   tar -cf ../abc.tar . && gzip ../abc.tar && mv ../abc.tar.gz ../def.tar.gz
+  " you will find that “7z x ../def.tar.gz” unpacks archive “abc.tar” because 
+  " gzip stored its name.
+  let use_7z=(!s:c.omit_7z && executable('7z'))
+
   " .vim file and type syntax?
   if a:archive =~? '\.vim$'
     " hook for plugin / syntax files: Move into the correct direcotry:
@@ -188,7 +196,6 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
   elseif call(function('s:EndsWith'), [a:archive] + keys(gzbzip2) )
     " I was told tar on Windows is buggy and can't handle xj or xz correctly
     " so unpack in two phases:
-
     for [k,z] in items(gzbzip2)
       if s:EndsWith(a:archive, k)
         " without ext
@@ -197,10 +204,8 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
         let renameTo = unpacked.z[1]
 
         " PHASE (1): gunzip or bunzip using gzip,bzip2 or 7z:
-        if executable('7z') && !exists('g:prefer_tar')
-          " defaulting to 7z why or why not?
+        if use_7z
           call vam#utils#RunShell('7z x -o$ $', fnamemodify(a:archive, ':h'), a:archive)
-          " 7z renames tgz to tar
         else
           " make a backup. gunzip etc rm the original file
           if !delSource
@@ -216,41 +221,38 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
         endif
 
         if !filereadable(renameTo)
-          " windows tar does not rename .tgz to .tar ?
+          " Windows gzip does not rename .tgz to .tar ?
           call rename(unpacked, renameTo)
         endif
 
         " PHASE (2): now unpack .tar or .vba file and tidy up temp file:
-        call vam#utils#Unpack(renameTo, a:targetDir, { 'strip-components': strip_components, 'del-source': 1 })
+        call vam#utils#Unpack(renameTo, a:targetDir, extend({'del-source': 1}, opts))
         call delete(renameTo)
         break
       endif
       unlet k z
     endfor
 
-    " execute in target dir:
-
-    " .tar
+  " .tar
   elseif s:EndsWith(a:archive, '.tar')
-    if executable('7z')
+    if use_7z
       call vam#utils#RunShell('7z x -o$ $', a:targetDir, a:archive)
     else
       call s:exec_in_dir(tgt + [{'c': 'tar -xf '.esc_archive }])
     endif
     call s:StripIfNeeded(opts, a:targetDir)
 
-    " .zip
+  " .zip
   elseif s:EndsWith(a:archive, '.zip')
-    if executable('7z')
+    if use_7z
       call vam#utils#RunShell('7z x -o$ $', a:targetDir, a:archive)
     else
       call s:exec_in_dir(tgt + [{'c': 'unzip '.esc_archive }])
     endif
     call s:StripIfNeeded(opts, a:targetDir)
 
-    " .7z, .cab, .rar, .arj, .jar
-    " (I have actually seen only .7z and .rar, but 7z supports other formats 
-    " too)
+  " .7z, .cab, .rar, .arj, .jar
+  " (I have actually seen only .7z and .rar, but 7z supports other formats too)
   elseif s:EndsWith(a:archive,  '.7z','.cab','.arj','.rar','.jar')
     call vam#utils#RunShell('7z x -o$ $', a:targetDir, a:archive)
     call s:StripIfNeeded(opts, a:targetDir)
