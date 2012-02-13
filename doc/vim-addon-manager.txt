@@ -432,9 +432,16 @@ vam#install#CompleteAddonName                *vam#install#CompleteAddonName()*
 4. Options                                                       *VAM-options*
                                                          *g:vim_addon_manager*
 
-All options are located in the global dictionary g:vim_addon_manager. It also
-contains some stuff that user should never modify if he wants to see this
-plugin working. Possible keys:
+All options are located in the global dictionary g:vim_addon_manager. You can
+set them this way: >
+  let g:vim_addon_manager = {}
+  let g:vim_addon_manager['auto_install'] = 1
+  let g:vim_addon_manager['do_diff'] = 0
+  " ...
+< where KEY_NAME is one of auto_install, plugin_sources, ... (see below)
+
+It also contains some stuff that user should never modify if he wants to see
+this plugin working. Possible keys:
 
 auto_install                                                *VAM-auto_install*
         This options disables plugin installation confirmation. It will not
