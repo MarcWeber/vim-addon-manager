@@ -42,6 +42,17 @@ people will try to help you. You should skim the docs before asking for
 help though. Also see |VAM-author|
 [1] https://github.com/MarcWeber/vim-addon-manager/issues
 
+WHY VAM?: ~
+  - two maintainers (ZyX and Marc Weber)
+  - friendly to users (install addons by name)
+  - propagates collaborative coding by providing simple dependeoncy managament
+    improving code sharing
+  - supports many sources (git,hg,bzr,svn,www.vim.org)
+  - provides a way to deprecate plugins which are superseded by others
+  - most plugins can also be loaded at runtime (some problems may [BUG 10])
+  - some Windows support
+  - is not too shy telling you that alternatives exist (and which one)
+
 ==============================================================================
 1. Intro                                                           *VAM-intro*
 
@@ -160,6 +171,23 @@ NOTES: ~
         call vam#utils#RunShell('git clone --depth=1 $.url $p', a:repository, a:targetDir)
     endfun
 <
+
+  Another example: replace git_update and show changelog >
+    let g:vim_addon_manager = {}
+    let g:vim_addon_manager['git_update'] = {'f': 'MyGitUpdate', 'a': []}
+    fun! MyGitUpdate(targetDir)
+        let cd = shellescape
+        let oldHash = system(vam#utils#ShellDSL('cd $; git rev-list HEAD -1', a:targetDir))
+        call vam#utils#RunShell('cd $p && git pull', a:targetDir)
+        let newHash = system(vam#utils#ShellDSL('cd $; git rev-list HEAD -1', a:targetDir))
+        if oldHash != newHash
+          silent e VAM_GIT_UPDATE_LOG
+          puts=a:targetDir
+          puts=split(system(vam#utils#ShellDSL('cd $; git log $[]..$[]  ', a:targetDir, oldHash, newHash)
+        endif
+        return oldHash == newHash ? "up-to-date" : "updated"
+    endfun
+>
 
 ------------------------------------------------------------------------------
 2.2 names of addons and addon sources                        *VAM-addon-names*
@@ -947,7 +975,7 @@ what's going to happen.
 ==============================================================================
 12. Troubleshooting and known bugs                      *VAM-trouble-shooting*
 
-  Think about how to integrate ideas found in ipi http://www.vim.org/scripts/script.php?script_id=3809
+  [BUG 10] Think about how to integrate ideas found in ipi http://www.vim.org/scripts/script.php?script_id=3809
 
   Runtimepath manipulation should be separated from installation / update
   logic. This way you can have different implementation for updating plugins
