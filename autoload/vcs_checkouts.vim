@@ -2,18 +2,19 @@
 " its very short probably VAM will keep a copy
 
 exec vam#DefineAndBind('s:c','g:vim_addon_manager','{}')
-let s:c.shallow_clones = get(s:c,'shallow_clones', executable('git') && system('git clone --help') =~ '--depth')
-let s:c.scm_extra_args = get(s:c,'scm_extra_args',{})
-
-let s:se = s:c.scm_extra_args
-" this is not proberly quoted yet thus its will change:
-" using list so that we can encode ['$ $',[1,2]] (quoting values if needed)
-let s:se.git = get(s:c,'git', [s:c.shallow_clones ? '--depth 1' : ''])
+let s:c.scms = get(s:c, 'scms', {})
 
 " What's important about these configurations ?
 "
-" s:*_checkout are called with (repository, targetDir)
-" s:*_update are called with (repository, vcs_directory)
+" s:c.scms.{scm}.clone are called with additional (repository, targetDir),
+"                      absense of targetDir indicates failure
+" s:c.scms.{scm}.update are called with additional (repository), non-zero return
+"                       value indicates failure
+"
+" Both should contain list that looks like if you are going to do the job using 
+" `call call("call", s:scms.{scm}.{key})'.
+"
+" You can explicitely set executable location using
 "
 " Thus you can overwrite them and implement whatever behaviour you like.
 " The default implemenation should be close to what users expect from the VCS
@@ -22,32 +23,92 @@ let s:se.git = get(s:c,'git', [s:c.shallow_clones ? '--depth 1' : ''])
 "
 " Later we can even add additional implementations telling user that upstream
 " has changed etc .. (TODO)
-let s:c.git_checkout = get(s:c, 'git_checkout', { 'f': 'vam#utils#RunShell', 'a': ['git clone '.s:se.git[0].' $.url $p'] })
-let s:c.hg_checkout = get(s:c, 'hg_checkout', { 'f': 'vam#utils#RunShell', 'a': ['hg clone $.url $p']})
-let s:c.bzr_checkout = get(s:c, 'bzr_checkout', { 'f': 'vam#utils#RunShell', 'a': ['bzr branch $.url $p']})
-let s:c.svn_checkout = get(s:c, 'svn_checkout', { 'f': 'vcs_checkouts#SVNCheckout', 'a': []})
+let s:git_checkout='git clone $.url $p'
+if executable('git') && stridx(system('git clone --help'), '--depth')!=-1
+  let s:git_checkout='git clone --depth 1 $.url $p'
+endif
+let s:scm_defaults={
+      \'git': {'clone': ['vam#utils#RunShell', [s:git_checkout       ]],
+      \       'update': ['vam#utils#RunShell', ['cd $p && git pull'  ]],},
+      \ 'hg': {'clone': ['vam#utils#RunShell', ['hg clone $.url $p'  ]],
+      \       'update': ['vam#utils#RunShell', ['hg pull -u -R $p'   ]],},
+      \'bzr': {'clone': ['vam#utils#RunShell', ['bzr branch $.url $p']],
+      \       'update': ['vam#utils#RunShell', ['bzr pull -d $p'     ]],},
+      \'svn': {'clone': ['vcs_checkouts#SVNCheckout', []],
+      \       'update': ['vam#utils#RunShell', ['svn update $p'      ]],},
+      \'_bundle': {'update': ['vcs_checkouts#UpdateBundle', []],},
+    \}
+let s:c.scms=get(s:c, 'scms', {})
+call map(filter(copy(s:c.scms), 'has_key(s:scm_defaults, v:key)'), 'extend(v:val, s:scm_defaults[v:key], "keep")')
+call extend(s:c.scms, s:scm_defaults, 'keep')
+call map(copy(s:c.scms), 'extend(v:val, {"dir": ".".v:key})')
 
-" luckily "cd && cmd" works on both: win and linux ..
-" let s:c.git_update = get(s:c, 'git_update', { 'f': 'vam#utils#RunShell', 'a': ['cd $p && git pull'] })
-let s:c.git_update = get(s:c, 'git_update', { 'f': 'vcs_checkouts#GitUpdate', 'a': []})
-
-let s:c.hg_update = get(s:c, 'hg_update', { 'f': 'vam#utils#RunShell', 'a': ['hg pull -u -R $p']})
-let s:c.bzr_update = get(s:c, 'bzr_update', { 'f': 'vam#utils#RunShell', 'a': ['bzr pull -d $p']})
-let s:c.svn_update = get(s:c, 'svn_update', { 'f': 'vam#utils#RunShell', 'a': ['cd $p && svn update']})
-
-
-fun! vcs_checkouts#GitUpdate(targetDir)
-  " use a simple shell script instead?
-  let oldHash = system(vam#utils#ShellDSL('cd $; git rev-list HEAD -1', a:targetDir))
-  call vam#utils#RunShell('cd $p && git pull', a:targetDir)
-  let newHash = system(vam#utils#ShellDSL('cd $; git rev-list HEAD -1', a:targetDir))
-  " if oldHash != newHash
-  "   " puts=a:targetDir
-  "   " puts=split(system(vam#utils#ShellDSL('cd $; git log $[]..$[]  ', a:targetDir, oldHash, newHash)
-  " endif
-  return oldHash == newHash ? "up-to-date" : "updated"
+fun! vcs_checkouts#GetBundle(repository, targetDir)
+  let [dummystr, protocol, user, domain, port, path; dummylst]=
+              \matchlist(a:repository, '\v^%(([^:]+)\:\/\/)?'.
+              \                           '%(([^@/:]+)\@)?'.
+              \                            '([^/:]*)'.
+              \                           '%(\:(\d+))?'.
+              \                            '(.*)$')
+  if domain is? 'github.com'
+    let url="https://".domain."/".'.s:ghpath.'."/zipball/master"
+    let archive='master.zip'
+  elseif domain is? 'bitbucket.org'
+    let url="https://".domain.path."/get/default.zip"
+    let archive='default.zip'
+  elseif domain is? 'git.devnull.li'
+    let url="http://".domain.path."/snapshot/master.tar.gz"
+    let archive='master.tar.gz'
+  else
+    throw 'Don’t know how to get bundle from '.domain
+  endif
+  call vam#install#Checkout(a:targetDir, {'type': 'archive', 'url': url, 'archive': archive})
+  call mkdir(a:targetDir.'/._bundle')
+  call writefile([url, archive], a:targetDir.'/._bundle/opts', 'b')
 endfun
 
+fun! vcs_checkouts#UpdateBundle(targetDir)
+  let [url, archive]=readfile(a:targetDir.'/._bundle/url', 'b')
+  call vam#utils#RmFR(a:targetDir)
+  call vam#install#Checkout(a:targetDir, {'type': 'archive', 'url': url, 'archive': archive})
+endfun
+
+fun! s:TryCmd(...)
+  try
+    call call('vam#utils#RunShell', a:000)
+    return 1
+  catch
+    return 0
+  endtry
+endfun
+
+fun! vcs_checkouts#GitCheckout(repository, targetDir)
+  if executable('git')
+    call vam#utils#RunShell(s:git_checkout, a:repository, a:targetDir)
+  elseif executable('hg') && s:TryCmd('hg clone $.url $p', a:repository, a:targetDir)
+    return
+  else
+    call vcs_checkouts#GetBundle(a:repository, a:targetDir)
+  endif
+endfun
+
+fun! vcs_checkouts#MercurialCheckout(repository, targetDir)
+  if executable('hg')
+    call vam#utils#RunShell('hg clone $.url $p', a:repository, a:targetDir)
+  else
+    call vcs_checkouts#GetBundle(a:repository, a:targetDir)
+  endif
+endfun
+
+fun! vcs_checkouts#SubversionCheckout(repository, targetDir)
+  if executable('svn')
+    call vcs_checkouts#SVNCheckout(a:repository, a:targetDir)
+  elseif executable('hg') && s:TryCmd('hg clone $.url $p', a:repository, a:targetDir)
+    return
+  elseif executable('bzr') && s:TryCmd('bzr branch $.url $p', a:repository, a:targetDir)
+    return
+  endif
+endfun
 
 fun! vcs_checkouts#SVNCheckout(repository, targetDir)
   let args=['svn checkout $.url $3p', a:repository, a:repository.url, a:targetDir]
@@ -62,36 +123,31 @@ endfun
 " Thus move checking .hg .svn etc into a different file
 
 fun! vcs_checkouts#Update(dir)
-  let directory = a:dir
-  let types = {'.git' : 'git', '.hg' : 'hg', '.svn': 'svn' }
-  for [k, t] in items(types)
-    if isdirectory(directory.'/'.k) | let type = t | break | endif
+  for [scm, sdescr] in items(s:c.scms)
+    if isdirectory(a:dir.'/'.(sdescr.dir))
+      break
+    endif
+    unlet sdescr
   endfor
 
-  if !exists('type')
-    " not knowing how to update a repo is not a failure
+  if !exists('sdescr')
     return 'unknown'
   endif
 
-  let c = s:c[type . '_update']
-  let r = call(c.f, c.a + [directory])
-  if r is 0
-    unlet r
-    let r ='up-to-date'
-  endif
-
-  if v:shell_error
-    call vam#Log('Updating '.a:dir.' falied. Got exit code: '.v:shell_error, 'ErrorMsg')
+  let c=sdescr.update
+  if call(c[0], c[1] + [a:dir], get(c, 2, {}))
+    call vam#Log('Updating '.a:dir.' failed')
     return 'failed'
   endif
-  return r
+
+  return 'up-to-date'
 endf
 
 " repository = {'type': git|hg|svn|bzr, 'url': .. }
 fun! vcs_checkouts#Checkout(targetDir, repository)
-  if a:repository.type =~ '^\%(git\|hg\|bzr\|svn\)$'
-    let c = s:c[(a:repository.type) . '_checkout']
-    call call(c.f, c.a + [a:repository, a:targetDir])
+  if has_key(s:c.scms, a:repository.type)
+    let c=s:c.scms[a:repository.type].clone
+    call call(c[0], c[1]+[a:repository, a:targetDir], get(c, 2, {}))
   else
     " Keep old behavior: no throw for unknown repository type
     return
