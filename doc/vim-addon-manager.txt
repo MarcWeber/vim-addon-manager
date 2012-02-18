@@ -7,9 +7,8 @@ CONTENTS                                                        *VAM-contents*
     1. Intro                                  |VAM-intro|
     2 Installation & installing plugins       |VAM-installation|
         2.2 names of addons and addon soucres |VAM-addon-names|
-        2.3 Example: personal                 |VAM-complex-setup-sample|
-            configurable setup
-        2.4 unattended installation
+        2.3 Example: configurable setup       |VAM-complex-setup-sample|
+        2.4 unattended installation           |VAM-unattended-installation|
     3. Functionality provided                 |VAM-functionality|
         3.1. Commands                         |VAM-commands|
         3.2. Functions                        |VAM-functions|
@@ -20,14 +19,11 @@ CONTENTS                                                        *VAM-contents*
     9. Testing this plugin                    |VAM-testing|
    10. Some notes for windows users           |VAM-windows|
    11. Some notes for Gentoo users            |VAM-gentoo|
-   12. Troubleshooting and known bug          |VAM-trouble-shooting|
-       and TODOs as well as "I want .."
-   13. VAM vs ...
-
-   14. tracking down errors                  |VAM-tracking-down-erros|
-
-   20. making plugins work with VAM
-        (rtp different from ~/.vim)
+   12. Troubleshooting and known bugs         |VAM-trouble-shooting|
+   13. TODO notes                             |VAM-TODO|
+   14. VAM vs ...                             |VAM-comparison|
+   15. Tracking down errors                   |VAM-tracking-down-erros|
+   16. Making plugins work with VAM           |VAM-adjusting-plugins|
 
 ==============================================================================
 
@@ -286,7 +282,7 @@ Or overwrite the MergeSources function: >
 
 
 ------------------------------------------------------------------------------
-2.3 Example: personal configurable setup *VAM-complex-setup-sample*
+2.3 Example: configurable setup                     *VAM-complex-setup-sample*
 >
   call vam#ActivateAddons(["github:YOURNAME"],{'auto_install' : 0})
   " this initializes Vim the way *you* want also loading more plugins:
@@ -304,7 +300,7 @@ Or overwrite the MergeSources function: >
   This section was written to inspire you only.
 
 ------------------------------------------------------------------------------
-2.4 unattended installation
+2.4 Unattended installation                      *VAM-unattended-installation*
 
 Note: You should always review foreign code before running it. That said this
 is how you can update or install unattended (without confirmations ..):
@@ -317,11 +313,10 @@ where ACTION is either UpdateActivatedAddons or vam#InstallAddons()
 
 This works for http://mawercer.de/~marc/vam/index.php.
 
-There is also the undocumented g:vim_addon_manager['dont_source'] option
-adding additionally json syntax checks on addon-info.json files which are
-evaled by Vim which should be used if you want to checkout eventually
-untrusted code! If you're going to use the plugins anyway its of no use.
-You also want to set auto_install.
+There is also the undocumented g:vim_addon_manager.dont_source option which 
+should be used if you want to checkout eventually untrusted code! If you're 
+going to use the plugins anyway its of no use.
+You may also want to set auto_install.
 
 ==============================================================================
 3. Functionality provided                                  *VAM-functionality*
@@ -1062,7 +1057,8 @@ what's going to happen.
   For windows users there is: http://mawercer.de/~marc/vam/index.php
   which will also work on sytems not having git but an unzip implementation.
 
-TODOs:
+==============================================================================
+13. TODO notes                                                      *VAM-TODO*
 - support vim-scripts.org. This will let you get all www.vim.org scripts using
   git repositories only. I think the general idea is great. However we have to
   take care to keep patches which were written for git/hg in sync.
@@ -1152,7 +1148,7 @@ sufficient to prepare patches.
 
 
 ==============================================================================
-13. VAM vs ...
+14. VAM vs ...                                               *VAM-comparison*
 
 
 - ftdetect files are loaded if you set "filetype on".
@@ -1204,7 +1200,7 @@ VAM. And that's good for community.
 
 
 ==============================================================================
-14. making plugins work with VAM (rtp different from ~/.vim) *VAM-tracking-down-errors*
+15. Tracking down errors                              *VAM-tracking-down-errors*
 
 1) Where does the error or unexpected behaviour come from?
   Try disabling plugins until you know which plugins are left causing the bad
@@ -1251,7 +1247,7 @@ SVN (svn)~
 Eventually you want to sent a bug report to maintainers
 
 ==============================================================================
-20. making plugins work with VAM (rtp different from ~/.vim)
+16. Making plugins work with VAM                       *VAM-adjusting-plugins*
 
 Most plugins should work out of the box.
 
