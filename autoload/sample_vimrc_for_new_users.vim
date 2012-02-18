@@ -113,6 +113,9 @@ noremap \go :exec 'e '. fnameescape(tlib#input#List('s','select file', split(glo
     command!-nargs=1 TJump call SelectTag(<f-args>)
 
 " }}}
+" select a buffer from list
+command SelectBuf exec 'b '.matchstr( tlib#input#List('s', 'select buffer', tlib#cmd#OutputAsList('ls')), '^\s*\zs\d\+\ze')
+noremap! \sb :SelectBuf<cr>
 
 " dummy func to enabling you to load this file after adding the top level {{{1
 " dir to runtimepath using :set runtimpeth+=ROOT

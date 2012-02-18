@@ -28,10 +28,26 @@ let s:c.bzr_checkout = get(s:c, 'bzr_checkout', { 'f': 'vam#utils#RunShell', 'a'
 let s:c.svn_checkout = get(s:c, 'svn_checkout', { 'f': 'vcs_checkouts#SVNCheckout', 'a': []})
 
 " luckily "cd && cmd" works on both: win and linux ..
-let s:c.git_update = get(s:c, 'git_update', { 'f': 'vam#utils#RunShell', 'a': ['cd $p && git pull'] })
+" let s:c.git_update = get(s:c, 'git_update', { 'f': 'vam#utils#RunShell', 'a': ['cd $p && git pull'] })
+let s:c.git_update = get(s:c, 'git_update', { 'f': 'vcs_checkouts#GitUpdate', 'a': []})
+
 let s:c.hg_update = get(s:c, 'hg_update', { 'f': 'vam#utils#RunShell', 'a': ['hg pull -u -R $p']})
 let s:c.bzr_update = get(s:c, 'bzr_update', { 'f': 'vam#utils#RunShell', 'a': ['bzr pull -d $p']})
 let s:c.svn_update = get(s:c, 'svn_update', { 'f': 'vam#utils#RunShell', 'a': ['cd $p && svn update']})
+
+
+fun! vcs_checkouts#GitUpdate(targetDir)
+  " use a simple shell script instead?
+  let oldHash = system(vam#utils#ShellDSL('cd $; git rev-list HEAD -1', a:targetDir))
+  call vam#utils#RunShell('cd $p && git pull', a:targetDir)
+  let newHash = system(vam#utils#ShellDSL('cd $; git rev-list HEAD -1', a:targetDir))
+  " if oldHash != newHash
+  "   " puts=a:targetDir
+  "   " puts=split(system(vam#utils#ShellDSL('cd $; git log $[]..$[]  ', a:targetDir, oldHash, newHash)
+  " endif
+  return oldHash == newHash ? "up-to-date" : "updated"
+endfun
+
 
 fun! vcs_checkouts#SVNCheckout(repository, targetDir)
   let args=['svn checkout $.url $3p', a:repository, a:repository.url, a:targetDir]
@@ -54,16 +70,21 @@ fun! vcs_checkouts#Update(dir)
 
   if !exists('type')
     " not knowing how to update a repo is not a failure
-    return 0
+    return 'unknown'
   endif
 
   let c = s:c[type . '_update']
-  call call(c.f, c.a + [directory])
+  let r = call(c.f, c.a + [directory])
+  if r is 0
+    unlet r
+    let r ='up-to-date'
+  endif
 
   if v:shell_error
-    throw "Updating ".a:dir." falied. Got exit code: ".v:shell_error
+    call vam#Log('Updating '.a:dir.' falied. Got exit code: '.v:shell_error, 'ErrorMsg')
+    return 'failed'
   endif
-  return 1
+  return r
 endf
 
 " repository = {'type': git|hg|svn|bzr, 'url': .. }

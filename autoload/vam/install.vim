@@ -158,7 +158,7 @@ fun! vam#install#Install(toBeInstalledList, ...)
     let confirmed = 0
     let origin = get(repository,'type','').' '.get(repository,'url','')
     call vam#Log('Plugin Name: '.name.' ver. '.get(repository, 'version', ''), 'None')
-    call vam#Log('Script Nr: '.get(repository, 'vim_script_nr', 'none'), 'None') 
+    call vam#Log('Script Nr: '.get(repository, 'vim_script_nr', 'none'), 'None')
     if (has_key(opts, 'requested_by'))
       call vam#Log('dependency chain: '.name.' < '.join(opts.requested_by,' < '))
     endif
@@ -280,18 +280,23 @@ fun! vam#install#ApplyPatch(info, repository, pluginDir, hook_opts)
 endfun
 
 " this function will be refactored slightly soon by either me or ZyX.
+" returns
+" "up-to-date" if addon is up to date
+" "updated" if addon was updated succesfully
+" "failed" if addon could not be updated. Error is logged in this case
 fun! vam#install#UpdateAddon(name)
   call vam#Log( "Considering ".a:name." for update" ,'type','unknown')
   let pluginDir = vam#PluginDirFromName(a:name)
   " First, try updating using VCS. Return 1 if everything is ok, 0 if exception 
   " is thrown
   try
-    if vcs_checkouts#Update(pluginDir)
-      return 1
+    let r = vcs_checkouts#Update(pluginDir)
+    if r isnot# 'unknown'
+      return r
     endif
   catch /.*/
     call vam#Log(v:exception)
-    return 0
+    return 'failed'
   endtry
 
   "Next, try updating plugin by archive
@@ -301,7 +306,7 @@ fun! vam#install#UpdateAddon(name)
   let repository = get(s:c['plugin_sources'], a:name, {})
   if empty(repository)
     call vam#Log("Don't know how to update ".a:name." because it is not contained in plugin_sources")
-    return 0
+    return 'failed'
   endif
   let newVersion = get(repository, 'version', '?')
 
@@ -316,9 +321,8 @@ fun! vam#install#UpdateAddon(name)
           \ ."\nYour install seems to be of type archive/manual/www.vim.org/unknown."
           \ ."\nIf you want to update ".a:name." remove ".pluginDir." and let VAM check it out again."
           \ )
-    return 0
+    return 'failed'
   endif
-
 
   let versionFile = pluginDir.'/version'
   let oldVersion = filereadable(versionFile) ? readfile(versionFile, 1)[0] : "?"
@@ -336,13 +340,15 @@ fun! vam#install#UpdateAddon(name)
     call vam#install#Checkout(pluginDir, repository)
 
     call s:RunHook('post-update', vam#AddonInfo(a:name), repository, pluginDir, hook_opts)
+
+    return 'updated'
   elseif oldVersion == newVersion
     call vam#Log( "Not updating plugin ".a:name.", ".newVersion." is current")
-    return 1
+    return 'up-to-date'
   else
     call vam#Log( "Not updating plugin ".a:name." because there is no version according to version key")
   endif
-  return 1
+  return 'up-to-date'
 endf
 
 fun! vam#install#Update(list)
@@ -359,17 +365,21 @@ fun! vam#install#Update(list)
   if empty(list) && s:confirm('Update all loaded plugins?')
     let list = keys(s:c['activated_plugins'])
   endif
-  let failed = []
+  let by_reply = {}
   for p in list
-    if vam#install#UpdateAddon(p)
+    let r = vam#install#UpdateAddon(p)
+    if r is# 'updated'
       call vam#install#HelpTags(p)
-    else
-      call add(failed,p)
     endif
+    if (!has_key(by_reply,r))
+      let by_reply[r] = []
+    endif
+    call add(by_reply[r], p)
   endfor
-  if !empty(failed)
-    call vam#Log( "Failed updating plugins: ".string(failed).".")
-  endif
+  let labels = {'updated': 'Updated:', 'failed': 'Failed to update:', 'up-to-date': 'Up to date:'}
+  for [k,v] in items(by_reply)
+    call vam#Log(get(labels,k,k).' '.string(by_reply[k]).".", k is# 'failed' ? 'WarningMsg' : 'Type')
+  endfor
 endf
 
 " completion {{{

@@ -18,6 +18,10 @@ let s:curl = exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o'
 " vam#utils#ShellDSL('$', 'escape this/\') == '''escape this/\''' 
 " vam#utils#ShellDSL('$1 $[2p] $1p', 'escape this/\',\'other\') =='''escape this/'' ''other'' ''escape this/''' 
 " vam#utils#ShellDSL('$.url $[1p.url] $1p.url', {'url':'URL'} ) =='''URL'' ''URL'' ''URL''' 
+" 
+" TODO: refactor: passing 1 should either be an option or not done here (but
+" when running the command with !). THat's because this function should be
+" usable with system() command a well.
 fun! vam#utils#ShellDSL(cmd, ...) abort
   let args = a:000
   let r = ''

@@ -24,6 +24,8 @@ CONTENTS                                                        *VAM-contents*
        and TODOs as well as "I want .."
    13. VAM vs ...
 
+   14. tracking down errors                  |VAM-tracking-down-erros|
+
    20. making plugins work with VAM
         (rtp different from ~/.vim)
 
@@ -41,6 +43,17 @@ MarcWeber is hanging around often so ping him or create a github ticket [1] and
 people will try to help you. You should skim the docs before asking for
 help though. Also see |VAM-author|
 [1] https://github.com/MarcWeber/vim-addon-manager/issues
+
+WHY VAM?: ~
+  - two maintainers (ZyX and Marc Weber)
+  - friendly to users (install addons by name)
+  - propagates collaborative coding by providing simple dependeoncy managament
+    improving code sharing
+  - supports many sources (git,hg,bzr,svn,www.vim.org)
+  - provides a way to deprecate plugins which are superseded by others
+  - most plugins can also be loaded at runtime (some problems may [BUG 10])
+  - some Windows support
+  - is not too shy telling you that alternatives exist (and which one)
 
 ==============================================================================
 1. Intro                                                           *VAM-intro*
@@ -160,6 +173,23 @@ NOTES: ~
         call vam#utils#RunShell('git clone --depth=1 $.url $p', a:repository, a:targetDir)
     endfun
 <
+
+  Another example: replace git_update and show changelog >
+    let g:vim_addon_manager = {}
+    let g:vim_addon_manager['git_update'] = {'f': 'MyGitUpdate', 'a': []}
+    fun! MyGitUpdate(targetDir)
+        let cd = shellescape
+        let oldHash = system(vam#utils#ShellDSL('cd $; git rev-list HEAD -1', a:targetDir))
+        call vam#utils#RunShell('cd $p && git pull', a:targetDir)
+        let newHash = system(vam#utils#ShellDSL('cd $; git rev-list HEAD -1', a:targetDir))
+        if oldHash != newHash
+          silent e VAM_GIT_UPDATE_LOG
+          puts=a:targetDir
+          puts=split(system(vam#utils#ShellDSL('cd $; git log $[]..$[]  ', a:targetDir, oldHash, newHash)
+        endif
+        return oldHash == newHash ? "up-to-date" : "updated"
+    endfun
+>
 
 ------------------------------------------------------------------------------
 2.2 names of addons and addon sources                        *VAM-addon-names*
@@ -432,9 +462,16 @@ vam#install#CompleteAddonName                *vam#install#CompleteAddonName()*
 4. Options                                                       *VAM-options*
                                                          *g:vim_addon_manager*
 
-All options are located in the global dictionary g:vim_addon_manager. It also
-contains some stuff that user should never modify if he wants to see this
-plugin working. Possible keys:
+All options are located in the global dictionary g:vim_addon_manager. You can
+set them this way: >
+  let g:vim_addon_manager = {}
+  let g:vim_addon_manager['auto_install'] = 1
+  let g:vim_addon_manager['do_diff'] = 0
+  " ...
+< where KEY_NAME is one of auto_install, plugin_sources, ... (see below)
+
+It also contains some stuff that user should never modify if he wants to see
+this plugin working. Possible keys:
 
 auto_install                                                *VAM-auto_install*
         This options disables plugin installation confirmation. It will not
@@ -972,7 +1009,7 @@ what's going to happen.
 ==============================================================================
 12. Troubleshooting and known bugs                      *VAM-trouble-shooting*
 
-  Think about how to integrate ideas found in ipi http://www.vim.org/scripts/script.php?script_id=3809
+  [BUG 10] Think about how to integrate ideas found in ipi http://www.vim.org/scripts/script.php?script_id=3809
 
   Runtimepath manipulation should be separated from installation / update
   logic. This way you can have different implementation for updating plugins
@@ -1196,6 +1233,54 @@ out the importance of the "dependency" feature. It allows reusing code easily.
 Thus code will be reused easily. Thus code review will take place yielding
 more collaboration thus better code. That was the main reason why I started
 VAM. And that's good for community.
+
+
+==============================================================================
+14. making plugins work with VAM (rtp different from ~/.vim) *VAM-tracking-down-errors*
+
+1) Where does the error or unexpected behaviour come from?
+  Try disabling plugins until you know which plugins are left causing the bad
+  behaviour. Then you can try checking out older versions.
+  Pathogen is using "git submodules" which would allow setting back many
+  repositories in time at once. Because VAM does not use git submodules you
+  have to checkout older versions for each plugin manually.
+
+GIT (git): ~
+
+  - optional: fetch all history (VAM by default uses shallow clones):
+    git fetch --depth=99999
+
+  - list changes:
+    gitk (gui) or git log -500
+
+  - list all changes in time:
+    git reflog show HEAD@{now} lists lines like this:
+    b8aee58 HEAD@{Wed Feb 15 03:22:53 2012 +0100}: commit: documentation improvements
+    ^^^^^ the hash
+
+  - checkout older revision (thus put plugin back in time to older revision):
+    git checkout hash
+    git checkout master # latest revision (unless you use different branches)
+
+  tip: hash~2 checks out two versions before hash.
+  Thus master~10 checks 10 revisions before the most current one.
+
+  If you know which hash is causing the bad behaviour you may want to have
+  look at changes using.
+  git show hash
+
+  Of course #git on irc.freenode.net is willing to help if you have trouble
+
+MERCURIAL (hg): ~
+  TODO improve this.
+  hg log -l 500 # list last 500 changes of repositories
+  hg update -C hash_or_number
+
+SVN (svn)~
+  svn log -l 500
+  svn up -rREVISION_NUMBER
+
+Eventually you want to sent a bug report to maintainers
 
 ==============================================================================
 20. making plugins work with VAM (rtp different from ~/.vim)
