@@ -250,10 +250,10 @@ fun! vam#install#CreatePatch(info, repository, pluginDir, hook_opts)
       try
         call vam#utils#ExecInDir([{'d': fnamemodify(a:pluginDir, ':h'), 'c': vam#utils#ShellDSL('diff -U3 -r -a --binary $p $p', fnamemodify(a:pluginDir,':t'), fnamemodify(pluginDirBackup,':t')).' > '.diff_file}])
         silent! call delete(diff_file)
-        let a:hook_opts.dif_do_diff=0
+        let a:hook_opts.diff_do_diff=0
       catch /.*/
         " :-( this is expected. diff returns non zero exit status. This is hacky
-        let a:hook_opts.dif_do_diff=1
+        let a:hook_opts.diff_do_diff=1
       endtry
       call vam#utils#RmFR(a:pluginDir)
     endif
@@ -292,6 +292,9 @@ fun! vam#install#UpdateAddon(name)
   try
     let r = vcs_checkouts#Update(pluginDir)
     if r isnot# 'unknown'
+      if r is# 'updated'
+        call s:RunHook('post-scms-update', vam#AddonInfo(a:name), {}, pluginDir, {})
+      endif
       return r
     endif
   catch /.*/

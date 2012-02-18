@@ -563,9 +563,10 @@ addon_completion_lhs                                *VAM-addon_completion_lhs*
         completion. Default: "<C-x><C-p>". Spaces and bars are escaped.
 
                                                                    *VAM-hooks*
-post_install_hook_functions                  *VAM-post_install_hook_functions*
-pre_update_hook_functions                    *VAM-pre_update_hook_functions*
-post_update_hook_functions                   *VAM-post_update_hook_functions*
+post_install_hook_functions               *VAM-post_install_hook_functions*
+pre_update_hook_functions                 *VAM-pre_update_hook_functions*
+post_update_hook_functions                *VAM-post_update_hook_functions*
+post_scm_update_hook_functions            *VAM-post_scm_update_hook_functions*
         Lists of function names or function references that will be called 
         when hook is executed (see |addon-info-hooks|). All functions get four 
         arguments: addon info dictionary, repository dictionary, plugin 
@@ -736,21 +737,25 @@ repository                                             *addon-info-repository*
                 Contains addon information in case plugin does not supply its 
                 own addon-info file.
 
-                                                *addon-info-hooks*
-post-install-hook                               *addon-info-post-install-hook*
-post-update-hook                                *addon-info-post-update-hook*
-pre-update-hook                                 *addon-info-pre-update-hook*
+                                                            *addon-info-hooks*
+post-install-hook                           *addon-info-post-install-hook*
+post-update-hook                            *addon-info-post-update-hook*
+post-scms-update-hook                       *addon-info-post-scms-update-hook*
+pre-update-hook                             *addon-info-pre-update-hook*
         Contains VimL command (string), that is |:execute|d after some 
         replacements are done: “%d” gets replaced with |expression| evaluating 
         to plugin root directory, “%i” – to addon-info dictionary and “%r” – 
         to repository dictionary, “%o” – to opts dictionary (used to save 
         information between “pre-” and “post-” hooks).
         Hooks are executed in the following cases:
-            Hook           Case ~
-            post-install   After successfully installing a plugin.
-            pre-update     Before a non-VCS source update.
-            post-update    After a non-VCS source update.
-        In *-update hooks opts dictionary also contains oldVersion value.
+            Hook              Case ~
+            post-install      After successfully installing a plugin.
+            pre-update        Before a non-VCS source update.
+            post-update       After a non-VCS source update.
+            post-scms-update  After VCS source update.
+        In non-scms *-update hooks opts dictionary also contains oldVersion 
+        value. In post-scms-update hook repository and opts dictionaries are 
+        empty.
 
 dependencies                                         *addon-info-dependencies*
         Describes plugins that are required for the plugin, must contain
