@@ -29,13 +29,17 @@ if executable('git') && stridx(system('git clone --help'), '--depth')!=-1
 endif
 let s:scm_defaults={
       \'git': {'clone': ['vam#utils#RunShell', [s:git_checkout       ]],
-      \       'update': ['vam#utils#RunShell', ['cd $p && git pull'  ]],},
+      \       'update': ['vam#utils#RunShell', ['cd $p && git pull'  ]],
+      \        'wdrev': ['vcs_checkouts#System', ['git --git-dir=$p rev-parse HEAD']],},
       \ 'hg': {'clone': ['vam#utils#RunShell', ['hg clone $.url $p'  ]],
-      \       'update': ['vam#utils#RunShell', ['hg pull -u -R $p'   ]],},
+      \       'update': ['vam#utils#RunShell', ['hg pull -u -R $p'   ]],
+      \        'wdrev': ['vcs_checkouts#System', ['hg log -R $p -r . --template '.shellescape('{node}')]],},
       \'bzr': {'clone': ['vam#utils#RunShell', ['bzr branch $.url $p']],
-      \       'update': ['vam#utils#RunShell', ['bzr pull -d $p'     ]],},
+      \       'update': ['vam#utils#RunShell', ['bzr pull -d $p'     ]],
+      \        'wdrev': ['vcs_checkouts#System', ['cd $p && bzr log -c . --line']]},
       \'svn': {'clone': ['vcs_checkouts#SVNCheckout', []],
-      \       'update': ['vam#utils#RunShell', ['svn update $p'      ]],},
+      \       'update': ['vam#utils#RunShell', ['svn update $p'      ]],
+      \        'wdrev': ['vcs_checkouts#SVN_wdrev', []],},
       \'_bundle': {'update': ['vcs_checkouts#UpdateBundle', []],},
     \}
 let s:c.scms=get(s:c, 'scms', {})
@@ -43,6 +47,18 @@ call map(filter(copy(s:c.scms), 'has_key(s:scm_defaults, v:key)'), 'extend(v:val
 call extend(s:c.scms, s:scm_defaults, 'keep')
 call map(copy(s:c.scms), 'extend(v:val, {"dir": ".".v:key})')
 
+fun! vcs_checkouts#System(cmd, targetDir)
+  let idx=stridx(a:cmd, '$p')
+  let cmd=a:cmd[:(idx-1)].shellescape(a:targetDir).a:cmd[(idx+2):]
+  if v:shell_error
+    return 0
+  endif
+  return system(cmd)
+endfun
+fun! vcs_checkouts#SVN_wdrev(targetDir)
+  let result=vcs_checkouts#System('cd $p && svn info', a:targetDir)
+  return substitute(result, '\v.{-}\nRevision\:\ (\d+).*', '\1', '')
+endfun
 fun! vcs_checkouts#GetBundle(repository, targetDir)
   let [dummystr, protocol, user, domain, port, path; dummylst]=
               \matchlist(a:repository, '\v^%(([^:]+)\:\/\/)?'.
@@ -134,12 +150,21 @@ fun! vcs_checkouts#Update(dir)
     return 'unknown'
   endif
 
+  if has_key(sdescr, 'wdrev')
+    let w=sdescr.wdrev
+    let wdrev=call(w[0], w[1]+[a:dir], get(w, 2, {}))
+  endif
   let c=sdescr.update
   if call(c[0], c[1] + [a:dir], get(c, 2, {}))
     call vam#Log('Updating '.a:dir.' failed')
     return 'failed'
   endif
 
+  if exists('wdrev') && wdrev isnot 0
+    if wdrev isnot# call(w[0], w[1]+[a:dir], get(w, 2, {}))
+      return 'updated'
+    endif
+  endif
   return 'up-to-date'
 endf
 

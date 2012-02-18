@@ -535,6 +535,11 @@ scms                                                                *VAM-scms*
             update      Determines how sources that are already checked out
                         should be updated.
                         Additional argument: updated directory.
+            wdrev       Determines how current revision should be obtained. 
+                        Used to distinguish between cases “update has not 
+                        updated anything” and “update successfully pulled and 
+                        checked out new revision(s)”.
+                        Additional argument: updated directory.
         Values of keys `clone' and `executable' should be lists that look like
         if you want to call them with call("call", {value}), but with
         additional arguments added to the second element of the list.
