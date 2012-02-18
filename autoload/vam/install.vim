@@ -527,7 +527,7 @@ endf
 
 fun! vam#install#HelpTags(name)
   let d=vam#PluginDirFromName(a:name).'/doc'
-  if isdirectory(d) | exec 'helptags '.d | endif
+  if isdirectory(d) | exec 'helptags '.fnameescape(d) | endif
 endf
 
 " " if --strip-components fails finish this workaround:
