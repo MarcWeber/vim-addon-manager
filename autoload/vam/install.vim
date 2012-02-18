@@ -1,6 +1,5 @@
 " vam#install contains code which is used when install plugins only
 
-let s:curl = exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o'
 exec vam#DefineAndBind('s:c','g:vim_addon_manager','{}')
 
 let s:c['change_to_unix_ff'] = get(s:c, 'change_to_unix_ff', (g:os=~#'unix'))
@@ -106,8 +105,8 @@ fun! vam#install#ReplaceAndFetchUrls(list)
     " assume n is either an url or a path
     if n =~ '^http://' && s:confirm('Fetch plugin info from URL '.n.'?')
       let t = tempfile()
-      call vam#utils#RunShell(s:curl.' $ > $', n, t)
-    elseif n =~  '[/\\]' && filereadable(n)
+      call vam#utils#Download(n, t)
+    elseif n =~ '[/\\]' && filereadable(n)
       let t = n
     endif
     if exists('t')
@@ -751,9 +750,6 @@ endf
 
 if g:is_win
   fun! vam#install#FetchAdditionalWindowsTools() abort
-    if !executable("curl") && s:curl == "curl -o"
-      throw "No curl found. Either set g:netrw_http_cmd='path/curl -o' or put it in PATH"
-    endif
     if !isdirectory(s:c['binary_utils'].'\dist')
       call mkdir(s:c['binary_utils'].'\dist','p')
     endif

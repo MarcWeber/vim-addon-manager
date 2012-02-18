@@ -5,7 +5,16 @@ if !exists('g:vim_addon_manager') | let g:vim_addon_manager = {} | endif | let s
 let s:c.omit_7z=get(s:c, 'omit_7z', 0)
 
 " let users override curl command. Reuse netrw setting
-let s:curl = exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o'
+" Let's hope that nobody is using a dir called "curl " .. because
+" substitution will be wrong then
+let s:http_cmd = exists('g:netrw_http_cmd') ?
+      \             substitute(g:netrw_http_cmd, '\c\vcurl(\.exe)?%(\ |$)', 'curl\1 --location --max-redirs 40 ', '') :
+      \          executable('curl') ?
+      \             'curl -L --max-redirs 40 -o' :
+      \          executable('wget') ?
+      \             'wget -O'
+      \          :
+      \             0
 
 " insert arguments at placeholders $ shell escaping the value
 " usage: s:shellescape("rm --arg $ -fr $p $p $p", [string, file1, file2, file3])
@@ -346,13 +355,11 @@ fun! vam#utils#CopyFile(a,b)
 endf
 
 fun! vam#utils#Download(url, targetFile)
+  if s:http_cmd is 0
+    throw "Neither curl nor wget was found. Either set g:netrw_http_cmd or put one of them in PATH"
+  endif
   " allow redirection because of sourceforge mirrors:
-
-  let s:curl = exists('g:netrw_http_cmd') ? g:netrw_http_cmd : 'curl -o'
-  " Let's hope that nobody is using a dir called "curl " .. because
-  " substitution will be wrong then
-  let c = substitute(s:curl, '\ccurl\(\.exe\)\?\%( \|$\)','curl\1 --location --max-redirs 40 ','')
-  call vam#utils#RunShell(c.' $p $', a:targetFile, a:url)
+  call vam#utils#RunShell(s:http_cmd.' $p $', a:targetFile, a:url)
 endf
 
 fun! vam#utils#RmFR(dir_or_file)
