@@ -8,6 +8,8 @@ let s:c['known'] = get(s:c,'known','vim-addon-manager-known-repositories')
 let s:c['MergeSources'] = get(s:c, 'MergeSources', 'vam_known_repositories#MergeSources')
 let s:c['pool_fun'] = get(s:c, 'pool_fun', 'vam#install#Pool')
 let s:c['name_rewriting'] = get(s:c, 'name_rewriting', {})
+let s:c['pre_update_hook_functions'] = get(s:c, 'pre_update_hook_functions', ['vam#install#CreatePatch'])
+let s:c['post_update_hook_functions'] = get(s:c, 'post_update_hook_functions', ['vam#install#ApplyPatch'])
 
 call extend(s:c.name_rewriting, {'99git+github': 'vam#install#RewriteName'})
 
@@ -122,6 +124,23 @@ fun! vam#install#ReplaceAndFetchUrls(list)
   return l
 endfun
 
+fun! s:RunHook(hook, info, repository, pluginDir, opts)
+  let hkey=tr(a:hook, '-', '_').'_hook_functions'
+  if has_key(s:c, hkey)
+    let d={}
+    for d.hook in s:c[hkey]
+      call call(d.hook, [a:info, a:repository, a:pluginDir, a:opts], {})
+    endfor
+  endif
+  let hkey=a:hook.'-hook'
+  if has_key(a:info, hkey)
+    execute substitute(substitute(substitute(substitute(a:info[hkey],
+          \'%d', 'a:pluginDir',  'g'),
+          \'%r', 'a:repository', 'g'),
+          \'%i', 'a:info',       'g'),
+          \'%o', 'a:opts',       'g')
+  endif
+endfu
 
 " opts: same as ActivateAddons
 fun! vam#install#Install(toBeInstalledList, ...)
@@ -188,9 +207,76 @@ fun! vam#install#Install(toBeInstalledList, ...)
        \ }))
 
       call vam#install#HelpTags(name)
+      call s:RunHook('post-install', info, repository, pluginDir, {})
     endif
   endfor
 endf
+
+fun! vam#install#CreatePatch(info, repository, pluginDir, hook_opts)
+  let a:hook_opts.diff_do_diff=(s:c.do_diff && executable('diff'))
+  " try creating diff by checking out old version again
+  if a:hook_opts.diff_do_diff
+    " move plugin to backup destination:
+    let pluginDirBackup = a:pluginDir.'-'.a:hook_opts.oldVersion
+    if isdirectory(pluginDirBackup) || filereadable(pluginDirBackup)
+      if s:confirm('Remove old plugin backup directory ('.pluginDirBackup.')?')
+        call vam#utils#RmFR(pluginDirBackup)
+      else
+        throw 'User abort: remove '.pluginDirBackup.' manually'
+      endif
+    endif
+    call rename(a:pluginDir, pluginDirBackup)
+    " can be romved. old version is encoded in tmp dir. Removing makes
+    " diffing easier
+    silent! call delete(pluginDirBackup.'/version')
+    let a:hook_opts.diff_backup_dir=pluginDirBackup
+
+    let diff_file = a:pluginDir.'-'.a:hook_opts.oldVersion.'.diff'
+    let a:hook_opts.diff_file=diff_file
+    " try to create a diff
+    let archiveName = vam#install#ArchiveNameFromDict(a:repository)
+    let archiveFileBackup = pluginDirBackup.'/archive/'.archiveName
+    if !filereadable(archiveFileBackup)
+      call vam#Log("Old archive file ".archiveFileBackup." is gone, can't try to create diff.")
+    else
+      let archiveFile = a:pluginDir.'/archive/'.archiveName
+      call mkdir(a:pluginDir.'/archive', 'p')
+
+      let rep_copy = deepcopy(a:repository)
+      let rep_copy['url'] = 'file://'.expand(archiveFileBackup)
+      call vam#install#Checkout(a:pluginDir, rep_copy)
+      silent! call delete(a:pluginDir.'/version')
+      try
+        call vam#utils#ExecInDir([{'d': fnamemodify(a:pluginDir, ':h'), 'c': vam#utils#ShellDSL('diff -U3 -r -a --binary $p $p', fnamemodify(a:pluginDir,':t'), fnamemodify(pluginDirBackup,':t')).' > '.diff_file}])
+        silent! call delete(diff_file)
+        let a:hook_opts.diff_do_diff=0
+      catch /.*/
+        " :-( this is expected. diff returns non zero exit status. This is hacky
+        let a:hook_opts.diff_do_diff=1
+      endtry
+      call vam#utils#RmFR(a:pluginDir)
+    endif
+  endif
+endfun
+fun! vam#install#ApplyPatch(info, repository, pluginDir, hook_opts)
+  " try applying patch
+  if a:hook_opts.diff_do_diff
+    if executable('patch')
+      let diff_file=a:hook_opts.diff_file
+      let pluginDirBackup=a:hook_opts.diff_backup_dir
+      try
+        call vam#utils#ExecInDir([{'d': a:pluginDir, 'c': vam#utils#ShellDSL('patch --binary -p1 --input=$p', diff_file)}])
+        call vam#Log('Patching suceeded', 'None')
+        call delete(diff_file)
+        call vam#utils#RmFR(pluginDirBackup)
+      catch /.*/
+        call vam#Log('Failed to apply patch '.diff_file.' ('.v:exception.'), original files may be found in '.pluginDirBackup)
+      endtry
+    else
+      call vam#Log('Failed trying to apply diff: “patch” executable not found')
+    endif
+  endif
+endfun
 
 " this function will be refactored slightly soon by either me or ZyX.
 " returns
@@ -204,12 +290,15 @@ fun! vam#install#UpdateAddon(name)
   " is thrown
   try
     let r = vcs_checkouts#Update(pluginDir)
-    if r != "unkown"
+    if r isnot# 'unknown'
+      if r is# 'updated'
+        call s:RunHook('post-scms-update', vam#AddonInfo(a:name), {}, pluginDir, {})
+      endif
       return r
     endif
   catch /.*/
     call vam#Log(v:exception)
-    return "failed"
+    return 'failed'
   endtry
 
   "Next, try updating plugin by archive
@@ -219,7 +308,7 @@ fun! vam#install#UpdateAddon(name)
   let repository = get(s:c['plugin_sources'], a:name, {})
   if empty(repository)
     call vam#Log("Don't know how to update ".a:name." because it is not contained in plugin_sources")
-    return "failed"
+    return 'failed'
   endif
   let newVersion = get(repository, 'version', '?')
 
@@ -234,92 +323,34 @@ fun! vam#install#UpdateAddon(name)
           \ ."\nYour install seems to be of type archive/manual/www.vim.org/unknown."
           \ ."\nIf you want to update ".a:name." remove ".pluginDir." and let VAM check it out again."
           \ )
-    return "failed"
+    return 'failed'
   endif
 
   let versionFile = pluginDir.'/version'
-  let oldVersion = filereadable(versionFile) ? readfile(versionFile, 1)[0] : "?"
+  let oldVersion = filereadable(versionFile) ? readfile(versionFile, 'b')[0] : "?"
   if oldVersion !=# newVersion || newVersion == '?'
     " update plugin
     echom "Updating plugin ".a:name." because ".(newVersion == '?' ? 'version is unknown' : 'there is a different version')
 
-    " move plugin to backup destination:
-    let pluginDirBackup = pluginDir.'-'.oldVersion
-    if isdirectory(pluginDirBackup) || filereadable(pluginDirBackup)
-      if s:confirm("Remove old plugin backup directory (".pluginDirBackup.")?")
-        call vam#utils#RmFR(pluginDirBackup)
-      else
-        throw "User abort: remove ".pluginDirBackup." manually"
-      endif
-    endif
-    call rename(pluginDir, pluginDirBackup)
-    " can be romved. old version is encoded in tmp dir. Removing makes
-    " diffing easier
-    silent! call delete(pluginDirBackup.'/version')
-
-    " try creating diff by checking out old version again
-    if s:c['do_diff'] && executable('diff')
-      let diff_file = pluginDir.'-'.oldVersion.'.diff'
-      " try to create a diff
-      let archiveName = vam#install#ArchiveNameFromDict(repository)
-      let archiveFileBackup = pluginDirBackup.'/archive/'.archiveName
-      if !filereadable(archiveFileBackup)
-        call vam#Log( "Old archive file ".archiveFileBackup." is gone, can't try to create diff.")
-      else
-        let archiveFile = pluginDir.'/archive/'.archiveName
-        call mkdir(pluginDir.'/archive','p')
-
-        let rep_copy = deepcopy(repository)
-        let rep_copy['url'] = 'file://'.expand(archiveFileBackup)
-        call vam#install#Checkout(pluginDir, rep_copy)
-        silent! call delete(pluginDir.'/version')
-        try
-          call vam#utils#ExecInDir([{'d': fnamemodify(pluginDir, ':h'), 'c': vam#utils#ShellDSL('diff -U3 -r -a --binary $p $p', fnamemodify(pluginDir,':t'), fnamemodify(pluginDirBackup,':t')).' > '.diff_file}])
-          silent! call delete(diff_file)
-        catch /.*/
-          " :-( this is expected. diff returns non zero exit status. This is hacky
-          let diff=1
-        endtry
-        call vam#utils#RmFR(pluginDir)
-      endif
-    endif
+    let hook_opts={'oldVersion': oldVersion}
+    call s:RunHook('pre-update', vam#AddonInfo(a:name), repository, pluginDir, hook_opts)
 
     " checkout new version (checkout into empty location - same as installing):
+    if isdirectory(pluginDir)
+      call vam#utils#RmFR(pluginDir)
+    endif
     call vam#install#Checkout(pluginDir, repository)
 
-    " try applying patch
-    let patch_failure = 0
-    if exists('diff')
-      if executable("patch")
-        try
-          call vam#utils#ExecInDir([{'d': pluginDir, 'c': vam#utils#ShellDSL('patch --binary -p1 --input=$p', diff_file)}])
-          echom "Patching suceeded"
-          let patch_failure = 0
-          call delete(diff_file)
-          let patch_failure = 0
-        catch /.*/
-          let patch_failure = 1
-          call vam#Log( "Failed applying patch ".diff_file." kept old dir in ".pluginDirBackup)
-        endtry
-      else
-        call vam#Log( "Failed trying to apply diff. patch exectubale not found")
-        let patch_failure = 1
-      endif
-    endif
+    call s:RunHook('post-update', vam#AddonInfo(a:name), repository, pluginDir, hook_opts)
 
-    " tidy up - i f user didn't provide diff we remove old directory
-    if !patch_failure
-      call vam#utils#RmFR(pluginDirBackup)
-      return "updated"
-    endif
-    return "updated-with-failure"
+    return 'updated'
   elseif oldVersion == newVersion
     call vam#Log( "Not updating plugin ".a:name.", ".newVersion." is current")
-    return "up-to-date"
+    return 'up-to-date'
   else
     call vam#Log( "Not updating plugin ".a:name." because there is no version according to version key")
   endif
-  return "up-to-date"
+  return 'up-to-date'
 endf
 
 fun! vam#install#Update(list)
@@ -339,7 +370,7 @@ fun! vam#install#Update(list)
   let by_reply = {}
   for p in list
     let r = vam#install#UpdateAddon(p)
-    if r =~ "updated"
+    if r is# 'updated'
       call vam#install#HelpTags(p)
     endif
     if (!has_key(by_reply,r))
@@ -347,9 +378,9 @@ fun! vam#install#Update(list)
     endif
     call add(by_reply[r], p)
   endfor
-  let labels = { 'updated': 'updated plugins','failed': 'Failed updating plugins', 'up-to-date': "up-to-date plugins"}
+  let labels = {'updated': 'Updated:', 'failed': 'Failed to update:', 'up-to-date': 'Up to date:'}
   for [k,v] in items(by_reply)
-    call vam#Log( get(labels,k,k).' '.string(by_reply[k]).".", k =~ "failed" ? "WarningMsg" : "type")
+    call vam#Log(get(labels,k,k).' '.string(by_reply[k]).".", k is# 'failed' ? 'WarningMsg' : 'Type')
   endfor
 endf
 
@@ -554,7 +585,7 @@ fun! vam#install#Checkout(targetDir, repository) abort
                 \                   'script-type': tolower(get(a:repository, 'script-type', 'plugin')),
                 \                   'unix_ff': get(a:repository, 'unix_ff', get(s:c, 'change_to_unix_ff')) })
 
-    call writefile([get(a:repository,"version","?")], a:targetDir."/version")
+    call writefile([get(a:repository, 'version', '?')], a:targetDir.'/version', 'b')
   endif
 endfun
 

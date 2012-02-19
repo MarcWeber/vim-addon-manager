@@ -524,6 +524,35 @@ plugin_dir_by_name                                    *VAM-plugin_dir_by_name*
         Note: If not all plugins are contained in the same direcotry
               completion for |:UninstallAddons| breaks because simple globbing
               is used.
+scms                                                                *VAM-scms*
+        This option determines how sources with supported SCM's should be
+        checked out and updated. It is a dictionary where keys are known SCM's
+        and values are dictionaries with the following keys:
+            Key         Value ~
+            clone       Determines how sources should be checked out.
+                        Additional arguments: repository url, target
+                                              directory.
+            update      Determines how sources that are already checked out
+                        should be updated.
+                        Additional argument: updated directory.
+            wdrev       Determines how current revision should be obtained. 
+                        Used to distinguish between cases “update has not 
+                        updated anything” and “update successfully pulled and 
+                        checked out new revision(s)”.
+                        Additional argument: updated directory.
+        Values of keys `clone' and `executable' should be lists that look like
+        if you want to call them with call("call", {value}), but with
+        additional arguments added to the second element of the list.
+        Example: >
+            function GitCheckout(url, target)
+                execute 'silent! !git clone' a:url shellescape(a:target, 1)
+            endfunction
+            function GitUpdate(command, directory) dict
+                execute 'sil! !cd' shellescape(a:directory, 1) '&&' a:command
+            endfunction
+            {'git': {'clone': ['GitCheckout', []],
+                   \'update': [function("GitUpdate"), ['git pull']],\
+                   \'executable': $HOME.'/bin/git'}}
 pool_fun                                                        *VAM-pool_fun*
         Name or reference of a function that must return dictionary contains 
         {{plugin-name}: {repository}} ({repository} is described under 
@@ -532,6 +561,23 @@ pool_fun                                                        *VAM-pool_fun*
 addon_completion_lhs                                *VAM-addon_completion_lhs*
         {lhs} of the mapping that uses |vam#install#CompleteAddonName()| for 
         completion. Default: "<C-x><C-p>". Spaces and bars are escaped.
+
+                                                                   *VAM-hooks*
+post_install_hook_functions               *VAM-post_install_hook_functions*
+pre_update_hook_functions                 *VAM-pre_update_hook_functions*
+post_update_hook_functions                *VAM-post_update_hook_functions*
+post_scm_update_hook_functions            *VAM-post_scm_update_hook_functions*
+        Lists of function names or function references that will be called 
+        when hook is executed (see |addon-info-hooks|). All functions get four 
+        arguments: addon info dictionary, repository dictionary, plugin 
+        directory location and hook options dictionary.
+        Default values:
+            post_install_hook_functions: absent
+            pre_update_hook_functions: ["vam#install#CreatePatch"]
+            post_update_hook_functions: ["vam#install#ApplyPatch"]
+        Note: update hooks values are required for |VAM-do_diff| to work, 
+              vam#install#CreatePatch must be the last function and 
+              vam#install#ApplyPatch should be the first.
 
 The following options are used by vim-addon-manager-known-repositories, not by
 VAM itself. So if you set |vim-addon-manager-known| to another value they may
@@ -690,6 +736,26 @@ repository                                             *addon-info-repository*
         addon-info
                 Contains addon information in case plugin does not supply its 
                 own addon-info file.
+
+                                                            *addon-info-hooks*
+post-install-hook                           *addon-info-post-install-hook*
+post-update-hook                            *addon-info-post-update-hook*
+post-scms-update-hook                       *addon-info-post-scms-update-hook*
+pre-update-hook                             *addon-info-pre-update-hook*
+        Contains VimL command (string), that is |:execute|d after some 
+        replacements are done: “%d” gets replaced with |expression| evaluating 
+        to plugin root directory, “%i” – to addon-info dictionary and “%r” – 
+        to repository dictionary, “%o” – to opts dictionary (used to save 
+        information between “pre-” and “post-” hooks).
+        Hooks are executed in the following cases:
+            Hook              Case ~
+            post-install      After successfully installing a plugin.
+            pre-update        Before a non-VCS source update.
+            post-update       After a non-VCS source update.
+            post-scms-update  After VCS source update.
+        In non-scms *-update hooks opts dictionary also contains oldVersion 
+        value. In post-scms-update hook repository and opts dictionaries are 
+        empty.
 
 dependencies                                         *addon-info-dependencies*
         Describes plugins that are required for the plugin, must contain
