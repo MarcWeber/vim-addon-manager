@@ -746,6 +746,13 @@ repository                                             *addon-info-repository*
         addon-info
                 Contains addon information in case plugin does not supply its 
                 own addon-info file.
+        vim_script_nr
+                Contains www.vim.org script ID.
+        homepage
+                Contains home page URL. Though it is possible to use it, VAM 
+                currently is also able to use repository.url to determine 
+                plugin home page (github and bitbucket sources only). May be 
+                the only source of home page URL in the future.
 
                                                             *addon-info-hooks*
 post-install-hook                           *addon-info-post-install-hook*

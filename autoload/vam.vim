@@ -279,14 +279,17 @@ fun! vam#DisplayAddonInfo(name)
   call vam#Log('Plugin: '.name.((has_key(repository, 'version'))?(' version '.repository.version):('')), 'None')
   if has_key(repository, 'vim_script_nr')
     call vam#Log('Script number: '.repository.vim_script_nr, 'None')
-    call vam#Log('Home page: http://www.vim.org/scripts/script.php?script_id='.repository.vim_script_nr, 'None')
+    call vam#Log('Vim.org page: http://www.vim.org/scripts/script.php?script_id='.repository.vim_script_nr, 'None')
+  endif
+  if has_key(repository, 'homepage')
+    call vam#Log('Home page: '.repository.homepage)
   elseif repository.url =~? '^\w\+://github\.com/'
     call vam#Log('Home page: https://github.com/'.substitute(repository.url, '^\V\w\+://github.com/\v([^/]+\/[^/]{-}%(\.git)?)%(\/|$)@=.*', '\1', ''), 'None')
   elseif repository.url =~? '^\w\+://bitbucket\.org/'
     call vam#Log('Home page: https://bitbucket.org/'.substitute(repository.url, '^\V\w\+://bitbucket.org/\v([^/]+\/[^/]+).*', '\1', ''), 'None')
   endif
   call vam#Log('Source URL: '.repository.url.' (type '.get(repository, 'type', 'archive').')', 'None')
-  for key in filter(keys(repository), 'v:val!~#''\vurl|vim_script_nr|version|type''')
+  for key in filter(keys(repository), 'v:val!~#''\vurl|vim_script_nr|version|type|homepage''')
     call vam#Log(key.': '.string(repository[key]), 'None')
   endfor
 endfun
