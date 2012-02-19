@@ -156,15 +156,15 @@ fun! vam#install#Install(toBeInstalledList, ...)
 
     let confirmed = 0
     let origin = get(repository,'type','').' '.get(repository,'url','')
-    call vam#Log('Plugin Name: '.name.' ver. '.get(repository, 'version', ''), 'None')
-    call vam#Log('Script Nr: '.get(repository, 'vim_script_nr', 'none'), 'None')
-    if (has_key(opts, 'requested_by'))
-      call vam#Log('dependency chain: '.name.' < '.join(opts.requested_by,' < '))
-    endif
 
     " tell user about target directory. Some users don't get it the first time..
     let pluginDir = vam#PluginDirFromName(name)
+
+    call vam#DisplayAddonInfo(name)
     call vam#Log('Target: '.pluginDir, 'None')
+    if (has_key(opts, 'requested_by'))
+      call vam#Log('Dependency chain: '.join([name]+opts.requested_by,' < '))
+    endif
 
     let d = get(repository, 'deprecated', '')
     if type(d) == type('') && d != ''
