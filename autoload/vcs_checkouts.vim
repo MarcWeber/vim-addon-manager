@@ -182,6 +182,4 @@ fun! vcs_checkouts#Checkout(targetDir, repository)
   endif
 endf
 
-let s:exec_in_dir=function('vam#utils#ExecInDir')
-
 " vim: et ts=8 sts=2 sw=2

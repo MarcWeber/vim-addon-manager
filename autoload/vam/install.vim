@@ -247,7 +247,7 @@ fun! vam#install#CreatePatch(info, repository, pluginDir, hook_opts)
       call vam#install#Checkout(a:pluginDir, rep_copy)
       silent! call delete(a:pluginDir.'/version')
       try
-        call vam#utils#ExecInDir([{'d': fnamemodify(a:pluginDir, ':h'), 'c': vam#utils#ShellDSL('diff -U3 -r -a --binary $p $p', fnamemodify(a:pluginDir,':t'), fnamemodify(pluginDirBackup,':t')).' > '.diff_file}])
+        call vam#utils#ExecInDir(fnamemodify(a:pluginDir, ':h'), 'diff -U3 -r -a --binary $p $p > $p', fnamemodify(a:pluginDir,':t'), fnamemodify(pluginDirBackup,':t'), diff_file)
         silent! call delete(diff_file)
         let a:hook_opts.diff_do_diff=0
       catch /.*/
@@ -265,7 +265,7 @@ fun! vam#install#ApplyPatch(info, repository, pluginDir, hook_opts)
       let diff_file=a:hook_opts.diff_file
       let pluginDirBackup=a:hook_opts.diff_backup_dir
       try
-        call vam#utils#ExecInDir([{'d': a:pluginDir, 'c': vam#utils#ShellDSL('patch --binary -p1 --input=$p', diff_file)}])
+        call vam#utils#ExecInDir(a:pluginDir, 'patch --binary -p1 --input=$p', diff_file)
         call vam#Log('Patching suceeded', 'None')
         call delete(diff_file)
         call vam#utils#RmFR(pluginDirBackup)

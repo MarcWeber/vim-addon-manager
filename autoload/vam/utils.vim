@@ -76,42 +76,25 @@ endf
 " TODO improve this and move somewhere else?
 fun! vam#utils#RunShell(...) abort
   let cmd = call('vam#utils#ShellDSL', a:000)
-  return s:Cmd(0,cmd)
+  return s:Cmd(0, cmd)
 endf
 
 " cmds = list of {'d':  dir to run command in, 'c': the command line to be run }
-fun! vam#utils#ExecInDir(cmds) abort
+fun! vam#utils#ExecInDir(dir, ...) abort
   if g:is_win
     " set different lcd in extra buffer:
     new
     try
-      let lcd=""
-      for c in a:cmds
-        if has_key(c, "d")
-          exec "lcd ".fnameescape(c.d)
-        endif
-        if has_key(c, "c")
-          call s:Cmd(c.c)
-        endif
-      endfor
+      execute 'lcd' fnameescape(a:dir)
+      let cmd=call('vam#utils#ShellDSL', a:000)
     finally
       bw!
     endtry
   else
-    " execute command sequences on linux
-    let cmds_str = []
-    for c in a:cmds
-      if has_key(c, "d")
-        call add(cmds_str, "cd ".shellescape(c.d, 1))
-      endif
-      if has_key(c, "c")
-        call add(cmds_str, c.c)
-      endif
-    endfor
-    call s:Cmd(1, join(cmds_str," && "))
+    let cmd=vam#utils#ShellDSL('cd $p', a:dir).' && '.call('vam#utils#ShellDSL', a:000)
   endif
+  call s:Cmd(1, cmd)
 endf
-let s:exec_in_dir=function('vam#utils#ExecInDir')
 
 "Usages: EndsWith('name.tar',   '.tar', '.txt') returns 1 even if .tar was .txt
 fun! s:EndsWith(name, ...)
@@ -168,9 +151,6 @@ endfun
 fun! vam#utils#Unpack(archive, targetDir, ...)
   let opts = a:0 > 0 ? a:1 : {}
   let delSource = get(opts, 'del-source', 0)
-
-  let esc_archive = vam#utils#ShellDSL('$', a:archive)
-  let tgt = [{'d': a:targetDir}]
 
   " [ ending, chars to strip, chars to add, command to do the unpacking ]
   let gzbzip2 = {
@@ -251,7 +231,7 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
     if use_7z
       call vam#utils#RunShell('7z x -o$ $', a:targetDir, a:archive)
     else
-      call s:exec_in_dir(tgt + [{'c': 'tar -xf '.esc_archive }])
+      call vam#utils#ExecInDir(a:targetDir, 'tar -xf $', a:archive)
     endif
     call s:StripIfNeeded(opts, a:targetDir)
 
@@ -260,7 +240,7 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
     if use_7z
       call vam#utils#RunShell('7z x -o$ $', a:targetDir, a:archive)
     else
-      call s:exec_in_dir(tgt + [{'c': 'unzip '.esc_archive }])
+      call vam#utils#ExecInDir(a:targetDir, 'unzip $', a:archive)
     endif
     call s:StripIfNeeded(opts, a:targetDir)
 
