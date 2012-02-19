@@ -30,7 +30,7 @@ endif
 let s:scm_defaults={
       \'git': {'clone': ['vam#utils#RunShell', [s:git_checkout       ]],
       \       'update': ['vam#utils#RunShell', ['cd $p && git pull'  ]],
-      \        'wdrev': ['vam#utils#System',   ['git --git-dir=$p rev-parse HEAD']],},
+      \        'wdrev': ['vam#utils#System',   ['git --git-dir=$p/.git rev-parse HEAD']],},
       \ 'hg': {'clone': ['vam#utils#RunShell', ['hg clone $.url $p'  ]],
       \       'update': ['vam#utils#RunShell', ['hg pull -u -R $p'   ]],
       \        'wdrev': ['vam#utils#System',   ['hg log --template $ -R $p -r .', '{node}']],},
@@ -79,6 +79,7 @@ fun! vcs_checkouts#UpdateBundle(targetDir)
   let [url, archive]=readfile(a:targetDir.'/._bundle/url', 'b')
   call vam#utils#RmFR(a:targetDir)
   call vam#install#Checkout(a:targetDir, {'type': 'archive', 'url': url, 'archive': archive})
+  return 0
 endfun
 
 fun! s:TryCmd(...)
@@ -144,7 +145,7 @@ fun! vcs_checkouts#Update(dir)
 
   if has_key(sdescr, 'wdrev')
     let w=sdescr.wdrev
-    let wdrev=call(w[0], w[1]+[a:dir], get(w, 2, {}))
+    let wdrev=call(w[0], get(w, 1, [])+[a:dir], get(w, 2, {}))
   endif
   let c=sdescr.update
   if call(c[0], c[1] + [a:dir], get(c, 2, {}))
@@ -153,7 +154,7 @@ fun! vcs_checkouts#Update(dir)
   endif
 
   if exists('wdrev') && wdrev isnot 0
-    if wdrev isnot# call(w[0], w[1]+[a:dir], get(w, 2, {}))
+    if wdrev isnot# call(w[0], get(w, 1, [])+[a:dir], get(w, 2, {}))
       return 'updated'
     endif
   endif
@@ -164,7 +165,7 @@ endf
 fun! vcs_checkouts#Checkout(targetDir, repository)
   if has_key(s:c.scms, a:repository.type)
     let c=s:c.scms[a:repository.type].clone
-    call call(c[0], c[1]+[a:repository, a:targetDir], get(c, 2, {}))
+    call call(c[0], get(c, 1, [])+[a:repository, a:targetDir], get(c, 2, {}))
   else
     " Keep old behavior: no throw for unknown repository type
     return
