@@ -259,26 +259,38 @@ fun! vam#ActivateAddons(...) abort
 endfun
 
 fun! vam#DisplayAddonInfo(name)
-  let plugin = get(g:vim_addon_manager['plugin_sources'], a:name, {})
+  let repository = get(g:vim_addon_manager['plugin_sources'], a:name, {})
   let name = a:name
-  if empty(plugin) && a:name =~ '^\d\+$'
+  if empty(repository) && a:name =~ '^\d\+$'
     " try to find by script id
     let dict = filter(copy(g:vim_addon_manager['plugin_sources']), 'get(v:val,"vim_script_nr","")."" == '.string(1*a:name))
     if (empty(dict))
       throw "unknown script ".a:name
     else
-      let plugin = get(values(dict), 0, {})
+      let repository = get(values(dict), 0, {})
       let name = keys(dict)[0]
     endif
   end
-  if empty(plugin)
+  if empty(repository)
     echo "Invalid plugin name: " . a:name
     return
   endif
-  echo '========================'
-  echo 'VAM name: '.name
-  for key in keys(plugin)
-    echo key . ': ' . plugin[key]
+  call vam#Log(repeat('=', &columns-1), 'Comment')
+  call vam#Log('Plugin: '.name.((has_key(repository, 'version'))?(' version '.repository.version):('')), 'None')
+  if has_key(repository, 'vim_script_nr')
+    call vam#Log('Script number: '.repository.vim_script_nr, 'None')
+    call vam#Log('Vim.org page: http://www.vim.org/scripts/script.php?script_id='.repository.vim_script_nr, 'None')
+  endif
+  if has_key(repository, 'homepage')
+    call vam#Log('Home page: '.repository.homepage)
+  elseif repository.url =~? '^\w\+://github\.com/'
+    call vam#Log('Home page: https://github.com/'.substitute(repository.url, '^\V\w\+://github.com/\v([^/]+\/[^/]{-}%(\.git)?)%(\/|$)@=.*', '\1', ''), 'None')
+  elseif repository.url =~? '^\w\+://bitbucket\.org/'
+    call vam#Log('Home page: https://bitbucket.org/'.substitute(repository.url, '^\V\w\+://bitbucket.org/\v([^/]+\/[^/]+).*', '\1', ''), 'None')
+  endif
+  call vam#Log('Source URL: '.repository.url.' (type '.get(repository, 'type', 'archive').')', 'None')
+  for key in filter(keys(repository), 'v:val!~#''\vurl|vim_script_nr|version|type|homepage''')
+    call vam#Log(key.': '.string(repository[key]), 'None')
   endfor
 endfun
 
