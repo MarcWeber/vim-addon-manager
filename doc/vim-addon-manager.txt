@@ -159,34 +159,6 @@ NOTES: ~
   - set auto_install = 1 (to make Vim stop asking you any questions. However you
     won't know if knew dependencies are fetched in that case etc)
 
-
-  Example how to patch vcs checkout functions (eg if you're behind a proxy and
-  need to checkout github urls by http://): >
-    let g:vim_addon_manager = {}
-    let g:vim_addon_manager['git_checkout'] = {'f': 'MyGitCheckout', 'a': []}
-    fun! MyGitCheckout(repository, targetDir)
-        let a:repository.url = substitute(a:repository.url, '^git:\/\/github', 'http://gihtub', '')
-        call vam#utils#RunShell('git clone --depth=1 $.url $p', a:repository, a:targetDir)
-    endfun
-<
-
-  Another example: replace git_update and show changelog >
-    let g:vim_addon_manager = {}
-    let g:vim_addon_manager['git_update'] = {'f': 'MyGitUpdate', 'a': []}
-    fun! MyGitUpdate(targetDir)
-        let cd = shellescape
-        let oldHash = system(vam#utils#ShellDSL('cd $; git rev-list HEAD -1', a:targetDir))
-        call vam#utils#RunShell('cd $p && git pull', a:targetDir)
-        let newHash = system(vam#utils#ShellDSL('cd $; git rev-list HEAD -1', a:targetDir))
-        if oldHash != newHash
-          silent e VAM_GIT_UPDATE_LOG
-          puts=a:targetDir
-          puts=split(system(vam#utils#ShellDSL('cd $; git log $[]..$[]  ', a:targetDir, oldHash, newHash)
-        endif
-        return oldHash == newHash ? "up-to-date" : "updated"
-    endfun
->
-
 ------------------------------------------------------------------------------
 2.2 names of addons and addon sources                        *VAM-addon-names*
 
@@ -561,6 +533,13 @@ pool_fun                                                        *VAM-pool_fun*
 addon_completion_lhs                                *VAM-addon_completion_lhs*
         {lhs} of the mapping that uses |vam#install#CompleteAddonName()| for 
         completion. Default: "<C-x><C-p>". Spaces and bars are escaped.
+
+shell_commands_run_method                      *VAM-shell_commands_run_method*
+        String, possible values: “bang”, “system”. Determines method used to 
+        run shell commands: “bang” (default) uses “:execute '!'.cmd”,
+        “system” uses “sysem(cmd)”, output is echoed. Second avoids hit-enter 
+        prompts, but is unable to run commands with newline (see 
+        |system()|).
 
                                                                    *VAM-hooks*
 post_install_hook_functions               *VAM-post_install_hook_functions*

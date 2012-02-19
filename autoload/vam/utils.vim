@@ -16,6 +16,10 @@ let s:http_cmd = exists('g:netrw_http_cmd') ?
       \          :
       \             0
 
+" for testing it is necessary to avoid the "Press enter to continue lines".
+" Thus provide an option making all shell commands use “system”
+let s:c['shell_commands_run_method'] = get(s:c, 'shell_commands_run_method', 'bang')
+
 " insert arguments at placeholders $ shell escaping the value
 " usage: s:shellescape("rm --arg $ -fr $p $p $p", [string, file1, file2, file3])
 "
@@ -23,15 +27,11 @@ let s:http_cmd = exists('g:netrw_http_cmd') ?
 " \ on Windows. This only happens by the $p substitution
 " if $ is followed by a number its treated as index
 
-" EXamples:
-" vam#utils#ShellDSL('$', 'escape this/\') == '''escape this/\''' 
-" vam#utils#ShellDSL('$1 $[2p] $1p', 'escape this/\',\'other\') =='''escape this/'' ''other'' ''escape this/''' 
-" vam#utils#ShellDSL('$.url $[1p.url] $1p.url', {'url':'URL'} ) =='''URL'' ''URL'' ''URL''' 
-" 
-" TODO: refactor: passing 1 should either be an option or not done here (but
-" when running the command with !). THat's because this function should be
-" usable with system() command a well.
-fun! vam#utils#ShellDSL(cmd, ...) abort
+" Examples:
+" s:ShellDSL('$', 'escape this/\') == '''escape this/\'''
+" s:ShellDSL('$1 $[2p] $1p', 'escape this/\',\'other\') =='''escape this/'' ''other'' ''escape this/'''
+" s:ShellDSL('$.url $[1p.url] $1p.url', {'url':'URL'} ) =='''URL'' ''URL'' ''URL'''
+fun! s:ShellDSL(special, cmd, ...) abort
   let args = a:000
   let r = ''
   let l = split(a:cmd, '\V$', 1)
@@ -41,7 +41,7 @@ fun! vam#utils#ShellDSL(cmd, ...) abort
     let list = matchlist(x, '\[\?\(\d*\)\(p\)\?\(\.[^ \t\]]*\)\?\]\?')
     if len(list) ==0
       " should not happen
-      throw 'vam#utils#ShellDSL, bad : '.x
+      throw 's:ShellDSL, bad : '.x
     endif
     if list[1] != ''
       let p= args[list[1]-1]
@@ -57,44 +57,63 @@ fun! vam#utils#ShellDSL(cmd, ...) abort
     if list[2] == 'p'
       let p = expand(fnameescape(p))
     endif
-    let r .= shellescape(p,1).x[len(list[0]):]
+    let r .= shellescape(p, a:special).x[len(list[0]):]
     unlet p
   endfor
   return r
 endf
 
 fun! s:Cmd(expect_code_0, cmd) abort
-  call vam#Log(a:cmd, "None")
-  exe (s:c.silent_shell_commands ?  "silent " : "").'!'. a:cmd
+  call vam#Log(a:cmd, 'PreProc')
+  if s:c.shell_commands_run_method[-4:] is# 'bang'
+    execute '!'.a:cmd
+  elseif s:c.shell_commands_run_method is# 'system'
+    call vam#Log(system(a:cmd), 'None')
+  else
+    throw 'Unknown run method: '.s:c.shell_commands_run_method
+  endif
   if a:expect_code_0 && v:shell_error != 0
     let s:c.last_shell_command = a:cmd
-    throw "error executing ". a:cmd
+    throw "Command “".a:cmd."” exited with error code ".v:shell_error
   endif
   return v:shell_error
 endf
 
 " TODO improve this and move somewhere else?
 fun! vam#utils#RunShell(...) abort
-  let cmd = call('vam#utils#ShellDSL', a:000)
+  let special=(s:c.shell_commands_run_method[-4:] is# 'bang')
+  let cmd = call('s:ShellDSL', [special]+a:000)
   return s:Cmd(0, cmd)
 endf
 
 " cmds = list of {'d':  dir to run command in, 'c': the command line to be run }
 fun! vam#utils#ExecInDir(dir, ...) abort
+  let special=(s:c.shell_commands_run_method[-4:] is# 'bang')
   if g:is_win
     " set different lcd in extra buffer:
     new
     try
       execute 'lcd' fnameescape(a:dir)
-      let cmd=call('vam#utils#ShellDSL', a:000)
+      let cmd=call('s:ShellDSL', [special]+a:000)
+      call s:Cmd(1, cmd)
     finally
       bw!
     endtry
   else
-    let cmd=vam#utils#ShellDSL('cd $p', a:dir).' && '.call('vam#utils#ShellDSL', a:000)
+    let cmd=s:ShellDSL(special, 'cd $p', a:dir).' && '.
+          \ call('s:ShellDSL', [special]+a:000)
+    call s:Cmd(1, cmd)
   endif
-  call s:Cmd(1, cmd)
 endf
+
+fun! vam#utils#System(...)
+  let cmd=call('s:ShellDSL', [0]+a:000)
+  let r=system(cmd)
+  if v:shell_error
+    return 0
+  endif
+  return r
+endfun
 
 "Usages: EndsWith('name.tar',   '.tar', '.txt') returns 1 even if .tar was .txt
 fun! s:EndsWith(name, ...)

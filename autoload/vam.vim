@@ -53,12 +53,6 @@ let s:c['addon_completion_lhs'] = get(s:c, 'addon_completion_lhs', '<C-x><C-p>')
 " More options that are used for plugins’ installation are listed in 
 " autoload/vam/install.vim
 
-" for testing it is necessary to avoid the "Press enter to continue lines"
-" (cygwin?). Thus provide an option making all shell commands silent
-" However don't set this to 1 by default. If something goes wrong I want users
-" to see what went wrong. Not everybody knows how to debug VimL!
-let s:c['silent_shell_commands'] = get(s:c,'silent_shell_commands', 0)
-
 if g:is_win
   " if binary-utils path exists then add it to PATH
   let s:c['binary_utils'] = get(s:c,'binary_utils',s:c['plugin_root_dir'].'\binary-utils')

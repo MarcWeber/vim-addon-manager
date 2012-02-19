@@ -30,16 +30,16 @@ endif
 let s:scm_defaults={
       \'git': {'clone': ['vam#utils#RunShell', [s:git_checkout       ]],
       \       'update': ['vam#utils#RunShell', ['cd $p && git pull'  ]],
-      \        'wdrev': ['vcs_checkouts#System', ['git --git-dir=$p rev-parse HEAD']],},
+      \        'wdrev': ['vam#utils#System',   ['git --git-dir=$p rev-parse HEAD']],},
       \ 'hg': {'clone': ['vam#utils#RunShell', ['hg clone $.url $p'  ]],
       \       'update': ['vam#utils#RunShell', ['hg pull -u -R $p'   ]],
-      \        'wdrev': ['vcs_checkouts#System', ['hg log -R $p -r . --template '.shellescape('{node}')]],},
+      \        'wdrev': ['vam#utils#System',   ['hg log --template $ -R $p -r .', '{node}']],},
       \'bzr': {'clone': ['vam#utils#RunShell', ['bzr branch $.url $p']],
       \       'update': ['vam#utils#RunShell', ['bzr pull -d $p'     ]],
-      \        'wdrev': ['vcs_checkouts#System', ['cd $p && bzr log -c . --line']]},
+      \        'wdrev': ['vam#utils#System',   ['bzr log $p --line -l 1']]},
       \'svn': {'clone': ['vcs_checkouts#SVNCheckout', []],
       \       'update': ['vam#utils#RunShell', ['svn update $p'      ]],
-      \        'wdrev': ['vcs_checkouts#SVN_wdrev', []],},
+      \        'wdrev': ['vcs_checkouts#SVNWdrev', []],},
       \'_bundle': {'update': ['vcs_checkouts#UpdateBundle', []],},
     \}
 let s:c.scms=get(s:c, 'scms', {})
@@ -47,16 +47,8 @@ call map(filter(copy(s:c.scms), 'has_key(s:scm_defaults, v:key)'), 'extend(v:val
 call extend(s:c.scms, s:scm_defaults, 'keep')
 call map(copy(s:c.scms), 'extend(v:val, {"dir": ".".v:key})')
 
-fun! vcs_checkouts#System(cmd, targetDir)
-  let idx=stridx(a:cmd, '$p')
-  let cmd=a:cmd[:(idx-1)].shellescape(a:targetDir).a:cmd[(idx+2):]
-  if v:shell_error
-    return 0
-  endif
-  return system(cmd)
-endfun
-fun! vcs_checkouts#SVN_wdrev(targetDir)
-  let result=vcs_checkouts#System('cd $p && svn info', a:targetDir)
+fun! vcs_checkouts#SVNWdrev(targetDir)
+  let result=vam#utils#System('svn info $p', a:targetDir)
   return substitute(result, '\v.{-}\nRevision\:\ (\d+).*', '\1', '')
 endfun
 fun! vcs_checkouts#GetBundle(repository, targetDir)

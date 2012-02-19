@@ -16,7 +16,7 @@ endif
 let g:vim_addon_manager.auto_install=1
 let g:vim_addon_manager.do_diff=0
 let g:vim_addon_manager.plugin_root_dir=fnamemodify('./vam-'.g:curtest, ':p')[:-2]
-let g:vim_addon_manager.silent_shell_commands=1
+let g:vim_addon_manager.shell_commands_run_method='system'
 let s:outfile=fnamemodify(g:outfile, ':p')
 let s:errfile=fnamemodify(g:outfile, ':p:r').'.fail'
 function WriteFile(...)
