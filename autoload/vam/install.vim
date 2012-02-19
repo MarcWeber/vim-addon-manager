@@ -327,7 +327,7 @@ fun! vam#install#UpdateAddon(name)
   endif
 
   let versionFile = pluginDir.'/version'
-  let oldVersion = filereadable(versionFile) ? readfile(versionFile, 1)[0] : "?"
+  let oldVersion = filereadable(versionFile) ? readfile(versionFile, 'b')[0] : "?"
   if oldVersion !=# newVersion || newVersion == '?'
     " update plugin
     echom "Updating plugin ".a:name." because ".(newVersion == '?' ? 'version is unknown' : 'there is a different version')
@@ -585,7 +585,7 @@ fun! vam#install#Checkout(targetDir, repository) abort
                 \                   'script-type': tolower(get(a:repository, 'script-type', 'plugin')),
                 \                   'unix_ff': get(a:repository, 'unix_ff', get(s:c, 'change_to_unix_ff')) })
 
-    call writefile([get(a:repository,"version","?")], a:targetDir."/version")
+    call writefile([get(a:repository, 'version', '?')], a:targetDir.'/version', 'b')
   endif
 endfun
 
