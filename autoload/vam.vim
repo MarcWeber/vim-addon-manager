@@ -271,7 +271,7 @@ fun! vam#DisplayAddonInfo(name)
     " try to find by script id
     let dict = filter(copy(g:vim_addon_manager['plugin_sources']), 'get(v:val,"vim_script_nr","")."" == '.string(1*a:name))
     if (empty(dict))
-      throw "unkown script ".a:name
+      throw "unknown script ".a:name
     else
       let plugin = get(values(dict), 0, {})
       let name = keys(dict)[0]

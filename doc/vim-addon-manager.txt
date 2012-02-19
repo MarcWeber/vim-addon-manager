@@ -165,7 +165,7 @@ NOTES: ~
     let g:vim_addon_manager = {}
     let g:vim_addon_manager['git_checkout'] = {'f': 'MyGitCheckout', 'a': []}
     fun! MyGitCheckout(repository, targetDir)
-        let a:repository.url = substitute(a:repository.url, '^git:\/\/github', 'http://gihtub', '')
+        let a:repository.url = substitute(a:repository.url, '^git:\/\/github', 'http://github', '')
         call vam#utils#RunShell('git clone --depth=1 $.url $p', a:repository, a:targetDir)
     endfun
 <
