@@ -51,34 +51,39 @@ fun! vcs_checkouts#SVNWdrev(targetDir)
   let result=vam#utils#System('svn info $p', a:targetDir)
   return substitute(result, '\v.{-}\nRevision\:\ (\d+).*', '\1', '')
 endfun
+
+fun! s:WriteBundleDir(targetDir, url, archive)
+  call mkdir(a:targetDir.'/._bundle')
+  call writefile([a:url, a:archive], a:targetDir.'/._bundle/opts', 'b')
+endfun
 fun! vcs_checkouts#GetBundle(repository, targetDir)
   let [dummystr, protocol, user, domain, port, path; dummylst]=
-              \matchlist(a:repository, '\v^%(([^:]+)\:\/\/)?'.
-              \                           '%(([^@/:]+)\@)?'.
-              \                            '([^/:]*)'.
-              \                           '%(\:(\d+))?'.
-              \                            '(.*)$')
+              \matchlist(a:repository.url, '\v^%(([^:]+)\:\/\/)?'.
+              \                               '%(([^@/:]+)\@)?'.
+              \                                '([^/:]*)'.
+              \                               '%(\:(\d+))?'.
+              \                                '(.*)$')
   if domain is? 'github.com'
-    let url="https://".domain."/".'.s:ghpath.'."/zipball/master"
+    let url='https://'.domain.'/'.substitute(path, '\v^[:/]|\.git$', '', 'g').'/zipball/master'
     let archive='master.zip'
   elseif domain is? 'bitbucket.org'
-    let url="https://".domain.path."/get/default.zip"
+    let url='https://'.domain.path.'/get/default.zip'
     let archive='default.zip'
   elseif domain is? 'git.devnull.li'
-    let url="http://".domain.path."/snapshot/master.tar.gz"
+    let url='http://'.domain.path.'/snapshot/master.tar.gz'
     let archive='master.tar.gz'
   else
     throw 'Don’t know how to get bundle from '.domain
   endif
-  call vam#install#Checkout(a:targetDir, {'type': 'archive', 'url': url, 'archive': archive})
-  call mkdir(a:targetDir.'/._bundle')
-  call writefile([url, archive], a:targetDir.'/._bundle/opts', 'b')
+  call vam#install#Checkout(a:targetDir, {'type': 'archive', 'url': url, 'archive_name': archive})
+  call s:WriteBundleDir(a:targetDir, url, archive)
 endfun
 
 fun! vcs_checkouts#UpdateBundle(targetDir)
-  let [url, archive]=readfile(a:targetDir.'/._bundle/url', 'b')
+  let [url, archive]=readfile(a:targetDir.'/._bundle/opts', 'b')
   call vam#utils#RmFR(a:targetDir)
-  call vam#install#Checkout(a:targetDir, {'type': 'archive', 'url': url, 'archive': archive})
+  call vam#install#Checkout(a:targetDir, {'type': 'archive', 'url': url, 'archive_name': archive})
+  call s:WriteBundleDir(a:targetDir, url, archive)
   return 0
 endfun
 
@@ -154,11 +159,16 @@ fun! vcs_checkouts#Update(dir)
   endif
 
   if exists('wdrev') && wdrev isnot 0
-    if wdrev isnot# call(w[0], get(w, 1, [])+[a:dir], get(w, 2, {}))
+    let newwdrev=call(w[0], get(w, 1, [])+[a:dir], get(w, 2, {}))
+    if newwdrev is 0
+      return 'possibly updated'
+    elseif wdrev isnot# newwdrev
       return 'updated'
+    else
+      return 'up-to-date'
     endif
   endif
-  return 'up-to-date'
+  return 'possibly updated'
 endf
 
 " repository = {'type': git|hg|svn|bzr, 'url': .. }

@@ -286,6 +286,9 @@ endfun
 fun! vam#install#UpdateAddon(name)
   call vam#Log( "Considering ".a:name." for update" ,'type','unknown')
   let pluginDir = vam#PluginDirFromName(a:name)
+  if !isdirectory(pluginDir)
+    return 'missing'
+  endif
   " First, try updating using VCS. Return 1 if everything is ok, 0 if exception 
   " is thrown
   try
@@ -318,7 +321,7 @@ fun! vam#install#UpdateAddon(name)
     runtime autoload/vam/util.vim
   endif
 
-  if get(repository, 'type', '') != 'archive'
+  if get(repository, 'type', 0) isnot# 'archive'
     call vam#Log("Not updating ".a:name." because the repository description suggests using VCS ".get(repository, 'type', 'unknown').'.'
           \ ."\nYour install seems to be of type archive/manual/www.vim.org/unknown."
           \ ."\nIf you want to update ".a:name." remove ".pluginDir." and let VAM check it out again."
@@ -378,7 +381,10 @@ fun! vam#install#Update(list)
     endif
     call add(by_reply[r], p)
   endfor
-  let labels = {'updated': 'Updated:', 'failed': 'Failed to update:', 'up-to-date': 'Up to date:'}
+  let labels = {'updated': 'Updated:', 'failed': 'Failed to update:',
+        \       'up-to-date': 'Already up to date:',
+        \       'possibly updated': 'Don’t know how to determine update state (possibly updated):',
+        \       'missing': 'Plugin not installed:',}
   for [k,v] in items(by_reply)
     call vam#Log(get(labels,k,k).' '.string(by_reply[k]).".", k is# 'failed' ? 'WarningMsg' : 'Type')
   endfor
