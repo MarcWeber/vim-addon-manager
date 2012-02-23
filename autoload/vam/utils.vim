@@ -172,10 +172,12 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
 
   " [ ending, chars to strip, chars to add, command to do the unpacking ]
   let gzbzip2 = {
-        \ '.gz':   [-4, '','gzip -d'],
-        \ '.tgz':   [-3,'ar','gzip -d'],
-        \ '.bz2':   [-5, '', 'bzip2 -d'],
-        \ '.tbz2':  [-4,'ar','bzip2 -d'],
+        \ '.xz':    [-4,   '', 'xz -d '  ],
+        \ '.txz':   [-3, 'ar', 'xz -d '  ],
+        \ '.gz':    [-4,   '', 'gzip -d' ],
+        \ '.tgz':   [-3, 'ar', 'gzip -d' ],
+        \ '.bz2':   [-5,   '', 'bzip2 -d'],
+        \ '.tbz2':  [-4, 'ar', 'bzip2 -d'],
         \ }
 
 
@@ -203,7 +205,7 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
     " also see [fix-layout]
     call writefile(readfile(a:archive,'b'), fixDir.'/'.fnamemodify(a:archive, ':t'), 'b')
 
-  " .gz .bzip2 (or .vba.* or .tar.*)
+  " .gz, .xz, .bz2 (or .vba.* or .tar.*)
   elseif call(function('s:EndsWith'), [a:archive] + keys(gzbzip2) )
     " I was told tar on Windows is buggy and can't handle xj or xz correctly
     " so unpack in two phases:
