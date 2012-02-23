@@ -249,18 +249,30 @@ identify the plugin you're looking for.
 default. its long name is *vim-addon-manager-known-repositories* .
 
 *VAM-kr-patching*
-Both dicts are merged. The default is to prefer the scm version but you can
-choose. (-> MergeSources). You can either overwrite the merge function or just
-predefine the dictionary and add your own sources for testing before
-submitting to |VAM-kr|:
+VAM-kr merges both sources (scm and www.vim.org ones), see MergeSources.
+The result is provided by vam_known_repositories#Pool() which is the only pool
+used by default. See example and default implementation vam#install#Pool().
 
-You can add your own sources to the pool easily (BUG/TODO [5]): >
+If you want to add your own soucres consider submitting them to
+VAM-kr as patch. If you don't there are two ways:
+
+WAY 1 (still supported), add to your .vimrc (before activating VAM) (BUG/TODO [5]): >
   let g:vim_addon_manager = {}
   let g:vim_addon_manager.plugin_sources = {}
   let g:vim_addon_manager.plugin_sources['your_plugin_name'] = { plugin dictionary }
 <
+WAY 2 define your own Pool function: >
+  let g:vim_addon_manager = {}
+  let g:vim_addon_manager.pool_fun = MyPoolFun
+  fun MyPoolFun()
+    let d = vam#install#Pool()
+    let d['my_plugin'] = { 'type' : 'git', 'url' : ' ... ' }
+    return d
+  endf
+<
 
-Or overwrite the MergeSources function: >
+Example overwriting the MergeSources function (VAM-kr pool implementation): >
+Yes: You could do this in hte MyPoolFun shown above as well >
 
     fun! vam_known_repositories#MergeSources(plugin_sources, www_vim_org, scm_plugin_sources, patch_function, snr_to_name)
 

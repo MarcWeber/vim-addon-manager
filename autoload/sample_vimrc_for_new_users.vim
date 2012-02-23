@@ -103,8 +103,9 @@ noremap \r :TRecentlyUsedFiles<cr>
 " plugin etc)
 
 " don't ask me why glob() from Vim is that slow .. :(
+" one reason is that it doesn't follow symlinks (unless you pass -L to find)
 fun! FastGlob(glob)
-  let g = a:glob.'$'
+  let g = '^'.a:glob.'$'
   let replace = {'**': '.*','*': '[^/\]*','.': '\.'}
   let g = substitute(g, '\(\*\*\|\*\|\.\)', '\='.string(replace).'[submatch(1)]','g')
   let cmd = 'find | grep -e '.shellescape(g)
