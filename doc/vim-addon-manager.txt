@@ -50,6 +50,7 @@ WHY VAM?: ~
   - most plugins can also be loaded at runtime (some problems may [BUG 10])
   - some Windows support
   - is not too shy telling you that alternatives exist (and which one)
+  - copes with "subdirectories contain vim runtimepath" cases
 
 ==============================================================================
 1. Intro                                                           *VAM-intro*

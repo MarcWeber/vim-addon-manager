@@ -101,7 +101,18 @@ noremap \r :TRecentlyUsedFiles<cr>
 
 " simple glob open based on tlib's List function (similar to TCommand or fuzzy
 " plugin etc)
-noremap \go :exec 'e '. fnameescape(tlib#input#List('s','select file', split(glob(input('glob pattern, curr dir:','**/*')),"\n") ))<cr>
+
+" don't ask me why glob() from Vim is that slow .. :(
+fun! FastGlob(glob)
+  let g = a:glob.'$'
+  let replace = {'**': '.*','*': '[^/\]*','.': '\.'}
+  let g = substitute(g, '\(\*\*\|\*\|\.\)', '\='.string(replace).'[submatch(1)]','g')
+  let cmd = 'find | grep -e '.shellescape(g)
+  " let exclude = a:exclude_pattern == ''? '' : ' | grep -v -e '.shellescape(a:exclude_pattern)
+  " let cmd .= exclude
+  return system(cmd)
+endf
+noremap \go :exec 'e '. fnameescape(tlib#input#List('s','select file', split(FastGlob(input('glob pattern, curr dir:','**/*')),"\n") ))<cr>
 
 " sometimes when using tags the list is too long. filtering it by library or
 " such can easily be achived by such code: {{{'
@@ -114,7 +125,7 @@ noremap \go :exec 'e '. fnameescape(tlib#input#List('s','select file', split(glo
 
 " }}}
 " select a buffer from list
-command SelectBuf exec 'b '.matchstr( tlib#input#List('s', 'select buffer', tlib#cmd#OutputAsList('ls')), '^\s*\zs\d\+\ze')
+command! SelectBuf exec 'b '.matchstr( tlib#input#List('s', 'select buffer', tlib#cmd#OutputAsList('ls')), '^\s*\zs\d\+\ze')
 noremap! \sb :SelectBuf<cr>
 
 " dummy func to enabling you to load this file after adding the top level {{{1
@@ -127,6 +138,7 @@ endf
 
 " create directory for files before Vim tries writing them:
 augroup CREATE_MISSING_DIR_ON_BUF_WRITE
+  au!
   autocmd BufWritePre * if !isdirectory(expand('%:h')) | call mkdir(expand('%:h'),'p') | endif
 augroup end
 

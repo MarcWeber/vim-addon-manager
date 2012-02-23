@@ -86,7 +86,6 @@ fun! vam#utils#RunShell(...) abort
   return s:Cmd(0, cmd)
 endf
 
-" cmds = list of {'d':  dir to run command in, 'c': the command line to be run }
 fun! vam#utils#ExecInDir(dir, ...) abort
   let special=(s:c.shell_commands_run_method[-4:] is# 'bang')
   if g:is_win
