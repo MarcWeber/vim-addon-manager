@@ -36,7 +36,7 @@ let s:scm_defaults={
       \        'wdrev': ['vam#utils#System',   ['hg log --template $ -R $p -r .', '{node}']],},
       \'bzr': {'clone': ['vam#utils#RunShell', ['bzr branch $.url $p']],
       \       'update': ['vam#utils#RunShell', ['bzr pull -d $p'     ]],
-      \        'wdrev': ['vam#utils#System',   ['bzr log $p --line -l 1']]},
+      \        'wdrev': ['vam#utils#System',   ['bzr revno --tree $p']]},
       \'svn': {'clone': ['vcs_checkouts#SVNCheckout', []],
       \       'update': ['vam#utils#RunShell', ['svn update $p'      ]],
       \        'wdrev': ['vcs_checkouts#SVNWdrev', []],},
