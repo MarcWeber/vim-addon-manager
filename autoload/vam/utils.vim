@@ -178,6 +178,7 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
         \ '.tgz':   [-3, 'ar', 'gzip -d' ],
         \ '.bz2':   [-5,   '', 'bzip2 -d'],
         \ '.tbz2':  [-4, 'ar', 'bzip2 -d'],
+        \ '.tbz':   [-3, 'ar', 'bzip2 -d'],
         \ }
 
 
