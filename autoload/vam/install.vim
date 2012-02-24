@@ -124,7 +124,7 @@ fun! vam#install#ReplaceAndFetchUrls(list)
   return l
 endfun
 
-fun! s:RunHook(hook, info, repository, pluginDir, opts)
+fun! vam#install#RunHook(hook, info, repository, pluginDir, opts)
   let hkey=tr(a:hook, '-', '_').'_hook_functions'
   if has_key(s:c, hkey)
     let d={}
@@ -207,7 +207,9 @@ fun! vam#install#Install(toBeInstalledList, ...)
        \ }))
 
       call vam#install#HelpTags(name)
-      call s:RunHook('post-install', info, repository, pluginDir, {})
+      if get(opts, 'run_install_hooks', 0)
+        call vam#install#RunHook('post-install', info, repository, pluginDir, {})
+      endif
     endif
   endfor
 endf
@@ -295,7 +297,7 @@ fun! vam#install#UpdateAddon(name)
     let r = vcs_checkouts#Update(pluginDir)
     if r isnot# 'unknown'
       if r is# 'updated'
-        call s:RunHook('post-scms-update', vam#AddonInfo(a:name), {}, pluginDir, {})
+        call vam#install#RunHook('post-scms-update', vam#AddonInfo(a:name), {}, pluginDir, {})
       endif
       return r
     endif
@@ -336,7 +338,7 @@ fun! vam#install#UpdateAddon(name)
     echom "Updating plugin ".a:name." because ".(newVersion == '?' ? 'version is unknown' : 'there is a different version')
 
     let hook_opts={'oldVersion': oldVersion}
-    call s:RunHook('pre-update', vam#AddonInfo(a:name), repository, pluginDir, hook_opts)
+    call vam#install#RunHook('pre-update', vam#AddonInfo(a:name), repository, pluginDir, hook_opts)
 
     " checkout new version (checkout into empty location - same as installing):
     if isdirectory(pluginDir)
@@ -344,7 +346,7 @@ fun! vam#install#UpdateAddon(name)
     endif
     call vam#install#Checkout(pluginDir, repository)
 
-    call s:RunHook('post-update', vam#AddonInfo(a:name), repository, pluginDir, hook_opts)
+    call vam#install#RunHook('post-update', vam#AddonInfo(a:name), repository, pluginDir, hook_opts)
 
     return 'updated'
   elseif oldVersion == newVersion

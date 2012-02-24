@@ -150,7 +150,8 @@ NOTES: ~
    Depending on the option you choose to run ActivateAddons Vim may not be
    able to show the questions correctly asking you to install a plugin.
    If that's the case (for whatever reason) I recommend installing the plugin
-   using |:InstallAddon| or |:ActivateAddon| before adding it to the list in .vimrc
+   using |:InstallAddons| or |:ActivateAddons| before adding it to the list in 
+   .vimrc
 
    If you're annoyed by the message: >
    "Press enter to continue"
@@ -329,7 +330,13 @@ InstallAddons {name} ...                                      *:InstallAddons*
         Install addons with given names. See |vam#install#InstallAddons()| for
         more details.
         You use InstallAddons instead of ActivateAddons if you want to review
-        plugin source before running it.
+        plugin source before running it. Also see |:RunInstallHooks|, it may 
+        be required to complete installation.
+
+RunInstallHooks {name} ...                                  *:RunInstallHooks*
+        Run post-install hooks for given plugins. Required if plugin has been 
+        installed using |:InstallAddons| and has hooks that are needed for it 
+        to work.
 
 ActivateAddons {name} ...                                    *:ActivateAddons*
         Activate addons with given names. See |vam#ActivateAddons()| for
@@ -767,7 +774,8 @@ pre-update-hook                             *addon-info-pre-update-hook*
         information between “pre-” and “post-” hooks).
         Hooks are executed in the following cases:
             Hook              Case ~
-            post-install      After successfully installing a plugin.
+            post-install      After successfully installing a plugin using 
+                              |:ActivateAddons| or running |:RunInstallHooks|.
             pre-update        Before a non-VCS source update.
             post-update       After a non-VCS source update.
             post-scms-update  After VCS source update.
