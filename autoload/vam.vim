@@ -149,6 +149,7 @@ endf
 " }
 fun! vam#ActivateRecursively(list_of_names, ...)
   let opts = a:0 == 0 ? {} : a:1
+  let opts['run_install_hooks'] = get(opts, 'run_install_hooks', 1)
 
   for name in a:list_of_names
     if !has_key(s:c['activated_plugins'],  name)
@@ -373,6 +374,13 @@ command! -nargs=* -complete=customlist,vam#install#InstalledAddonCompletion Acti
 command! -nargs=* -complete=customlist,vam#install#UpdateCompletion UpdateAddons :call vam#install#Update([<f-args>])
 command! -nargs=0 UpdateActivatedAddons exec 'UpdateAddons '.join(keys(g:vim_addon_manager['activated_plugins']),' ')
 command! -nargs=* -complete=customlist,vam#install#UninstallCompletion UninstallNotLoadedAddons :call vam#install#UninstallAddons([<f-args>])
+
+function! s:RunInstallHooks(plugins)
+  for name in a:plugins
+    call vam#install#RunHooks('post-install', vam#AddonInfo(name), vam#install#GetRepo(name, {}), vam#PluginDirFromName(name), {})
+  endfor
+endfunction
+command! -nargs=+ -complete=customlist,vam#install#InstalledAddonCompletion RunInstallHooks :call s:RunInstallHooks([<f-args>])
 
 
 " plugin name completion function:
