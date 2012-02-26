@@ -148,7 +148,8 @@ endf
 "   trusted repositories only
 " }
 fun! vam#ActivateRecursively(list_of_names, ...)
-  let opts = extend({'run_install_hooks': 1}, a:0 == 0 ? {} : a:1)
+  let opts = a:0 == 0 ? {} : a:1
+  let opts['run_install_hooks'] = get(opts, 'run_install_hooks', 1)
 
   for name in a:list_of_names
     if !has_key(s:c['activated_plugins'],  name)
