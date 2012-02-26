@@ -102,17 +102,17 @@ fun! vam#install#ReplaceAndFetchUrls(list)
   let l = a:list
   let idx = 0
   for idx in range(0, len(l)-1)
-    if exists('t') | unlet t | endif
     let n = l[idx]
     " assume n is either an url or a path
-    if n =~ '^http://' && s:confirm('Fetch plugin info from URL '.n.'?')
-      let t = tempfile()
+    if n =~ '\m^https\?://' && s:confirm('Fetch plugin info from URL '.n.'?')
+      let t = tempname()
       call vam#utils#Download(n, t)
     elseif n =~ '[/\\]' && filereadable(n)
       let t = n
     endif
     if exists('t')
       let dic = vam#ReadAddonInfo(t)
+      unlet t
       if !has_key(dic,'name') || !has_key(dic, 'repository')
         call vam#Log( n." is no valid addon-info file. It must contain both keys: name and repository")
         continue
