@@ -255,6 +255,15 @@ fun! vam#ActivateAddons(...) abort
       call vam#GlobThenSource(rtp.'/ftdetect/*.vim')
     endfor
 
+    if len(new_runtime_paths)
+      " The purpose of this line is to "refresh" buffer local vars and syntax.
+      " (eg when loading a python plugin when opening a .py file)
+      " Maybe its the responsibility of plugins to "refresh" settings of
+      " buffers which are already open - I don't expect them to do so.
+      " Let's see how much this breaks.
+      bufdo exec 'set ft='.&ft
+    endif
+
   endif
 endfun
 

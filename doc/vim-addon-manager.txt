@@ -132,7 +132,9 @@ Add the following to your .vimrc >
           " Also see section "2.2. names of addons and addon sources" in VAM's documentation
         endfun
         call SetupVAM()
-        " experimental: run after gui has been started (gvim) [3]
+        " experimental [E1]: load plugins lazily depending on filetype, See
+        " NOTES
+        " experimental [E2]: run after gui has been started (gvim) [3]
         " option1:  au VimEnter * call SetupVAM()
         " option2:  au GUIEnter * call SetupVAM()
         " See BUGS sections below [*]
@@ -146,7 +148,16 @@ minimal setup ~
 
 
 NOTES: ~
+   experimental: load plugins lazily depending on filetype [E1]~
+>
+    let ft_addons = {
+      \ '^\%(c\|cpp\)$': [ 'plugin-for-c-development' ],
+      \ 'javascript': [ 'plugin-for-javascript' ]
+    \ }
+    au FileType * for l in values(filter(copy(ft_addons), string(expand('<amatch>')).' =~ v:key')) | call vam#ActivateAddons(l) | endfor
+<  Provide feedback about this. If it works we may add it as builtin
 
+   experimental: setup VAM when GUI has started [E2] ~
    Depending on the option you choose to run ActivateAddons Vim may not be
    able to show the questions correctly asking you to install a plugin.
    If that's the case (for whatever reason) I recommend installing the plugin
@@ -188,6 +199,15 @@ NOTES: ~
         return 0
     endfun
     let g:vim_addon_manager.scms.git.update=['MyGitUpdate']
+<
+
+   HOWTO benchmark startup? >
+   vim --startuptime logfile -c q
+<  Then read the logfile. As alternative you can benchmark activating scripts
+   *at rurntime* by >
+   tlib#cmd#Time('call vam#ActivateAddons(["A"])')
+<  which requires tlib. Why at runtime? Because plugin/*.vim files are sourced
+   by VIM after .vimrc has been processed
 
 ------------------------------------------------------------------------------
 2.2 names of addons and addon sources                        *VAM-addon-names*
@@ -264,7 +284,7 @@ WAY 1 (still supported), add to your .vimrc (before activating VAM) (BUG/TODO [5
 <
 WAY 2 define your own Pool function: >
   let g:vim_addon_manager = {}
-  let g:vim_addon_manager.pool_fun = MyPoolFun
+  let g:vim_addon_manager.pool_fun = function('MyPoolFun')
   fun MyPoolFun()
     let d = vam#install#Pool()
     let d['my_plugin'] = { 'type' : 'git', 'url' : ' ... ' }
