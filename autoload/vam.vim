@@ -243,25 +243,26 @@ fun! vam#ActivateAddons(...) abort
     endif
     unlet rtp
 
-    if !has('vim_starting')
-      for rtp in new_runtime_paths
-        call vam#GlobThenSource(rtp.'/plugin/**/*.vim')
-        call vam#GlobThenSource(rtp.'/after/plugin/**/*.vim')
-      endfor
-    endif
-
     for rtp in new_runtime_paths
       " filetype off/on would do the same ?
       call vam#GlobThenSource(rtp.'/ftdetect/*.vim')
     endfor
 
-    if len(new_runtime_paths)
-      " The purpose of this line is to "refresh" buffer local vars and syntax.
-      " (eg when loading a python plugin when opening a .py file)
-      " Maybe its the responsibility of plugins to "refresh" settings of
-      " buffers which are already open - I don't expect them to do so.
-      " Let's see how much this breaks.
-      bufdo exec 'set ft='.&ft
+    if !has('vim_starting')
+      for rtp in new_runtime_paths
+        call vam#GlobThenSource(rtp.'/plugin/**/*.vim')
+        call vam#GlobThenSource(rtp.'/after/plugin/**/*.vim')
+      endfor
+
+      if len(new_runtime_paths)
+        " The purpose of this line is to "refresh" buffer local vars and syntax.
+        " (eg when loading a python plugin when opening a .py file)
+        " Maybe its the responsibility of plugins to "refresh" settings of
+        " buffers which are already open - I don't expect them to do so.
+        " Let's see how much this breaks.
+        bufdo exec 'set ft='.&ft
+      endif
+
     endif
 
   endif
