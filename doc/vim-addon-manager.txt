@@ -1270,6 +1270,12 @@ Its not a bug. You can get remaining versions by git fetch --depth=9999999
 or such. This speeds up installation very much and should be still be
 sufficient to prepare patches.
 
+if git is not in PATH "Bundle" checkout (by github/bitbucket zip) is tried.
+If that fails there is no hint that git is available at all. So the error
+message should be "Sorry, failed checking out X, tried a) git b) by zip".
+I don't think its worth fixing right now. Its just yet another small
+"impurity" I feel little bit uncomfortable with. But probably the advantages
+win.
 
 ==============================================================================
 14. VAM vs ...                                               *VAM-comparison*
