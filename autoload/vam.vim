@@ -248,7 +248,9 @@ fun! vam#ActivateAddons(...) abort
       call vam#GlobThenSource(rtp.'/ftdetect/*.vim')
     endfor
 
-    if !has('vim_starting')
+    " using force is very likely to cause the plugin to be sourced twice
+    " I hope the plugins don't mind
+    if !has('vim_starting') || get(opts, 'force_loading_plugins_now', 0)
       for rtp in new_runtime_paths
         call vam#GlobThenSource(rtp.'/plugin/**/*.vim')
         call vam#GlobThenSource(rtp.'/after/plugin/**/*.vim')

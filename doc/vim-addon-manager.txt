@@ -154,7 +154,7 @@ NOTES: ~
       \ '^\%(c\|cpp\)$': [ 'plugin-for-c-development' ],
       \ 'javascript': [ 'plugin-for-javascript' ]
     \ }
-    au FileType * for l in values(filter(copy(ft_addons), string(expand('<amatch>')).' =~ v:key')) | call vam#ActivateAddons(l) | endfor
+    au FileType * for l in values(filter(copy(ft_addons), string(expand('<amatch>')).' =~ v:key')) | call vam#ActivateAddons(l, {'force_loading_plugins_now':1}) | endfor
 <  Provide feedback about this. If it works we may add it as builtin
 
    experimental: setup VAM when GUI has started [E2] ~
