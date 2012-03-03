@@ -103,11 +103,14 @@ fun! vcs_checkouts#GitCheckout(repository, targetDir)
   if executable('git')
     return vam#utils#RunShell(s:git_checkout, a:repository, a:targetDir)
   elseif executable('hg') && !s:TryCmdSilent('hg help gexport')
+    call vam#Log('Trying to checkout git source '.a:repository.url.' using mercurial.', 'None')
     return s:TryCmd('hg clone $ $p', ((a:repository.url[:2] is# 'git')?
           \                               (a:repository.url):
           \                               ('git+'.a:repository.url)),
           \                          a:targetDir)
   else
+    call vam#Log('Trying to checkout git source '.a:repository.url." using site bundles.\n".
+          \      'Please consider installing git or mercurial with hg-git extension', 'WarningMsg')
     return vcs_checkouts#GetBundle(a:repository, a:targetDir)
   endif
 endfun
@@ -116,6 +119,8 @@ fun! vcs_checkouts#MercurialCheckout(repository, targetDir)
   if executable('hg')
     return vam#utils#RunShell('hg clone $.url $p', a:repository, a:targetDir)
   else
+    call vam#Log('Trying to checkout mercurial source '.a:repository.url." using site bundles.\n".
+          \      'Please consider installing git or mercurial with hg-git extension', 'WarningMsg')
     return vcs_checkouts#GetBundle(a:repository, a:targetDir)
   endif
 endfun
@@ -130,11 +135,17 @@ fun! vcs_checkouts#SVNCheckout(repository, targetDir)
 endfun
 
 fun! vcs_checkouts#SubversionCheckout(repository, targetDir)
+  " Both mercurial and bazaar are slow in this case because they request full 
+  " changeset history from the server, while subversion does not.
   if executable('svn')
     return vcs_checkouts#SVNCheckout(a:repository, a:targetDir)
   elseif executable('hg') && !s:TryCmdSilent('hg help svn')
+    call vam#Log('Trying to checkout subversion source '.a:repository.url." using mercurial.\n".
+          \      'You may consider installing svn as using mercurial is slower', 'WarningMsg')
     return s:TryCmd('hg clone $.url $p', a:repository, a:targetDir)
-  elseif executable('bzr')
+  elseif executable('bzr') && !s:TryCmdSilent('bzr help svn')
+    call vam#Log('Trying to checkout subversion source '.a:repository.url." using bazaar.\n".
+          \      'You may consider installing subversion as using bazaar is slower', 'WarningMsg')
     return s:TryCmd('bzr branch $.url $p', a:repository, a:targetDir)
   endif
   return 1
