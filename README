@@ -44,7 +44,7 @@ Feature list:
 
 - a function which configures plugin sources:
 
-  1) www.vim.org (the plugin list is updated once within 10 days by a cron job)
+  1) www.vim.org (the plugin list is updated daily by a cron job)
 
   2) some scripts have been added manually. Some of them are development
      versions which are also contained in 1)
@@ -56,7 +56,7 @@ Feature list:
   fixing bugs. Thanks to you all! (list provided in the documentation)
 
 
-Continue reading the documentation: doc/vim-addon-manager.txt (online:
+Continue reading the documentation: doc/vim-addon-manager.txt
 
 I could quote several people who told me how "awesome" this small tool is.
 But I prefer letting you explore it yourself.
