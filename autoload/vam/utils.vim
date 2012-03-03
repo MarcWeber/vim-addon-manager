@@ -39,7 +39,7 @@ fun! s:ShellDSL(special, cmd, ...) abort
   let i = 0
   for x in l[1:]
     let list = matchlist(x, '\[\?\(\d*\)\(p\)\?\(\.[^ \t\]]*\)\?\]\?')
-    if len(list) ==0
+    if empty(list)
       " should not happen
       throw 's:ShellDSL, bad : '.x
     endif

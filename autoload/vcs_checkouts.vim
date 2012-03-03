@@ -77,6 +77,7 @@ fun! vcs_checkouts#GetBundle(repository, targetDir)
   endif
   call vam#install#Checkout(a:targetDir, {'type': 'archive', 'url': url, 'archive_name': archive})
   call s:WriteBundleDir(a:targetDir, url, archive)
+  return 0
 endfun
 
 fun! vcs_checkouts#UpdateBundle(targetDir)
@@ -89,38 +90,33 @@ endfun
 
 fun! s:TryCmd(...)
   try
-    call call('vam#utils#RunShell', a:000)
-    return 1
+    return call('vam#utils#RunShell', a:000)
   catch
-    return 0
+    return 1
   endtry
+endfun
+fun! s:TryCmdSilent(...)
+  silent return call('s:TryCmd', a:000)
 endfun
 
 fun! vcs_checkouts#GitCheckout(repository, targetDir)
   if executable('git')
-    call vam#utils#RunShell(s:git_checkout, a:repository, a:targetDir)
-  elseif executable('hg') && s:TryCmd('hg clone $.url $p', a:repository, a:targetDir)
-    return
+    return vam#utils#RunShell(s:git_checkout, a:repository, a:targetDir)
+  elseif executable('hg') && !s:TryCmdSilent('hg help gexport')
+    return s:TryCmd('hg clone $ $p', ((a:repository.url[:2] is# 'git')?
+          \                               (a:repository.url):
+          \                               ('git+'.a:repository.url)),
+          \                          a:targetDir)
   else
-    call vcs_checkouts#GetBundle(a:repository, a:targetDir)
+    return vcs_checkouts#GetBundle(a:repository, a:targetDir)
   endif
 endfun
 
 fun! vcs_checkouts#MercurialCheckout(repository, targetDir)
   if executable('hg')
-    call vam#utils#RunShell('hg clone $.url $p', a:repository, a:targetDir)
+    return vam#utils#RunShell('hg clone $.url $p', a:repository, a:targetDir)
   else
-    call vcs_checkouts#GetBundle(a:repository, a:targetDir)
-  endif
-endfun
-
-fun! vcs_checkouts#SubversionCheckout(repository, targetDir)
-  if executable('svn')
-    call vcs_checkouts#SVNCheckout(a:repository, a:targetDir)
-  elseif executable('hg') && s:TryCmd('hg clone $.url $p', a:repository, a:targetDir)
-    return
-  elseif executable('bzr') && s:TryCmd('bzr branch $.url $p', a:repository, a:targetDir)
-    return
+    return vcs_checkouts#GetBundle(a:repository, a:targetDir)
   endif
 endfun
 
@@ -131,6 +127,17 @@ fun! vcs_checkouts#SVNCheckout(repository, targetDir)
     let args+=[a:repository[key]]
   endfor
   call call('vam#utils#RunShell', args)
+endfun
+
+fun! vcs_checkouts#SubversionCheckout(repository, targetDir)
+  if executable('svn')
+    return vcs_checkouts#SVNCheckout(a:repository, a:targetDir)
+  elseif executable('hg') && !s:TryCmdSilent('hg help svn')
+    return s:TryCmd('hg clone $.url $p', a:repository, a:targetDir)
+  elseif executable('bzr')
+    return s:TryCmd('bzr branch $.url $p', a:repository, a:targetDir)
+  endif
+  return 1
 endfun
 
 " this may be useful for other projects.
