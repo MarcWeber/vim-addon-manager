@@ -731,13 +731,6 @@ repository                                             *addon-info-repository*
          |! to it - so that its kept in sync.
 
         Key      Description ~
-        addon-info
-                 optional, contains dict which will be written to
-                 addon-info.json for this plugin if the plugin does not ship
-                 its own addon-info.json file. This way dependencies, that a
-                 subdirectory contains vim data and similar "fixes" can be
-                 applied easily. See samples in VAM-kr.
-
         type     Required, must be either one of `hg', `git', `svn', `bzr' or
                  an empty string.
         url      If `type' key contains a VCS name (`hg', `git', `bzr' or `svn'),
