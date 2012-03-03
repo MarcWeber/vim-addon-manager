@@ -108,6 +108,9 @@ fun! vcs_checkouts#GitCheckout(repository, targetDir)
           \                               (a:repository.url):
           \                               ('git+'.a:repository.url)),
           \                          a:targetDir)
+  elseif executable('bzr') && !s:TryCmdSilent('bzr help git')
+    call vam#Log('Trying to checkout git source '.a:repository.url.' using bazaar.', 'None')
+    return s:TryCmd('bzr branch $.url $p', a:repository, a:targetDir)
   else
     call vam#Log('Trying to checkout git source '.a:repository.url." using site bundles.\n".
           \      'Please consider installing git or mercurial with hg-git extension', 'WarningMsg')
