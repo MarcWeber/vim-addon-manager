@@ -493,6 +493,22 @@ vam#install#CompleteAddonName                *vam#install#CompleteAddonName()*
     Function suitable to be a completion function for omni completion 
     ('omnifunc'). Completes addon names. See also |VAM-addon_completion_lhs|.
 
+vcs_checkouts#GitCheckout                   *vcs_checkouts#GitCheckout*
+vcs_checkouts#MercurialCheckout             *vcs_checkouts#MercurialCheckout*
+vcs_checkouts#SubversionCheckout            *vcs_checkouts#SubversionCheckout*
+    Functions that do their best to checkout plugins, trying various 
+    additional methods:
+              SCM    Additional methods tried ~
+              git    Mercurial with hg-git, bazaar with bzr-git, 
+                     github/bitbucket bundles
+              hg     Bitbucket bundles
+              svn    Mercurial with hgsubversion, bazaar with bzr-svn
+    To use them add the following to the vimrc: >
+        let g:vim_addon_manager={'scms': {'git': {}, 'svn': {}, 'hg': {}}}
+        let g:vim_addon_manager.scms.git.clone=['vcs_checkouts#GitCheckout']
+        let g:vim_addon_manager.scms.hg.clone =['vcs_checkouts#MercurialCheckout']
+        let g:vim_addon_manager.scms.svn.clone=['vcs_checkouts#SubversionCheckout']
+
 ==============================================================================
 4. Options                                                       *VAM-options*
                                                          *g:vim_addon_manager*
@@ -596,6 +612,9 @@ scms                                                                *VAM-scms*
                    \'update': [function("GitUpdate"), ['git pull']],\
                    \'executable': $HOME.'/bin/git'}}
             " “'clone': ['GitCheckout']” works as well
+<       Note: if some keys are missing, then VAM will use the defaults. So it 
+              is safe to override just one “clone” key as it is shown in 
+              |vcs_checkouts#GitCheckout| example.
 pool_fun                                                        *VAM-pool_fun*
         Name or reference of a function that must return dictionary contains 
         {{plugin-name}: {repository}} ({repository} is described under 
