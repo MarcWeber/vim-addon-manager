@@ -101,6 +101,10 @@ started fast.
 Add the following to your .vimrc >
 
         fun! SetupVAM()
+          " set advanced options like this:
+          " let g:vim_addon_manager = {}
+          " let g:vim_addon_manager['key'] = value
+
           " YES, you can customize this vam_install_path path and everything still works!
           let vam_install_path = expand('$HOME') . '/.vim/vim-addons'
           exec 'set runtimepath+='.vam_install_path.'/vim-addon-manager'
@@ -873,6 +877,10 @@ another list: http://vim-scripts.org/tools.html
 Emacs install scripts manager:
   el-get http://github.com/dimitri/el-get/blob/master/el-get.el
 
+janus collection also seems to have kind of dependency management.
+I tried contacting them - no reply.
+See https://groups.google.com/group/janus-vimius/browse_thread/thread/78db65eebd9cc5d8?hl=de
+
 There is another project which has the same name:
 http://packages.debian.org/sid/vim-addon-manager
 The author (Jamessan) is fine with this project sharing the same name.
@@ -909,6 +917,10 @@ Mike Smullin:
 
 Israel Chauca Fuentes:
  - reporting and fixing some bugs
+
+Zach Kelling (zeekay twitter/github):
+  providing an initial almost working attempt to load plugins lazily based on
+  filetype
 
 (+) means they are collaborators on github and could take action in case of serious
     trouble.
