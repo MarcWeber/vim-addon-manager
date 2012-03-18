@@ -801,7 +801,7 @@ repository                                             *addon-info-repository*
                 colors, compiler, indent, keymap, lang, print, spell, syntax.
         addon-info
                 Contains addon information in case plugin does not supply its 
-                own addon-info file.
+                own addon-info file. Will be written to addo-info.json file.
         vim_script_nr
                 Contains www.vim.org script ID.
         homepage
