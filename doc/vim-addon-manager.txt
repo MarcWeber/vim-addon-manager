@@ -118,7 +118,7 @@ Add the following to your .vimrc >
             " I'm sorry having to add this reminder. Eventually it'll pay off.
             call confirm("Remind yourself that most plugins ship with documentation (README*, doc/*.txt). Its your first source of knowledge. If you can't find the info you're looking for in reasonable time ask maintainers to improve documentation")
             exec '!p='.shellescape(vam_install_path).'; mkdir -p "$p" && cd "$p" && git clone --depth 1 git://github.com/MarcWeber/vim-addon-manager.git'
-            " VAM run helptags automatically if you install or update plugins
+            " VAM runs helptags automatically if you install or update plugins
             exec 'helptags '.fnameescape(vam_install_path.'/vim-addon-manager/doc')
           endif
 
