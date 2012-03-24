@@ -703,14 +703,6 @@ repository                                             *addon-info-repository*
         |vam#install#Install()| call (see its description). This is
         a dictionary with the following keys:
 
-         !! Note: As very common in extreme programming documentation may be
-         !! outdated. So may be this section. So refer to the code:
-         !! |vam#install#Checkout()| to find out about all supported keys
-         !! Its easy to read and extend. Contact me if you're unsure. I'll help
-         !! you.
-         !! I'd even consider moving this section into the code only refering
-         |! to it - so that its kept in sync.
-
         Key      Description ~
         type     Required, must be either one of `hg', `git', `svn', `bzr' or
                  an empty string.
