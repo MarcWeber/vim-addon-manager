@@ -1275,42 +1275,62 @@ sufficient to prepare patches.
   Thus if you do it after calling pathogen/vundle/.. everything should be
   fine. (Thanks to graywh for telling me)
 
+------------------------------------------------------------------------------
+14.1. VAM vs pathogen                                        *VAM-vs-pathogen*
 
-vs Pathogen 
--------------
++ |:helptags| is run automatically only after updating or installing the 
+  plugin.
++ There is a maintained pool of plugins that makes possible to
+    1. create hooks which may be required to finish installation (like 
+       Command-T requiring some compilation)
+    2. patch (mainly tell VAM that plugin has different runtimepath) or 
+       deprecate plugins (for example, Sanders snipmate)
++ VAM handles plugin dependencies (of course, if author or pool maintainer 
+  added required information).
++ VAM is able to download and install or update plugins.
++ VAM is able to load plugins while vim is running.
 
-  1) helptags is run automatically always when updating or installing plugins
-    only
+------------------------------------------------------------------------------
+14.2. VAM vs vundle                                            *VAM-vs-vundle*
 
-  2) Because there is a maintained pool of plugins you can patch or
-    deprecate them:
-    This happened to Sanders snipmate.
-    Most patches just add "root" key telling VAM to add a subdir to rtp.
++ Vundles seems to source after/* files for you, but it does not care about 
+  ordering when adding to rtp, thus “~/.vim/after/ftplugin/*” is sources 
+  before “~/.vim/bundle/PLUGIN/ftplugin”. It is though unlikely that you run 
+  into this issue.
++ Does not handle dependencies (though it is in TODO).
 
-  3) simple dependency management
+------------------------------------------------------------------------------
+14.3. VAM vs GetLatestVimScripts                                 *VAM-vs-GLVS*
 
-  4) supports all common VCS (svn, bazaar, git, mercurial)
++ VAM uses human-readable names instead of script IDs.
++ GLVS is able to handle only www.vim.org sources.
++ GLVS puts all files into “~/.vim”, VAM (and others mentioned above) uses 
+  one-directory-for-one-plugin approach.
++ GLVS does not seem to track which files belong to which plugin so is not 
+  able to uninstall plugins.
+- Unlike VAM GLVS is included in standart vim distribution.
+- GLVS was released (posted to www.vim.org) in Nov 2004, while VAM only in 
+  Dec 2009, so it is likely that more plugins define dependencies using GLVS 
+  (needs more exploration though). On the other hand, VAM has large maintained 
+  database also with dependency information.
 
-  5) Automatic downloading of scripts from vim.org.
+------------------------------------------------------------------------------
+14.4. Some other similar projects                               *VAM-vs-other*
 
-  7) You can easily load plugins at runtime.
+There are other projects known which are not so popular as the above:
+1. janus (https://github.com/carlhuda/janus)
+    + Has plugin managment system built on top of pathogen
+    ? Janus is a vim distribution, not only package manager
+2. vimpyre (https://github.com/pct/vimpyre)
+    + Requires python and some python packages
+    + Uses pathogen to actually load plugins, it does only installation itself
+    + Supports only git
+    ? Not a vim plugin, but a python extension. Is installed using pip.
+    - Is able to do some local searches
+    - Vimpyre can open plugin home page in browser
 
-vs vundle
----------
-
-    Vundle seems to source after/* files for you (since March 2011)
-
-    BUT: It doesn't take care about ordering when adding to rtp.
-    Thus ~/.vim/after/ftplugin/* is sourced before
-    ~/.vim/bundle/PLUGIN/ftplugin but should be the other way round.
-
-    However its unlikely that you run into this issue (I know about one case).
-
-
-vs X
----------
-  TODO: Most people are using VAM or Pathogen now AFAIK - so if you feel need
-  for this list submit patches
+Most people are using VAM or Pathogen now AFAIK - so if you feel need for this 
+list submit patches
 
 I personally don't have anything against the other solutions. I like to point
 out the importance of the "dependency" feature. It allows reusing code easily.
