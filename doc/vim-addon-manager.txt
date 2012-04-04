@@ -98,6 +98,7 @@ You make VAM install plugins by adding their names to the list in
  |vam#ActivateAddons()|. Try understanding the comments. They'll help you get
 started fast.
 
+recommended setup ~
 Add the following to your .vimrc >
 
         fun! SetupVAM()
@@ -154,6 +155,9 @@ Add the following to your .vimrc >
 
 
 minimal setup ~
+  This is the minimal setup which makes VAM work.
+  If you remove all comments in the large "recommend setup" above and drop the
+  code checking out VAM automatically this is which is left:
 >
   set rtp+=PATH-TO-VAM
   call vam#ActivateAddons([], {'auto_install' : 0})
