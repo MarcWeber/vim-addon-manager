@@ -98,7 +98,7 @@ recommended setup ~
 2) Read the comments carefully. They help you getting started. Then you can remove them. 
 3) Add addon names to the ActivateAddons call, start Vim, you sohuld be done. >
 
-        fun! EnsureVamIsOnDisk()
+        fun! EnsureVamIsOnDisk(vam_install_path)
           " windows users want to use http://mawercer.de/~marc/vam/index.php
           " to fetch VAM, VAM-known-repositories and the listed plugins
           " without having to install curl, unzip, git tool chain first
