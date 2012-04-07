@@ -1,4 +1,4 @@
-*vim-addon-manager.txt* Declarative package manager for Vim
+*vim-addon-manager-getting-started.txt* Declarative package manager for Vim
 ==============================================================================
 CONTENTS                                                        *VAM-contents*
 
