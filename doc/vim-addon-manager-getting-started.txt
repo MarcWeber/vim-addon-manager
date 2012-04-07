@@ -5,12 +5,26 @@ CONTENTS                                                        *VAM-contents*
     0. GETTING STARTED & LOOKING FOR HELP <<
 
     1. Intro                                  |VAM-intro|
-    2 Installation & installing plugins       |VAM-installation|
+    2. Installation & installing plugins      |VAM-installation|
         2.2 Names of addons and addon soucres |VAM-addon-names|
         2.3 Example: configurable setup       |VAM-complex-setup-sample|
         2.4 unattended installation           |VAM-unattended-installation|
-
-    additional topics 3-165 see vim-addon-manager-additional-documentation.txt
+In |vim-addon-manager-additional-documentation.txt|:
+    3. Functionality provided                 |VAM-functionality|
+        3.1. Commands                         |VAM-commands|
+        3.2. Functions                        |VAM-functions|
+    4. Options                                |VAM-options|
+    6. Uninstalling plugins                   |VAM-uninstall-plugins|
+    7. Addon-info file                        |VAM-addon-info|
+    8. Author, credits, some notes            |VAM-related|
+    9. Testing this plugin                    |VAM-testing|
+   10. Some notes for windows users           |VAM-windows|
+   11. Some notes for Gentoo users            |VAM-gentoo|
+   12. Troubleshooting and known bugs         |VAM-trouble-shooting|
+   13. TODO notes                             |VAM-TODO|
+   14. VAM vs ...                             |VAM-comparison|
+   15. Tracking down errors                   |VAM-tracking-down-erros|
+   16. Making plugins work with VAM           |VAM-adjusting-plugins|
 
 ==============================================================================
 
@@ -339,3 +353,4 @@ should be used if you want to checkout eventually untrusted code! If you're
 going to use the plugins anyway its of no use.
 You may also want to set auto_install.
 
+vim: tw=78:ts=8:ft=help:norl

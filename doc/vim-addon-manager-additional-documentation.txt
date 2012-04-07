@@ -1,8 +1,14 @@
 *vim-addon-manager-additional-documentation.txt* Declarative package manager for Vim
 ==============================================================================
 CONTENTS                                                        *VAM-contents*
-    1., 2. see vim-addon-manager-getting-started.txt
 
+In |vim-addon-manager-getting-started.txt|:
+    1. Intro                                  |VAM-intro|
+    2. Installation & installing plugins      |VAM-installation|
+        2.2 Names of addons and addon soucres |VAM-addon-names|
+        2.3 Example: configurable setup       |VAM-complex-setup-sample|
+        2.4 unattended installation           |VAM-unattended-installation|
+Here:
     3. Functionality provided                 |VAM-functionality|
         3.1. Commands                         |VAM-commands|
         3.2. Functions                        |VAM-functions|
@@ -18,7 +24,6 @@ CONTENTS                                                        *VAM-contents*
    14. VAM vs ...                             |VAM-comparison|
    15. Tracking down errors                   |VAM-tracking-down-erros|
    16. Making plugins work with VAM           |VAM-adjusting-plugins|
-
 
 ==============================================================================
 3. Functionality provided                                  *VAM-functionality*
