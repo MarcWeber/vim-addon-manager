@@ -390,7 +390,7 @@ command! -nargs=* -complete=customlist,vam#install#UninstallCompletion Uninstall
 
 function! s:RunInstallHooks(plugins)
   for name in a:plugins
-    call vam#install#RunHooks('post-install', vam#AddonInfo(name), vam#install#GetRepo(name, {}), vam#PluginDirFromName(name), {})
+    call vam#install#RunHook('post-install', vam#AddonInfo(name), vam#install#GetRepo(name, {}), vam#PluginDirFromName(name), {})
   endfor
 endfunction
 command! -nargs=+ -complete=customlist,vam#install#InstalledAddonCompletion RunInstallHooks :call s:RunInstallHooks([<f-args>])
