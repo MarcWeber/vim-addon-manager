@@ -1,6 +1,6 @@
 *vim-addon-manager-getting-started.txt* Declarative package manager for Vim
 ==============================================================================
-CONTENTS                                                        *VAM-contents*
+CONTENTS                                        *VAM-contents-getting-started*
 
     0. GETTING STARTED & LOOKING FOR HELP <<
 

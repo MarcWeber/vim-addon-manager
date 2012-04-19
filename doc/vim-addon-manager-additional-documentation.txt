@@ -1,6 +1,6 @@
 *vim-addon-manager-additional-documentation.txt* Declarative package manager for Vim
 ==============================================================================
-CONTENTS                                                        *VAM-contents*
+CONTENTS                                       *VAM-contents-additional*
 
 In |vim-addon-manager-getting-started.txt|:
     1. Intro                                  |VAM-intro|
