@@ -93,7 +93,10 @@ to cause same Vim behaviour everywhere.
 2. Installation                                             *VAM-installation*
 
 Windows users: skim |VAM-windows|.
-Gentoo users: skim |VAM-gentoo|.
+Gentoo users : skim |VAM-gentoo|
+  which explains how to install VAM system wide using layman overlays.
+  IMHO Fastest is continuing reading below though.
+
 rest (linux like everything supporting /bin/sh like shells) users keep reading
 here
 
