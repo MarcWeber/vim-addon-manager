@@ -93,32 +93,32 @@ to cause same Vim behaviour everywhere.
 2. Installation                                             *VAM-installation*
 
 Windows users: skim |VAM-windows|.
-Gentoo users : skim |VAM-gentoo|
-  which explains how to install VAM system wide using layman overlays.
-  IMHO Fastest is continuing reading below though.
+Gentoo users : skim |VAM-gentoo| which explains how to install VAM system-wide 
+               from the layman overlay.
 
-rest (linux like everything supporting /bin/sh like shells) users keep reading
-here
+Rest (linux and everything able to run POSIX shell) users should keep reading 
+here.
 
-minimal setup ~
+Minimal setup ~
   This is the minimal setup which makes VAM work.
-  However you want to use the longer commented version below because it also
-  fetches VAM.
-  Then copy pasting .vimrc is enough to replicate your setup.
+  However you may want to use the longer commented version below because it 
+  also fetches VAM so that copying your .vimrc is enough to replicate your 
+  setup.
 
   Add to your .vimrc >
-  set runtimepath+=PATH-TO-VAM
-  call vam#ActivateAddons([.. list of plugin names ..], {'auto_install' : 0})
+    set runtimepath+=PATH-TO-VAM
+    call vam#ActivateAddons([.. list of plugin names ..], {'auto_install' : 0})
 
 recommended setup ~
-1) Copy paste the following to your .vimrc.
-2) Read the comments carefully. They help you getting started. Then you can remove them. 
-3) Add addon names to the ActivateAddons call, start Vim, you sohuld be done. >
-
+1) Paste the following to your .vimrc.
+2) Read the comments carefully. They help you getting started. Then you can 
+   remove them.
+3) Add addon names to the ActivateAddons call, start Vim. That’s all.
+>
         fun! EnsureVamIsOnDisk(vam_install_path)
-          " windows users want to use http://mawercer.de/~marc/vam/index.php
+          " windows users may want to use http://mawercer.de/~marc/vam/index.php
           " to fetch VAM, VAM-known-repositories and the listed plugins
-          " without having to install curl, unzip, git tool chain first
+          " without having to install curl, 7-zip and git tools first
           " -> BUG [4] (git-less installation)
           if !filereadable(a:vam_install_path.'/vim-addon-manager/.git/config')
              \&& 1 == confirm("Clone VAM into ".a:vam_install_path."?","&Y\n&N")
@@ -199,46 +199,67 @@ NOTES: ~
    "Press enter to continue"
 <  There are at least two solutions you can try:
 
-  - press q once and Vim should stop asking
-  - set auto_install = 1 (to make Vim stop asking you any questions. However you
-    won't know if knew dependencies are fetched in that case etc)
+   - press q once and Vim should stop asking
+   - set |VAM-auto_install| to 1 (to make VAM stop asking you questions before 
+     installing anything)
+     , set |VAM-shell_commands_run_method| to "system" (to make VAM use 
+     |system()| for running installation commands and thus avoid |hit-enter| 
+     prompts)
+     and set 'nomore' before ActivateAddons call (to avoid |more-prompt|).
 
 
-  Example how to patch vcs checkout functions (eg if you're behind a proxy and
-  need to checkout github urls by http://): >
-    let g:vim_addon_manager = {'scms': {'git': {}}}
-    fun! MyGitCheckout(repository, targetDir)
-        let a:repository.url = substitute(a:repository.url, '^git://github', 'http://github', '')
-        return vam#utils#RunShell('git clone --depth=1 $.url $p', a:repository, a:targetDir)
-    endfun
-    let g:vim_addon_manager.scms.git.clone=['MyGitCheckout']
+   Example how to patch vcs checkout functions (eg if you're behind a proxy 
+   and need to checkout github urls by http://): >
+     let g:vim_addon_manager = {'scms': {'git': {}}}
+     fun! MyGitCheckout(repository, targetDir)
+         let a:repository.url = substitute(a:repository.url, '^git://github', 'http://github', '')
+         return vam#utils#RunShell('git clone --depth=1 $.url $p', a:repository, a:targetDir)
+     endfun
+     let g:vim_addon_manager.scms.git.clone=['MyGitCheckout']
 <
 
-  Another example: replace git_update and show changelog >
-    let g:vim_addon_manager = {'scms': {'git': {}}}
-    fun! MyGitUpdate(targetDir)
-        let cd = shellescape
-        let oldHash = vam#utils#System('git --git-dir=$p/.git rev-list HEAD -1', a:targetDir)
-        call vam#utils#RunShell('cd $p && git pull', a:targetDir)
-        let newHash = vam#utils#System('git --git-dir=$p/.git rev-list HEAD -1', a:targetDir)
-        if oldHash isnot# newHash
-          silent enew
-          setlocal buftype=nofile bufhidden=wipe
-          call setline(1, a:targetDir)
-          call append(1, split(system(vam#utils#ShellDSL('cd $; git log $[]..$[]', a:targetDir, oldHash, newHash)), "\n"))
-        endif
-        return 0
-    endfun
-    let g:vim_addon_manager.scms.git.update=['MyGitUpdate']
+   Another example: replace git_update and show changelog >
+     let g:vim_addon_manager = {'scms': {'git': {}}}
+     fun! MyGitUpdate(targetDir)
+         let cd = shellescape
+         let oldHash = vam#utils#System('git --git-dir=$p/.git rev-list HEAD -1', a:targetDir)
+         call vam#utils#RunShell('cd $p && git pull', a:targetDir)
+         let newHash = vam#utils#System('git --git-dir=$p/.git rev-list HEAD -1', a:targetDir)
+         if oldHash isnot# newHash
+           silent enew
+           setlocal buftype=nofile bufhidden=wipe
+           call setline(1, a:targetDir)
+           call append(1, split(system(vam#utils#ShellDSL('cd $; git log $[]..$[]', a:targetDir, oldHash, newHash)), "\n"))
+         endif
+         return 0
+     endfun
+     let g:vim_addon_manager.scms.git.update=['MyGitUpdate']
 <
 
-   HOWTO benchmark startup? >
-   vim --startuptime logfile -c q
-<  Then read the logfile. As alternative you can benchmark activating scripts
-   *at rurntime* by >
-   tlib#cmd#Time('call vam#ActivateAddons(["A"])')
-<  which requires tlib. Why at runtime? Because plugin/*.vim files are sourced
-   by VIM after .vimrc has been processed
+   Startup benchmarking ~
+   Some non-precise benchmarking can be done by >
+        vim --startuptime startup.log -c q
+<  . Timings will be printed to startup.log file. You can do it more precisely 
+   by using >
+        vim --cmd 'profile start profile.log' \
+            --cmd 'profile func *' \
+            --cmd 'profile file *' \
+            -c 'profile pause' \
+            -c 'qa!'
+<  Then it will output full profile information where time consumed by each 
+   line is shown, with a summary of function call times at the end. You can 
+   also get a summary of script file times if you open profile.log and do >
+        let timings=[]
+        g/^SCRIPT/call add(timings, [getline('.')[len('SCRIPT  '):], matchstr(getline(line('.')+1), '^Sourced \zs\d\+')]+map(getline(line('.')+2, line('.')+3), 'matchstr(v:val, ''\d\+\.\d\+$'')'))
+        call setline('.', ['count total (s)   self (s)  script']+map(copy(timings), 'printf("%5u %9s   %8s  %s", v:val[1], v:val[2], v:val[3], v:val[0])'))
+<  . You can also get times of scripts activation if you run >
+        tlib#cmd#Time('call vam#ActivateAddons(["A"])')
+<  for plugins which were not already activated after vim has started. 
+   Requires tlib. Adds time which takes VAM to do activation to actual 
+   activation. For filetype, indent, syntax, compiler, colorscheme and 
+   autoload plugins time spend in VAM is likely to exceed time used to load 
+   plugin (because actual loading will take place later if required), so it is 
+   better to read |profiling| instead.
 
 ------------------------------------------------------------------------------
 2.2 Names of addons and addon sources                        *VAM-addon-names*
