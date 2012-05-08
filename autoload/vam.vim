@@ -6,15 +6,6 @@
 
 " don't need a plugin. If you want to use this plugin you call Activate once
 " anyway
-augroup VAM_addon_info_handlers
-  autocmd!
-  autocmd BufRead,BufNewFile *-addon-info.txt,addon-info.json
-    \ setlocal ft=addon-info
-    \ | setlocal syntax=json
-    \ | syn match Error "^\s*'"
-  autocmd BufWritePost *-addon-info.txt,addon-info.json call vam#ReadAddonInfo(expand('%'))
-augroup end
-
 fun! vam#DefineAndBind(local,global,default)
   return 'if !exists('.string(a:global).') | let '.a:global.' = '.a:default.' | endif | let '.a:local.' = '.a:global
 endf
@@ -68,6 +59,19 @@ if executable('git')
   let s:c['plugin_sources']["vim-addon-manager-known-repositories"] = { 'type' : 'git', 'url': 'git://github.com/MarcWeber/vim-addon-manager-known-repositories.git' }
 else
   let s:c['plugin_sources']["vim-addon-manager-known-repositories"] = { 'type' : 'archive', 'url': 'http://github.com/MarcWeber/vim-addon-manager-known-repositories/tarball/master', 'archive_name': 'vim-addon-manager-known-repositories-tip.tar.gz' }
+endif
+
+let s:c['create_addon_info_handlers'] = get(s:c, 'create_addon_info_handlers', 1)
+
+if s:c.create_addon_info_handlers
+  augroup VAM_addon_info_handlers
+    autocmd!
+    autocmd BufRead,BufNewFile *-addon-info.txt,addon-info.json
+      \ setlocal ft=addon-info
+      \ | setlocal syntax=json
+      \ | syn match Error "^\s*'"
+    autocmd BufWritePost *-addon-info.txt,addon-info.json call vam#ReadAddonInfo(expand('%'))
+  augroup END
 endif
 
 fun! vam#VerifyIsJSON(s)
