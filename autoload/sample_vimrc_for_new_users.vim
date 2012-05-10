@@ -12,7 +12,8 @@
 " these markers { { { enable folding. see modeline at the bottom
 " You don't have to close them if you append the folding level.
 
-" set nocompatible should be default. This should be the first line:
+" set nocompatible should be default. This is done automatically if a .vimrc
+" or .gvimrc exists. Explicitly listing it here for completness.
 set nocompatible
 
 
@@ -71,7 +72,8 @@ noremap \ip :set invpaste<bar>echo &paste ? 'pasting is on' : 'pasting is off'
 
 " for windows: make backspace work. Doesn't hurt on linux. This should be
 " default!
-set bs=2
+set bs=indent,eol,star
+" (deprecated:) set bs=2
 
 " foreign plugin vim-addon-manager {{{1
 
@@ -106,7 +108,7 @@ noremap \r :TRecentlyUsedFiles<cr>
 " one reason is that it doesn't follow symlinks (unless you pass -L to find)
 fun! FastGlob(glob)
   let g = '^'.a:glob.'$'
-  let replace = {'**': '.*','*': '[^/\]*','.': '\.'}
+  let replace = {'**': '.*','*': '[^/\\]*','.': '\.'}
   let g = substitute(g, '\(\*\*\|\*\|\.\)', '\='.string(replace).'[submatch(1)]','g')
   let cmd = 'find | grep -e '.shellescape(g)
   " let exclude = a:exclude_pattern == ''? '' : ' | grep -v -e '.shellescape(a:exclude_pattern)
@@ -389,4 +391,3 @@ Tell me to add additional resources here
 
 
 " this modeline tells vim to enable folding {{{1
-" vim: fdm=marker 

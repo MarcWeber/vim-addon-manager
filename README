@@ -56,7 +56,9 @@ Feature list:
   fixing bugs. Thanks to you all! (list provided in the documentation)
 
 
-Continue reading the documentation: doc/vim-addon-manager.txt
+Continue reading the documentation: 
+  doc/vim-addon-manager-getting-started.txt
+  doc/vim-addon-manager-additional-documentation.txt
 
 I could quote several people who told me how "awesome" this small tool is.
 But I prefer letting you explore it yourself.

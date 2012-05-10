@@ -535,6 +535,9 @@ janus collection also seems to have kind of dependency management.
 I tried contacting them - no reply.
 See https://groups.google.com/group/janus-vimius/browse_thread/thread/78db65eebd9cc5d8?hl=de
 
+vimpyre: A python package managing vim scripts somehow. Its using pathogen to
+manage loading of the scripts: https://github.com/pct/vimpyre
+
 There is another project which has the same name:
 http://packages.debian.org/sid/vim-addon-manager
 The author (Jamessan) is fine with this project sharing the same name.
