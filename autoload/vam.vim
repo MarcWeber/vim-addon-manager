@@ -24,6 +24,8 @@ let s:c['plugin_sources'] = get(s:c,'plugin_sources', {})
 " if a plugin has an item here the dict value contents will be written as plugin info file
 let s:c['activated_plugins'] = get(s:c,'activated_plugins', {})
 
+let s:c['create_addon_info_handlers'] = get(s:c, 'create_addon_info_handlers', 1)
+
 " gentoo users may install VAM system wide. In that case s:d is not writeable.
 " In the future this may be put into a gentoo specific patch.
 let s:d = expand('<sfile>:h:h:h')
@@ -61,7 +63,6 @@ else
   let s:c['plugin_sources']["vim-addon-manager-known-repositories"] = { 'type' : 'archive', 'url': 'http://github.com/MarcWeber/vim-addon-manager-known-repositories/tarball/master', 'archive_name': 'vim-addon-manager-known-repositories-tip.tar.gz' }
 endif
 
-let s:c['create_addon_info_handlers'] = get(s:c, 'create_addon_info_handlers', 1)
 
 if s:c.create_addon_info_handlers
   augroup VAM_addon_info_handlers
