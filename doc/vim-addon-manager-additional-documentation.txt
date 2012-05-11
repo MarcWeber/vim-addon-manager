@@ -108,7 +108,7 @@ vam#install#Install({addons}[, {opts}])                *vam#install#Install()*
               forward or back slash, so use `./plugname-addon-info.txt' for
               files located in the current directory)i
             - |addon-info.txt| URL. In this case {arg} must start with
-              `http://'.
+              “http://” or “https://”.
         After installing the plugin help tags are updated, see |:helptags|.
 
         {addons}: See |VAM-addon-names|
@@ -521,15 +521,14 @@ PATHOGEN:
     http://vim-scripts.org/index.html
 
 There are also some other package managers for vim:
-    http://github.com/c9s/Vimana
-    http://snk.tuxfamily.org/log/vim-script-management-system.html
-    http://github.com/gmarik/vundle (git support only, VimL)
+    https://github.com/c9s/Vimana
+    https://github.com/gmarik/vundle (git support only, VimL)
 You can try and see which is the best.
 
 another list: http://vim-scripts.org/tools.html
 
 Emacs install scripts manager:
-  el-get http://github.com/dimitri/el-get/blob/master/el-get.el
+  el-get https://github.com/dimitri/el-get/blob/master/el-get.el
 
 janus collection also seems to have kind of dependency management.
 I tried contacting them - no reply.
@@ -562,7 +561,7 @@ ZyX (+) (Nikolay Pavlov, ZyX-I on github)
     archive
   - pushing 7z and providing a reference implementation
   - smart strip components implementation
-Tux Tom (+) (http://github.com/TuxTom)
+Tux Tom (+) (https://github.com/TuxTom)
   - helping fixing a cd bug on Windows
 creidiki (Leonardo Valeri Manera)
   - greatly improving Windows support
@@ -648,7 +647,7 @@ Here is that was found to be working:
     set shellquote=\"
 <
 
-See http://stackoverflow.com/questions/355988/how-do-i-deal-with-quote-characters-when-using-cmd-exe
+See https://stackoverflow.com/questions/355988/how-do-i-deal-with-quote-characters-when-using-cmd-exe
 for more informations.
 
 Ashwin Nanjappa provided an alternative installation instruction here which
@@ -678,6 +677,12 @@ Curl:
     Don't forget the -o argument at the end. :)
 
 Archives:
+    Get 7-zip here: http://7-zip.org/download.html. You need the full version
+    with gui because package with command-line version contains only 7za
+    executable, while you need 7z in order to support more archives. You can 
+    skip all subsequent projects, one 7z is enough for all supported archive 
+    file formats.
+
     Get Tar, Gzip and Unzip from the GnuWin32 project
     Gzip: http://gnuwin32.sourceforge.net/packages/gzip.htm
     Tar: http://gnuwin32.sourceforge.net/packages/gtar.htm
@@ -692,15 +697,12 @@ Archives:
     You only need xzdec.exe. Put in the same place you put those other archive
     tools.
 
-    Get p7zip here: http://7-zip.org/download.html. You need the full version
-    with gui because package with command-line version contains only 7za
-    executable, while you need 7z in order to support more archives.
-
     Either add them to your system or user path (google it!) or add them just
     to vim's path by putting something like this in _vimrc: >
         let $PATH='{path-to-gnu-utils};'.$PATH
 <   Again, replace the whole of {path-to-gnu-utils} including brackets with
-    the directory you have installed/unpacked them to.
+    the directory you have installed/unpacked them to. You need the same for 
+    7-zip too.
 
 VCS:
     MSysGit (and TortoiseGit/GitExtensions) by default add the `git'
@@ -712,6 +714,8 @@ VCS:
     SilkSVN: http://www.sliksvn.com/en/download/
     MsysGit: http://code.google.com/p/msysgit/
     Mercurial: http://mercurial.selenic.com/
+
+    See also |vcs_checkouts#GitCheckout|.
 
 
 We tried thinking about making using vim-addon-manager easier for Windows
@@ -964,13 +968,10 @@ sufficient to prepare patches.
 ==============================================================================
 14. VAM vs ...                                               *VAM-comparison*
 
-
-- ftdetect files are loaded if you set "filetype on".
-  Thus if you do it after calling pathogen/vundle/.. everything should be
-  fine. (Thanks to graywh for telling me)
-
 ------------------------------------------------------------------------------
 14.1. VAM vs pathogen                                        *VAM-vs-pathogen*
+
+URL: https://github.com/tpope/vim-pathogen
 
 + |:helptags| is run automatically only after updating or installing the 
   plugin.
@@ -987,8 +988,10 @@ sufficient to prepare patches.
 ------------------------------------------------------------------------------
 14.2. VAM vs vundle                                            *VAM-vs-vundle*
 
+URL: https://github.com/gmarik/vundle
+
 + Vundles seems to source after/* files for you, but it does not care about 
-  ordering when adding to rtp, thus “~/.vim/after/ftplugin/*” is sources 
+  ordering when adding to rtp, thus “~/.vim/after/ftplugin/*” is sourced 
   before “~/.vim/bundle/PLUGIN/ftplugin”. It is though unlikely that you run 
   into this issue.
 + Does not handle dependencies (though it is in TODO).
@@ -1007,9 +1010,29 @@ sufficient to prepare patches.
   Dec 2009, so it is likely that more plugins define dependencies using GLVS 
   (needs more exploration though). On the other hand, VAM has large maintained 
   database also with dependency information.
+- Uses downloaded archives’ IDs to determine whether update is needed, this 
+  may have a difference if author does not bother with changing versions, have 
+  chosen the same version because previous upload was packaged wrongly (e.g. 
+  has missing files), etc.
 
 ------------------------------------------------------------------------------
-14.4. Some other similar projects                               *VAM-vs-other*
+14.4. VAM vs Vimana                                            *VAM-vs-Vimana*
+
+URL: https://github.com/c9s/Vimana
+
++ Requires perl.
++ (For plain vim files posted to vim.org) requires special comment.
++ Has less number of supported distribution formats.
++ Requires manually adding runtimepaths of newly installed plugins or puts 
+  everything into ~/.vim (well, in first entry of 'runtimepath')
++ No dependency handling.
+- Has easy support for changing runtimepath for particular plugin
+  (see also “+” above).
+- Is able to do online searches on www.vim.org.
+- Has support for Makefiles and Rakefiles.
+
+------------------------------------------------------------------------------
+14.5. Some other similar projects                               *VAM-vs-other*
 
 There are other projects known which are not so popular as the above:
 1. janus (https://github.com/carlhuda/janus)
@@ -1022,6 +1045,18 @@ There are other projects known which are not so popular as the above:
     ? Not a vim plugin, but a python extension. Is installed using pip.
     - Is able to do some local searches
     - Vimpyre can open plugin home page in browser
+3. Vim script management system
+   (http://snk.tuxfamily.org/log/vim-script-management-system.html)
+    + Requires ruby and mechanize gem
+    + Not supported: 23 March 2011 author has chosen to use 
+      http://github.com/vim-scripts mirror of www.vim.org
+    + Supports only www.vim.org
+    + Always installs plain .vim files to plugin/ directory
+    + Has less number of supported distribution formats
+    + No dependency handling
+    + Uses script IDs
+    ? Not a vim plugin, but a shell command-line utility
+    - Uses downloaded archives’ IDs to determine whether update is needed
 
 Most people are using VAM or Pathogen now AFAIK - so if you feel need for this 
 list submit patches
@@ -1096,6 +1131,10 @@ code: >
 <
 Then plugins can find additional resources (templates, python files, ..)
 relative to s:parent_dir_of_this_file
+
+Filetype detection files (from ftdetect/ directory) are loaded if you set 
+"filetype on". Thus if you do it after last call to vam#ActivateAddons, 
+everything should be fine.
 
 ==============================================================================
 The linux script is gone. Search for "unix based os" to learn about its
