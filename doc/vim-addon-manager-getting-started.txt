@@ -44,7 +44,7 @@ help though. Also see |VAM-author|
 WHY VAM?: ~
   - two maintainers (ZyX and Marc Weber)
   - friendly to users (install addons by name)
-  - propagates collaborative coding by providing simple dependeoncy managament
+  - propagates collaborative coding by providing simple dependency managament
     improving code sharing
   - supports many sources (git,hg,bzr,svn,www.vim.org)
   - provides a way to deprecate plugins which are superseded by others
