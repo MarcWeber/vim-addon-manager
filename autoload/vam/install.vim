@@ -370,7 +370,7 @@ fun! vam#install#Update(list)
   call vam#install#LoadPool(1)
 
   if empty(list) && s:confirm('Update all loaded plugins?')
-    let list = ['vim-addon-manager'] + keys(s:c['activated_plugins'])
+    let list = keys(s:c['activated_plugins'])
   endif
   let by_reply = {}
   for p in list
