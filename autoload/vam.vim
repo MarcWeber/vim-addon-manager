@@ -22,7 +22,8 @@ let s:c['auto_install'] = get(s:c,'auto_install', 0)
 " repository locations:
 let s:c['plugin_sources'] = get(s:c,'plugin_sources', {})
 " if a plugin has an item here the dict value contents will be written as plugin info file
-let s:c['activated_plugins'] = get(s:c,'activated_plugins', {})
+" adding VAM, so that its contained in list passed to :UpdateActivatedAddons 
+let s:c['activated_plugins'] = get(s:c,'activated_plugins', {'vim-addon-manager':{}})
 
 let s:c['create_addon_info_handlers'] = get(s:c, 'create_addon_info_handlers', 1)
 
