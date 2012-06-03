@@ -120,8 +120,9 @@ recommended setup ~
           " to fetch VAM, VAM-known-repositories and the listed plugins
           " without having to install curl, 7-zip and git tools first
           " -> BUG [4] (git-less installation)
-          if !filereadable(a:vam_install_path.'/vim-addon-manager/.git/config')
-             \&& 1 == confirm("Clone VAM into ".a:vam_install_path."?","&Y\n&N")
+          if filereadable(a:vam_install_path.'/vim-addon-manager/.git/config')
+            return 1
+          elseif confirm("Clone VAM into ".a:vam_install_path."?","&Y\n&N") == 1
             " I'm sorry having to add this reminder. Eventually it'll pay off.
             call confirm("Remind yourself that most plugins ship with ".
                         \"documentation (README*, doc/*.txt). It is your ".
@@ -133,6 +134,9 @@ recommended setup ~
             " VAM runs helptags automatically when you install or update 
             " plugins
             exec 'helptags '.fnameescape(a:vam_install_path.'/vim-addon-manager/doc')
+            return 1
+          else
+            return 0
           endif
         endf
 
@@ -147,7 +151,9 @@ recommended setup ~
 
           " VAM install location:
           let vam_install_path = expand('$HOME') . '/.vim/vim-addons'
-          call EnsureVamIsOnDisk(vam_install_path)
+          if EnsureVamIsOnDisk(vam_install_path) == 0
+            return
+          endif
           exec 'set runtimepath+='.vam_install_path.'/vim-addon-manager'
 
           " Tell VAM which plugins to fetch & load:
