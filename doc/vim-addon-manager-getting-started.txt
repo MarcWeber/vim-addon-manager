@@ -153,7 +153,10 @@ recommended setup ~
           " VAM install location:
           let vam_install_path = expand('$HOME') . '/.vim/vim-addons'
           if !EnsureVamIsOnDisk(vam_install_path)
-            throw "NO VAM FOUND!"
+            echohl ErrorMsg
+            echomsg "No VAM found!"
+            echohl NONE
+            return
           endif
           exec 'set runtimepath+='.vam_install_path.'/vim-addon-manager'
 
