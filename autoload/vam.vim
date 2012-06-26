@@ -43,6 +43,7 @@ let s:c['plugin_root_dir'] = expand(s:c['plugin_root_dir'])
 let s:c['dont_source'] = get(s:c, 'dont_source', 0)
 let s:c['plugin_dir_by_name'] = get(s:c, 'plugin_dir_by_name', 'vam#DefaultPluginDirFromName')
 let s:c['addon_completion_lhs'] = get(s:c, 'addon_completion_lhs', '<C-x><C-p>')
+let s:c['debug_activation'] = get(s:c, 'debug_activation', 0)
 
 " More options that are used for plugins’ installation are listed in 
 " autoload/vam/install.vim
@@ -185,6 +186,11 @@ fun! vam#ActivateRecursively(list_of_names, ...)
       call add(opts['new_runtime_paths'], rtp)
 
       let s:c['activated_plugins'][name] = 1
+
+      if s:c.debug_activation
+        " activation takes place later (-> new_runtime_paths), but messages will be in order
+        call vam#Log('activating '.name.' required by: '.join(get(opts, 'requested_by', []),' > '))
+      end
     endif
   endfor
 endf

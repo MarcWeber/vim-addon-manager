@@ -149,6 +149,7 @@ recommended setup ~
           " Example: drop git sources unless git is in PATH. Same plugins can
           " be installed from www.vim.org. Lookup MergeSources to get more control
           " let g:vim_addon_manager['drop_git_sources'] = !executable('git')
+          " let g:vim_addon_manager.debug_activation = 1
 
           " VAM install location:
           let vam_install_path = expand('$HOME') . '/.vim/vim-addons'

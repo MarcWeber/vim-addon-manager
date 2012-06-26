@@ -355,6 +355,10 @@ MergeSources                                                *VAM-MergeSources*
 
         An Example can be found in this file.
 
+debug_activation                                       *VAM-debug_activation*
+	prints lines why which plugin gets activated. Not pretty - but helpful
+        in some cases.
+
 ==============================================================================
 6. Uninstalling Plugins                                *VAM-uninstall-plugins*
 
