@@ -321,6 +321,10 @@ post_scm_update_hook_functions            *VAM-post_scm_update_hook_functions*
               vam#install#CreatePatch must be the last function and 
               vam#install#ApplyPatch should be the first.
 
+debug_activation                                        *VAM-debug_activation*
+        Bool, makes VAM print lines explaining reasons for activation 
+        particular plugins. Not pretty - but helpful in some cases.
+
 The following options are used by vim-addon-manager-known-repositories, not by
 VAM itself. So if you set |vim-addon-manager-known| to another value they may
 have no effect.
@@ -354,10 +358,6 @@ MergeSources                                                *VAM-MergeSources*
         an empty dictionary as |self| dictionary.
 
         An Example can be found in this file.
-
-debug_activation                                        *VAM-debug_activation*
-        Bool, makes VAM print lines explaining reasons for activation 
-        particular plugins. Not pretty - but helpful in some cases.
 
 ==============================================================================
 6. Uninstalling Plugins                                *VAM-uninstall-plugins*
