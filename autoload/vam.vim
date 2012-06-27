@@ -189,7 +189,12 @@ fun! vam#ActivateRecursively(list_of_names, ...)
 
       if s:c.debug_activation
         " activation takes place later (-> new_runtime_paths), but messages will be in order
-        call vam#Log('activating '.name.' required by: '.join(get(opts, 'requested_by', []),' > '))
+        " XXX Lengths of “as it was requested by” and “which was requested by” 
+        "     match
+        call vam#Log('Will activate '.name.(empty(get(opts, 'requested_by'))?
+              \                             (' as it was specified by user.'):
+              \                             ("\n  as it was requested by ".
+              \                               join(opts.requested_by, "\n  which was requested by ").'.')))
       end
     endif
   endfor
