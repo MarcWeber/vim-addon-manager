@@ -46,7 +46,7 @@ WHY VAM?: ~
   - friendly to users (install addons by name)
   - propagates collaborative coding by providing simple dependency managament
     improving code sharing
-  - supports many sources (git,hg,bzr,svn,www.vim.org)
+  - supports many sources (git, hg, bzr, svn, darcs, www.vim.org)
   - provides a way to deprecate plugins which are superseded by others
   - most plugins can also be loaded at runtime (some problems may [BUG 10])
   - some Windows support
@@ -70,7 +70,7 @@ Features:
     - Separate directories for each plugins
     - Dependency resolution
     - Popular VCS support: plugin supports fetching from Git, Mercurial,
-      Subversion and Bazaar repositories
+      Subversion, Bazaar and Darcs repositories
     - maintained pool of addons (vim-addon-manager-known-repositories)
       which warns you if you try to install an outdated plugin
     - replicate your Vim setup by copying your .vimrc (See SetupVAM)
@@ -80,8 +80,8 @@ Features:
 Dependencies:
     - Curl, wget or other program that can output URL contents to stdout (in
       order to get http protocol support)
-    - Git, Mercurial, Subversion and Bazaar (if you want to install plugins
-      from appropriate repositories)
+    - Git, Mercurial, Subversion, Bazaar and Darcs (if you want to install 
+      plugins from appropriate repositories)
     - Either tar, gzip and zip or 7-zip (required for unpacking some addons)
 
 What does "Declarative package manager" mean? The final behaviour of Vim

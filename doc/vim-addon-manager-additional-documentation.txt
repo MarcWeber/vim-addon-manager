@@ -718,14 +718,15 @@ VCS:
     SilkSVN: http://www.sliksvn.com/en/download/
     MsysGit: http://code.google.com/p/msysgit/
     Mercurial: http://mercurial.selenic.com/
+    Darcs: http://darcs.net/
 
     See also |vcs_checkouts#GitCheckout|.
 
 
 We tried thinking about making using vim-addon-manager easier for Windows
 users. One idea was introducing a proxy which asks a linux server to package
-git/svn/mercurial/bazaar as zip file on the fly. This would mean you don't
-have to install svn,hg,.. to use plugins only.
+git/svn/mercurial/bazaar/darcs as zip file on the fly. This would mean you 
+don’t have to install svn,hg,.. to use plugins only.
 
 If you want something like this to happen contact me.
 
