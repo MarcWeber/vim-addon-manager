@@ -348,7 +348,7 @@ fun! vam#utils#StripComponents(dir, num, keepdirs)
 endf
 
 " also copies 0. May throw an exception on failure
-fun! vam#utils#CopyFile(a,b)
+fun! vam#utils#CopyFile(a, b) abort
   let fc = readfile(a:a, 'b')
   if writefile(fc, a:b, 'b') != 0
     throw "copying file ".a:a." to ".a:b." failed"
