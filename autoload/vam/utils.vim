@@ -155,6 +155,16 @@ fun! s:StripIfNeeded(opts, targetDir)
   endif
 endfun
 
+fun! vam#utils#GuessFixDir(type)
+  if a:type  =~# '\v^%(after\/)?%(syntax|indent|%(ft)?plugin)$'
+    return type
+  elseif a:type is# 'color scheme'
+    return 'colors'
+  else
+    return 'plugin'
+  endif
+endfun
+
 " may throw EXCEPTION_UNPACK.*
 " most packages are shipped in a directory. Eg ADDON/plugin/*
 " strip-components=1 strips of this ADDON directory (implemented for tar.* " archives only)
@@ -182,13 +192,7 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
         \ }
 
 
-  let fixDir = a:targetDir.'/plugin'
-  let type = get(opts, 'script-type', 'plugin')
-  if type  =~# '\v^%(%(after\/)?syntax|indent|ftplugin)$'
-    let fixDir = a:targetDir.'/'.type
-  elseif type is 'color scheme'
-    let fixDir = a:targetDir.'/colors'
-  endif
+  let fixDir = a:targetDir.'/'.vam#utils#GuessFixDir(get(opts, 'script-type', 'plugin'))
 
   " 7z renames .tbz, .tbz2, .tar.bz2 to .tar, but it preserves names stored by 
   " gzip (if any): if you do
