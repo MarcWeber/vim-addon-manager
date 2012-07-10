@@ -28,24 +28,32 @@ if executable('git') && stridx(system('git clone --help'), '--depth')!=-1
   let s:git_checkout='git clone --depth 1 $.url $p'
 endif
 let s:scm_defaults={
-      \'git': {'clone': ['vam#utils#RunShell', [s:git_checkout       ]],
-      \       'update': ['vam#utils#RunShell', ['cd $p && git pull'  ]],
-      \        'wdrev': ['vam#utils#System',   ['git --git-dir=$p/.git rev-parse HEAD']],},
-      \ 'hg': {'clone': ['vam#utils#RunShell', ['hg clone $.url $p'  ]],
-      \       'update': ['vam#utils#RunShell', ['hg pull -u -R $p'   ]],
-      \        'wdrev': ['vam#utils#System',   ['hg log --template $ -R $p -r .', '{node}']],},
-      \'bzr': {'clone': ['vam#utils#RunShell', ['bzr branch $.url $p']],
-      \       'update': ['vam#utils#RunShell', ['bzr pull -d $p'     ]],
-      \        'wdrev': ['vam#utils#System',   ['bzr revno --tree $p']]},
-      \'svn': {'clone': ['vcs_checkouts#SVNCheckout', []],
-      \       'update': ['vam#utils#RunShell', ['svn update $p'      ]],
-      \        'wdrev': ['vcs_checkouts#SVNWdrev', []],},
+      \  'git': {'clone': ['vam#utils#RunShell', [s:git_checkout             ]],
+      \         'update': ['vam#utils#RunShell', ['cd $p && git pull'        ]],
+      \          'wdrev': ['vam#utils#System',   ['git --git-dir=$p/.git rev-parse HEAD']],},
+      \   'hg': {'clone': ['vam#utils#RunShell', ['hg clone $.url $p'        ]],
+      \         'update': ['vam#utils#RunShell', ['hg pull -u -R $p'         ]],
+      \          'wdrev': ['vam#utils#System',   ['hg log --template $ -R $p -r .', '{node}']],},
+      \  'bzr': {'clone': ['vam#utils#RunShell', ['bzr branch $.url $p'      ]],
+      \         'update': ['vam#utils#RunShell', ['bzr pull -d $p'           ]],
+      \          'wdrev': ['vam#utils#System',   ['bzr revno --tree $p'      ]]},
+      \  'svn': {'clone': ['vcs_checkouts#SVNCheckout', []],
+      \         'update': ['vam#utils#RunShell', ['svn update $p'            ]],
+      \          'wdrev': ['vcs_checkouts#SVNWdrev', []],},
+      \'darcs': {'clone': ['vam#utils#RunShell', ['darcs get --lazy $.url $p']],
+      \         'update': ['vam#utils#RunShell', ['darcs pull --repodir $p'  ]],
+      \          'wdrev': ['vcs_checkouts#DarcsWdrev', []]},
       \'_bundle': {'update': ['vcs_checkouts#UpdateBundle', []],},
     \}
 let s:c.scms=get(s:c, 'scms', {})
 call map(filter(copy(s:c.scms), 'has_key(s:scm_defaults, v:key)'), 'extend(v:val, s:scm_defaults[v:key], "keep")')
 call extend(s:c.scms, s:scm_defaults, 'keep')
 call map(copy(s:c.scms), 'extend(v:val, {"dir": ".".v:key})')
+
+fun! vcs_checkouts#DarcsWdrev(targetDir)
+  let result=vam#utils#System('darcs show repo --repodir $p', a:targetDir)
+  return substitute(result, '\v.*\nNum\ Patches\:\ (\d+).*', '\1', '')
+endfun
 
 fun! vcs_checkouts#SVNWdrev(targetDir)
   let result=vam#utils#System('svn info $p', a:targetDir)
