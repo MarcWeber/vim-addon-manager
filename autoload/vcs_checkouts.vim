@@ -205,6 +205,7 @@ fun! vcs_checkouts#Checkout(targetDir, repository)
   if has_key(s:c.scms, a:repository.type)
     let c=s:c.scms[a:repository.type].clone
     call call(c[0], get(c, 1, [])+[a:repository, a:targetDir], get(c, 2, {}))
+    return 1
   else
     " Keep old behavior: no throw for unknown repository type
     return

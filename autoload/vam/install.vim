@@ -573,8 +573,9 @@ fun! vam#install#Checkout(targetDir, repository) abort
           \ ."manually."
           \ )
   endif
-  if get(a:repository,'type','') =~ 'git\|hg\|svn\|bzr'
-    call vcs_checkouts#Checkout(a:targetDir, a:repository)
+  if vcs_checkouts#Checkout(a:targetDir, a:repository)
+    " Successfully checked out a repository. Leaving a comment here to indicate 
+    " that an if condition has a side effect of checking out a repository.
   else
     " archive based repositories - no VCS
 
