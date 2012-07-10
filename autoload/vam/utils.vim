@@ -157,7 +157,7 @@ endfun
 
 fun! vam#utils#GuessFixDir(type)
   if a:type  =~# '\v^%(after\/)?%(syntax|indent|%(ft)?plugin)$'
-    return type
+    return a:type
   elseif a:type is# 'color scheme'
     return 'colors'
   else
