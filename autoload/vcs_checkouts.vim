@@ -49,6 +49,7 @@ let s:c.scms=get(s:c, 'scms', {})
 call map(filter(copy(s:c.scms), 'has_key(s:scm_defaults, v:key)'), 'extend(v:val, s:scm_defaults[v:key], "keep")')
 call extend(s:c.scms, s:scm_defaults, 'keep')
 call map(copy(s:c.scms), 'extend(v:val, {"dir": ".".v:key})')
+let s:c.scms.darcs.dir='_darcs'
 
 fun! vcs_checkouts#DarcsWdrev(targetDir)
   let result=vam#utils#System('darcs show repo --repodir $p', a:targetDir)
