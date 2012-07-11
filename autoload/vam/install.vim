@@ -751,28 +751,38 @@ endfun
 fun! vam#install#LoadKnownRepos()
   let known = s:c['known']
   let reason = a:0 > 0 ? a:1 : 'get more plugin sources'
-  if 0 == get(s:c['activated_plugins'], known, 0)
+  if get(s:c['activated_plugins'], known, 0)
+    return 1
+  else
     let policy=get(s:c, 'known_repos_activation_policy', 'autoload')
-    if policy==?"ask"
+    if policy is? 'ask'
       let reply = s:confirm('Activate plugin '.known.' to '.reason."?", "&Yes\n&No\nN&ever (during session)")
-    elseif policy==?"never"
+    elseif policy is? 'never'
       let reply=2
     else
       let reply=1
     endif
-    if reply == 3 | let s:c.known_repos_activation_policy = "never" | endif
-    if reply == 1
+    if reply == 3
+      let s:c.known_repos_activation_policy = 'never'
+      return 0
+    elseif reply == 1
       " don't pass opts so that new_runtime_paths is not set which will
       " trigger topLevel adding -known-repos to rtp immediately
       call vam#ActivateAddons([known], {})
+      return 1
+    else
+      return 0
     endif
   endif
 endfun
 
 " The default pool of know plugins for VAM: vim-addon-manager-known-repositories
 fun! vam#install#Pool()
-  call vam#install#LoadKnownRepos()
-  return vam_known_repositories#Pool()
+  if vam#install#LoadKnownRepos()
+    return vam_known_repositories#Pool()
+  else
+    return s:c.plugin_sources
+  endif
 endfun
 
 " (re)loads pool of known plugins
