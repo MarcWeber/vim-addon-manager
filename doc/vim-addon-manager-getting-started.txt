@@ -388,4 +388,11 @@ should be used if you want to checkout eventually untrusted code! If you're
 going to use the plugins anyway its of no use.
 You may also want to set auto_install.
 
+Also see https://github.com/MarcWeber/vim-addon-manager/issues/77:
+>
+  let g:vim_addon_manager = {
+    \'shell_commands_run_method': 'system',
+    \'auto_install': 1,
+    \}
+<
 vim: tw=78:ts=8:ft=help:norl
