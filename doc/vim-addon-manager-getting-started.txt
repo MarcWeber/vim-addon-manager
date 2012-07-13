@@ -281,7 +281,7 @@ Those identifieres (= plugin names) are passed to |vam#ActivateAddons()|, |:Inst
 www.vim.org.
 
 types of names:
-  1) Plugin name looked up in pool. Try |:AddonInfo| NAME
+  1) Plugin name looked up in pool. Try |:AddonsInfo| NAME
 
     Determining addon names ~
     - From ID: |:AddonsInfo| SCRIPT_ID, pick the word right after string "Plugin: ".
