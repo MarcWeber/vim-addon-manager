@@ -44,6 +44,7 @@ let s:c['dont_source'] = get(s:c, 'dont_source', 0)
 let s:c['plugin_dir_by_name'] = get(s:c, 'plugin_dir_by_name', 'vam#DefaultPluginDirFromName')
 let s:c['addon_completion_lhs'] = get(s:c, 'addon_completion_lhs', '<C-x><C-p>')
 let s:c['debug_activation'] = get(s:c, 'debug_activation', 0)
+let s:c['pool_item_check_fun'] = get(s:c, 'pool_item_check_fun', 'none')
 
 " More options that are used for plugins’ installation are listed in 
 " autoload/vam/install.vim
@@ -60,7 +61,7 @@ endif
 " additional plugin sources should go into your .vimrc or into the repository
 " called "vim-addon-manager-known-repositories" referenced here:
 if executable('git')
-  let s:c['plugin_sources']["vim-addon-manager-known-repositories"] = { 'type' : 'git', 'url': 'git://github.com/MarcWeber/vim-addon-manager-known-repositories.git' }
+  let s:c['plugin_sources']["vim-addon-manager-known-repositories"] = { 'type' : 'git', 'url': 'git://github.com/MarcWeber/vim-addon-manager-known-repositories' }
 else
   let s:c['plugin_sources']["vim-addon-manager-known-repositories"] = { 'type' : 'archive', 'url': 'http://github.com/MarcWeber/vim-addon-manager-known-repositories/tarball/master', 'archive_name': 'vim-addon-manager-known-repositories-tip.tar.gz' }
 endif

@@ -10,6 +10,7 @@ let s:c['pool_fun'] = get(s:c, 'pool_fun', 'vam#install#Pool')
 let s:c['name_rewriting'] = get(s:c, 'name_rewriting', {})
 let s:c['pre_update_hook_functions'] = get(s:c, 'pre_update_hook_functions', ['vam#install#CreatePatch'])
 let s:c['post_update_hook_functions'] = get(s:c, 'post_update_hook_functions', ['vam#install#ApplyPatch'])
+let s:c['pool_item_check_funs'] = get(s:c, 'pool_item_check_funs', ['vam#install#CheckPoolItem'])
 
 call extend(s:c.name_rewriting, {'99git+github': 'vam#install#RewriteName'})
 
@@ -39,6 +40,15 @@ fun! s:confirm(msg, ...)
     return confirm(a:msg, a:0 ? "&No\nYe&s" : "&Yes\n&No") == 1+a:0
   endif
 endfun
+
+fun! vam#install#CheckPoolItem(key, i)
+  let type = get(a:i, 'type', '')
+  let url = get(a:i, 'url', '')
+  if type == 'git' && url =~ ':\/\/github.com\/'
+    if url =~ '^http' | call vam#Log("pool item ".url.": should not be using http:// for consistency. If you need http see MyGitCheckout example") | endif
+    if url =~ '\.git$' | call vam#Log('pool item '.url.': github urls also work without .git suffix. Drop if for copy paste and consistency reasons') | endif
+  endif
+endf
 
 fun! vam#install#RewriteName(name)
   if a:name[:6]==#'github:'
@@ -791,6 +801,12 @@ fun! vam#install#LoadPool(...)
   if force || !has_key(s:c, 'pool_loaded')
     " update plugin_sources
     let s:c.plugin_sources = call(s:c.pool_fun, [], {})
+
+    for F in s:c.pool_item_check_funs
+      for k_v in items(s:c.plugin_sources)
+        call call(F, k_v)
+      endfor
+    endfor
 
     let s:c.pool_loaded = 1
   endif
