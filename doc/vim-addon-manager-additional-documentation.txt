@@ -78,11 +78,19 @@ vam#ActivateAddons({addons}[, {opts}])                  *vam#ActivateAddons()*
         directory to 'runtimepath'. If vim has already started VAM will also
         source plugin/**/*.vim (in other case sourcing is done by vim).
 
-        Optional {opts} argument should be a dictionary with key 
-        "auto_install". It will be used to override global option 
-        |VAM-auto_install|. Other possible keys are for internal use only. In 
-        order to manually activate plugins try using |:ActivateAddons| which 
-        also provides completion.
+        Optional {opts} argument should be a dictionary with one of the 
+        following keys:
+        Key                        Description ~
+        auto_install               Boolean, overrides |VAM-auto_install|.
+        force_loading_plugins_now  Boolean. By default plugins are sourced 
+                                   only if has("vim_starting") is false 
+                                   because if it is true and VAM was called 
+                                   from vimrc, then plugins will be loaded by 
+                                   vim itself after adding them to 'rtp'. But 
+                                   if VAM was called from a plugin after vim 
+                                   started loading them new additions to 
+                                   'runtimepath' may be ignored by vim, hence 
+                                   the option.
 
         In order to manually activate plugins try using |:ActivateAddons|
         which also provides completion.
