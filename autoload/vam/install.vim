@@ -156,7 +156,7 @@ endfu
 fun! vam#install#Install(toBeInstalledList, ...)
   let toBeInstalledList = vam#install#ReplaceAndFetchUrls(a:toBeInstalledList)
   let opts = a:0 == 0 ? {} : a:1
-  let auto_install = s:c['auto_install'] || get(opts,'auto_install',0)
+  let auto_install = get(opts, 'auto_install', s:c.auto_install)
   for name in filter(copy(toBeInstalledList), '!vam#IsPluginInstalled(v:val)')
     let repository = vam#install#GetRepo(name, opts)
     " make sure all sources are known
