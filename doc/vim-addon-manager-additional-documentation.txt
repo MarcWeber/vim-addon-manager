@@ -1027,6 +1027,8 @@ URL: https://github.com/gmarik/vundle
   before “~/.vim/bundle/PLUGIN/ftplugin”. It is though unlikely that you run 
   into this issue.
 + Does not handle dependencies (though it is in TODO).
+- Vundle has a command to clean unused plugins.
+- Vundle has “interactive mode” which speeds up certain workflows.
 
 ------------------------------------------------------------------------------
 14.4. VAM vs GetLatestVimScripts                                 *VAM-vs-GLVS*
