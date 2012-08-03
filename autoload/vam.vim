@@ -380,16 +380,18 @@ endfun
 
 " looks like an error but is not. Catches users attention. Logs to :messages
 fun! vam#Log(s, ...)
-  " let hi = a:0 > 0 ? a:1 : 'WarningMsg'
-  " exec 'echohl '. hi
-  " for l in split(a:s, "\n", 1)
-  "   if empty(l)
-  "     echom ' '
-  "   else
-  "     echom l
-  "   endif
-  " endfor
-  " echohl None
+  if !exists('g:vam_silent_log') || g:vam_silent_log == 0
+    let hi = a:0 > 0 ? a:1 : 'WarningMsg'
+    exec 'echohl '. hi
+    for l in split(a:s, "\n", 1)
+      if empty(l)
+        echom ' '
+      else
+        echom l
+      endif
+    endfor
+    echohl None
+  endif
 endfun
 
 " If you want these commands witohut activating plugins call
