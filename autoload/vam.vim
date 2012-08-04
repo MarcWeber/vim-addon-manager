@@ -46,6 +46,14 @@ let s:c['addon_completion_lhs'] = get(s:c, 'addon_completion_lhs', '<C-x><C-p>')
 let s:c['debug_activation'] = get(s:c, 'debug_activation', 0)
 let s:c['pool_item_check_fun'] = get(s:c, 'pool_item_check_fun', 'none')
 
+" experimental: will be documented when its tested
+" don't echo lines, add them to a buffer to prevent those nasty "Press Enter"
+" to show more requests by Vim
+" TODO: move log code into other file (such as utils.vim) because its not used on each startup
+" TODO: think about autowriting it
+let s:c['log_to_buf'] = get(s:c, 'log_to_buf', 0)
+let s:c['vam_log_buffer_name'] = get(s:c, 'vam_log_buffer_name', s:c.plugin_root_dir.'/VAM_LOG.txt')
+
 " More options that are used for plugins’ installation are listed in 
 " autoload/vam/install.vim
 
@@ -380,7 +388,10 @@ endfun
 
 " looks like an error but is not. Catches users attention. Logs to :messages
 fun! vam#Log(s, ...)
-  if !exists('g:vam_silent_log') || g:vam_silent_log == 0
+  if s:c.log_to_buf
+    silent! exec 'e '.fnameescape(s:c.vam_log_buffer_name)
+    cal append('$', split(a:s, "\n", 1))
+  else
     let hi = a:0 > 0 ? a:1 : 'WarningMsg'
     exec 'echohl '. hi
     for l in split(a:s, "\n", 1)
