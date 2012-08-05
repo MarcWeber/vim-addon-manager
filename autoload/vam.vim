@@ -396,7 +396,7 @@ fun! vam#Log(s, ...)
   if s:c.log_to_file
     cal add(s:c.log_lines, a:s)
     cal writefile(s:c.log_lines, s:c.log_name)
-  if s:c.log_to_buf
+  elseif s:c.log_to_buf
     silent! exec 'e '.fnameescape(s:c.log_name)
     cal append('$', split(a:s, "\n", 1))
   else
