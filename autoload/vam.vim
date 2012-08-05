@@ -389,7 +389,7 @@ endfun
 " looks like an error but is not. Catches users attention. Logs to :messages
 fun! vam#Log(s, ...)
   if s:c.log_to_buf
-    silent! exec 'e '.fnameescape(s:c.vam_log_buffer_name)
+    silent execute 'split' fnameescape(s:c.vam_log_buffer_name)
     cal append('$', split(a:s, "\n", 1))
   else
     let hi = a:0 > 0 ? a:1 : 'WarningMsg'
