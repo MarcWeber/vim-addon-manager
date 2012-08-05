@@ -51,13 +51,13 @@ let s:c['pool_item_check_fun'] = get(s:c, 'pool_item_check_fun', 'none')
 " to show more requests by Vim
 " TODO: move log code into other file (such as utils.vim) because its not used on each startup
 " TODO: think about autowriting it
-let s:c['log_to_buf'] = get(s:c, 'log_to_buf', 0)
+let s:c['log_to_buf']  = get(s:c, 'log_to_buf', 0)
 let s:c['log_to_file'] = get(s:c, 'log_to_file', 0)
-let s:c['vam_log_buffer_name'] = get(s:c, 'vam_log_buffer_name', s:c.plugin_root_dir.'/VAM_LOG.txt')
+let s:c['log_name']    = get(s:c, 'log_name', s:c.plugin_root_dir.'/VAM_LOG.txt')
 
 if s:c['log_to_file'] == 1
   let s:c['log_lines'] = []
-  call system('touch '.s:c['vam_log_buffer_name'])
+  call system('touch '.s:c['log_name'])
 endif
 " More options that are used for plugins’ installation are listed in 
 " autoload/vam/install.vim
@@ -395,9 +395,9 @@ endfun
 fun! vam#Log(s, ...)
   if s:c.log_to_file
     cal add(s:c.log_lines, a:s)
-    cal writefile(s:c.log_lines, s:c.vam_log_buffer_name)
+    cal writefile(s:c.log_lines, s:c.log_name)
   if s:c.log_to_buf
-    silent! exec 'e '.fnameescape(s:c.vam_log_buffer_name)
+    silent! exec 'e '.fnameescape(s:c.log_name)
     cal append('$', split(a:s, "\n", 1))
   else
     let hi = a:0 > 0 ? a:1 : 'WarningMsg'
