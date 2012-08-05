@@ -409,16 +409,16 @@ Also see https://github.com/MarcWeber/vim-addon-manager/issues/79:
     \}
 <
 
-and if you wish, you may customize the location of the VAM log file, just
-use the vam_log_buffer_name option which defaults to a value of VAM_LOG.txt
-in the VAM plugin's root directory e.g.
+and if you wish, you may customize the default buffer name for the VAM log, 
+just use the log_buffer_name option which defaults to a value of 
+|VAM-plugin_root_dir|/VAM_LOG.txt e.g. 
 ~/.vim/vim-addons/vim-addon-manager/VAM_LOG.txt
 >
   let g:vim_addon_manager = {
     \'shell_commands_run_method': 'system',
     \'auto_install': 1,
     \'log_to_buf': 1,
-    \'vam_log_buffer_name': '/tmp/vam_install.log',
+    \'log_buffer_name': '/tmp/vam_install.log',
     \}
 <
 

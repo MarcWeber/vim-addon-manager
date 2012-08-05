@@ -52,7 +52,7 @@ let s:c['pool_item_check_fun'] = get(s:c, 'pool_item_check_fun', 'none')
 " TODO: move log code into other file (such as utils.vim) because its not used on each startup
 " TODO: think about autowriting it
 let s:c['log_to_buf'] = get(s:c, 'log_to_buf', 0)
-let s:c['vam_log_buffer_name'] = get(s:c, 'vam_log_buffer_name', s:c.plugin_root_dir.'/VAM_LOG.txt')
+let s:c['log_buffer_name'] = get(s:c, 'log_buffer_name', s:c.plugin_root_dir.'/VAM_LOG.txt')
 
 " More options that are used for plugins’ installation are listed in 
 " autoload/vam/install.vim
@@ -389,7 +389,7 @@ endfun
 " looks like an error but is not. Catches users attention. Logs to :messages
 fun! vam#Log(s, ...)
   if s:c.log_to_buf
-    silent execute 'split' fnameescape(s:c.vam_log_buffer_name)
+    silent execute 'split' fnameescape(s:c.log_buffer_name)
     cal append('$', split(a:s, "\n", 1))
   else
     let hi = a:0 > 0 ? a:1 : 'WarningMsg'
