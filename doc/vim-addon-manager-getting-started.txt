@@ -386,6 +386,7 @@ This works for http://mawercer.de/~marc/vam/index.php.
 There is also the undocumented g:vim_addon_manager.dont_source option which 
 should be used if you want to checkout eventually untrusted code! If you're 
 going to use the plugins anyway its of no use.
+
 You may also want to set auto_install.
 
 Also see https://github.com/MarcWeber/vim-addon-manager/issues/77:
@@ -396,7 +397,29 @@ Also see https://github.com/MarcWeber/vim-addon-manager/issues/77:
     \}
 <
 
-Also see experimental log_to_buf option (just set it or read code. It'll be
-documented later)
+and possibly log_to_buf which will prevent you from having to deal with most
+of those "hit enter to continue" prompts while VAM downloads plugins
+
+Also see https://github.com/MarcWeber/vim-addon-manager/issues/79:
+>
+  let g:vim_addon_manager = {
+    \'shell_commands_run_method': 'system',
+    \'auto_install': 1,
+    \'log_to_buf': 1,
+    \}
+<
+
+and if you wish, you may customize the location of the VAM log file, just
+use the vam_log_buffer_name option which defaults to a value of VAM_LOG.txt
+in the VAM plugin's root directory e.g.
+~/.vim/vim-addons/vim-addon-manager/VAM_LOG.txt
+>
+  let g:vim_addon_manager = {
+    \'shell_commands_run_method': 'system',
+    \'auto_install': 1,
+    \'log_to_buf': 1,
+    \'vam_log_buffer_name': '/tmp/vam_install.log',
+    \}
+<
 
 vim: tw=78:ts=8:ft=help:norl
