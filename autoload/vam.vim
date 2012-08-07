@@ -389,8 +389,26 @@ endfun
 " looks like an error but is not. Catches users attention. Logs to :messages
 fun! vam#Log(s, ...)
   if s:c.log_to_buf
-    silent execute 'split' fnameescape(s:c.log_buffer_name)
+    let nr = bufnr(s:c.log_buffer_name)
+    if nr == -1
+      " create buffer and add date header
+      execute 'split' fnameescape(s:c.log_buffer_name)
+      cal append('$', '>>>>>>>>>>>> '.strftime('%c'))
+
+      autocmd! BufDelete <buffer> w
+      " on quit BufDelete is not run!!
+      autocmd! VimLeave <buffer> w
+
+    else
+      exec 'b '.nr
+    endif
     cal append('$', split(a:s, "\n", 1))
+    " if the buffer appears to be modified vim asks questions when quitting,
+    " I want it to be silent, it gets written bi au command see above
+    " yes - if vim crashes logs are lost. I hope it doesn't happen to often.
+    " Writing on each messages seems overkill to me - The log may get long
+    " over time
+    setlocal nomodified
   else
     let hi = a:0 > 0 ? a:1 : 'WarningMsg'
     exec 'echohl '. hi
