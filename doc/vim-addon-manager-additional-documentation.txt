@@ -174,9 +174,9 @@ vam#install#CompleteAddonName                *vam#install#CompleteAddonName()*
     Function suitable to be a completion function for omni completion 
     ('omnifunc'). Completes addon names. See also |VAM-addon_completion_lhs|.
 
-vcs_checkouts#GitCheckout                   *vcs_checkouts#GitCheckout*
-vcs_checkouts#MercurialCheckout             *vcs_checkouts#MercurialCheckout*
-vcs_checkouts#SubversionCheckout            *vcs_checkouts#SubversionCheckout*
+vam#vcs#GitCheckout                               *vam#vcs#GitCheckout*
+vam#vcs#MercurialCheckout                         *vam#vcs#MercurialCheckout*
+vam#vcs#SubversionCheckout                        *vam#vcs#SubversionCheckout*
     Functions that do their best to checkout plugins, trying various 
     additional methods:
               SCM    Additional methods tried ~
@@ -186,9 +186,9 @@ vcs_checkouts#SubversionCheckout            *vcs_checkouts#SubversionCheckout*
               svn    Mercurial with hgsubversion, bazaar with bzr-svn
     To use them add the following to the vimrc: >
         let g:vim_addon_manager={'scms': {'git': {}, 'svn': {}, 'hg': {}}}
-        let g:vim_addon_manager.scms.git.clone=['vcs_checkouts#GitCheckout']
-        let g:vim_addon_manager.scms.hg.clone =['vcs_checkouts#MercurialCheckout']
-        let g:vim_addon_manager.scms.svn.clone=['vcs_checkouts#SubversionCheckout']
+        let g:vim_addon_manager.scms.git.clone=['vam#vcs#GitCheckout']
+        let g:vim_addon_manager.scms.hg.clone =['vam#vcs#MercurialCheckout']
+        let g:vim_addon_manager.scms.svn.clone=['vam#vcs#SubversionCheckout']
 
 ==============================================================================
 4. Options                                                       *VAM-options*
@@ -275,8 +275,13 @@ scms                                                                *VAM-scms*
             wdrev       Determines how current revision should be obtained. 
                         Used to distinguish between cases “update has not 
                         updated anything” and “update successfully pulled and 
-                        checked out new revision(s)”.
+                        checked out new revision(s)” and also for logging new 
+                        changes.
                         Additional argument: updated directory.
+            log         Returns log (string) with changes.
+                        Additional arguments: updated directory, old revision 
+                            identifier, new revision identifier (values 
+                            obtained by wdrev above).
         Values of keys `clone' and `executable' should be lists that look like
         if you want to call them with call("call", {value}), but with
         additional arguments added to the second element of the list. You may 
@@ -295,7 +300,7 @@ scms                                                                *VAM-scms*
             " “'clone': ['GitCheckout']” works as well
 <       Note: if some keys are missing, then VAM will use the defaults. So it 
               is safe to override just one “clone” key as it is shown in 
-              |vcs_checkouts#GitCheckout| example.
+              |vam#vcs#GitCheckout| example.
 pool_fun                                                        *VAM-pool_fun*
         Name or reference of a function that must return dictionary contains 
         {{plugin-name}: {repository}} ({repository} is described under 
@@ -313,11 +318,10 @@ shell_commands_run_method                      *VAM-shell_commands_run_method*
         |system()|).
 
                                                                    *VAM-hooks*
-post_install_hook_functions               *VAM-post_install_hook_functions*
-pre_update_hook_functions                 *VAM-pre_update_hook_functions*
-post_update_hook_functions                *VAM-post_update_hook_functions*
-pre_scm_update_hook_functions            *VAM-pre_scm_update_hook_functions*
-post_scm_update_hook_functions            *VAM-post_scm_update_hook_functions*
+post_install_hook_functions              *VAM-post_install_hook_functions*
+pre_update_hook_functions                *VAM-pre_update_hook_functions*
+post_update_hook_functions               *VAM-post_update_hook_functions*
+post_scms_update_hook_functions          *VAM-post_scms_update_hook_functions*
         Lists of function names or function references that will be called 
         when hook is executed (see |addon-info-hooks|). All functions get four 
         arguments: addon info dictionary, repository dictionary, plugin 
@@ -326,6 +330,7 @@ post_scm_update_hook_functions            *VAM-post_scm_update_hook_functions*
             post_install_hook_functions: absent
             pre_update_hook_functions: ["vam#install#CreatePatch"]
             post_update_hook_functions: ["vam#install#ApplyPatch"]
+            post_scms_update_hook_functions: ["vam#install#ShowShortLog"]
         Note: update hooks values are required for |VAM-do_diff| to work, 
               vam#install#CreatePatch must be the last function and 
               vam#install#ApplyPatch should be the first.
@@ -502,8 +507,10 @@ pre-update-hook                             *addon-info-pre-update-hook*
             post-update       After a non-VCS source update.
             post-scms-update  After VCS source update.
         In non-scms *-update hooks opts dictionary also contains oldVersion 
-        value. In post-scms-update hook repository and opts dictionaries are 
-        empty.
+        and newVersion values. In post-scms-update hook repository and opts 
+        dictionaries also contain them, but here they are whatever 
+        |VAM-scms|.{SCM}.wdrev returns or zero. Additionally sdescr key is 
+        available with support functions (one of |VAM-scms| dictionaries).
 
 dependencies                                         *addon-info-dependencies*
         Describes plugins that are required for the plugin, must contain
@@ -729,7 +736,7 @@ VCS:
     Mercurial: http://mercurial.selenic.com/
     Darcs: http://darcs.net/
 
-    See also |vcs_checkouts#GitCheckout|.
+    See also |vam#vcs#GitCheckout|.
 
 
 We tried thinking about making using vim-addon-manager easier for Windows

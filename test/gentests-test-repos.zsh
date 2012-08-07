@@ -1,12 +1,16 @@
 #!/bin/zsh
 emulate -L zsh
 #▶1 Clone vam-test-known
-FOREGROUND=1 \
-mkdir vam-init
-vimcmd -u $VIMRC \
-       --cmd 'let g:curtest="init"' \
-       -c 'call vam#ActivateAddons("vam-test-known")' \
-       -c 'qa!'
+function clone-vtk()
+{
+    local -x FOREGROUND=1
+    mkdir vam-init
+    vimcmd -u $VIMRC \
+           --cmd 'let g:curtest="init"' \
+           -c 'call vam#ActivateAddons("vam-test-known")' \
+           -c 'qa!'
+}
+clone-vtk
 function addtofile()
 {
     target=$1

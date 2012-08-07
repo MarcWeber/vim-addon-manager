@@ -10,8 +10,7 @@ let s:c['pool_fun'] = get(s:c, 'pool_fun', 'vam#install#Pool')
 let s:c['name_rewriting'] = get(s:c, 'name_rewriting', {})
 let s:c['pre_update_hook_functions'] = get(s:c, 'pre_update_hook_functions', ['vam#install#CreatePatch'])
 let s:c['post_update_hook_functions'] = get(s:c, 'post_update_hook_functions', ['vam#install#ApplyPatch'])
-let s:c['pre_scms_update_hook_functions'] = get(s:c, 'post_scms_update_hook_functions', ['vam#install#PreScmsUpdateHookShowShortLog'])
-let s:c['post_scms_update_hook_functions'] = get(s:c, 'post_scms_update_hook_functions', ['vam#install#PostScmsUpdateHookShowShortLog'])
+let s:c['post_scms_update_hook_functions'] = get(s:c, 'post_scms_update_hook_functions', ['vam#install#ShowShortLog'])
 let s:c['pool_item_check_funs'] = get(s:c, 'pool_item_check_funs', ['vam#install#CheckPoolItem'])
 
 call extend(s:c.name_rewriting, {'99git+github': 'vam#install#RewriteName'})
@@ -306,11 +305,11 @@ fun! vam#install#UpdateAddon(name)
   " First, try updating using VCS. Return 1 if everything is ok, 0 if exception 
   " is thrown
   try
-    call vam#install#RunHook('pre-scms-update', vam#AddonInfo(a:name), {}, pluginDir, {})
-    let r = vcs_checkouts#Update(pluginDir)
+    let [r, oldVersion, newVersion, sdescr] = vam#vcs#Update(pluginDir)
+    let hook_opts={'oldVersion': oldVersion, 'newVersion': newVersion, 'sdescr': sdescr}
     if r isnot# 'unknown'
       if r is# 'updated'
-        call vam#install#RunHook('post-scms-update', vam#AddonInfo(a:name), {}, pluginDir, {})
+        call vam#install#RunHook('post-scms-update', vam#AddonInfo(a:name), {}, pluginDir, hook_opts)
       endif
       return r
     endif
@@ -350,7 +349,7 @@ fun! vam#install#UpdateAddon(name)
     " update plugin
     echom "Updating plugin ".a:name." because ".(newVersion == '?' ? 'version is unknown' : 'there is a different version')
 
-    let hook_opts={'oldVersion': oldVersion}
+    let hook_opts={'oldVersion': oldVersion, 'newVersion': newVersion}
     call vam#install#RunHook('pre-update', vam#AddonInfo(a:name), repository, pluginDir, hook_opts)
 
     " checkout new version (checkout into empty location - same as installing):
@@ -586,7 +585,7 @@ fun! vam#install#Checkout(targetDir, repository) abort
           \ ."manually."
           \ )
   endif
-  if vcs_checkouts#Checkout(a:targetDir, a:repository)
+  if vam#vcs#Checkout(a:targetDir, a:repository)
     " Successfully checked out a repository. Leaving a comment here to indicate 
     " that an if condition has a side effect of checking out a repository.
   else
@@ -870,24 +869,17 @@ if g:is_win
   endf
 endif
 
-fun! vam#install#PreScmsUpdateHookShowShortLog(info, repository, pluginDir, hook_opts)
-  let s:c.old_versions = get(s:c,'old_versions',{})
-  if isdirectory(a:pluginDir.'/.git')
-    let s:c.old_versions[a:pluginDir] = system('cd '.shellescape(a:pluginDir).' && git rev-list HEAD -1')[:-2]
-  elseif isdirectory(a:pluginDir.'/.hg')
-  elseif isdirectory(a:pluginDir.'/.svn')
-    ...
-  endif
-endf
-
-fun! vam#install#PostScmsUpdateHookShowShortLog(info, repository, pluginDir, hook_opts)
-  if isdirectory(a:pluginDir.'/.git')
-    call vam#utils#ExecInDir(a:pluginDir, 'git $ $ $', 'log', '--pretty=format:%s', s:c.old_versions[a:pluginDir].'..HEAD')
-  elseif isdirectory(a:pluginDir.'/.hg')
-    " TODO
-  elseif isdirectory(a:pluginDir.'/.svn')
-    " TODO
-    ...
+fun! vam#install#ShowShortLog(info, repository, pluginDir, hook_opts)
+  if has_key(a:hook_opts.sdescr, 'log')
+    let c=a:hook_opts.sdescr.log
+    call vam#Log('Changes', 'PreProc')
+    " XXX wdrev() functions return result with trailing newline hence matchstr()
+    "     \S also matches newline hence double quotes and collection
+    call vam#Log(call(c[0], get(c, 1, [])+[
+          \a:pluginDir,
+          \matchstr(a:hook_opts.oldVersion, "[^ \t\r\n]*"),
+          \matchstr(a:hook_opts.newVersion, "[^ \t\r\n]*")], get(c, 2, {})),
+          \'Normal')
   endif
 endf
 

@@ -7,12 +7,12 @@ Hook: pre-update
 info: []
 repo: [['type', 'archive'], ['url', 'http://downloads.sourceforge.net/project/vimpluginloader/vam-test/vam_test_tgz_2-nodoc.tar.bz2'], ['version', '0.1.8']]
 pdir: 'vam-hooks/vam_test_tgz2'
-opts: {'oldVersion': '0.1.7'}
+opts: {'newVersion': '0.1.8', 'oldVersion': '0.1.7'}
 Hook: post-update
 info: []
 repo: [['type', 'archive'], ['url', 'http://downloads.sourceforge.net/project/vimpluginloader/vam-test/vam_test_tgz_2-nodoc.tar.bz2'], ['version', '0.1.8']]
 pdir: 'vam-hooks/vam_test_tgz2'
-opts: {'oldVersion': '0.1.7'}
+opts: {'newVersion': '0.1.8', 'oldVersion': '0.1.7'}
 Hook: post-install
 info: [['post-install-hook', 'call Hook(''post-install'', %i, %r, %d, %o)'], ['post-scms-update-hook', 'call Hook(''post-scms-update'', %i, %r, %d, %o)'], ['post-update-hook', 'call Hook(''post-update'', %i, %r, %d, %o)'], ['pre-update-hook', 'call Hook(''pre-update'', %i, %r, %d, %o)']]
 repo: [['type', 'archive'], ['url', 'http://downloads.sourceforge.net/project/vimpluginloader/vam-test/vam_test_hook.tar.bz2']]
@@ -27,14 +27,14 @@ Hook: pre-update
 info: [['post-install-hook', 'call Hook(''post-install'', %i, %r, %d, %o)'], ['post-scms-update-hook', 'call Hook(''post-scms-update'', %i, %r, %d, %o)'], ['post-update-hook', 'call Hook(''post-update'', %i, %r, %d, %o)'], ['pre-update-hook', 'call Hook(''pre-update'', %i, %r, %d, %o)']]
 repo: [['type', 'archive'], ['url', 'http://downloads.sourceforge.net/project/vimpluginloader/vam-test/vam_test_hook.tar-copy.tar.bz2'], ['version', 'new']]
 pdir: 'vam-hooks/vam_test_hook'
-opts: {'oldVersion': '?'}
+opts: {'newVersion': 'new', 'oldVersion': '?'}
 Plugin hook: pre-update
 info: [['post-install-hook', 'call Hook(''post-install'', %i, %r, %d, %o)'], ['post-scms-update-hook', 'call Hook(''post-scms-update'', %i, %r, %d, %o)'], ['post-update-hook', 'call Hook(''post-update'', %i, %r, %d, %o)'], ['pre-update-hook', 'call Hook(''pre-update'', %i, %r, %d, %o)']]
 repo: [['type', 'archive'], ['url', 'http://downloads.sourceforge.net/project/vimpluginloader/vam-test/vam_test_hook.tar-copy.tar.bz2'], ['version', 'new']]
 pdir: 'vam-hooks/vam_test_hook'
-opts: {'oldVersion': '?'}
+opts: {'newVersion': 'new', 'oldVersion': '?'}
 Hook: post-update
 info: []
 repo: [['type', 'archive'], ['url', 'http://downloads.sourceforge.net/project/vimpluginloader/vam-test/vam_test_hook.tar-copy.tar.bz2'], ['version', 'new']]
 pdir: 'vam-hooks/vam_test_hook'
-opts: {'oldVersion': '?'}
+opts: {'newVersion': 'new', 'oldVersion': '?'}
