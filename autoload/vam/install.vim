@@ -10,6 +10,8 @@ let s:c['pool_fun'] = get(s:c, 'pool_fun', 'vam#install#Pool')
 let s:c['name_rewriting'] = get(s:c, 'name_rewriting', {})
 let s:c['pre_update_hook_functions'] = get(s:c, 'pre_update_hook_functions', ['vam#install#CreatePatch'])
 let s:c['post_update_hook_functions'] = get(s:c, 'post_update_hook_functions', ['vam#install#ApplyPatch'])
+let s:c['pre_scms_update_hook_functions'] = get(s:c, 'post_scms_update_hook_functions', ['vam#install#PreScmsUpdateHookShowShortLog'])
+let s:c['post_scms_update_hook_functions'] = get(s:c, 'post_scms_update_hook_functions', ['vam#install#PostScmsUpdateHookShowShortLog'])
 let s:c['pool_item_check_funs'] = get(s:c, 'pool_item_check_funs', ['vam#install#CheckPoolItem'])
 
 call extend(s:c.name_rewriting, {'99git+github': 'vam#install#RewriteName'})
@@ -304,6 +306,7 @@ fun! vam#install#UpdateAddon(name)
   " First, try updating using VCS. Return 1 if everything is ok, 0 if exception 
   " is thrown
   try
+    call vam#install#RunHook('pre-scms-update', vam#AddonInfo(a:name), {}, pluginDir, {})
     let r = vcs_checkouts#Update(pluginDir)
     if r isnot# 'unknown'
       if r is# 'updated'
@@ -866,5 +869,26 @@ if g:is_win
 
   endf
 endif
+
+fun! vam#install#PreScmsUpdateHookShowShortLog(info, repository, pluginDir, hook_opts)
+  let s:c.old_versions = get(s:c,'old_versions',{})
+  if isdirectory(a:pluginDir.'/.git')
+    let s:c.old_versions[a:pluginDir] = system('cd '.shellescape(a:pluginDir).' && git rev-list HEAD -1')[:-2]
+  elseif isdirectory(a:pluginDir.'/.hg')
+  elseif isdirectory(a:pluginDir.'/.svn')
+    ...
+  endif
+endf
+
+fun! vam#install#PostScmsUpdateHookShowShortLog(info, repository, pluginDir, hook_opts)
+  if isdirectory(a:pluginDir.'/.git')
+    call vam#utils#ExecInDir(a:pluginDir, 'git $ $ $', 'log', '--pretty=format:%s', s:c.old_versions[a:pluginDir].'..HEAD')
+  elseif isdirectory(a:pluginDir.'/.hg')
+    " TODO
+  elseif isdirectory(a:pluginDir.'/.svn')
+    " TODO
+    ...
+  endif
+endf
 
 " vim: et ts=8 sts=2 sw=2

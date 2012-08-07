@@ -316,6 +316,7 @@ shell_commands_run_method                      *VAM-shell_commands_run_method*
 post_install_hook_functions               *VAM-post_install_hook_functions*
 pre_update_hook_functions                 *VAM-pre_update_hook_functions*
 post_update_hook_functions                *VAM-post_update_hook_functions*
+pre_scm_update_hook_functions            *VAM-pre_scm_update_hook_functions*
 post_scm_update_hook_functions            *VAM-post_scm_update_hook_functions*
         Lists of function names or function references that will be called 
         when hook is executed (see |addon-info-hooks|). All functions get four 
