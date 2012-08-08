@@ -27,10 +27,6 @@ let s:git_checkout='git clone $.url $p'
 if executable('git') && stridx(system('git clone --help'), '--depth')!=-1
   let s:git_checkout='git clone --depth 1 $.url $p'
 endif
-" Note: I do not know a way to have the same log results for mercurial and git. 
-"       Here log will also list revisions that were added after old working 
-"       directory revision, but are not its ancestor (e.g. unmerged feature 
-"       branch)
 let s:scm_defaults={
       \  'git': {'clone': ['vam#utils#RunShell', [s:git_checkout             ]],
       \         'update': ['vam#utils#RunShell', ['cd $p && git pull'        ]],
@@ -39,7 +35,7 @@ let s:scm_defaults={
       \   'hg': {'clone': ['vam#utils#RunShell', ['hg clone $.url $p'        ]],
       \         'update': ['vam#utils#RunShell', ['hg pull -u -R $p'         ]],
       \          'wdrev': ['vam#utils#System',   ['hg log --template $ -R $p -r .', '{rev}']],
-      \            'log': ['vam#vcs#RunWithIncrementedRev', ['hg log --template $ -R $p -r $[]:$[]', '\n{desc}\n']],},
+      \            'log': ['vam#vcs#MercurialLog', []],},
       \  'bzr': {'clone': ['vam#utils#RunShell', ['bzr branch $.url $p'      ]],
       \         'update': ['vam#utils#RunShell', ['bzr pull -d $p'           ]],
       \          'wdrev': ['vam#utils#System',   ['bzr revno --tree $p'      ]],
@@ -64,6 +60,14 @@ fun! vam#vcs#RunWithIncrementedRev(...)
   let args=copy(a:000)
   let args[-2]+=1
   return call('vam#utils#System', args)
+endfun
+
+fun! vam#vcs#MercurialLog(targetDir, oldVersion, newVersion)
+  " Note: this will show nothing if oldVersion is not an ancestor of 
+  "       a newVersion. Mercurial should not update with the above command in 
+  "       this case though.
+  return call('vam#utils#System', ['hg log --template $ -R $p -r $', '{desc}\n', a:targetDir,
+        \                          a:oldVersion.'..'.a:newVersion.' and not '.a:oldVersion])
 endfun
 
 fun! vam#vcs#DarcsLog(targetDir, oldVersion, newVersion)
