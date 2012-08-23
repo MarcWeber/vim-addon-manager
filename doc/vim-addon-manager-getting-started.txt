@@ -73,6 +73,8 @@ Features:
       Subversion, Bazaar and Darcs repositories
     - maintained pool of addons (vim-addon-manager-known-repositories)
       which warns you if you try to install an outdated plugin
+      (have a look at it online : http://mawercer.de/~marc/vam/index.php)
+
     - replicate your Vim setup by copying your .vimrc (See SetupVAM)
     - load plugins lazily when Vim is already running. Some plugins require
       additional tweaks for this to work
