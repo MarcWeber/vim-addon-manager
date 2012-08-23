@@ -7,9 +7,9 @@
   install/ update/ use manually installed plugin on startup or load them lazily
   as needed when you feel that way [3]
 - dependency management builtin [2]
-- based on a "pool" of plugin which is maintained by the community.
-  This allows warning you if you're going to install autdated packages.
-  [known plugins](http://mawercer.de/~marc/vam/index.php).
+- based on a "[pool](http://mawercer.de/~marc/vam/index.php)" of plugin which
+  is maintained by the community.
+  This allows warning you if you're going to install outdated packages.
   Of course you can opt-out and use your own pool easily.
 - sources from www.vim.org, git, mercurial, svn, darcs, cvs, bazaar, [...]
 - plugin name completion in .vim files and :(Update|Activate)Addons commands
@@ -26,6 +26,17 @@
      Implemented by a addon-info.json file
 [3]: Yes - there are some special cases where it does not work correctly
      because some au commands don't get triggered
+
+## THE POOL
+is made up of
+- [vim.org sources](https://raw.github.com/MarcWeber/vim-addon-manager-known-repositories/master/db/vimorgsources.json) found on [www.vim.org](http://www.vim.org)
+  These are update periodically
+- manually added [version controlled sources](https://raw.github.com/MarcWeber/vim-addon-manager-known-repositories/master/db/scmsources.vim)
+- a [patch
+  file](https://github.com/MarcWeber/vim-addon-manager-known-repositories/blob/master/db/patchinfo.vim)
+  augmenting www.vim.org sources. Eg not all plugins on www.vim.org have correct
+  "type" - thus additional information is required to move single files to the
+  correct location
 
 ## SUPPORT
 VAM is well supported by at least 2 maintainers. Try github tickets or Vim irc
