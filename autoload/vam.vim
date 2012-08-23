@@ -302,6 +302,29 @@ fun! vam#ActivateAddons(...) abort
   endif
 endfun
 
+fun! vam#DisplayAddonInfoLines(name, repository)
+  let name = a:name
+  let repository = a:repository
+  let lines = []
+  call add(lines, 'Plugin: '.name.((has_key(repository, 'version'))?(' version '.repository.version):('')))
+  if has_key(repository, 'vim_script_nr')
+    call add(lines, 'Script number: '.repository.vim_script_nr)
+    call add(lines, 'Vim.org page: http://www.vim.org/scripts/script.php?script_id='.repository.vim_script_nr)
+  endif
+  if has_key(repository, 'homepage')
+    call add(lines, 'Home page: '.repository.homepage)
+  elseif repository.url =~? '^\w\+://github\.com/'
+    call add(lines, 'Home page: https://github.com/'.substitute(repository.url, '^\V\w\+://github.com/\v([^/]+\/[^/]{-}%(\.git)?)%(\/|$)@=.*', '\1', ''))
+  elseif repository.url =~? '^\w\+://bitbucket\.org/'
+    call add(lines, 'Home page: https://bitbucket.org/'.substitute(repository.url, '^\V\w\+://bitbucket.org/\v([^/]+\/[^/]+).*', '\1', ''))
+  endif
+  call add(lines, 'Source URL: '.repository.url.' (type '.get(repository, 'type', 'archive').')',)
+  for key in filter(keys(repository), 'v:val!~#''\vurl|vim_script_nr|version|type|homepage''')
+    call add(lines, key.': '.string(repository[key]))
+  endfor
+  return lines
+endf
+
 fun! vam#DisplayAddonInfo(name)
   let repository = get(g:vim_addon_manager['plugin_sources'], a:name, {})
   let name = a:name
@@ -319,23 +342,9 @@ fun! vam#DisplayAddonInfo(name)
     echo "Invalid plugin name: " . a:name
     return
   endif
+
   call vam#Log(repeat('=', &columns-1), 'Comment')
-  call vam#Log('Plugin: '.name.((has_key(repository, 'version'))?(' version '.repository.version):('')), 'None')
-  if has_key(repository, 'vim_script_nr')
-    call vam#Log('Script number: '.repository.vim_script_nr, 'None')
-    call vam#Log('Vim.org page: http://www.vim.org/scripts/script.php?script_id='.repository.vim_script_nr, 'None')
-  endif
-  if has_key(repository, 'homepage')
-    call vam#Log('Home page: '.repository.homepage)
-  elseif repository.url =~? '^\w\+://github\.com/'
-    call vam#Log('Home page: https://github.com/'.substitute(repository.url, '^\V\w\+://github.com/\v([^/]+\/[^/]{-}%(\.git)?)%(\/|$)@=.*', '\1', ''), 'None')
-  elseif repository.url =~? '^\w\+://bitbucket\.org/'
-    call vam#Log('Home page: https://bitbucket.org/'.substitute(repository.url, '^\V\w\+://bitbucket.org/\v([^/]+\/[^/]+).*', '\1', ''), 'None')
-  endif
-  call vam#Log('Source URL: '.repository.url.' (type '.get(repository, 'type', 'archive').')', 'None')
-  for key in filter(keys(repository), 'v:val!~#''\vurl|vim_script_nr|version|type|homepage''')
-    call vam#Log(key.': '.string(repository[key]), 'None')
-  endfor
+  call vam#Log(join(vam#DisplayAddonInfoLines(name, repository),"\n"), 'None')
 endfun
 
 fun! vam#DisplayAddonsInfo(names)
