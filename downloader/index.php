@@ -11,6 +11,16 @@ define('HISTORY_FILE', 'previous_downloads.txt');
 define('NAME_CACHE_FILE', 'name_cache');
 define('RECREATE_CACHE_HOURS', 48 * 2);
 
+function name_cache(){
+  $a = json_decode(file_get_contents(NAME_CACHE_FILE), true);
+  ksort($a);
+  return $a;
+}
+
+function _htmlentities($s){
+	return htmlentities($s, ENT_QUOTES, "UTF-8" );
+}
+
 function downloadFile( $fullPath, $name = '' ){
 
   if ($name == '')
@@ -91,10 +101,38 @@ call vam#".$c."(".json_encode($names).", {'auto_install' : 1})
 ";
 }
 
-function vimrc2($names){
+function vimrc2(){
   return vimrc(array(), true)
   .'
-  call writefile( [string(vam#install#KnownAddons(0))], "names")
+  let info = {}
+  for n in vam#install#KnownAddons(0)
+   let repo = get(g:vim_addon_manager["plugin_sources"],n,{})
+   if repo != {}
+     let info[n] = vam#DisplayAddonInfoLines(n, repo)
+   endif
+  endfor
+
+fun! Encode(thing, ...)
+  let nl = a:0 > 0 ? (a:1 ? "\\n" : "") : ""
+  if type(a:thing) == type("")
+    return \'"\'.escape(a:thing,\'"\\\').\'"\'
+  elseif type(a:thing) == type({}) && !has_key(a:thing, \'json_special_value\')
+    let pairs = []
+    for [Key, Value] in items(a:thing)
+      call add(pairs, Encode(Key).\':\'.Encode(Value))
+      unlet Key | unlet Value
+    endfor
+    return "{".nl.join(pairs, ",".nl)."}"
+  elseif type(a:thing) == type(0)
+    return a:thing
+  elseif type(a:thing) == type([])
+    return \'[\'.join(map(copy(a:thing), "Encode(v:val)"),",").\']\'
+  else
+    throw "unexpected new thing: ".string(a:thing)
+  endif
+endf
+
+  call writefile( [Encode(info)], "names")
   ';
 }
 
@@ -134,6 +172,26 @@ echo $cmd;
   exit();
 }
 
+if (isset($_GET['plugin_info'])){
+  $a = name_cache();
+  $s = implode("\n", $a[base64_decode($_GET['plugin_info'])]);
+
+  if (strpos($s, "deprecated") != false){
+    echo "PAY ATTENTION TO THE deprecated NOTICE!";
+  }
+
+  echo '<pre>';
+  echo _htmlentities($s);
+  echo '</pre>';
+  
+  
+echo '
+</body>
+</html>
+';
+exit();
+}
+
 if (isset($_POST['names'])){
  if ($_POST['spam_protection'] != 'V I M'){
    echo 'you failed - SPAM protection. Reread instructions';
@@ -141,10 +199,11 @@ if (isset($_POST['names'])){
  } else {
   $names = preg_split('/[ ,]+/', $_POST['names']);
   $errors = array();
-  foreach($names as $n){
+  foreach($names as &$n){
     if (preg_match('/^(VAM|vim-addon-manager|VAM-kr|vim-addon-manager-known-repositories)$/', $n)){
       $errors[] = $n.' will be included automatically, retry';
     }
+    $n = preg_replace('/[[\]\'"]/', '', $n);
   }
   if (count($errors) > 0){
     foreach($errors as $err){
@@ -175,10 +234,12 @@ Installing git, mercurial, zip commands can be tedious on windows.
 This page let's you download VAM and its plugins.
 
 <form method="post">
-Put in "V I M" here (spam protection): <br/>
+Put in "V I M" (mind the spaces, spam protection): <br/>
 <input type="text" name="spam_protection" value="value"> <br/>
 
 The plugin names you want separated by , or space (VAM-kr and VAM will be included always):<br/>
+Yes, from now one '"[] will be stripped so pasting a list is fine, also. This
+way you can update everyhting at once easily.<br/>
 <input type="text" name="names" value="tlib vim-addon-commenting"><br/>
 
 <input type="submit" name="go" value="download zip"><br/>
@@ -226,7 +287,10 @@ function known_names(){
     file_put_contents(NAME_CACHE_FILE, file_get_contents($dir.'/names'));
     system('rm -fr $dir');
   }
- $s =file_get_contents(NAME_CACHE_FILE);
+ $s = '';
+ foreach(name_cache() as $key => $v){
+   $s .= '<a target="n" href="?plugin_info='.base64_encode($key).'" >'._htmlentities($key).'</a>, ';
+ }
  return $s;
 }
 
