@@ -176,7 +176,7 @@ if (isset($_GET['plugin_info'])){
   $a = name_cache();
   $s = implode("\n", $a[base64_decode($_GET['plugin_info'])]);
 
-  if (strpos($s, "deprecated") != false){
+  if (strpos($s, "deprecated:") != false){
     echo "PAY ATTENTION TO THE deprecated NOTICE!";
   }
 
@@ -199,11 +199,14 @@ if (isset($_POST['names'])){
  } else {
   $names = preg_split('/[ ,]+/', $_POST['names']);
   $errors = array();
+  $name_cache = name_cache();
   foreach($names as &$n){
     if (preg_match('/^(VAM|vim-addon-manager|VAM-kr|vim-addon-manager-known-repositories)$/', $n)){
       $errors[] = $n.' will be included automatically, retry';
     }
     $n = preg_replace('/[[\]\'"]/', '', $n);
+    if (!isset($name_cache[$n]) && !preg_match('/^(github|git|hg):/', $n))
+      $errors[] = 'name '.$n.' unkown. Check against list at the bottom of main page';
   }
   if (count($errors) > 0){
     foreach($errors as $err){
@@ -222,16 +225,37 @@ if (isset($_POST['names'])){
    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 <head>
-  <title>VAM for Windows Downloader</title>
+  <title>VAM for Windows Downloader & VAM pool viewer</title>
     <meta name="robots" content="index,nofollow" />
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 </head>
 <body>
 
+<style type="text/css" media="all">
+  .links a {
+    text-decoration: none;
+    color: #000;
+  }
+
+  .hide_link {
+     font-size: small;
+     color: #CCC !important;
+  }
+
+</style>
+
+
 <h1>VAM downloader for Windows users</h1>
 
+<div>
 Installing git, mercurial, zip commands can be tedious on windows.
 This page let's you download VAM and its plugins.
+</div>
+
+<h2>HOWTO</h2>
+<p>
+Fill in the form, then copy the _vimrc and vimfiles into your user directory. https using self signed certificate is supported.
+</p>
 
 <form method="post">
 Put in "V I M" (mind the spaces, spam protection): <br/>
@@ -256,9 +280,10 @@ or on irc.freenode.net (#vim).
 <br/>
 <br/>
 
-This site back again - sorry for the long downtime - I'm don't get payed for this.
-
 <a href="<?php echo HISTORY_FILE; ?>">previous downloads</a>
+
+<br/>
+You want to say thanks? Goto <a href="http://www.vim.org">http://www.vim.org</a> and visit some of the sponsors ..
 
 <?php
 
@@ -287,10 +312,16 @@ function known_names(){
     file_put_contents(NAME_CACHE_FILE, file_get_contents($dir.'/names'));
     system('rm -fr $dir');
   }
- $s = '';
+ $s = '<div class="links"> You can click on these links: </br>';
  foreach(name_cache() as $key => $v){
-   $s .= '<a target="n" href="?plugin_info='.base64_encode($key).'" >'._htmlentities($key).'</a>, ';
+  $dep =  (strpos(implode("\n", $v), "deprecated:") != false);
+   $s .= 
+	'<a class="'.($dep ? "hide_link" : '').'" target="n" href="?plugin_info='.base64_encode($key).'" >'
+	. _htmlentities($key)
+	.'</a>'
+	.', ';
  }
+ $s .= "</div>";
  return $s;
 }
 
