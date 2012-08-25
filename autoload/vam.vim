@@ -177,7 +177,10 @@ fun! vam#ActivateRecursively(list_of_names, ...)
 
       let infoFile = vam#AddonInfoFile(name)
       if !filereadable(infoFile) && !vam#IsPluginInstalled(name)
-        call vam#install#Install([name], opts)
+        if empty(vam#install#Install([name], opts))
+          unlet s:c['activated_plugins'][name]
+          continue
+        endif
       endif
       let info = vam#AddonInfo(name)
       let dependencies = get(info,'dependencies', {})
@@ -296,9 +299,11 @@ fun! vam#ActivateAddons(...) abort
               \         'bufexists(v:val)'),
               \  'setbufvar(v:val, "&filetype", getbufvar(v:val, "&filetype"))')
       endif
-
     endif
 
+    if empty(filter(copy(args[0]), 'get(s:c.activated_plugins, v:val, 0)'))
+      throw 'Not all plugins were activated'
+    endif
   endif
 endfun
 

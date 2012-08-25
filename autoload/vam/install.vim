@@ -158,6 +158,7 @@ fun! vam#install#Install(toBeInstalledList, ...)
   let toBeInstalledList = vam#install#ReplaceAndFetchUrls(a:toBeInstalledList)
   let opts = a:0 == 0 ? {} : a:1
   let auto_install = get(opts, 'auto_install', s:c.auto_install)
+  let installed = []
   for name in filter(copy(toBeInstalledList), '!vam#IsPluginInstalled(v:val)')
     let repository = vam#install#GetRepo(name, opts)
     " make sure all sources are known
@@ -222,7 +223,10 @@ fun! vam#install#Install(toBeInstalledList, ...)
         call vam#install#RunHook('post-install', info, repository, pluginDir, {})
       endif
     endif
+
+    let installed += [name]
   endfor
+  return installed
 endf
 
 fun! vam#install#CreatePatch(info, repository, pluginDir, hook_opts)
