@@ -230,15 +230,17 @@ endf
 fun! vam#vcs#Checkout(targetDir, repository)
   if has_key(s:c.scms, a:repository.type)
     let c=s:c.scms[a:repository.type].clone
-    call call(c[0], get(c, 1, [])+[a:repository, a:targetDir], get(c, 2, {}))
-    return 1
+    if call(c[0], get(c, 1, [])+[a:repository, a:targetDir], get(c, 2, {}))
+      throw "Failed to checkout addon to ".a:targetDir."."
+    endif
   else
     " Keep old behavior: no throw for unknown repository type
     return
   endif
   if !isdirectory(a:targetDir)
-    throw "Failure. Plugin directory ".a:targetDir." should have been created but does not exist !"
+    throw "Failure. Plugin directory ".a:targetDir." should have been created but does not exist."
   endif
+  return 1
 endf
 
 " vim: et ts=8 sts=2 sw=2
