@@ -1,4 +1,4 @@
-# VAM — maximizing overall Vim experience
+# VAM — maximizing overall Vim experience
 “VAM” is short name for vim-addon-manager
 
 ## FEATURES
@@ -26,7 +26,7 @@
      Implemented by a addon-info.json file and patchinfo database for addons 
      without VAM support.
 
-[3]: Yes — there are some special cases where it does not work correctly because 
+[3]: Yes — there are some special cases where it does not work correctly because 
      some autocommands don’t get triggered
 
 ## THE POOL
@@ -68,13 +68,13 @@ Here you go:
 See contact information in GETTING STARTED documentation.
 
 ## BUGS
-It’ll never have nice install progress bars — because the “progress” is not
-very well known because addons can be installed at any time — and additionall
-depnedncies may be encountered.
+It’ll never have nice install progress bars — because the “progress” is not very 
+well known because addons can be installed at any time — and additionall 
+dependencies may be encountered.
 
-If you want to be able to rollback you have to use git submodules yourself or
-find a different solution — because VAM also supports other VCS and installing
-by .zip,.tar.gz etc
+If you want to be able to rollback you have to use git submodules yourself or 
+find a different solution — because VAM also supports other VCS and installing 
+from archives.
 
 ## Related work
 Also very famous:
