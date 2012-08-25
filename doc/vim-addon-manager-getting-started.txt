@@ -57,16 +57,14 @@ WHY VAM?: ~
 1. Intro                                                           *VAM-intro*
 
 VAM is a shortcut for vim-addon-manager. Its vision is: Make it easiest to
-install plugin somewhat following the 20% of efforts yields 80% of value rule.
-
-Difference names addon plugin: Almost none. 
+install plugin somewhat following the “20% of efforts yields 80% of value” 
+rule.
 >
- :h plugin
-tells you about the old manual manual way of installing plugins. VAM helps 
-keeping ~/.vim clean by separating plugins from each other.
+   :h plugin
+tells you about the old manual way of installing plugins. VAM helps keeping 
+~/.vim clean by separating plugins from each other.
 
 Features:
-
     - Separate directories for each plugins
     - Dependency resolution
     - Popular VCS support: plugin supports fetching from Git, Mercurial,
@@ -74,7 +72,6 @@ Features:
     - maintained pool of addons (vim-addon-manager-known-repositories)
       which warns you if you try to install an outdated plugin
       (have a look at it online : http://mawercer.de/~marc/vam/index.php)
-
     - replicate your Vim setup by copying your .vimrc (See SetupVAM)
     - load plugins lazily when Vim is already running. Some plugins require
       additional tweaks for this to work
@@ -90,6 +87,9 @@ What does "Declarative package manager" mean? The final behaviour of Vim
 should be declared once. Your ~/.vimrc and |:UpdateAddons| should be enough
 to cause same Vim behaviour everywhere.
 
+Note: “Addon” here is a synonym for “plugin”: “a related collection of files 
+      enhancing vim functionality”. “Plugin” may also mean “a .vim file inside 
+      a plugin directory” hence using “addon”.
 
 ==============================================================================
 2. Installation                                             *VAM-installation*
