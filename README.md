@@ -61,8 +61,8 @@ However the “self install” alternative is recommended, see
 ## Let me see all docs!
 Here you go:
 
-- [GETTING STARTED](doc/vim-addon-manager-getting-started.txt)
-- [additional docs](doc/vim-addon-manager-additional-documentation.txt)
+- [GETTING STARTED](https://raw.github.com/MarcWeber/vim-addon-manager/master/doc/vim-addon-manager-getting-started.txt)
+- [additional docs](https://raw.github.com/MarcWeber/vim-addon-manager/master/doc/vim-addon-manager-additional-documentation.txt)
 
 ## CONTACT / HELP
 See contact information in GETTING STARTED documentation.
