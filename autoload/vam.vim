@@ -301,7 +301,7 @@ fun! vam#ActivateAddons(...) abort
       endif
     endif
 
-    if empty(filter(copy(args[0]), 'get(s:c.activated_plugins, v:val, 0)'))
+    if empty(filter(copy(args[0]), 'get(s:c.activated_plugins, v:val, 0)')) && !empty(copy(args[0]))
       throw 'Not all plugins were activated'
     endif
   endif
