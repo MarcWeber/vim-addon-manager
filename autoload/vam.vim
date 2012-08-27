@@ -252,7 +252,15 @@ fun! vam#ActivateAddons(...) abort
 
   " add new_runtime_paths state if not present in opts yet
   let new_runtime_paths = get(opts, 'new_runtime_paths',[])
+  let to_be_activated = get(opts, 'to_be_activated', {})
+
+
   let opts['new_runtime_paths'] = new_runtime_paths
+  let opts['to_be_activated'] = to_be_activated
+
+  for a in args[0]
+    let to_be_activated[a] = 1
+  endfor
 
   call call('vam#ActivateRecursively', args)
 
@@ -301,8 +309,9 @@ fun! vam#ActivateAddons(...) abort
       endif
     endif
 
-    if empty(filter(copy(args[0]), 'get(s:c.activated_plugins, v:val, 0)'))
-      throw 'Not all plugins were activated'
+    let failed = filter(keys(to_be_activated), '!has_key(s:c.activated_plugins, v:val)')
+    if !empty(failed)
+      throw 'These plugins could not be activated for some reason: '.string(failed)
     endif
   endif
 endfun
