@@ -30,7 +30,7 @@
      some autocommands don’t get triggered
 
 ## THE POOL
-Poll is made up of
+Pool is made up of
 
 - [Plugins found on 
   www.vim.org](https://raw.github.com/MarcWeber/vim-addon-manager-known-repositories/master/db/vimorgsources.json).
