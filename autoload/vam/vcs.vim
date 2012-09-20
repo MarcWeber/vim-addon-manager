@@ -208,7 +208,7 @@ fun! vam#vcs#Update(dir)
   endif
   let c=sdescr.update
   if call(c[0], c[1] + [a:dir], get(c, 2, {}))
-    call vam#Log('Updating '.a:dir.' failed')
+    call vam#Log('Updating '.a:dir.' failed. The :AddonInfo command may tell you about a new upstream source. If in doubt move the plugin directory somewhere else install it from scratch')
     return ['failed', wdrev, 0, sdescr]
   endif
 
