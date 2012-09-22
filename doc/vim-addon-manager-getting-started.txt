@@ -147,6 +147,8 @@ recommended setup ~
           " Set advanced options like this:
           " let g:vim_addon_manager = {}
           " let g:vim_addon_manager['key'] = value
+          "     Pipe all output into a buffer which gets written to disk
+          " let g:vim_addon_manager['log_to_buf'] =1
 
           " Example: drop git sources unless git is in PATH. Same plugins can
           " be installed from www.vim.org. Lookup MergeSources to get more control

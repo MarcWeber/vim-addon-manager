@@ -69,7 +69,7 @@ endfun
 fun! vam#install#GetRepo(name, opts)
   if a:name isnot# s:c['known'] | call vam#install#LoadPool() |endif
 
-  let repository = get(s:c['plugin_sources'], a:name, get(a:opts, a:name, 0))
+  let repository = get(s:c['plugin_sources'], a:name, get(get(a:opts, 'plugin_sources', {}), a:name, 0))
   if repository is 0
     unlet repository
     for key in sort(keys(s:c.name_rewriting))
@@ -172,7 +172,9 @@ fun! vam#install#Install(toBeInstalledList, ...)
     " tell user about target directory. Some users don't get it the first time..
     let pluginDir = vam#PluginDirFromName(name)
 
-    call vam#DisplayAddonInfo(name)
+    " call vam#DisplayAddonInfo(name), can't use due to plugin_sources
+    call vam#Log(join(vam#DisplayAddonInfoLines(name, repository),"\n"), 'None')
+
     call vam#Log('Target: '.pluginDir, 'None')
     if (has_key(opts, 'requested_by'))
       call vam#Log('Dependency chain: '.join([name]+opts.requested_by,' < '))
