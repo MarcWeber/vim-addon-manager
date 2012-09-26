@@ -1,12 +1,19 @@
-" minimal useful unbiased recommended .vimrc: http://vim.wikia.com/wiki/Example_vimrc
+" minimal useful unbiased recommended .vimrc: 
+" http://vim.wikia.com/wiki/Example_vimrc
+" or
+" :h vimrc_example.vim
+"
+" more useful info for new users:
+" http://vim.wikia.com/wiki/Category:Getting_started
 
 
 " kept recoding the same things over and over again.
 " So I write what I think is useful to you here.
 "
 " How to use?
-" Either copy paste contents into your .vimrc (omitting the Load function)
-" or call the load function
+" Skim it - then copy paste the lines you like into your personal .vimrc file.
+" Its a rough guide giving you hints about what can be done rather than
+" what should be done
 
 
 " these markers { { { enable folding. see modeline at the bottom
@@ -100,6 +107,9 @@ set bs=indent,eol,star
 " Eg its plugin tmru (most recently used files) provides the command
 " TRecentlyUsedFiles you can map to easily:
 noremap \r :TRecentlyUsedFiles<cr>
+" the most simple alternative built into vim is the :oldfiles command
+" however it may not work that wel if you use many vim instances at the same
+" time
 
 " simple glob open based on tlib's List function (similar to TCommand or fuzzy
 " plugin etc)
