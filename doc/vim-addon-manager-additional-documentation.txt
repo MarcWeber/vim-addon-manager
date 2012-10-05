@@ -214,14 +214,14 @@ plugin_sources                                            *VAM-plugin_sources*
         this dictionary override corresponding values in |addon-info.txt|
         files, so be careful when you extend it.
 plugin_root_dir                                          *VAM-plugin_root_dir*
-        Defines a directory where plugins will be installed to. If directory
-        where this plugin is installed to (three levels up relative to
-        autoload/vam.vim: autoload/../..) is writeable by user, then
-        it defaults to directory in question (so, if user has installed
-        vim-addon-manager to ~/.vim/bundle/vim-addon-manager, this will be
-        equal to ~/.vim/bundle). If autoload/vam.vim is not
-        writeable by the user, then it defaults to ~/.vim/vim-addons.
-        Note that you must set this variable before calling any vam function
+        Defines a directory where plugins will be installed to. If directory 
+        where this plugin is installed to (three levels up relative to 
+        autoload/vam.vim: autoload/../..) is writeable by user, then it 
+        defaults to directory in question (so, if user has installed 
+        vim-addon-manager to ~/.vim/bundle/vim-addon-manager, this will be 
+        equal to ~/.vim/bundle). If it is not writeable by the user, then it 
+        defaults to ~/.vim/vim-addons.
+        Note that you must set this variable before calling any vam function.
         Note 2: it may be ignored in custom |VAM-plugin_dir_by_name|.
                                            *VAM-known_repos_activation_policy*
 known_repos_activation_policy
