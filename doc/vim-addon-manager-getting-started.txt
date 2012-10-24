@@ -279,31 +279,34 @@ NOTES: ~
 ------------------------------------------------------------------------------
 2.2 Names of addons and addon sources                        *VAM-addon-names*
 
-Because we are human VAM uses readable names as unique identifier for plugins.
-Those identifieres (= plugin names) are passed to |vam#ActivateAddons()|, |:InstallAddons|,
-|:ActivateAddons| . The name is automatically derived from plugin titles at
-www.vim.org.
+Because we are human VAM uses readable names as unique identifier for plugins. 
+Those identifieres (= plugin names) are passed to |vam#ActivateAddons()|, 
+|:InstallAddons|, |:ActivateAddons| . The name is automatically derived from 
+plugin titles at www.vim.org.
 
 types of names:
   1) Plugin name looked up in pool. Try |:AddonsInfo| NAME
 
     Determining addon names ~
-    - From ID: |:AddonsInfo| SCRIPT_ID, pick the word right after string "Plugin: ".
-    - use |:InstallAddons|' name completion by typing some chars then pressing
-      <c-d> then <tab>.
-    - Use <c-x><c-p> completion while editing your vimrc.
+    - From ID: |:AddonsInfo| SCRIPT_ID, pick the word right after string 
+      "Plugin: ".
+    - Use |:InstallAddons|' name completion by typing some chars then pressing 
+      <C-d> then <Tab>. |c_CTRL-D|
+    - Use <C-x><C-p> completion while editing your vimrc.
+      See |VAM-addon-completion_lhs| if you don’t like the lhs or the whole 
+      idea.
 
-  2) Name which gets rewritten internally (see |vam#install#RewriteName()|) >
+  2) Name which gets rewritten internally (see |VAM-name_rewriting|) >
        github:{Name}      =>  {"type": "git", "url": "git://github.com/{Name}/vim-addon-{Name}}
        github:{N}/{Repo}  =>  {"type": "git", "url": "git://github.com/{N}/{Repo}"}
        git:{GIT_URL}      =>  {"type": "git", "url": "GIT_URL"}
-<   Don't use if you expect others to create plugins depending on yours. Add
+<   Don't use if you expect others to create plugins depending on yours. Add 
     your plugin to |VAM-kr| instead.
 
 
-Instead of telling us to add your plugin to |VAM-kr| you can also patch the
-pool easily: |VAM-kr-patching| - however if you contribute to |VAM-kr| the
-community will benefit much more.
+Instead of telling us to add your plugin to |VAM-kr| you can also patch 
+the pool easily: |VAM-kr-patching| - however if you contribute to |VAM-kr| 
+the community will benefit much more.
 
 *VAM-kr*  is the default pool. VAM checks it out by default. Its long name is 
 *vim-addon-manager-known-repositories*  (stored in |VAM-known| option).
@@ -311,7 +314,7 @@ community will benefit much more.
 *VAM-kr-patching*
 VAM-kr merges both sources (scm and www.vim.org ones), see |VAM-MergeSources|.
 The result is provided by vam_known_repositories#Pool() which is the only pool
-used by default. See example and default implementation vam#install#Pool().
+used by default. See example and default implementation of vam#install#Pool().
 
 If you want to add your own soucres consider submitting them to
 VAM-kr as patch. If you don't there are two ways:
@@ -334,8 +337,7 @@ Plugin dictionaries are described in |addon-info-repository|.
 
 Example: overwriting the MergeSources function (VAM-kr pool implementation): >
 Yes, you can do this in MyPoolFun shown above as well >
-
-    fun! vam_known_repositories#MergeSources(plugin_sources, www_vim_org, scm_plugin_sources, patch_function, snr_to_name)
+    fun! MyMergeSources(plugin_sources, www_vim_org, scm_plugin_sources, patch_function, snr_to_name)
 
       " run default:
       call vam_known_repositories#MergeSources(a:plugin_sources, a:www_vim_org, a:scm_plugin_sources, a:patch_function, a:snr_to_name)

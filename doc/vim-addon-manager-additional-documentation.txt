@@ -308,7 +308,8 @@ pool_fun                                                        *VAM-pool_fun*
         Default is "vam#install#Pool".
 addon_completion_lhs                                *VAM-addon_completion_lhs*
         {lhs} of the mapping that uses |vam#install#CompleteAddonName()| for 
-        completion. Default: "<C-x><C-p>". Spaces and bars are escaped.
+        completion. Default: "<C-x><C-p>". Spaces and bars are not escaped. 
+        Use zero to disable this completely.
 
 shell_commands_run_method                      *VAM-shell_commands_run_method*
         String, possible values: “bang”, “system”. Determines method used to 
