@@ -282,7 +282,8 @@ NOTES: ~
 Because we are human VAM uses readable names as unique identifier for plugins.
 Those identifieres (= plugin names) are passed to |vam#ActivateAddons()|, |:InstallAddons|,
 |:ActivateAddons| . The name is automatically derived from plugin titles at
-www.vim.org.
+www.vim.org. Example: gams%2559. gams is ambigous thus the script number is
+appended
 
 types of names:
   1) Plugin name looked up in pool. Try |:AddonsInfo| NAME
