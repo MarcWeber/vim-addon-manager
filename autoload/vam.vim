@@ -370,27 +370,56 @@ fun! vam#DisplayAddonsInfo(names)
   for name in a:names
     call vam#DisplayAddonInfo(name)
   endfor
-endfun
+endf
+
+fun! vam#SourceFiles(fs)
+  for file in a:fs
+    exec 'source '.fnameescape(file)
+  endfor
+endf
 
 fun! vam#GlobThenSource(glob)
   if s:c.dont_source | return | endif
-  for file in split(glob(a:glob),"\n")
-    exec 'source '.fnameescape(file)
-  endfor
+  call vam#SourceFiles(split(glob(a:glob),"\n"))
 endf
 
 augroup VIM_PLUGIN_MANAGER
   autocmd VimEnter * call  vam#Hack()
 augroup end
 
+" taken from tlib
+fun! vam#OutputAsList(command) "{{{3
+    " let lines = ''
+    redir => lines
+    silent! exec a:command
+    redir END
+    return split(lines, '\n')
+endf
+
 " hack: Vim sources plugin files after sourcing .vimrc
 "       Vim doesn't source the after/plugin/*.vim files in other runtime
 "       paths. So do this *after* plugin/* files have been sourced
+"
+"       If you activate addons in plugin/*.vim files Vim will miss
+"       plugin/*.vim files of those files - so make sure they are alle sourced
+" 
+" This function takes about 1ms to execute my system
 fun! vam#Hack()
+  " files which should have been sourced:
+  let fs = []
+  let rtp = split(&runtimepath, '\v(\\@<!(\\.)*\\)@<!\,')
+  for r in rtp | call extend(fs, split(glob(r.'/plugin/*.vim'),"\n")) | endfor
+  for r in rtp | call extend(fs, split(glob(r.'/after/plugin/**/*.vim'),"\n")) | endfor
+
+  let scriptnames = map(vam#OutputAsList('scriptnames'), 'v:val[(stridx(v:val,":")+2):-1]')
+  call filter(fs, 'index(scriptnames,  v:val) == -1')
+  call vam#SourceFiles(fs)
+
+  " no longer needed, should be catched by code above
   " now source after/plugin/**/*.vim files explicitly. Vim doesn't do it (hack!)
-  for p in keys(s:c['activated_plugins'])
-      call vam#GlobThenSource(vam#PluginDirFromName(p).'/after/plugin/**/*.vim')
-  endfor
+  " for p in keys(s:c['activated_plugins'])
+  "     call vam#GlobThenSource(vam#PluginDirFromName(p).'/after/plugin/**/*.vim')
+  " endfor
 endf
 
 fun! vam#AddonInfoFile(name)
