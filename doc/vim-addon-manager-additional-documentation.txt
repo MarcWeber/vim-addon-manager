@@ -67,6 +67,15 @@ AddonsInfo {id/name} ...                                         *:AddonsInfo*
         Shows addon information. Accepts both VAM script names and www.vim.org 
         script numbers.
 
+AddonsBisect                                                 *:AddonsBisect*
+        Bisect activated plugins to find the one causing some trouble you're
+        experiencing. Bisectng means deviding the list of activated addons
+        into two equal sized sets, then asking you to test whether the
+        issue occurs, then repating the test on either set until one plugin
+        is left.
+
+        This may not work no Windowsn yet due to the ! usage.
+
 ------------------------------------------------------------------------------
 3.2. Functions                                                 *VAM-functions*
 

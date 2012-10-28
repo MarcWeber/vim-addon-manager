@@ -52,6 +52,8 @@ WHY VAM?: ~
   - some Windows support
   - is not too shy telling you that alternatives exist (and which one)
   - copes with "subdirectories contain vim runtimepath" cases
+  - addon bisecting support: Find out which plugin is causing kind of pain to
+    you (|AddonsBisect|)
 
 ==============================================================================
 1. Intro                                                           *VAM-intro*
