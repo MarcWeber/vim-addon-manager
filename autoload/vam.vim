@@ -265,6 +265,10 @@ fun! vam#ActivateAddons(...) abort
   call call('vam#ActivateRecursively', args)
 
   if topLevel
+
+    if exists('g:vam_plugin_whitelist')
+      call filter(to_be_activated, 'index(g:vam_plugin_whitelist, v:val) >= 0')
+    end
     " deferred tasks:
     " - add addons to runtimepath
     " - add source plugin/**/*.vim files in case Activate was called long
@@ -463,6 +467,8 @@ command! -nargs=* -complete=customlist,vam#install#InstalledAddonCompletion Acti
 command! -nargs=* -complete=customlist,vam#install#UpdateCompletion UpdateAddons :call vam#install#Update([<f-args>])
 command! -nargs=0 UpdateActivatedAddons exec 'UpdateAddons '.join(keys(g:vim_addon_manager['activated_plugins']),' ')
 command! -nargs=* -complete=customlist,vam#install#UninstallCompletion UninstallNotLoadedAddons :call vam#install#UninstallAddons([<f-args>])
+
+command! -nargs=* -complete=customlist,vam#install#BisectCompletion VAMBisect :call vam#install#Bisect(<f-args>)
 
 function! s:RunInstallHooks(plugins)
   for name in a:plugins
