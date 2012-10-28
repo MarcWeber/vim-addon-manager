@@ -51,6 +51,6 @@ function Try(cmd)
     endtry
 endfunction
 command -nargs=1 Try :call Try(<q-args>)
-if filereadable(g:curtest.'.vim')
+if !exists('g:noexe') && filereadable(g:curtest.'.vim')
     source `=g:curtest.".vim"`
 endif

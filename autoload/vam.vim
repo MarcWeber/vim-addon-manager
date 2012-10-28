@@ -196,6 +196,10 @@ fun! vam#ActivateRecursively(list_of_names, ...)
       " source plugin/* files ?
       let rtp = vam#PluginRuntimePath(name)
       call add(opts['new_runtime_paths'], rtp)
+      let opts.path_plugins[rtp] = name
+      if !empty(get(opts, 'requested_by'))
+        let opts.are_dependencies[name] = 1
+      endif
 
       let s:c['activated_plugins'][name] = 1
 
@@ -251,12 +255,16 @@ fun! vam#ActivateAddons(...) abort
   let topLevel = !has_key(opts, 'new_runtime_paths')
 
   " add new_runtime_paths state if not present in opts yet
-  let new_runtime_paths = get(opts, 'new_runtime_paths',[])
-  let to_be_activated = get(opts, 'to_be_activated', {})
+  let new_runtime_paths = get(opts, 'new_runtime_paths', [])
+  let to_be_activated   = get(opts, 'to_be_activated',   {})
+  let path_plugins      = get(opts, 'path_plugins',      {})
+  let are_dependencies  = get(opts, 'are_dependencies',  {})
 
 
-  let opts['new_runtime_paths'] = new_runtime_paths
-  let opts['to_be_activated'] = to_be_activated
+  let opts.new_runtime_paths = new_runtime_paths
+  let opts.to_be_activated   = to_be_activated
+  let opts.path_plugins      = path_plugins
+  let opts.are_dependencies  = are_dependencies
 
   for a in args[0]
     let to_be_activated[a] = 1
@@ -267,7 +275,9 @@ fun! vam#ActivateAddons(...) abort
   if topLevel
 
     if exists('g:vam_plugin_whitelist')
-      call filter(to_be_activated, 'index(g:vam_plugin_whitelist, v:val) >= 0')
+      call filter(to_be_activated,   'index(g:vam_plugin_whitelist, v:key) != -1 || has_key(are_dependencies, v:key)')
+      call filter(path_plugins,      'has_key(to_be_activated, v:val)')
+      call filter(new_runtime_paths, 'has_key(path_plugins, v:val)')
     end
     " deferred tasks:
     " - add addons to runtimepath
