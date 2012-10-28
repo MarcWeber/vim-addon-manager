@@ -644,6 +644,8 @@ non-zero code. Dependencies:
   - zsh
   - perl
   - YAML::Any (+some YAML implementation) and WWW::Mechanize perl packages
+    Note: YAML implementation must accept YAML files without leading ---. YAML 
+          parser shipped with perl does not accept them, use YAML::LibYAML.
   - vim
 Tests dependencies (not required for test.zsh, but for the tests themselves):
   - git, mercurial, subversion and bazaar version control systems
