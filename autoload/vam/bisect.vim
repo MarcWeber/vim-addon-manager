@@ -11,8 +11,8 @@ fun! vam#bisect#StepBad(vim, plain, addons, vimrc_tmp) abort
     call extend(cmd_items, ["-u", a:vimrc_tmp])
   endif
 
-  call extend(cmd_items, ["--cmd", "command OKVAMBisect call writefile(['ok'], ".string(a:vimrc_tmp).")|qa!"])
-  call extend(cmd_items, ["--cmd", "command BADVAMBisect call writefile(['bad'], ".string(a:vimrc_tmp).")|qa!"])
+  call extend(cmd_items, ["--cmd", "command -bar -nargs=0 OKVAMBisect  call writefile(['ok'], ".string(a:vimrc_tmp).")|qa!"])
+  call extend(cmd_items, ["--cmd", "command -bar -nargs=0 BADVAMBisect call writefile(['bad'], ".string(a:vimrc_tmp).")|qa!"])
   call extend(cmd_items, ["-c", "echom 'VAM bisect running. Run your test and either of OKVAMBisect, BADVAMBisect to quit'"])
 
   " call system(join(map(cmd_items,'shellescape(v:val)')," "))
@@ -21,14 +21,14 @@ fun! vam#bisect#StepBad(vim, plain, addons, vimrc_tmp) abort
   if !vam#install#confirm('running vim with addons '.string(a:addons).' plain: '.a:plain)
     throw "user abort"
   endif
-  exec '!'.escape(join(map(cmd_items,'shellescape(v:val, 1)'),' '),'%!')
+  exec '!'.join(map(cmd_items,'shellescape(v:val, 1)'), ' ')
   let r = readfile(a:vimrc_tmp)
   if r[0] == "ok"
     return 0
   elseif r[0] == "bad"
     return 1
   else
-    throw "You neither used VAMBisectOK nor VAMBisectBAD to exit vim!"
+    throw "You used neither OKVAMBisect nor BADVAMBisect to exit vim!"
   endif
 endf
 
@@ -130,9 +130,11 @@ fun! vam#bisect#Bisect(...)
   " It does not harm running non-gui vim with --nofork
   let vim_executable += ['--nofork']
   let addons = keys(s:c.activated_plugins)
-  let r = vam#bisect#List(vim_executable, 0, addons, [])
+  try
+    let r = vam#bisect#List(vim_executable, 0, addons, [])
+  endtry
   let g:vim_addon_bisect_result = r
-  echoe string(r.message)
+  call vam#Log(r.message)
 endf
 
 fun! vam#bisect#BisectCompletion(A, L, P, ...)
