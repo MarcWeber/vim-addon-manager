@@ -45,6 +45,7 @@ let s:c['plugin_dir_by_name'] = get(s:c, 'plugin_dir_by_name', 'vam#DefaultPlugi
 let s:c['addon_completion_lhs'] = get(s:c, 'addon_completion_lhs', '<C-x><C-p>')
 let s:c['debug_activation'] = get(s:c, 'debug_activation', 0)
 let s:c['pool_item_check_fun'] = get(s:c, 'pool_item_check_fun', 'none')
+let s:c['no_activate_hack'] = get(s:c, 'no_activate_hack', 0)
 
 " experimental: will be documented when its tested
 " don't echo lines, add them to a buffer to prevent those nasty "Press Enter"
@@ -407,9 +408,11 @@ fun! vam#GlobThenSource(glob)
   call vam#SourceFiles(vam#GlobList(a:glob))
 endfun
 
-augroup VIM_PLUGIN_MANAGER
-  autocmd VimEnter * call  vam#SourceMissingPlugins()
-augroup END
+if !s:c.no_activate_hack
+  augroup VIM_PLUGIN_MANAGER
+    autocmd VimEnter * call  vam#SourceMissingPlugins()
+  augroup END
+endif
 
 " taken from tlib
 fun! vam#OutputAsList(command) "{{{3
