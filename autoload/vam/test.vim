@@ -56,7 +56,7 @@ fun! vam#test#TestUnpack(test) abort
     call vam#utils#RmFR(tmpDir)
     let dict = g:vim_addon_manager['plugin_sources'][v[0]]
     call vam#install#Checkout(tmpDir, dict)
-    let files = split(glob(tmpDir.'/**'),"\n")
+    let files = vam#GlobInDir(tmpDir, '**')
     " replace \ by / on win and remove tmpDir prefix
     call map(files, 'substitute(v:val,'.string('\').',"/","g")['.(len(tmpDir)+1).':]')
     call sort(files)

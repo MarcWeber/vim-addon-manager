@@ -124,8 +124,8 @@ let s:post_unpack_hooks={}
 fun s:post_unpack_hooks.fix_layout(opts, targetDir, fixDir)
   " if there are *.vim files but no */**/*.vim files they layout is likely to
   " be broken. Try fixing it
-  let rtpvimfiles=glob(a:targetDir.'/*.vim')
-  if  !empty(rtpvimfiles) && empty(glob(a:targetDir.'/*/**/*.vim'))
+  let rtpvimfiles=vam#GlobInDir(a:targetDir, '*.vim')
+  if  !empty(rtpvimfiles) && empty(glob(fnameescape(a:targetDir).'/*/**/*.vim', 1))
     " also see [fix-layout]
 
     " fixing .vim file locations was missed above. So fix it now
@@ -140,7 +140,7 @@ fun s:post_unpack_hooks.fix_layout(opts, targetDir, fixDir)
 endfun
 fun s:post_unpack_hooks.change_to_unix_ff(opts, targetDir, fixDir)
   if get(a:opts, 'unix_ff', 0)
-    for f in filter(vam#utils#Glob(a:targetDir.'/**/*.vim'), 'filewritable(v:val)==1')
+    for f in filter(vam#GlobInDir(a:targetDir, '**/*.vim'), 'filewritable(v:val)==1')
       call writefile(map(readfile(f, 'b'),
                   \'((v:val[-1:] is# "\r")?(v:val[:-2]):(v:val))'), f, 'b')
     endfor
@@ -295,15 +295,6 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
   endfor
 endf
 
-" Usage: Glob($HOME.'/*')
-" FIXME won't list hidden files as well
-fun! vam#utils#Glob(path)
-  return split(glob(a:path),"\n")
-  " The following does not filter . and .. components at all and spoils ** 
-  " patterns (but it lacks `\' at the start of the line, so it is not even 
-  " executed). Commenting this line just clarifies this issue
-  " + filter(split(glob(substitute(a:path,'\*','.*','g')),"\n"),'v:val != "." && v:val != ".."')
-endf
 
 " move */* one level up, then remove first * matches
 " if you don't want all dirs to be removed add them to keepdirs
@@ -331,14 +322,14 @@ fun! vam#utils#StripComponents(dir, num, keepdirs)
     let tomove = []
     let toremove = []
     " for each a:dir/*
-    for gdir in filter(vam#utils#Glob(a:dir.'/*'),'isdirectory(v:val)')
+    for gdir in filter(vam#GlobInDir(a:dir, '*'),'isdirectory(v:val)')
       if index(a:keepdirs, gdir)!=-1 | continue | endif
       call add(toremove, gdir)
       if strip_single_dir && len(toremove)>=2
         return
       endif
       " for each gdir/*
-      for path in vam#utils#Glob(gdir.'/*')
+      for path in vam#GlobInDir(gdir, '*')
         " move out of dir
         call add(tomove, [path, a:dir.'/'.fnamemodify(path, ':t')])
       endfor

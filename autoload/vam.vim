@@ -149,8 +149,8 @@ fun! vam#IsPluginInstalled(name)
   " if dir exists and its not a failed download
   " (empty archive directory)
   return isdirectory(d)
-    \ && ( !isdirectory(d.'/archive')
-    \     || len(glob(d.'/archive/*')) > 0 )
+    \ && (!isdirectory(d.'/archive')
+    \     || !empty(glob(fnameescape(d).'/archive/*', 1)))
 endf
 
 " {} if file doesn't exist
@@ -378,13 +378,27 @@ fun! vam#SourceFiles(fs)
   endfor
 endf
 
+" FIXME won't list hidden files as well
+if v:version>703 || (v:version==703 && has('patch465'))
+  fun! vam#GlobList(glob)
+    return glob(a:glob, 1, 1)
+  endfun
+else
+  fun! vam#GlobList(glob)
+    return split(glob(a:glob, 1), "\n")
+  endfun
+endif
+
+fun! vam#GlobInDir(dir, glob)
+  return vam#GlobList(fnameescape(a:dir).'/'.a:glob)
+endfun
 fun! vam#GlobThenSource(glob)
   if s:c.dont_source | return | endif
-  call vam#SourceFiles(split(glob(a:glob),"\n"))
+  call vam#SourceFiles(vam#GlobList(a:glob))
 endf
 
 augroup VIM_PLUGIN_MANAGER
-  autocmd VimEnter * call  vam#Hack()
+  autocmd VimEnter * call  vam#SourceMissingPlugins()
 augroup end
 
 " taken from tlib
@@ -404,22 +418,16 @@ endf
 "       plugin/*.vim files of those files - so make sure they are alle sourced
 " 
 " This function takes about 1ms to execute my system
-fun! vam#Hack()
+fun! vam#SourceMissingPlugins()
   " files which should have been sourced:
   let fs = []
   let rtp = split(&runtimepath, '\v(\\@<!(\\.)*\\)@<!\,')
-  for r in rtp | call extend(fs, split(glob(r.'/plugin/*.vim'),"\n")) | endfor
-  for r in rtp | call extend(fs, split(glob(r.'/after/plugin/**/*.vim'),"\n")) | endfor
+  for r in rtp | call extend(fs, vam#GlobInDir(r, 'plugin/*.vim')) | endfor
+  for r in rtp | call extend(fs, vam#GlobInDir(r, 'after/plugin/**/*.vim')) | endfor
 
   let scriptnames = map(vam#OutputAsList('scriptnames'), 'v:val[(stridx(v:val,":")+2):-1]')
   call filter(fs, 'index(scriptnames,  v:val) == -1')
   call vam#SourceFiles(fs)
-
-  " no longer needed, should be catched by code above
-  " now source after/plugin/**/*.vim files explicitly. Vim doesn't do it (hack!)
-  " for p in keys(s:c['activated_plugins'])
-  "     call vam#GlobThenSource(vam#PluginDirFromName(p).'/after/plugin/**/*.vim')
-  " endfor
 endf
 
 fun! vam#AddonInfoFile(name)

@@ -428,7 +428,7 @@ fun! vam#install#KnownAddons(type)
   if a:type isnot# 'notinstalled' &&
         \s:c.plugin_dir_by_name is# 'vam#DefaultPluginDirFromName' &&
         \stridx(s:c.plugin_root_dir, "\n")==-1
-    for n in split(glob(s:c.plugin_root_dir.'/*', "\n"))
+    for n in vam#GlobInDir(s:c.plugin_root_dir, '*')
       " We don’t care about values: so no need to make it complex
       let k[fnamemodify(n, ':t')] = 1
     endfor
@@ -559,22 +559,6 @@ fun! vam#install#HelpTags(name)
   if isdirectory(d) | exec 'helptags '.fnameescape(d) | endif
 endf
 
-" " if --strip-components fails finish this workaround:
-" " emulate it in VimL
-" fun! s:StripComponents(targetDir, num)
-"   let dostrip = 1*a:num
-"   while x in range(1, 1*a:num)
-"     let dirs = split(glob(a:targetDir.'/*'),"\n")
-"     if len(dirs) > 1
-"       throw "can't strip, multiple dirs found!"
-"     endif
-"     for f in split(glob(dirs[0].'/*'),"\n")
-"       call rename(file_or_dir, fnamemodify(f,':h:h').'/'.fnamemodify(f,':t'))
-"     endfor
-"     call remove_dir_or_file(fnamemodify(f,':h'))
-"   endwhile
-" endfun
-
 " basename of url. if archive_name is given use that instead
 fun! vam#install#ArchiveNameFromDict(repository)
     let archiveName = fnamemodify(substitute(get(a:repository,'archive_name',''), '\.\@<=VIM$', 'vim', ''),':t')
@@ -672,7 +656,7 @@ fun! vam#install#MergePluginFiles(plugins, skip_pattern)
   let uniq = 1
   let all_contents = ""
   for r in runtimepaths
-    for file in split(glob(r.'/plugin-merged/*.vim'),"\n")
+    for file in vam#GlobInDir(r, 'plugin-merged/*.vim')
 
       if file =~ a:skip_pattern
         let all_contents .= "\" ignoring ".file."\n"
@@ -757,8 +741,7 @@ endf
 
 fun! vam#install#UnmergePluginFiles()
   let path = fnamemodify(vam#PluginRuntimePath('vim-addon-manager'),':h')
-  for merged in split(glob(path.'/*/plugin-merged'),"\n")
-            \ +split(glob(path.'/*/*/plugin-merged'),"\n")
+  for merged in vam#GlobInDir(path, '{,*/}*/plugin-merged')
     echo "unmerging ".merged
     call rename(merged, substitute(merged,'-merged$','',''))
   endfor
