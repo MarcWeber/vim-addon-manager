@@ -118,7 +118,12 @@ recommended setup ~
 2) Read the comments carefully. They help you getting started. Then you can 
    remove them.
 3) Add addon names to the ActivateAddons call, start Vim. That’s all.
+
+commented version ~
 >
+        " put this line first in ~/.vimrc
+        set nocompatible | filetype indent plugin on | syn on
+
         fun! EnsureVamIsOnDisk(vam_install_path)
           " windows users may want to use http://mawercer.de/~marc/vam/index.php
           " to fetch VAM, VAM-known-repositories and the listed plugins
@@ -160,9 +165,7 @@ recommended setup ~
           " VAM install location:
           let vam_install_path = expand('$HOME') . '/.vim/vim-addons'
           if !EnsureVamIsOnDisk(vam_install_path)
-            echohl ErrorMsg
-            echomsg "No VAM found!"
-            echohl NONE
+            echohl ErrorMsg | echomsg "No VAM found!" | echohl NONE
             return
           endif
           exec 'set runtimepath+='.vam_install_path.'/vim-addon-manager'
@@ -193,6 +196,21 @@ recommended setup ~
         " See BUGS sections below [*]
         " Vim 7.0 users see BUGS section [3]
 
+minimal version ~
+>
+        " put this line first in ~/.vimrc
+        set nocompatible | filetype indent plugin on | syn on
+
+        fun SetupVAM()
+          let vam_install_path = expand('$HOME') . '/.vim/vim-addons'
+          exec 'set rtp+='.vam_install_path.'/vim-addon-manager'
+          " let g:vim_addon_manager = { your config here see "commented version" example and help
+          if !isdirectory(vam_install_path.'/vim-addon-manager/autoload')
+            execute '!git clone --depth=1 git://github.com/MarcWeber/vim-addon-manager '.shellescape(vam_install_path, 1).'/vim-addon-manager'
+          endif
+          call vam#ActivateAddons([the plugin names], {'auto_install' : 0})
+        endf
+        call SetupVAM()
 
 
 NOTES: ~
