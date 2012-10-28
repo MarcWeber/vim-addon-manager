@@ -42,6 +42,10 @@ fun! s:confirm(msg, ...)
   endif
 endfun
 
+fun! vam#install#confirm(...)
+  return call('s:confirm', a:000)
+endfun
+
 fun! vam#install#CheckPoolItem(key, i)
   let type = get(a:i, 'type', '')
   let url = get(a:i, 'url', '')

@@ -79,7 +79,7 @@ AddonsBisect [vim] [arg1] ...                                  *:AddonsBisect*
         If arguments are given they are used as a command that launches vim. 
         If you know how to make vim test whether problem occurs use >
             AddonsBisect vim -c if\ has(problem)|BADVAMBisect|else|OKVAMBisect|endif
-<       (Note the space escaping).
+<       (note the space escaping).
 
 ------------------------------------------------------------------------------
 3.2. Functions                                                 *VAM-functions*

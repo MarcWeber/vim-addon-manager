@@ -1,3 +1,6 @@
+
+exec vam#DefineAndBind('s:c','g:vim_addon_manager','{}')
+
 fun! vam#bisect#StepBad(vim, plain, addons, vimrc_tmp) abort
   let cmd_items = copy(a:vim)
   if a:plain
@@ -15,7 +18,7 @@ fun! vam#bisect#StepBad(vim, plain, addons, vimrc_tmp) abort
   " call system(join(map(cmd_items,'shellescape(v:val)')," "))
   " take care about %, use VAMs functions?
 
-  if !s:confirm('running vim with addons '.string(a:addons).' plain: '.a:plain)
+  if !vam#install#confirm('running vim with addons '.string(a:addons).' plain: '.a:plain)
     throw "user abort"
   endif
   exec '!'.escape(join(map(cmd_items,'shellescape(v:val, 1)'),' '),'%!')
