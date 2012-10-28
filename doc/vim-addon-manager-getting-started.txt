@@ -153,13 +153,13 @@ commented version ~
         fun! SetupVAM()
           " Set advanced options like this:
           " let g:vim_addon_manager = {}
-          " let g:vim_addon_manager['key'] = value
+          " let g:vim_addon_manager.key = value
           "     Pipe all output into a buffer which gets written to disk
-          " let g:vim_addon_manager['log_to_buf'] =1
+          " let g:vim_addon_manager.log_to_buf =1
 
           " Example: drop git sources unless git is in PATH. Same plugins can
           " be installed from www.vim.org. Lookup MergeSources to get more control
-          " let g:vim_addon_manager['drop_git_sources'] = !executable('git')
+          " let g:vim_addon_manager.drop_git_sources = !executable('git')
           " let g:vim_addon_manager.debug_activation = 1
 
           " VAM install location:
@@ -343,14 +343,14 @@ VAM-kr as patch. If you don't there are two ways:
 WAY 1: (still supported) add to your .vimrc before activating VAM (BUG/TODO [5]): >
   let g:vim_addon_manager = {}
   let g:vim_addon_manager.plugin_sources = {}
-  let g:vim_addon_manager.plugin_sources['your_plugin_name'] = { plugin dictionary }
+  let g:vim_addon_manager.plugin_sources.your_plugin_name = { plugin dictionary }
 <
 WAY 2: define your own Pool function: >
   let g:vim_addon_manager = {}
   let g:vim_addon_manager.pool_fun = function('MyPoolFun')
   fun MyPoolFun()
     let d = vam#install#Pool()
-    let d['my_plugin'] = { 'type' : 'git', 'url' : ' ... ' }
+    let d.my_plugin = { 'type' : 'git', 'url' : ' ... ' }
     return d
   endfun
 
@@ -370,11 +370,11 @@ Yes, you can do this in MyPoolFun shown above as well >
         let a:plugin_sources[your_plugin]['password'] = 'svn user'
        endfor
 
-      let a:plugin_sources['your_plugin_name'] = { plugin dictionary }
+      let a:plugin_sources.your_plugin_name = { plugin dictionary }
     endfun
     " tell VAM to use your MergeSources function:
     let g:vim_addon_manager = {}
-    let g:vim_addon_manager['MergeSources'] = function('MyMergeSources')
+    let g:vim_addon_manager.MergeSources = function('MyMergeSources')
 <
 
 
