@@ -66,13 +66,15 @@ UninstallNotLoadedAddons {name} ...                *:UninstallNotLoadedAddons*
 AddonsInfo {id/name} ...                                         *:AddonsInfo*
         Shows addon information. Accepts both VAM script names and www.vim.org 
         script numbers.
-
-AddonsBisect                                                 *:AddonsBisect*
-        Bisect activated plugins to find the one causing some trouble you're
-        experiencing. Bisectng means deviding the list of activated addons
-        into two equal sized sets, then asking you to test whether the
-        issue occurs, then repating the test on either set until one plugin
-        is left.
+                                                *:OKVAMBisect* *:BADVAMBisect*
+AddonsBisect                                                   *:AddonsBisect*
+        Command that helps find which one of the activated plugins is causing 
+        the problem. In order to do this it launches new vim instance which 
+        will activate only half (1/4, 1/8 and so on) of the plugins currently 
+        activated. In newly launched vim you are able to use :OKVAMBisect 
+        command to mark this set of plugins as non-problematic and 
+        :BADVAMBisect to mark this set of plugins as problematic. It will 
+        repeat bisection until there is only one plugin in the list.
 
         This may not work no Windowsn yet due to the ! usage.
 
