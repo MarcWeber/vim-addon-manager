@@ -18,7 +18,7 @@ let s:http_cmd = exists('g:netrw_http_cmd') ?
 
 " for testing it is necessary to avoid the "Press enter to continue lines".
 " Thus provide an option making all shell commands use “system”
-let s:c['shell_commands_run_method'] = get(s:c, 'shell_commands_run_method', s:c.log_to_buf ? 'system' : 'bang')
+let s:c.shell_commands_run_method = get(s:c, 'shell_commands_run_method', s:c.log_to_buf ? 'system' : 'bang')
 
 " insert arguments at placeholders $ shell escaping the value
 " usage: s:shellescape("rm --arg $ -fr $p $p $p", [string, file1, file2, file3])

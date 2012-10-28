@@ -18,61 +18,63 @@ endfor
 let g:is_win = g:os[:2] == 'win'
 
 exec vam#DefineAndBind('s:c','g:vim_addon_manager','{}')
-let s:c['auto_install'] = get(s:c,'auto_install', 0)
+let s:c.auto_install               = get(s:c,'auto_install',                0)
 " repository locations:
-let s:c['plugin_sources'] = get(s:c,'plugin_sources', {})
+let s:c.plugin_sources             = get(s:c,'plugin_sources',              {})
 " if a plugin has an item here the dict value contents will be written as plugin info file
 " Note: VAM itself may be added after definition of vam#PluginDirFromName 
 " function
-let s:c['activated_plugins'] = get(s:c,'activated_plugins', {})
+let s:c.activated_plugins          = get(s:c,'activated_plugins',           {})
 
-let s:c['create_addon_info_handlers'] = get(s:c, 'create_addon_info_handlers', 1)
+let s:c.create_addon_info_handlers = get(s:c, 'create_addon_info_handlers', 1)
 
 " Users may install VAM system wide. In that case s:d is not writeable.
 let s:d = expand('<sfile>:h:h:h')
-let s:c['plugin_root_dir'] = get(s:c, 'plugin_root_dir', filewritable(s:d) ? s:d : '~/.vim/vim-addons' )
+let s:c.plugin_root_dir = get(s:c, 'plugin_root_dir', filewritable(s:d) ? s:d : '~/.vim/vim-addons')
 unlet s:d
 
-if s:c['plugin_root_dir'] == expand('$HOME')
-  echoe "VAM: Don't install VAM into ~/.vim the normal way. See docs -> SetupVAM function. Put it int ~/.vim/vim-addons/vim-addon-manager for example."
+if s:c.plugin_root_dir == expand('~')
+  echohl Error
+  echomsg "VAM: Don't install VAM into ~/.vim the normal way. See docs -> SetupVAM function. Put it int ~/.vim/vim-addons/vim-addon-manager for example."
+  echohl None
   finish
 endif
 
 " ensure we have absolute paths (windows doesn't like ~/.. ) :
-let s:c['plugin_root_dir'] = expand(s:c['plugin_root_dir'])
-let s:c['dont_source'] = get(s:c, 'dont_source', 0)
-let s:c['plugin_dir_by_name'] = get(s:c, 'plugin_dir_by_name', 'vam#DefaultPluginDirFromName')
-let s:c['addon_completion_lhs'] = get(s:c, 'addon_completion_lhs', '<C-x><C-p>')
-let s:c['debug_activation'] = get(s:c, 'debug_activation', 0)
-let s:c['pool_item_check_fun'] = get(s:c, 'pool_item_check_fun', 'none')
-let s:c['no_activate_hack'] = get(s:c, 'no_activate_hack', 0)
+let s:c.plugin_root_dir = expand(s:c.plugin_root_dir)
+let s:c.dont_source          = get(s:c, 'dont_source',          0)
+let s:c.plugin_dir_by_name   = get(s:c, 'plugin_dir_by_name',   'vam#DefaultPluginDirFromName')
+let s:c.addon_completion_lhs = get(s:c, 'addon_completion_lhs', '<C-x><C-p>')
+let s:c.debug_activation     = get(s:c, 'debug_activation',     0)
+let s:c.pool_item_check_fun  = get(s:c, 'pool_item_check_fun',  'none')
+let s:c.no_activate_hack     = get(s:c, 'no_activate_hack',     0)
 
 " experimental: will be documented when its tested
 " don't echo lines, add them to a buffer to prevent those nasty "Press Enter"
 " to show more requests by Vim
 " TODO: move log code into other file (such as utils.vim) because its not used on each startup
 " TODO: think about autowriting it
-let s:c['log_to_buf'] = get(s:c, 'log_to_buf', 0)
-let s:c['log_buffer_name'] = get(s:c, 'log_buffer_name', s:c.plugin_root_dir.'/VAM_LOG.txt')
+let s:c.log_to_buf      = get(s:c, 'log_to_buf', 0)
+let s:c.log_buffer_name = get(s:c, 'log_buffer_name', s:c.plugin_root_dir.'/VAM_LOG.txt')
 
 " More options that are used for plugins’ installation are listed in 
 " autoload/vam/install.vim
 
-if g:is_win
+if g:is_win && has_key(s:c, 'binary_utils')
   " if binary-utils path exists then add it to PATH
-  let s:c['binary_utils'] = get(s:c,'binary_utils',s:c['plugin_root_dir'].'\binary-utils')
-  let s:c['binary_utils_bin'] = s:c['binary_utils'].'\dist\bin'
-  if isdirectory(s:c['binary_utils'])
-    let $PATH=$PATH.';'.s:c['binary_utils_bin']
+  let s:c.binary_utils = get(s:c,'binary_utils', s:c.plugin_root_dir.'\binary-utils')
+  let s:c.binary_utils_bin = s:c.binary_utils.'\dist\bin'
+  if isdirectory(s:c.binary_utils)
+    let $PATH=$PATH.';'.s:c.binary_utils_bin
   endif
 endif
 
 " additional plugin sources should go into your .vimrc or into the repository
 " called "vim-addon-manager-known-repositories" referenced here:
 if executable('git')
-  let s:c['plugin_sources']["vim-addon-manager-known-repositories"] = { 'type' : 'git', 'url': 'git://github.com/MarcWeber/vim-addon-manager-known-repositories' }
+  let s:c.plugin_sources["vim-addon-manager-known-repositories"] = {'type' : 'git', 'url': 'git://github.com/MarcWeber/vim-addon-manager-known-repositories'}
 else
-  let s:c['plugin_sources']["vim-addon-manager-known-repositories"] = { 'type' : 'archive', 'url': 'http://github.com/MarcWeber/vim-addon-manager-known-repositories/tarball/master', 'archive_name': 'vim-addon-manager-known-repositories-tip.tar.gz' }
+  let s:c.plugin_sources["vim-addon-manager-known-repositories"] = {'type' : 'archive', 'url': 'http://github.com/MarcWeber/vim-addon-manager-known-repositories/tarball/master', 'archive_name': 'vim-addon-manager-known-repositories-tip.tar.gz'}
 endif
 
 if s:c.create_addon_info_handlers
@@ -127,12 +129,12 @@ fun! vam#PluginDirFromName(...)
 endfun
 fun! vam#PluginRuntimePath(name)
   let info = vam#AddonInfo(a:name)
-  return vam#PluginDirFromName(a:name).(has_key(info, 'runtimepath') ? '/'.info['runtimepath'] : '')
+  return vam#PluginDirFromName(a:name).(has_key(info, 'runtimepath') ? '/'.info.runtimepath : '')
 endfun
 
 " adding VAM, so that its contained in list passed to :UpdateActivatedAddons 
 if filewritable(vam#PluginDirFromName('vim-addon-manager'))==2
-  let s:c['activated_plugins']['vim-addon-manager']=1
+  let s:c.activated_plugins['vim-addon-manager']=1
 endif
 
 " doesn't check dependencies!
@@ -172,14 +174,14 @@ fun! vam#ActivateRecursively(list_of_names, ...)
   let opts = extend({'run_install_hooks': 1}, a:0 == 0 ? {} : a:1)
 
   for name in a:list_of_names
-    if !has_key(s:c['activated_plugins'],  name)
+    if !has_key(s:c.activated_plugins,  name)
       " break circular dependencies..
-      let s:c['activated_plugins'][name] = 0
+      let s:c.activated_plugins[name] = 0
 
       let infoFile = vam#AddonInfoFile(name)
       if !filereadable(infoFile) && !vam#IsPluginInstalled(name)
         if empty(vam#install#Install([name], opts))
-          unlet s:c['activated_plugins'][name]
+          unlet s:c.activated_plugins[name]
           continue
         endif
       endif
@@ -196,13 +198,13 @@ fun! vam#ActivateRecursively(list_of_names, ...)
 
       " source plugin/* files ?
       let rtp = vam#PluginRuntimePath(name)
-      call add(opts['new_runtime_paths'], rtp)
+      call add(opts.new_runtime_paths, rtp)
       let opts.path_plugins[rtp] = name
       if !empty(get(opts, 'requested_by'))
         let opts.are_dependencies[name] = 1
       endif
 
-      let s:c['activated_plugins'][name] = 1
+      let s:c.activated_plugins[name] = 1
 
       if s:c.debug_activation
         " activation takes place later (-> new_runtime_paths), but messages will be in order
@@ -355,11 +357,11 @@ fun! vam#DisplayAddonInfoLines(name, repository)
 endfun
 
 fun! vam#DisplayAddonInfo(name)
-  let repository = get(g:vim_addon_manager['plugin_sources'], a:name, {})
+  let repository = get(g:vim_addon_manager.plugin_sources, a:name, {})
   let name = a:name
   if empty(repository) && a:name =~ '^\d\+$'
     " try to find by script id
-    let dict = filter(copy(g:vim_addon_manager['plugin_sources']), 'get(v:val,"vim_script_nr","")."" == '.string(1*a:name))
+    let dict = filter(copy(g:vim_addon_manager.plugin_sources), 'get(v:val,"vim_script_nr","")."" == '.string(1*a:name))
     if (empty(dict))
       throw "unknown script ".a:name
     else
@@ -515,7 +517,7 @@ command! -nargs=* -bar -complete=customlist,vam#install#AddonCompletion Activate
 command! -nargs=* -bar -complete=customlist,vam#install#AddonCompletion AddonsInfo :call vam#DisplayAddonsInfo([<f-args>])
 command! -nargs=* -bar -complete=customlist,vam#install#InstalledAddonCompletion ActivateInstalledAddons :call vam#ActivateAddons([<f-args>])
 command! -nargs=* -bar -complete=customlist,vam#install#UpdateCompletion UpdateAddons :call vam#install#Update([<f-args>])
-command! -nargs=0 -bar UpdateActivatedAddons exec 'UpdateAddons '.join(keys(g:vim_addon_manager['activated_plugins']),' ')
+command! -nargs=0 -bar UpdateActivatedAddons exec 'UpdateAddons '.join(keys(g:vim_addon_manager.activated_plugins),' ')
 command! -nargs=* -bar -complete=customlist,vam#install#UninstallCompletion UninstallNotLoadedAddons :call vam#install#UninstallAddons([<f-args>])
 
 command! -nargs=* -complete=customlist,vam#bisect#BisectCompletion AddonsBisect :call vam#bisect#Bisect(<f-args>)

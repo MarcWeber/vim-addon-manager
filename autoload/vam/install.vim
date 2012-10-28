@@ -2,16 +2,16 @@
 
 exec vam#DefineAndBind('s:c','g:vim_addon_manager','{}')
 
-let s:c['change_to_unix_ff'] = get(s:c, 'change_to_unix_ff', (g:os=~#'unix'))
-let s:c['do_diff'] = get(s:c, 'do_diff', 1)
-let s:c['known'] = get(s:c,'known','vim-addon-manager-known-repositories')
-let s:c['MergeSources'] = get(s:c, 'MergeSources', 'vam_known_repositories#MergeSources')
-let s:c['pool_fun'] = get(s:c, 'pool_fun', 'vam#install#Pool')
-let s:c['name_rewriting'] = get(s:c, 'name_rewriting', {})
-let s:c['pre_update_hook_functions'] = get(s:c, 'pre_update_hook_functions', ['vam#install#CreatePatch'])
-let s:c['post_update_hook_functions'] = get(s:c, 'post_update_hook_functions', ['vam#install#ApplyPatch'])
-let s:c['post_scms_update_hook_functions'] = get(s:c, 'post_scms_update_hook_functions', ['vam#install#ShowShortLog'])
-let s:c['pool_item_check_funs'] = get(s:c, 'pool_item_check_funs', ['vam#install#CheckPoolItem'])
+let s:c.change_to_unix_ff               = get(s:c, 'change_to_unix_ff', (g:os=~#'unix'))
+let s:c.do_diff                         = get(s:c, 'do_diff',           1)
+let s:c.known                           = get(s:c, 'known', 'vim-addon-manager-known-repositories')
+let s:c.MergeSources                    = get(s:c, 'MergeSources', 'vam_known_repositories#MergeSources')
+let s:c.pool_fun                        = get(s:c, 'pool_fun', 'vam#install#Pool')
+let s:c.name_rewriting                  = get(s:c, 'name_rewriting',    {})
+let s:c.pre_update_hook_functions       = get(s:c, 'pre_update_hook_functions', ['vam#install#CreatePatch'])
+let s:c.post_update_hook_functions      = get(s:c, 'post_update_hook_functions', ['vam#install#ApplyPatch'])
+let s:c.post_scms_update_hook_functions = get(s:c, 'post_scms_update_hook_functions', ['vam#install#ShowShortLog'])
+let s:c.pool_item_check_funs            = get(s:c, 'pool_item_check_funs', ['vam#install#CheckPoolItem'])
 
 call extend(s:c.name_rewriting, {'99git+github': 'vam#install#RewriteName'})
 
@@ -71,9 +71,9 @@ fun! vam#install#RewriteName(name)
 endfun
 
 fun! vam#install#GetRepo(name, opts)
-  if a:name isnot# s:c['known'] | call vam#install#LoadPool() |endif
+  if a:name isnot# s:c.known | call vam#install#LoadPool() |endif
 
-  let repository = get(s:c['plugin_sources'], a:name, get(get(a:opts, 'plugin_sources', {}), a:name, 0))
+  let repository = get(s:c.plugin_sources, a:name, get(get(a:opts, 'plugin_sources', {}), a:name, 0))
   if repository is 0
     unlet repository
     for key in sort(keys(s:c.name_rewriting))
@@ -126,14 +126,14 @@ fun! vam#install#ReplaceAndFetchUrls(list)
       let t = n
     endif
     if exists('t')
-      let dic = vam#ReadAddonInfo(t)
+      let info = vam#ReadAddonInfo(t)
       unlet t
-      if !has_key(dic,'name') || !has_key(dic, 'repository')
+      if !has_key(info, 'name') || !has_key(info, 'repository')
         call vam#Log( n." is no valid addon-info file. It must contain both keys: name and repository")
         continue
       endif
-      let s:c['plugin_sources'][dic['name']] = dic['repository']
-      let l[idx] = dic['name']
+      let s:c.plugin_sources[info.name] = info.repository
+      let l[idx] = info.name
     endif
   endfor
   return l
@@ -266,7 +266,7 @@ fun! vam#install#CreatePatch(info, repository, pluginDir, hook_opts)
       call mkdir(a:pluginDir.'/archive', 'p')
 
       let rep_copy = deepcopy(a:repository)
-      let rep_copy['url'] = 'file://'.expand(archiveFileBackup)
+      let rep_copy.url = 'file://'.expand(archiveFileBackup)
       call vam#install#Checkout(a:pluginDir, rep_copy)
       silent! call delete(a:pluginDir.'/version')
       try
@@ -332,7 +332,7 @@ fun! vam#install#UpdateAddon(name)
 
   " we have to find out whether there is a new version:
   call vam#install#LoadPool()
-  let repository = get(s:c['plugin_sources'], a:name, {})
+  let repository = get(s:c.plugin_sources, a:name, {})
   if empty(repository)
     call vam#Log("Don't know how to update ".a:name." because it is not contained in plugin_sources")
     return 'failed'
@@ -392,7 +392,7 @@ fun! vam#install#Update(list)
   call vam#install#LoadPool(1)
 
   if empty(list) && s:confirm('Update all loaded plugins?')
-    let list = keys(s:c['activated_plugins'])
+    let list = keys(s:c.activated_plugins)
   endif
   let by_reply = {}
   for p in list
@@ -563,7 +563,7 @@ endfun
 fun! vam#install#ArchiveNameFromDict(repository)
     let archiveName = fnamemodify(substitute(get(a:repository,'archive_name',''), '\.\@<=VIM$', 'vim', ''),':t')
     if empty(archiveName)
-      let archiveName = fnamemodify(a:repository['url'],':t')
+      let archiveName = fnamemodify(a:repository.url,':t')
     endif
     return archiveName
 endfun
@@ -592,7 +592,7 @@ fun! vam#install#Checkout(targetDir, repository) abort
     " archive will be downloaded to this location
     let archiveFile = a:targetDir.'/archive/'.archiveName
 
-    call vam#utils#Download(a:repository['url'], archiveFile)
+    call vam#utils#Download(a:repository.url, archiveFile)
 
     call vam#utils#Unpack(archiveFile, a:targetDir,
                 \                  {'strip-components': get(a:repository,'strip-components',-1),
@@ -637,7 +637,7 @@ fun! vam#install#MergePluginFiles(plugins, skip_pattern)
   let target = vam#install#MergeTarget()
 
   for r in a:plugins
-    if !has_key(s:c['activated_plugins'], r)
+    if !has_key(s:c.activated_plugins, r)
       throw "JoinPluginFiles: all plugins must be activated (which ensures that they have been installed). This plugin is not active: ".r
     endif
   endfor
@@ -753,9 +753,9 @@ endfun
 " one of those commands. Read doc/vim-addon-manager.txt to learn about the
 " pool of plugin sources. Also see option "known_repos_activation_policy"
 fun! vam#install#LoadKnownRepos()
-  let known = s:c['known']
+  let known = s:c.known
   let reason = a:0 > 0 ? a:1 : 'get more plugin sources'
-  if get(s:c['activated_plugins'], known, 0)
+  if get(s:c.activated_plugins, known, 0)
     return 1
   else
     let policy=get(s:c, 'known_repos_activation_policy', 'autoload')
@@ -810,8 +810,8 @@ endfun
 
 if g:is_win
   fun! vam#install#FetchAdditionalWindowsTools() abort
-    if !isdirectory(s:c['binary_utils'].'\dist')
-      call mkdir(s:c['binary_utils'].'\dist','p')
+    if !isdirectory(s:c.binary_utils.'\dist')
+      call mkdir(s:c.binary_utils.'\dist','p')
     endif
     " we have curl, so we can fetch remaining deps using Download and Unpack
     let tools = {
@@ -827,18 +827,18 @@ if g:is_win
       for ex in v[2]
         if executable(ex) | continue | endif
       endfor
-      if !filereadable(s:c['binary_utils'].'\'.v[1])
-        call vam#utils#DownloadFromMirrors(v[0].v[1], s:c['binary_utils'])
+      if !filereadable(s:c.binary_utils.'\'.v[1])
+        call vam#utils#DownloadFromMirrors(v[0].v[1], s:c.binary_utils)
       endif
     endfor
 
     if !executable('unzip')
       " colorize this?
       echo "__ its your turn: __"
-      echom "__ move all files of the zip directory into ".s:c['binary_utils'].'/dist . Close the Explorer window and the shell window to continue. Press any key'
+      echom "__ move all files of the zip directory into ".s:c.binary_utils.'/dist . Close the Explorer window and the shell window to continue. Press any key'
       call getchar()
-      exec "!".expand(s:c['binary_utils'].'/'. tools.zip[1])
-      let $PATH=$PATH.';'.s:c['binary_utils_bin']
+      exec "!".expand(s:c.binary_utils.'/'. tools.zip[1])
+      let $PATH=$PATH.';'.s:c.binary_utils_bin
       if !executable('unzip')
         throw "can't execute unzip. Something failed!"
       endif
@@ -847,7 +847,7 @@ if g:is_win
     " now we have unzip and can do rest
     for k in ["gzip","bzip2","tar","diffutils","patch"]
       if !executable(tools[k][2])
-        call vam#utils#Unpack(s:c['binary_utils'].'\'.tools[k][1], s:c['binary_utils'].'\dist')
+        call vam#utils#Unpack(s:c.binary_utils.'\'.tools[k][1], s:c.binary_utils.'\dist')
       endif
     endfor
 
@@ -856,7 +856,7 @@ if g:is_win
     "return
   "endif
   "let _7zurl = 'mirror://sourceforge/sevenzip/7-Zip/4.65/7z465.exe'
-  "call vam#utils#DownloadFromMirrors(_7zurl, s:c['binary_utils'].'/7z.exe')
+  "call vam#utils#DownloadFromMirrors(_7zurl, s:c.binary_utils.'/7z.exe')
 
   endfun
 endif

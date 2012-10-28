@@ -10,12 +10,12 @@ fun! vam#test#Test()
   exec '!cp -r'  s:plugin_root_dir test_dir
 
   " keep it simple:
-  let g:vim_addon_manager['activated_plugins']['vim-addon-manager-known-repositories'] = 1
-  let plugin_sources = g:vim_addon_manager['plugin_sources']
+  let g:vim_addon_manager.activated_plugins['vim-addon-manager-known-repositories'] = 1
+  let plugin_sources = g:vim_addon_manager.plugin_sources
 
   " test mercurial
   call feedkeys("y")
-  let plugin_sources['vimstuff'] = { 'type': 'hg', 'url': 'http://vimstuff.hg.sourceforge.net:8000/hgroot/vimstuff/vimstuff' }
+  let plugin_sources.vimstuff = {'type': 'hg', 'url': 'http://vimstuff.hg.sourceforge.net:8000/hgroot/vimstuff/vimstuff'}
   call vam#ActivateAddons(["vimstuff"])
 
   " test git
@@ -54,7 +54,7 @@ fun! vam#test#TestUnpack(test) abort
   for [k,v] in items(tests)
     if k !~ a:test | continue | endif
     call vam#utils#RmFR(tmpDir)
-    let dict = g:vim_addon_manager['plugin_sources'][v[0]]
+    let dict = g:vim_addon_manager.plugin_sources[v[0]]
     call vam#install#Checkout(tmpDir, dict)
     let files = vam#GlobInDir(tmpDir, '**')
     " replace \ by / on win and remove tmpDir prefix
@@ -79,7 +79,7 @@ fun! vam#test#TestUpdate(case) abort
   let plugin_source_file = tmpDir.'/'.plugin_name.'.vim'
   let installDir = vam#PluginDirByName(plugin_name)
   let installCompareDir = vam#PluginDirByName(plugin_name.'-1.0') 
-  silent! unlet  g:vim_addon_manager['activated_plugins'][plugin_name]
+  silent! unlet  g:vim_addon_manager.activated_plugins[plugin_name]
   for dir in [tmpDir, installDir, installCompareDir]
     if isdirectory(dir) | call vam#utils#RmFR(dir) | endif
   endfor
@@ -95,7 +95,7 @@ fun! vam#test#TestUpdate(case) abort
 
   " install v1
   call writefile( file_v1, plugin_source_file, 1)
-  let g:vim_addon_manager['plugin_sources'][plugin_name] = {'type': 'archive', 'url': 'file://'.plugin_source_file, 'version' : '1.0' , 'script-type': 'plugin' }
+  let g:vim_addon_manager.plugin_sources[plugin_name] = {'type': 'archive', 'url': 'file://'.plugin_source_file, 'version' : '1.0' , 'script-type': 'plugin' }
   exec 'ActivateAddons '.plugin_name
 
   " patch
@@ -105,7 +105,7 @@ fun! vam#test#TestUpdate(case) abort
 
     " update to v2
     call writefile( file_v2, plugin_source_file, 1)
-    let g:vim_addon_manager['plugin_sources'][plugin_name] = {'type': 'archive', 'url': 'file://'.plugin_source_file, 'version' : '2.0' , 'script-type': 'plugin' }
+    let g:vim_addon_manager.plugin_sources[plugin_name] = {'type': 'archive', 'url': 'file://'.plugin_source_file, 'version' : '2.0' , 'script-type': 'plugin' }
     exec 'UpdateAddons '.plugin_name
 
     " verify that the patch is still present
@@ -117,7 +117,7 @@ fun! vam#test#TestUpdate(case) abort
     " manual test: diff file should be kept
     " update to v2 conflict
     call writefile( file_v2_conflict, plugin_source_file, 1)
-    let g:vim_addon_manager['plugin_sources'][plugin_name] = {'type': 'archive', 'url': 'file://'.plugin_source_file, 'version' : '2.0' , 'script-type': 'plugin' }
+    let g:vim_addon_manager.plugin_sources[plugin_name] = {'type': 'archive', 'url': 'file://'.plugin_source_file, 'version' : '2.0' , 'script-type': 'plugin' }
     exec 'UpdateAddons '.plugin_name
   else
     throw "unknown case"
