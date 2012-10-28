@@ -634,18 +634,22 @@ What features are missing?
 ==============================================================================
 9. Testing this plugin                                           *VAM-testing*
 
-Run >
-    # Replace ~/.vim/vim-addons/vim-addon-manager with the path you installed this
-    # plugin to
-    cd ~/.vim/vim-addons/vim-addon-manager
-    sh vim-addon-manager-test.sh
-.
-You should see >
-    1
-    1
-    1
-at the end. Written for Linux only. Code coverage is bad. Its a starting
-point.
+Run (assuming you installed it in ~/.vim/vim-addons) >
+    cd ~/.vim/vim-addons
+    hg clone http://vimpluginloader.hg.sourceforge.net:8000/hgroot/vimpluginloader/dev-tools
+    cd dev-tools
+    ./test.zsh -a vim-addon-manager
+. If test fails test.zsh prints out a list of failed tests and exits with 
+non-zero code. Dependencies:
+  - zsh
+  - perl
+  - YAML::Any (+some YAML implementation) and WWW::Mechanize perl packages
+  - vim
+Tests dependencies (not required for test.zsh, but for the tests themselves):
+  - git, mercurial, subversion and bazaar version control systems
+  - wget or curl. Unlike VAM tests cannot use any other downloader.
+  - 7z or zip and tar+gzip+bzip2
+  - vimball plugin
 
 ==============================================================================
 10. Some notes for windows users                                 *VAM-windows*
