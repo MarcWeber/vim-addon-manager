@@ -423,6 +423,13 @@ fun! vam#OutputAsList(command) "{{{3
     return split(lines, '\n')
 endfun
 
+let s:sep=fnamemodify(expand('<sfile>:h'), ':p')[-1:]
+let s:sesep=escape(s:sep, '\&~')
+let s:resep='\V'.escape(s:sep, '\').'\+'
+fun! s:normpath(path)
+  return substitute(expand(fnameescape(resolve(a:path)), 1), s:resep, s:sesep, 'g')
+endfun
+
 " hack: Vim sources plugin files after sourcing .vimrc
 "       Vim doesn't source the after/plugin/*.vim files in other runtime
 "       paths. So do this *after* plugin/* files have been sourced
@@ -435,10 +442,11 @@ fun! vam#SourceMissingPlugins()
   " files which should have been sourced:
   let fs = []
   let rtp = split(&runtimepath, '\v(\\@<!(\\.)*\\)@<!\,')
-  for r in rtp | call extend(fs, vam#GlobInDir(r, 'plugin/*.vim')) | endfor
+  for r in rtp | call extend(fs, vam#GlobInDir(r, 'plugin/**/*.vim')) | endfor
   for r in rtp | call extend(fs, vam#GlobInDir(r, 'after/plugin/**/*.vim')) | endfor
+  call map(fs, 's:normpath(v:val)')
 
-  let scriptnames = map(vam#OutputAsList('scriptnames'), 'v:val[(stridx(v:val,":")+2):-1]')
+  let scriptnames = map(vam#OutputAsList('scriptnames'), 's:normpath(v:val[(stridx(v:val,":")+2):-1])')
   call filter(fs, 'index(scriptnames,  v:val) == -1')
   call vam#SourceFiles(fs)
 endfun
