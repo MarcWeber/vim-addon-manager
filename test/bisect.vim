@@ -20,3 +20,4 @@ execute 'AddonsBisect '.v:progname.' --cmd let\ g:noexe=1 --cmd let\ g:curtest='
 redir END
 let msglines=split(g:messages, "\n")
 call WriteFile(filter(msglines[:-2], 'v:val =~ "\\v^E\\d+\\:"')+msglines[-1:])
+qa!
