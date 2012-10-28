@@ -28,7 +28,7 @@ fun! vam#test#Test()
   let plugin_sources['vim-latex'] = { 'type': 'svn', 'url': 'https://vim-latex.svn.sourceforge.net/svnroot/vim-latex/trunk/vimfiles'}
   call vam#ActivateAddons(["vim-latex"])
 
-endf
+endfun
 
 " vam#utils#Unpack tests
 
@@ -68,7 +68,7 @@ fun! vam#test#TestUnpack(test) abort
       debug echoe 'continue'
     endif
   endfor
-endf
+endfun
 
 " tests that creating and applying diffs when updating archive plugins (found
 " on www.vim.org) works as expected.

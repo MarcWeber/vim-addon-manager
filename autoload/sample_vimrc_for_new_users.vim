@@ -124,7 +124,7 @@ fun! FastGlob(glob)
   " let exclude = a:exclude_pattern == ''? '' : ' | grep -v -e '.shellescape(a:exclude_pattern)
   " let cmd .= exclude
   return system(cmd)
-endf
+endfun
 noremap \go :exec 'e '. fnameescape(tlib#input#List('s','select file', split(FastGlob(input('glob pattern, curr dir:','**/*')),"\n") ))<cr>
 
 " sometimes when using tags the list is too long. filtering it by library or
@@ -133,7 +133,7 @@ noremap \go :exec 'e '. fnameescape(tlib#input#List('s','select file', split(Fas
       let tag = eval(tlib#input#List('s','select tag', map(taglist(a:regex), 'string([v:val.kind, v:val.filename, v:val.cmd])')))
       exec 'e '.fnameescape(tag[1])
       exec tag[2]
-    endf
+    endfun
     command!-nargs=1 TJump call SelectTag(<f-args>)
 
 " }}}
@@ -147,7 +147,7 @@ fun! sample_vimrc_for_new_users#Load()
   " no code. If this function is called this file is sourced
   " As alternative this can be used:
   " runtime autoload/sample_vimrc_for_new_users.vim
-endf
+endfun
 
 " create directory for files before Vim tries writing them:
 augroup CREATE_MISSING_DIR_ON_BUF_WRITE

@@ -112,25 +112,25 @@ function vimrc2(){
    endif
   endfor
 
-fun! Encode(thing, ...)
-  let nl = a:0 > 0 ? (a:1 ? "\\n" : "") : ""
-  if type(a:thing) == type("")
-    return \'"\'.escape(a:thing,\'"\\\').\'"\'
-  elseif type(a:thing) == type({}) && !has_key(a:thing, \'json_special_value\')
-    let pairs = []
-    for [Key, Value] in items(a:thing)
-      call add(pairs, Encode(Key).\':\'.Encode(Value))
-      unlet Key | unlet Value
-    endfor
-    return "{".nl.join(pairs, ",".nl)."}"
-  elseif type(a:thing) == type(0)
-    return a:thing
-  elseif type(a:thing) == type([])
-    return \'[\'.join(map(copy(a:thing), "Encode(v:val)"),",").\']\'
-  else
-    throw "unexpected new thing: ".string(a:thing)
-  endif
-endf
+  fun! Encode(thing, ...)
+    let nl = a:0 > 0 ? (a:1 ? "\\n" : "") : ""
+    if type(a:thing) == type("")
+      return \'"\'.escape(a:thing,\'"\\\').\'"\'
+    elseif type(a:thing) == type({}) && !has_key(a:thing, \'json_special_value\')
+      let pairs = []
+      for [Key, Value] in items(a:thing)
+        call add(pairs, Encode(Key).\':\'.Encode(Value))
+        unlet Key | unlet Value
+      endfor
+      return "{".nl.join(pairs, ",".nl)."}"
+    elseif type(a:thing) == type(0)
+      return a:thing
+    elseif type(a:thing) == type([])
+      return \'[\'.join(map(copy(a:thing), "Encode(v:val)"),",").\']\'
+    else
+      throw "unexpected new thing: ".string(a:thing)
+    endif
+  endfun
 
   call writefile( [Encode(info)], "names")
   ';

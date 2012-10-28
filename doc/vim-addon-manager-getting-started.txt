@@ -148,7 +148,7 @@ commented version ~
             endif
             return eval(is_installed_c)
           endif
-        endf
+        endfun
 
         fun! SetupVAM()
           " Set advanced options like this:
@@ -209,7 +209,7 @@ minimal version ~
             execute '!git clone --depth=1 git://github.com/MarcWeber/vim-addon-manager '.shellescape(vam_install_path, 1).'/vim-addon-manager'
           endif
           call vam#ActivateAddons([the plugin names], {'auto_install' : 0})
-        endf
+        endfun
         call SetupVAM()
 
 
@@ -352,7 +352,7 @@ WAY 2: define your own Pool function: >
     let d = vam#install#Pool()
     let d['my_plugin'] = { 'type' : 'git', 'url' : ' ... ' }
     return d
-  endf
+  endfun
 
 Plugin dictionaries are described in |addon-info-repository|.
 
@@ -371,7 +371,7 @@ Yes, you can do this in MyPoolFun shown above as well >
        endfor
 
       let a:plugin_sources['your_plugin_name'] = { plugin dictionary }
-    endf
+    endfun
     " tell VAM to use your MergeSources function:
     let g:vim_addon_manager = {}
     let g:vim_addon_manager['MergeSources'] = function('MyMergeSources')

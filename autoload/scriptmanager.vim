@@ -24,11 +24,11 @@ fun! scriptmanager#Activate(...) abort
     let g:vim_addon_manager=g:vim_script_manager
   endif
   call call(function('vam#ActivateAddons'),a:000)
-endf
+endfun
 
 fun! scriptmanager#DefineAndBind(...)
   echoe "fix your code!, scriptmanager#DefineAndBind was renamed to vam#DefineAndBind(. Drop this function to find the usage location faster!"
   return call(function('vam#DefineAndBind'),a:000)
-endf
+endfun
 
 " vim: sts=2 et sw=2

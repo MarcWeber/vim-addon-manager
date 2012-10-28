@@ -8,7 +8,7 @@
 " anyway
 fun! vam#DefineAndBind(local,global,default)
   return 'if !exists('.string(a:global).') | let '.a:global.' = '.a:default.' | endif | let '.a:local.' = '.a:global
-endf
+endfun
 
 
 " assign g:os
@@ -90,7 +90,7 @@ fun! vam#VerifyIsJSON(s)
   " adds missing addon information to work
   let scalarless_body = substitute(a:s, '\v\"%(\\.|[^"\\])*\"|\''%(\''{2}|[^''])*\''|true|false|null|[+-]?\d+%(\.\d+%([Ee][+-]?\d+)?)?', '', 'g')
   return scalarless_body !~# "[^,:{}[\\] \t]"
-endf
+endfun
 
 " use join so that you can break the dict into multiple lines. This makes
 " reading it much easier
@@ -114,7 +114,7 @@ fun! vam#ReadAddonInfo(path)
     return {}
   endif
 
-endf
+endfun
 
 fun! vam#DefaultPluginDirFromName(name)
   " this function maps addon names to their storage location. \/: are replaced
@@ -123,11 +123,11 @@ fun! vam#DefaultPluginDirFromName(name)
 endfun
 fun! vam#PluginDirFromName(...)
   return call(s:c.plugin_dir_by_name, a:000, {})
-endf
+endfun
 fun! vam#PluginRuntimePath(name)
   let info = vam#AddonInfo(a:name)
   return vam#PluginDirFromName(a:name).(has_key(info, 'runtimepath') ? '/'.info['runtimepath'] : '')
-endf
+endfun
 
 " adding VAM, so that its contained in list passed to :UpdateActivatedAddons 
 if filewritable(vam#PluginDirFromName('vim-addon-manager'))==2
@@ -151,7 +151,7 @@ fun! vam#IsPluginInstalled(name)
   return isdirectory(d)
     \ && (!isdirectory(d.'/archive')
     \     || !empty(glob(fnameescape(d).'/archive/*', 1)))
-endf
+endfun
 
 " {} if file doesn't exist
 fun! vam#AddonInfo(name)
@@ -159,7 +159,7 @@ fun! vam#AddonInfo(name)
   return filereadable(infoFile)
     \ ? vam#ReadAddonInfo(infoFile)
     \ : {}
-endf
+endfun
 
 
 " opts: {
@@ -211,10 +211,10 @@ fun! vam#ActivateRecursively(list_of_names, ...)
               \                             (' as it was specified by user.'):
               \                             ("\n  as it was requested by ".
               \                               join(opts.requested_by, "\n  which was requested by ").'.')))
-      end
+      endif
     endif
   endfor
-endf
+endfun
 
 let s:top_level = 0
 " see also ActivateRecursively
@@ -278,7 +278,7 @@ fun! vam#ActivateAddons(...) abort
       call filter(to_be_activated,   'index(g:vam_plugin_whitelist, v:key) != -1 || has_key(are_dependencies, v:key)')
       call filter(path_plugins,      'has_key(to_be_activated, v:val)')
       call filter(new_runtime_paths, 'has_key(path_plugins, v:val)')
-    end
+    endif
     " deferred tasks:
     " - add addons to runtimepath
     " - add source plugin/**/*.vim files in case Activate was called long
@@ -351,7 +351,7 @@ fun! vam#DisplayAddonInfoLines(name, repository)
     call add(lines, key.': '.string(repository[key]))
   endfor
   return lines
-endf
+endfun
 
 fun! vam#DisplayAddonInfo(name)
   let repository = get(g:vim_addon_manager['plugin_sources'], a:name, {})
@@ -365,7 +365,7 @@ fun! vam#DisplayAddonInfo(name)
       let repository = get(values(dict), 0, {})
       let name = keys(dict)[0]
     endif
-  end
+  endif
   if empty(repository)
     echo "Invalid plugin name: " . a:name
     return
@@ -380,13 +380,13 @@ fun! vam#DisplayAddonsInfo(names)
   for name in a:names
     call vam#DisplayAddonInfo(name)
   endfor
-endf
+endfun
 
 fun! vam#SourceFiles(fs)
   for file in a:fs
     exec 'source '.fnameescape(file)
   endfor
-endf
+endfun
 
 " FIXME won't list hidden files as well
 if v:version>703 || (v:version==703 && has('patch465'))
@@ -405,11 +405,11 @@ endfun
 fun! vam#GlobThenSource(glob)
   if s:c.dont_source | return | endif
   call vam#SourceFiles(vam#GlobList(a:glob))
-endf
+endfun
 
 augroup VIM_PLUGIN_MANAGER
   autocmd VimEnter * call  vam#SourceMissingPlugins()
-augroup end
+augroup END
 
 " taken from tlib
 fun! vam#OutputAsList(command) "{{{3
@@ -418,7 +418,7 @@ fun! vam#OutputAsList(command) "{{{3
     silent! exec a:command
     redir END
     return split(lines, '\n')
-endf
+endfun
 
 " hack: Vim sources plugin files after sourcing .vimrc
 "       Vim doesn't source the after/plugin/*.vim files in other runtime
@@ -438,7 +438,7 @@ fun! vam#SourceMissingPlugins()
   let scriptnames = map(vam#OutputAsList('scriptnames'), 'v:val[(stridx(v:val,":")+2):-1]')
   call filter(fs, 'index(scriptnames,  v:val) == -1')
   call vam#SourceFiles(fs)
-endf
+endfun
 
 fun! vam#AddonInfoFile(name)
   " history:
@@ -517,11 +517,11 @@ command! -nargs=* -bar -complete=customlist,vam#install#UninstallCompletion Unin
 
 command! -nargs=* -complete=customlist,vam#bisect#BisectCompletion AddonsBisect :call vam#bisect#Bisect(<f-args>)
 
-function! s:RunInstallHooks(plugins)
+fun! s:RunInstallHooks(plugins)
   for name in a:plugins
     call vam#install#RunHook('post-install', vam#AddonInfo(name), vam#install#GetRepo(name, {}), vam#PluginDirFromName(name), {})
   endfor
-endfunction
+endfun
 command! -nargs=+ -complete=customlist,vam#install#InstalledAddonCompletion RunInstallHooks :call s:RunInstallHooks([<f-args>])
 
 

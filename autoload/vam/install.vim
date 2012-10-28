@@ -53,7 +53,7 @@ fun! vam#install#CheckPoolItem(key, i)
     if url =~ '^http' | call vam#Log("pool item ".url.": should not be using http:// for consistency. If you need http see MyGitCheckout example") | endif
     if url =~ '\.git$' | call vam#Log('pool item '.url.': github urls also work without .git suffix. Drop if for copy paste and consistency reasons') | endif
   endif
-endf
+endfun
 
 fun! vam#install#RewriteName(name)
   if a:name[:6]==#'github:'
@@ -155,7 +155,7 @@ fun! vam#install#RunHook(hook, info, repository, pluginDir, opts)
           \'%i', 'a:info',       'g'),
           \'%o', 'a:opts',       'g')
   endif
-endfu
+endfun
 
 " opts: same as ActivateAddons
 fun! vam#install#Install(toBeInstalledList, ...)
@@ -233,7 +233,7 @@ fun! vam#install#Install(toBeInstalledList, ...)
     let installed += [name]
   endfor
   return installed
-endf
+endfun
 
 fun! vam#install#CreatePatch(info, repository, pluginDir, hook_opts)
   let a:hook_opts.diff_do_diff=(s:c.do_diff && executable('diff'))
@@ -378,7 +378,7 @@ fun! vam#install#UpdateAddon(name)
     call vam#Log( "Not updating plugin ".a:name." because there is no version according to version key")
   endif
   return 'up-to-date'
-endf
+endfun
 
 fun! vam#install#Update(list)
   let list = a:list
@@ -412,7 +412,7 @@ fun! vam#install#Update(list)
   for [k,v] in items(by_reply)
     call vam#Log(get(labels,k,k).' '.string(by_reply[k]).".", k is# 'failed' ? 'WarningMsg' : 'Type')
   endfor
-endf
+endfun
 
 " completion {{{
 
@@ -434,7 +434,7 @@ fun! vam#install#KnownAddons(type)
     endfor
   endif
   return sort(keys(k))
-endf
+endfun
 
 " Filters:
 " 1. Start of the name must be the same as completed name
@@ -523,23 +523,23 @@ endfun
 
 fun! vam#install#AddonCompletion(...)
   return call('vam#install#DoCompletion',a:000)
-endf
+endfun
 
 fun! vam#install#NotInstalledAddonCompletion(...)
   return call('vam#install#DoCompletion',a:000+["notinstalled"])
-endf
+endfun
 
 fun! vam#install#InstalledAddonCompletion(...)
   return call('vam#install#DoCompletion',a:000+["installed"])
-endf
+endfun
 
 fun! vam#install#UninstallCompletion(...)
   return call('vam#install#DoCompletion',a:000+["notloaded"])
-endf
+endfun
 
 fun! vam#install#UpdateCompletion(...)
   return call('vam#install#DoCompletion',a:000+["installed"])
-endf
+endfun
 "}}}
 
 fun! vam#install#UninstallAddons(list)
@@ -552,12 +552,12 @@ fun! vam#install#UninstallAddons(list)
   if s:confirm('Will now remove '.join(list, ', ').'. Confirm?')
     call map(list, 'vam#utils#RmFR(v:val)')
   endif
-endf
+endfun
 
 fun! vam#install#HelpTags(name)
   let d=vam#PluginDirFromName(a:name).'/doc'
   if isdirectory(d) | exec 'helptags '.fnameescape(d) | endif
-endf
+endfun
 
 " basename of url. if archive_name is given use that instead
 fun! vam#install#ArchiveNameFromDict(repository)
@@ -566,7 +566,7 @@ fun! vam#install#ArchiveNameFromDict(repository)
       let archiveName = fnamemodify(a:repository['url'],':t')
     endif
     return archiveName
-endf
+endfun
 
 
 " may throw EXCEPTION_UNPACK
@@ -615,7 +615,7 @@ endfun
 
 fun! vam#install#MergeTarget()
   return split(&runtimepath,",")[0].'/after/plugin/vim-addon-manager-merged.vim'
-endf
+endfun
 
 " if you machine is under IO load starting up Vim can take some time
 " This function tries to optimize this by reading all the plugin/*.vim
@@ -737,7 +737,7 @@ fun! vam#install#MergePluginFiles(plugins, skip_pattern)
   if !isdirectory(d) | call mkdir(d,'p') | endif
   call writefile(split(all_contents,"\n"), target)
 
-endf
+endfun
 
 fun! vam#install#UnmergePluginFiles()
   let path = fnamemodify(vam#PluginRuntimePath('vim-addon-manager'),':h')
@@ -804,7 +804,7 @@ fun! vam#install#LoadPool(...)
 
     let s:c.pool_loaded = 1
   endif
-endf
+endfun
 "}}}1
 
 
@@ -858,7 +858,7 @@ if g:is_win
   "let _7zurl = 'mirror://sourceforge/sevenzip/7-Zip/4.65/7z465.exe'
   "call vam#utils#DownloadFromMirrors(_7zurl, s:c['binary_utils'].'/7z.exe')
 
-  endf
+  endfun
 endif
 
 fun! vam#install#ShowShortLog(info, repository, pluginDir, hook_opts)
@@ -873,6 +873,6 @@ fun! vam#install#ShowShortLog(info, repository, pluginDir, hook_opts)
           \matchstr(a:hook_opts.newVersion, "[^ \t\r\n]*")], get(c, 2, {})),
           \'Normal')
   endif
-endf
+endfun
 
 " vim: et ts=8 sts=2 sw=2

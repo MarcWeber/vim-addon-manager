@@ -30,7 +30,7 @@ fun! vam#bisect#StepBad(vim, plain, addons, vimrc_tmp) abort
   else
     throw "You used neither OKVAMBisect nor BADVAMBisect to exit vim!"
   endif
-endf
+endfun
 
 " ... must be cache
 fun! vam#bisect#List(vim_executable, skip_initial, addons, force_addons, ...) abort
@@ -67,7 +67,7 @@ fun! vam#bisect#List(vim_executable, skip_initial, addons, force_addons, ...) ab
     else
       let cache.bisect_plain_result = {'problem_found': 0, 'message': 'Problem was not found - nothing left to test. Are you sure you have a problem?'}
       return cache.bisect_plain_result
-    end
+    endif
   endif
 
   if len(addons) == 1
@@ -116,7 +116,7 @@ fun! vam#bisect#List(vim_executable, skip_initial, addons, force_addons, ...) ab
       " let r = vam#bisect#Bisect(a:vim_executable, left_half, right_half)
     endif
   endif
-endf
+endfun
 
 " argument1: ['vim'] or ['gvim','--nofork']
 " rerun vim bisecting the plugin list to find out which plugin might be
@@ -135,11 +135,11 @@ fun! vam#bisect#Bisect(...)
   endtry
   let g:vim_addon_bisect_result = r
   call vam#Log(r.message)
-endf
+endfun
 
 fun! vam#bisect#BisectCompletion(A, L, P, ...)
   let list = ['vim','gvim']
   return list
-endf
+endfun
 
 " vim: et ts=8 sts=2 sw=2

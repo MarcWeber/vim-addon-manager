@@ -61,7 +61,7 @@ fun! s:ShellDSL(special, cmd, ...) abort
     unlet p
   endfor
   return r
-endf
+endfun
 
 fun! s:Cmd(expect_code_0, cmd) abort
   call vam#Log(a:cmd, 'PreProc')
@@ -77,14 +77,14 @@ fun! s:Cmd(expect_code_0, cmd) abort
     throw "Command “".a:cmd."” exited with error code ".v:shell_error
   endif
   return v:shell_error
-endf
+endfun
 
 " TODO improve this and move somewhere else?
 fun! vam#utils#RunShell(...) abort
   let special=(s:c.shell_commands_run_method[-4:] is# 'bang')
   let cmd = call('s:ShellDSL', [special]+a:000)
   return s:Cmd(0, cmd)
-endf
+endfun
 
 fun! vam#utils#ExecInDir(dir, ...) abort
   let special=(s:c.shell_commands_run_method[-4:] is# 'bang')
@@ -103,7 +103,7 @@ fun! vam#utils#ExecInDir(dir, ...) abort
           \ call('s:ShellDSL', [special]+a:000)
     call s:Cmd(1, cmd)
   endif
-endf
+endfun
 
 fun! vam#utils#System(...)
   let cmd=call('s:ShellDSL', [0]+a:000)
@@ -117,7 +117,7 @@ endfun
 "Usages: EndsWith('name.tar',   '.tar', '.txt') returns 1 even if .tar was .txt
 fun! s:EndsWith(name, ...)
   return  a:name =~? '\%('.substitute(join(a:000,'\|'),'\.','\\.','g').'\)$'
-endf
+endfun
 
 " Warning: Currently hooks should not depend on order of their execution
 let s:post_unpack_hooks={}
@@ -293,7 +293,7 @@ fun! vam#utils#Unpack(archive, targetDir, ...)
   for key in keys(s:post_unpack_hooks)
     call call(s:post_unpack_hooks[key], hargs, {})
   endfor
-endf
+endfun
 
 
 " move */* one level up, then remove first * matches
@@ -340,7 +340,7 @@ fun! vam#utils#StripComponents(dir, num, keepdirs)
     call map(tomove, 'rename(v:val[0], v:val[1])')
     call map(toremove, 'vam#utils#RmFR(v:val)')
   endfor
-endf
+endfun
 
 " also copies 0. May throw an exception on failure
 fun! vam#utils#CopyFile(a, b) abort
@@ -348,7 +348,7 @@ fun! vam#utils#CopyFile(a, b) abort
   if writefile(fc, a:b, 'b') != 0
     throw "copying file ".a:a." to ".a:b." failed"
   endif
-endf
+endfun
 
 fun! vam#utils#Download(url, targetFile)
   if s:http_cmd is 0
@@ -356,7 +356,7 @@ fun! vam#utils#Download(url, targetFile)
   endif
   " allow redirection because of sourceforge mirrors:
   call vam#utils#RunShell(s:http_cmd.' $p $', a:targetFile, a:url)
-endf
+endfun
 
 fun! vam#utils#RmFR(dir_or_file)
   let cmd = ""
@@ -381,7 +381,7 @@ fun! vam#utils#RmFR(dir_or_file)
   else
     call vam#utils#RunShell(cmd.' $', a:dir_or_file)
   endif
-endf
+endfun
 
 
 " a "direct link" (found on the download page)
@@ -405,7 +405,7 @@ fun! vam#utils#DownloadFromMirrors(url, targetDir)
     let t = t .'/'.fnamemodify(url,':t')
   endif
   call vam#utils#Download(url, t)
-endf
+endfun
 
 
 let s:tmpDir = ""
@@ -422,14 +422,14 @@ fun! vam#utils#TempDir(name)
   endif
   " expand make \ out of / on Windows
   return expand(s:tmpDir.'/'.a:name)
-endf
+endfun
 
 " tries finding a new name if a plugin was renamed.
 " Also tries to provide suggestions if you made trivial typos (case,
 " forgetting _ special characters and such)
 fun! vam#utils#TypoFix(name)
    return substitute(tolower(a:name), '[_/\-]*', '', 'g')
-endf
+endfun
 
 
 "{{{1 Completion

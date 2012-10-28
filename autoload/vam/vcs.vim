@@ -224,7 +224,7 @@ fun! vam#vcs#Update(dir)
   else
     return ['possibly updated', 0, 0, sdescr]
   endif
-endf
+endfun
 
 " repository = {'type': git|hg|svn|bzr, 'url': .. }
 fun! vam#vcs#Checkout(targetDir, repository)
@@ -241,6 +241,6 @@ fun! vam#vcs#Checkout(targetDir, repository)
     throw "Failure. Plugin directory ".a:targetDir." should have been created but does not exist."
   endif
   return 1
-endf
+endfun
 
 " vim: et ts=8 sts=2 sw=2
