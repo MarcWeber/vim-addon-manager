@@ -67,7 +67,7 @@ AddonsInfo {id/name} ...                                         *:AddonsInfo*
         Shows addon information. Accepts both VAM script names and www.vim.org 
         script numbers.
                                                 *:OKVAMBisect* *:BADVAMBisect*
-AddonsBisect                                                   *:AddonsBisect*
+AddonsBisect [vim] [arg1] ...                                  *:AddonsBisect*
         Command that helps find which one of the activated plugins is causing 
         the problem. In order to do this it launches new vim instance which 
         will activate only half (1/4, 1/8 and so on) of the plugins currently 
@@ -76,7 +76,10 @@ AddonsBisect                                                   *:AddonsBisect*
         :BADVAMBisect to mark this set of plugins as problematic. It will 
         repeat bisection until there is only one plugin in the list.
 
-        This may not work no Windowsn yet due to the ! usage.
+        If arguments are given they are used as a command that launches vim. 
+        If you know how to make vim test whether problem occurs use >
+            AddonsBisect vim -c if\ has(problem)|BADVAMBisect|else|OKVAMBisect|endif
+<       (Note the space escaping).
 
 ------------------------------------------------------------------------------
 3.2. Functions                                                 *VAM-functions*

@@ -3,9 +3,7 @@ fun! vam#bisect#StepBad(vim, plain, addons, vimrc_tmp) abort
   if a:plain
     call extend(cmd_items, ["-u", "NONE", "-U", "NONE", "-N"])
   else
-    let vimrc_file = has("win16") || has("win32") || has("win95") || has("dos16") || has("dos32") || has("os2")
-          \ ? $HOME.'/_vimrc' : $HOME.'/.vimrc'
-    let vimrc_contents = readfile(vimrc_file)
+    let vimrc_contents = readfile($MYVIMRC)
     call writefile(['let g:vam_plugin_whitelist = '.string(a:addons)]+ vimrc_contents, a:vimrc_tmp)
     call extend(cmd_items, ["-u", a:vimrc_tmp])
   endif
@@ -20,7 +18,7 @@ fun! vam#bisect#StepBad(vim, plain, addons, vimrc_tmp) abort
   if !s:confirm('running vim with addons '.string(a:addons).' plain: '.a:plain)
     throw "user abort"
   endif
-  exec '!'.escape(join(map(cmd_items,'shellescape(v:val)')," "),'%!')
+  exec '!'.escape(join(map(cmd_items,'shellescape(v:val, 1)'),' '),'%!')
   let r = readfile(a:vimrc_tmp)
   if r[0] == "ok"
     return 0
@@ -120,8 +118,14 @@ endf
 " argument1: ['vim'] or ['gvim','--nofork']
 " rerun vim bisecting the plugin list to find out which plugin might be
 " causing trouble you're experiencing
-fun! vam#bisect#Bisect()
-  let vim_executable = a:0 > 0 ? a:000 : has('gui_running') ? ['gvim','--nofork'] : ['vim']
+fun! vam#bisect#Bisect(...)
+  if a:0
+    let vim_executable = copy(a:000)
+  else
+    let vim_executable = [v:progname, has('gui_running')? '-g' : '-v']
+  endif
+  " It does not harm running non-gui vim with --nofork
+  let vim_executable += ['--nofork']
   let addons = keys(s:c.activated_plugins)
   let r = vam#bisect#List(vim_executable, 0, addons, [])
   let g:vim_addon_bisect_result = r
@@ -132,3 +136,5 @@ fun! vam#bisect#BisectCompletion(A, L, P, ...)
   let list = ['vim','gvim']
   return list
 endf
+
+" vim: et ts=8 sts=2 sw=2

@@ -468,7 +468,7 @@ command! -nargs=* -complete=customlist,vam#install#UpdateCompletion UpdateAddons
 command! -nargs=0 UpdateActivatedAddons exec 'UpdateAddons '.join(keys(g:vim_addon_manager['activated_plugins']),' ')
 command! -nargs=* -complete=customlist,vam#install#UninstallCompletion UninstallNotLoadedAddons :call vam#install#UninstallAddons([<f-args>])
 
-command! -nargs=? -complete=customlist,vam#bisect#BisectCompletion AddonsBisect :call vam#bisect#Bisect(<f-args>)
+command! -nargs=* -complete=customlist,vam#bisect#BisectCompletion AddonsBisect :call vam#bisect#Bisect(<f-args>)
 
 function! s:RunInstallHooks(plugins)
   for name in a:plugins
