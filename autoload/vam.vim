@@ -251,12 +251,12 @@ fun! vam#ActivateAddons(...) abort
   " g:vam_plugin_whitelist is used for bisecting.
   " Using a different global name so that collisions with user's ~/.vimrc are
   " less likely
-  if exists('g:vam_plugin_whitelist')
-    call filter(args[0],   'index(g:vam_plugin_whitelist, v:val) != -1')
-  endif
-
   let opts = args[1]
   let topLevel = !has_key(opts, 'new_runtime_paths')
+
+  if exists('g:vam_plugin_whitelist') && topLevel
+    call filter(args[0],   'index(g:vam_plugin_whitelist, v:val) != -1')
+  endif
 
   " add new_runtime_paths state if not present in opts yet
   let new_runtime_paths = get(opts, 'new_runtime_paths',[])
