@@ -47,7 +47,7 @@ let s:c.plugin_dir_by_name   = get(s:c, 'plugin_dir_by_name',   'vam#DefaultPlug
 let s:c.addon_completion_lhs = get(s:c, 'addon_completion_lhs', '<C-x><C-p>')
 let s:c.debug_activation     = get(s:c, 'debug_activation',     0)
 let s:c.pool_item_check_fun  = get(s:c, 'pool_item_check_fun',  'none')
-let s:c.no_activate_hack     = get(s:c, 'no_activate_hack',     0)
+let s:c.source_missing_files = get(s:c, 'source_missing_files', 1)
 
 " experimental: will be documented when its tested
 " don't echo lines, add them to a buffer to prevent those nasty "Press Enter"
@@ -403,9 +403,9 @@ fun! vam#GlobThenSource(glob)
   call vam#SourceFiles(vam#GlobList(a:glob))
 endfun
 
-if !s:c.no_activate_hack
+if s:c.source_missing_files
   augroup VIM_PLUGIN_MANAGER
-    autocmd VimEnter * call  vam#SourceMissingPlugins()
+    autocmd! VimEnter * call  vam#SourceMissingPlugins()
   augroup END
 endif
 
@@ -416,6 +416,13 @@ fun! vam#OutputAsList(command) "{{{3
     silent! exec a:command
     redir END
     return split(lines, '\n')
+endfun
+
+let s:sep=fnamemodify(expand('<sfile>:h'), ':p')[-1:]
+let s:sesep=escape(s:sep, '\&~')
+let s:resep='\V'.escape(s:sep, '\').'\+'
+fun! s:normpath(path)
+  return substitute(expand(fnameescape(resolve(a:path)), 1), s:resep, s:sesep, 'g')
 endfun
 
 " hack: Vim sources plugin files after sourcing .vimrc
@@ -430,10 +437,11 @@ fun! vam#SourceMissingPlugins()
   " files which should have been sourced:
   let fs = []
   let rtp = split(&runtimepath, '\v(\\@<!(\\.)*\\)@<!\,')
-  for r in rtp | call extend(fs, vam#GlobInDir(r, 'plugin/*.vim')) | endfor
+  for r in rtp | call extend(fs, vam#GlobInDir(r, 'plugin/**/*.vim')) | endfor
   for r in rtp | call extend(fs, vam#GlobInDir(r, 'after/plugin/**/*.vim')) | endfor
+  call map(fs, 's:normpath(v:val)')
 
-  let scriptnames = map(vam#OutputAsList('scriptnames'), 'v:val[(stridx(v:val,":")+2):-1]')
+  let scriptnames = map(vam#OutputAsList('scriptnames'), 's:normpath(v:val[(stridx(v:val,":")+2):-1])')
   call filter(fs, 'index(scriptnames,  v:val) == -1')
   call vam#SourceFiles(fs)
 endfun
