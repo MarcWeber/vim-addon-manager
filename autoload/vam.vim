@@ -199,10 +199,6 @@ fun! vam#ActivateRecursively(list_of_names, ...)
       " source plugin/* files ?
       let rtp = vam#PluginRuntimePath(name)
       call add(opts.new_runtime_paths, rtp)
-      let opts.path_plugins[rtp] = name
-      if !empty(get(opts, 'requested_by'))
-        let opts.are_dependencies[name] = 1
-      endif
 
       let s:c.activated_plugins[name] = 1
 
@@ -254,20 +250,23 @@ fun! vam#ActivateAddons(...) abort
   " args[0] = plugin names
   " args[1] = options
 
+  " g:vam_plugin_whitelist is used for bisecting.
+  " Using a different global name so that collisions with user's ~/.vimrc are
+  " less likely
   let opts = args[1]
   let topLevel = !has_key(opts, 'new_runtime_paths')
+
+  if exists('g:vam_plugin_whitelist') && topLevel
+    call filter(args[0],   'index(g:vam_plugin_whitelist, v:val) != -1')
+  endif
 
   " add new_runtime_paths state if not present in opts yet
   let new_runtime_paths = get(opts, 'new_runtime_paths', [])
   let to_be_activated   = get(opts, 'to_be_activated',   {})
-  let path_plugins      = get(opts, 'path_plugins',      {})
-  let are_dependencies  = get(opts, 'are_dependencies',  {})
 
 
   let opts.new_runtime_paths = new_runtime_paths
   let opts.to_be_activated   = to_be_activated
-  let opts.path_plugins      = path_plugins
-  let opts.are_dependencies  = are_dependencies
 
   for a in args[0]
     let to_be_activated[a] = 1
@@ -276,12 +275,6 @@ fun! vam#ActivateAddons(...) abort
   call call('vam#ActivateRecursively', args)
 
   if topLevel
-
-    if exists('g:vam_plugin_whitelist')
-      call filter(to_be_activated,   'index(g:vam_plugin_whitelist, v:key) != -1 || has_key(are_dependencies, v:key)')
-      call filter(path_plugins,      'has_key(to_be_activated, v:val)')
-      call filter(new_runtime_paths, 'has_key(path_plugins, v:val)')
-    endif
     " deferred tasks:
     " - add addons to runtimepath
     " - add source plugin/**/*.vim files in case Activate was called long
