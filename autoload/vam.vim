@@ -33,7 +33,7 @@ let s:d = expand('<sfile>:h:h:h')
 let s:c.plugin_root_dir = get(s:c, 'plugin_root_dir', filewritable(s:d) ? s:d : '~/.vim/vim-addons')
 unlet s:d
 
-if s:c.plugin_root_dir == expand('~')
+if s:c.plugin_root_dir is# expand('~')
   echohl Error
   echomsg "VAM: Don't install VAM into ~/.vim the normal way. See docs -> SetupVAM function. Put it int ~/.vim/vim-addons/vim-addon-manager for example."
   echohl None
@@ -354,9 +354,9 @@ fun! vam#DisplayAddonInfo(name)
   let name = a:name
   if empty(repository) && a:name =~ '^\d\+$'
     " try to find by script id
-    let dict = filter(copy(g:vim_addon_manager.plugin_sources), 'get(v:val,"vim_script_nr","")."" == '.string(1*a:name))
+    let dict = filter(copy(g:vim_addon_manager.plugin_sources), '+get(v:val,"vim_script_nr",0) == '.(+a:name))
     if (empty(dict))
-      throw "unknown script ".a:name
+      throw "Unknown script ".a:name
     else
       let repository = get(values(dict), 0, {})
       let name = keys(dict)[0]
@@ -438,7 +438,6 @@ fun! vam#SourceMissingPlugins()
   let fs = []
   let rtp = split(&runtimepath, '\v(\\@<!(\\.)*\\)@<!\,')
   for r in rtp | call extend(fs, vam#GlobInDir(r, 'plugin/**/*.vim')) | endfor
-  for r in rtp | call extend(fs, vam#GlobInDir(r, 'after/plugin/**/*.vim')) | endfor
   call map(fs, 's:normpath(v:val)')
 
   let scriptnames = map(vam#OutputAsList('scriptnames'), 's:normpath(v:val[(stridx(v:val,":")+2):-1])')
