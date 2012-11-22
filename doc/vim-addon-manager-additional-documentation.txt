@@ -354,6 +354,11 @@ debug_activation                                        *VAM-debug_activation*
         Bool, makes VAM print lines explaining reasons for activation 
         particular plugins. Not pretty - but helpful in some cases.
 
+source_missing_files                                *VAM-source_missing_files*
+        Bool, determines whether VAM should check whether all plugin/ files 
+        were sourced at the point of |VimEnter| event and source missed ones.
+        Default: 1.
+
 The following options are used by vim-addon-manager-known-repositories, not by
 VAM itself. So if you set |vim-addon-manager-known| to another value they may
 have no effect.

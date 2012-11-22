@@ -47,7 +47,7 @@ let s:c.plugin_dir_by_name   = get(s:c, 'plugin_dir_by_name',   'vam#DefaultPlug
 let s:c.addon_completion_lhs = get(s:c, 'addon_completion_lhs', '<C-x><C-p>')
 let s:c.debug_activation     = get(s:c, 'debug_activation',     0)
 let s:c.pool_item_check_fun  = get(s:c, 'pool_item_check_fun',  'none')
-let s:c.no_activate_hack     = get(s:c, 'no_activate_hack',     0)
+let s:c.source_missing_files = get(s:c, 'source_missing_files', 1)
 
 " experimental: will be documented when its tested
 " don't echo lines, add them to a buffer to prevent those nasty "Press Enter"
@@ -403,9 +403,9 @@ fun! vam#GlobThenSource(glob)
   call vam#SourceFiles(vam#GlobList(a:glob))
 endfun
 
-if !s:c.no_activate_hack
+if s:c.source_missing_files
   augroup VIM_PLUGIN_MANAGER
-    autocmd VimEnter * call  vam#SourceMissingPlugins()
+    autocmd! VimEnter * call  vam#SourceMissingPlugins()
   augroup END
 endif
 
