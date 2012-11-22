@@ -358,6 +358,10 @@ source_missing_files                                *VAM-source_missing_files*
         Bool, determines whether VAM should check whether all plugin/ files 
         were sourced at the point of |VimEnter| event and source missed ones.
         Default: 1.
+        This is needed if you load additional plugins in a plugin/*.vim file
+        which may happen if you use http://github.com/MarcWeber/vim-addon-local-vimrc
+        for instance
+
 
 The following options are used by vim-addon-manager-known-repositories, not by
 VAM itself. So if you set |vim-addon-manager-known| to another value they may
