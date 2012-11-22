@@ -354,7 +354,7 @@ fun! vam#DisplayAddonInfo(name)
   let name = a:name
   if empty(repository) && a:name =~ '^\d\+$'
     " try to find by script id
-    let dict = filter(copy(g:vim_addon_manager.plugin_sources), '+get(v:val,"vim_script_nr",0) == '.(+a:name))
+    let dict = filter(copy(g:vim_addon_manager.plugin_sources), '+get(v:val,"vim_script_nr",-1) == '.(+a:name))
     if (empty(dict))
       throw "Unknown script ".a:name
     else
