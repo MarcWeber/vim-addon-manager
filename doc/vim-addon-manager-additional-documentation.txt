@@ -32,7 +32,7 @@ Here:
 3.1. Commands                                                   *VAM-commands*
 
 InstallAddons {name} ...                                      *:InstallAddons*
-        Install addons with given names. See |vam#install#InstallAddons()| for
+        Install addons with given names. See |vam#install#Install()| for
         more details.
         You use InstallAddons instead of ActivateAddons if you want to review
         plugin source before running it. Also see |:RunInstallHooks|, it may 
