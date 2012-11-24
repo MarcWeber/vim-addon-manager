@@ -6,7 +6,7 @@ CONTENTS                                        *VAM-contents-getting-started*
 
     1. Intro                                  |VAM-intro|
     2. Installation & installing plugins      |VAM-installation|
-        2.2 Names of addons and addon soucres |VAM-addon-names|
+        2.2 Names of addons and addon sources |VAM-addon-names|
         2.3 Example: configurable setup       |VAM-complex-setup-sample|
         2.4 unattended installation           |VAM-unattended-installation|
 In |vim-addon-manager-additional-documentation.txt|:
@@ -337,7 +337,7 @@ VAM-kr merges both sources (scm and www.vim.org ones), see |VAM-MergeSources|.
 The result is provided by vam_known_repositories#Pool() which is the only pool
 used by default. See example and default implementation of vam#install#Pool().
 
-If you want to add your own soucres consider submitting them to
+If you want to add your own sources consider submitting them to
 VAM-kr as patch. If you don't there are two ways:
 
 WAY 1: (still supported) add to your .vimrc before activating VAM (BUG/TODO [5]): >
