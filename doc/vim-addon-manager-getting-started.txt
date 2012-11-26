@@ -25,6 +25,7 @@ In |vim-addon-manager-additional-documentation.txt|:
    14. VAM vs ...                             |VAM-comparison|
    15. Tracking down errors                   |VAM-tracking-down-erros|
    16. Making plugins work with VAM           |VAM-adjusting-plugins|
+   50. VAM works around deficiencies in runtimepath      |VAM-fixes-rtp|
 
 ==============================================================================
 

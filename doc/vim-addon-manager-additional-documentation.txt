@@ -24,6 +24,7 @@ Here:
    14. VAM vs ...                             |VAM-comparison|
    15. Tracking down errors                   |VAM-tracking-down-erros|
    16. Making plugins work with VAM           |VAM-adjusting-plugins|
+   50. VAM works around deficiencies in runtimepath      |VAM-fixes-rtp|
 
 ==============================================================================
 3. Functionality provided                                  *VAM-functionality*
@@ -1207,6 +1208,31 @@ relative to s:parent_dir_of_this_file
 Filetype detection files (from ftdetect/ directory) are loaded if you set 
 "filetype on". Thus if you do it after last call to vam#ActivateAddons, 
 everything should be fine.
+
+
+==============================================================================
+50. VAM works around deficiencies in runtimepath         *VAM-fixes-rtp*
+
+create these directories:
+
+~/.vim/after/plugin/1.vim
+~/.vim/ftdetect/2.vim
+
+~/my/after/plugin/3.vim
+~/my/ftdetect/4.vim
+
+and add a line like this:
+  echoe 'N.vim'
+
+~/.vimrc contents:
+  filetype on
+  set rtp+=~/my
+
+Then you'll notice that you'll get two echoe lines only: 1.vim and 2.vim
+However some plugins use the 3.vim and 4.vim scheme, too
+
+VAM will source 3.vim and 4.vim for you, see vam#GlobThenSource usage
+
 
 ==============================================================================
 The linux script is gone. Search for "unix based os" to learn about its

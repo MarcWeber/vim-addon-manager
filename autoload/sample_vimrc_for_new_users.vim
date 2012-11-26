@@ -53,6 +53,7 @@ noremap \b :b<space><c-d>
 " being able to open the help fast is always fine.
 " note that you can use tab / shift -tab to select next / previous match
 " also glob patterns are allowed. Eg :h com*func<tab>
+" <c-d> will show all matches at once.
 noremap \h :h<space>
 
 " open one file, use tab and shift-tab again if there are multiple files
