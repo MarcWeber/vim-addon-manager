@@ -426,8 +426,7 @@ fun! vam#install#KnownAddons(type)
   " split(glob) does not work properly in this case. Also don’t do this if we 
   " require notinstalled plugins.
   if a:type isnot# 'notinstalled' &&
-        \s:c.plugin_dir_by_name is# 'vam#DefaultPluginDirFromName' &&
-        \(!s:c.has_list_glob || stridx(s:c.plugin_root_dir, "\n")==-1)
+        \s:c.plugin_dir_by_name is# 'vam#DefaultPluginDirFromName'
     for dir in [s:c.plugin_root_dir]+s:c.additional_addon_dirs
       for key in map(vam#GlobInDir(dir, '*/'), 'fnamemodify(v:val[:-2], ":t")')
         " We don’t care about values: so no need to make it complex

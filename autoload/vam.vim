@@ -385,12 +385,10 @@ endfun
 
 " FIXME won't list hidden files as well
 if v:version>703 || (v:version==703 && has('patch465'))
-  let s:c.has_list_glob = 1
   fun! vam#GlobList(glob)
     return glob(a:glob, 1, 1)
   endfun
 else
-  let s:c.has_list_glob = 0
   fun! vam#GlobList(glob)
     return split(glob(a:glob, 1), "\n")
   endfun
