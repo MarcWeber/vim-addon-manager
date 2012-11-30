@@ -336,8 +336,9 @@ fun! vam#ActivateAddons(...) abort
           endif
         endfor
       endfor
-      for event in (has('gui_running')?['GUIEnter']:[])+['VimEnter',
-            \      'TabEnter', 'WinEnter', 'BufEnter', 'BufWinEnter']
+      for event in filter((has('gui_running')?['GUIEnter']:[])+['VimEnter',
+            \              'TabEnter', 'WinEnter', 'BufEnter', 'BufWinEnter'],
+            \             'has_key(event_to_groups, v:val)')
         for group in event_to_groups[event]
           execute 'doautocmd' group event
         endfor
