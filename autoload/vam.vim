@@ -41,7 +41,7 @@ if s:c.plugin_root_dir is# expand('~')
 endif
 
 " ensure we have absolute paths (windows doesn't like ~/.. ) :
-let s:c.plugin_root_dir = expand(s:c.plugin_root_dir)
+let s:c.plugin_root_dir = expand(fnameescape(s:c.plugin_root_dir))
 
 " calling expand is expensive, the user should add absolute paths or do it himself
 let s:c.additional_addon_dirs = get(s:c, 'additional_addon_dirs', [])
