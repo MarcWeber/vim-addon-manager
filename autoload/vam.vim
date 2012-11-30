@@ -42,6 +42,10 @@ endif
 
 " ensure we have absolute paths (windows doesn't like ~/.. ) :
 let s:c.plugin_root_dir = expand(s:c.plugin_root_dir)
+
+" calling expand is expensive, the user should add absolute paths or do it himself
+let s:c.additional_addon_dirs = get(s:c, 'additional_addon_dirs', [])
+
 let s:c.dont_source          = get(s:c, 'dont_source',          0)
 let s:c.plugin_dir_by_name   = get(s:c, 'plugin_dir_by_name',   'vam#DefaultPluginDirFromName')
 let s:c.addon_completion_lhs = get(s:c, 'addon_completion_lhs', '<C-x><C-p>')
@@ -119,10 +123,13 @@ fun! vam#ReadAddonInfo(path)
 
 endfun
 
-fun! vam#DefaultPluginDirFromName(name)
+fun! vam#DefaultPluginDirFromName(name) abort
   " this function maps addon names to their storage location. \/: are replaced
   " by - (See name rewriting)
-  return s:c.plugin_root_dir.'/'.substitute(a:name, '[\\/:]\+', '-', 'g')
+  let dirs = [s:c.plugin_root_dir] + s:c.additional_addon_dirs
+  let name = substitute(a:name, '[\\/:]\+', '-', 'g')
+  let existing = filter(copy(dirs), "isdirectory(v:val.'/'.".string(name).')')
+  return (empty(existing) ? dirs[0] : existing[0]).'/'.name
 endfun
 fun! vam#PluginDirFromName(...)
   return call(s:c.plugin_dir_by_name, a:000, {})

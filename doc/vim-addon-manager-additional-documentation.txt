@@ -220,6 +220,14 @@ set them this way: >
 It also contains some stuff that user should never modify if he wants to see
 this plugin working. Possible keys:
 
+
+additional_addon_dirs                                 *VAM-additional-addon-dirs*
+        Set it if you want to use system plugins found at /usr/shared-plugins.
+        Must be absolute paths, no "~" for HOME, use expand yourself for speed
+        reasons if you need it. Using it may break :UninstallAddons
+        completion cause similar minor annoyances. Have a look at its implementation:
+        at "vam#DefaultPluginDirFromName(name)".
+
 auto_install                                                *VAM-auto_install*
         This options disables plugin installation confirmation. It will not
         disable deprecation warnings and other prompts.
