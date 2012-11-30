@@ -422,15 +422,15 @@ fun! vam#install#KnownAddons(type)
   " from pool
   call extend(k, s:c.plugin_sources)
   " Disk completion using default plugin dir location.
-  " Don’t do this if plugin_root_dir contains newline: split(glob) does not work 
-  " properly in this case. Also don’t do this if we require notinstalled 
-  " plugins.
+  " Don’t do this if plugin_root_dir contains newline on outdated vim: 
+  " split(glob) does not work properly in this case. Also don’t do this if we 
+  " require notinstalled plugins.
   if a:type isnot# 'notinstalled' &&
         \s:c.plugin_dir_by_name is# 'vam#DefaultPluginDirFromName' &&
-        \stridx(s:c.plugin_root_dir, "\n")==-1
-    for n in vam#GlobInDir(s:c.plugin_root_dir, '*')
+        \(!s:c.has_list_glob || stridx(s:c.plugin_root_dir, "\n")==-1)
+    for key in map(vam#GlobInDir(s:c.plugin_root_dir, '*/'), 'fnamemodify(v:val[:-2], ":t")')
       " We don’t care about values: so no need to make it complex
-      let k[fnamemodify(n, ':t')] = 1
+      let k[key] = 1
     endfor
   endif
   return sort(keys(k))
