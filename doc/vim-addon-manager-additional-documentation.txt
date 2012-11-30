@@ -1239,6 +1239,8 @@ However some plugins use the 3.vim and 4.vim scheme, too
 
 VAM will source 3.vim and 4.vim for you, see vam#GlobThenSource usage
 
+Also see this line in source:
+" HACKS source files which Vim only sources at startup (before VimEnter)
 
 ==============================================================================
 The linux script is gone. Search for "unix based os" to learn about its

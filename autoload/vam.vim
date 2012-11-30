@@ -315,9 +315,13 @@ fun! vam#ActivateAddons(...) abort
       call vam#GlobThenSource(rtp.'/ftdetect/*.vim')
     endfor
 
+    " HACKS source files which Vim only sources at startup (before VimEnter)
+    "
     " using force is very likely to cause the plugin to be sourced twice
     " I hope the plugins don't mind
     if !has('vim_starting') || get(opts, 'force_loading_plugins_now', 0)
+      " get all au groups which have been defined before sourcing additional
+      " plugin files
       let oldaugs = s:GetAuGroups()
 
       for rtp in new_runtime_paths
@@ -325,6 +329,9 @@ fun! vam#ActivateAddons(...) abort
         call vam#GlobThenSource(rtp.'/after/plugin/**/*.vim')
       endfor
 
+      " Now find out which au groups are new and run them manually, cause
+      " Vim does so only when starting up. NerdTree and powerline are two
+      " plugins serving as sample. Both use VimEnter.
       let newaugs = filter(s:GetAuGroups(), '!has_key(oldaugs, v:key)')
       let event_to_groups = {}
       for [group, events] in items(newaugs)
