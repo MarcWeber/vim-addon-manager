@@ -66,7 +66,7 @@ let s:c.log_buffer_name = get(s:c, 'log_buffer_name', s:c.plugin_root_dir.'/VAM_
 
 if g:is_win && has_key(s:c, 'binary_utils')
   " if binary-utils path exists then add it to PATH
-  let s:c.binary_utils = get(s:c,'binary_utils', s:c.plugin_root_dir.'\binary-utils')
+  let s:c.binary_utils = get(s:c,'binary_utils', tr(s:c.plugin_root_dir, '/', '\').'\binary-utils')
   let s:c.binary_utils_bin = s:c.binary_utils.'\dist\bin'
   if isdirectory(s:c.binary_utils)
     let $PATH=$PATH.';'.s:c.binary_utils_bin
