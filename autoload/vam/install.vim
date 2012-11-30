@@ -428,9 +428,11 @@ fun! vam#install#KnownAddons(type)
   if a:type isnot# 'notinstalled' &&
         \s:c.plugin_dir_by_name is# 'vam#DefaultPluginDirFromName' &&
         \(!s:c.has_list_glob || stridx(s:c.plugin_root_dir, "\n")==-1)
-    for key in map(vam#GlobInDir(s:c.plugin_root_dir, '*/'), 'fnamemodify(v:val[:-2], ":t")')
-      " We don’t care about values: so no need to make it complex
-      let k[key] = 1
+    for dir in [s:c.plugin_root_dir]+s:c.additional_addon_dirs
+      for key in map(vam#GlobInDir(dir, '*/'), 'fnamemodify(v:val[:-2], ":t")')
+        " We don’t care about values: so no need to make it complex
+        let k[key] = 1
+      endfor
     endfor
   endif
   return sort(keys(k))
