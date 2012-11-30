@@ -148,14 +148,6 @@ endif
 fun! vam#IsPluginInstalled(name)
   let d = vam#PluginDirFromName(a:name)
 
-  " this will be dropped in about 12 months which is end of 2012
-  let old_path=s:c.plugin_root_dir.'/'.substitute(a:name, '[\\/:]\+', '', 'g')
-  if d != old_path && isdirectory(old_path)
-    if confirm("VAM has changed addon names policy for name rewriting. Rename ".old_path." to ".d."?", "&Ok") == 1
-      call rename(old_path, d)
-    endif
-  endif
-
   " if dir exists and its not a failed download
   " (empty archive directory)
   return isdirectory(d)
