@@ -43,8 +43,8 @@ endif
 " ensure we have absolute paths (windows doesn't like ~/.. ) :
 let s:c.plugin_root_dir = expand(fnameescape(s:c.plugin_root_dir))
 
-" calling expand is expensive, the user should add absolute paths or do it himself
 let s:c.additional_addon_dirs = get(s:c, 'additional_addon_dirs', [])
+call map(s:c.additional_addon_dirs, 'expand(fnameescape(v:val))')
 
 let s:c.dont_source          = get(s:c, 'dont_source',          0)
 let s:c.plugin_dir_by_name   = get(s:c, 'plugin_dir_by_name',   'vam#DefaultPluginDirFromName')
