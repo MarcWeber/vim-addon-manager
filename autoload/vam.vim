@@ -51,7 +51,7 @@ let s:c.plugin_dir_by_name   = get(s:c, 'plugin_dir_by_name',   'vam#DefaultPlug
 let s:c.addon_completion_lhs = get(s:c, 'addon_completion_lhs', '<C-x><C-p>')
 let s:c.debug_activation     = get(s:c, 'debug_activation',     0)
 let s:c.pool_item_check_fun  = get(s:c, 'pool_item_check_fun',  'none')
-let s:c.source_missing_files = get(s:c, 'source_missing_files', 1)
+let s:c.source_missing_files = get(s:c, 'source_missing_files', &loadplugins)
 
 " experimental: will be documented when its tested
 " don't echo lines, add them to a buffer to prevent those nasty "Press Enter"
@@ -319,7 +319,7 @@ fun! vam#ActivateAddons(...) abort
     "
     " using force is very likely to cause the plugin to be sourced twice
     " I hope the plugins don't mind
-    if !has('vim_starting') || get(opts, 'force_loading_plugins_now', 0)
+    if (&loadplugins && !has('vim_starting')) || get(opts, 'force_loading_plugins_now', 0)
       " get all au groups which have been defined before sourcing additional
       " plugin files
       let oldaugs = s:GetAuGroups()
