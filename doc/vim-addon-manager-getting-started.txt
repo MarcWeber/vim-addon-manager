@@ -125,29 +125,30 @@ commented version ~
         " put this line first in ~/.vimrc
         set nocompatible | filetype indent plugin on | syn on
 
-        fun! EnsureVamIsOnDisk(vam_install_path)
+        fun! EnsureVamIsOnDisk(plugin_root_dir)
           " windows users may want to use http://mawercer.de/~marc/vam/index.php
           " to fetch VAM, VAM-known-repositories and the listed plugins
           " without having to install curl, 7-zip and git tools first
           " -> BUG [4] (git-less installation)
-          let is_installed_c = "isdirectory(a:vam_install_path.'/vim-addon-manager/autoload')"
-          if eval(is_installed_c)
+          let vam_autoload_dir = a:plugin_root_dir.'/vim-addon-manager/autoload'
+          if isdirectory(vam_autoload_dir)
             return 1
           else
-            if 1 == confirm("Clone VAM into ".a:vam_install_path."?","&Y\n&N")
+            if 1 == confirm("Clone VAM into ".a:plugin_root_dir."?","&Y\n&N")
               " I'm sorry having to add this reminder. Eventually it'll pay off.
               call confirm("Remind yourself that most plugins ship with ".
                           \"documentation (README*, doc/*.txt). It is your ".
                           \"first source of knowledge. If you can't find ".
                           \"the info you're looking for in reasonable ".
                           \"time ask maintainers to improve documentation")
-              call mkdir(a:vam_install_path, 'p')
-              execute '!git clone --depth=1 git://github.com/MarcWeber/vim-addon-manager '.shellescape(a:vam_install_path, 1).'/vim-addon-manager'
+              call mkdir(a:plugin_root_dir, 'p')
+              execute '!git clone --depth=1 git://github.com/MarcWeber/vim-addon-manager '.
+                          \       shellescape(a:plugin_root_dir, 1).'/vim-addon-manager'
               " VAM runs helptags automatically when you install or update 
               " plugins
-              exec 'helptags '.fnameescape(a:vam_install_path.'/vim-addon-manager/doc')
+              exec 'helptags '.fnameescape(a:plugin_root_dir.'/vim-addon-manager/doc')
             endif
-            return eval(is_installed_c)
+            return isdirectory(vam_autoload_dir)
           endif
         endfun
 
@@ -164,18 +165,18 @@ commented version ~
           " let g:vim_addon_manager.debug_activation = 1
 
           " VAM install location:
-          let vam_install_path = expand('$HOME') . '/.vim/vim-addons'
-          if !EnsureVamIsOnDisk(vam_install_path)
+          let plugin_root_dir = expand('$HOME/.vim/vim-addons')
+          if !EnsureVamIsOnDisk(plugin_root_dir)
             echohl ErrorMsg | echomsg "No VAM found!" | echohl NONE
             return
           endif
-          exec 'set runtimepath+='.vam_install_path.'/vim-addon-manager'
+          let &rtp.=(empty(&rtp)?'':',').escape(plugin_root_dir, ',')
 
           " Tell VAM which plugins to fetch & load:
           call vam#ActivateAddons([], {'auto_install' : 0})
           " sample: call vam#ActivateAddons(['pluginA','pluginB', ...], {'auto_install' : 0})
 
-          " Addons are put into vam_install_path/plugin-name directory
+          " Addons are put into plugin_root_dir/plugin-name directory
           " unless those directories exist. Then they are activated.
           " Activating means adding addon dirs to rtp and do some additional
           " magic
@@ -203,11 +204,12 @@ minimal version ~
         set nocompatible | filetype indent plugin on | syn on
 
         fun SetupVAM()
-          let vam_install_path = expand('$HOME') . '/.vim/vim-addons'
-          exec 'set rtp+='.vam_install_path.'/vim-addon-manager'
+          let plugin_root_dir = expand('$HOME') . '/.vim/vim-addons'
+          let &rtp.=(empty(&rtp)?'':',').escape(plugin_root_dir, ',')
           " let g:vim_addon_manager = { your config here see "commented version" example and help
-          if !isdirectory(vam_install_path.'/vim-addon-manager/autoload')
-            execute '!git clone --depth=1 git://github.com/MarcWeber/vim-addon-manager '.shellescape(vam_install_path, 1).'/vim-addon-manager'
+          if !isdirectory(plugin_root_dir.'/vim-addon-manager/autoload')
+            execute '!git clone --depth=1 git://github.com/MarcWeber/vim-addon-manager '
+                        \       shellescape(plugin_root_dir.'/vim-addon-manager', 1)
           endif
           call vam#ActivateAddons([the plugin names], {'auto_install' : 0})
         endfun
