@@ -494,7 +494,7 @@ endfun
 
 fun! vam#install#CompleteAddonName(findstart, base)
   if a:findstart
-    let match_text=matchstr(getline('.')[:col('.')-1], "[^'\"()[\\]{}\t ]*$")
+    let match_text=matchstr(getline('.')[:col('.')-2], "[^'\"()[\\]{}\t ]*$")
     return col('.')-len(match_text)-1
   else
     call map(vam#install#FilterVariants(a:base, vam#install#KnownAddons(0)),
