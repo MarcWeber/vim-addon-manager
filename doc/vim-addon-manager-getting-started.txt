@@ -130,8 +130,8 @@ commented version ~
           " to fetch VAM, VAM-known-repositories and the listed plugins
           " without having to install curl, 7-zip and git tools first
           " -> BUG [4] (git-less installation)
-          let vam_autoload_dir = a:plugin_root_dir.'/vim-addon-manager/autoload'
-          if isdirectory(vam_autoload_dir)
+          let is_installed = "isdirectory(a:vam_install_path.'/vim-addon-manager/autoload')"
+          if eval(is_installed)
             return 1
           else
             if 1 == confirm("Clone VAM into ".a:plugin_root_dir."?","&Y\n&N")
@@ -148,7 +148,7 @@ commented version ~
               " plugins
               exec 'helptags '.fnameescape(a:plugin_root_dir.'/vim-addon-manager/doc')
             endif
-            return isdirectory(vam_autoload_dir)
+            return eval(is_installed)
           endif
         endfun
 
