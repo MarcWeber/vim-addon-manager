@@ -25,7 +25,7 @@ Here:
    14. VAM vs ...                             |VAM-comparison|
    15. Tracking down errors                   |VAM-tracking-down-erros|
    16. Making plugins work with VAM           |VAM-adjusting-plugins|
-   50. VAM works around deficiencies in runtimepath      |VAM-fixes-rtp|
+   17. VAM runtimepath handling tricks        |VAM-rtp-tricks|
 
 ==============================================================================
 3. Functionality provided                                  *VAM-functionality*
@@ -1159,7 +1159,7 @@ VAM. And that's good for community.
 
 
 ==============================================================================
-15. Tracking down errors                              *VAM-tracking-down-errors*
+15. Tracking down errors                            *VAM-tracking-down-errors*
 
 1) Where does the error or unexpected behaviour come from?
   Try disabling plugins until you know which plugins are left causing the bad
@@ -1176,34 +1176,38 @@ GIT (git): ~
   - list changes:
     gitk (gui) or git log -500
 
-  - list all changes in time:
-    git reflog show HEAD@{now} lists lines like this:
-    b8aee58 HEAD@{Wed Feb 15 03:22:53 2012 +0100}: commit: documentation improvements
-    ^^^^^ the hash
-
-  - checkout older revision (thus put plugin back in time to older revision):
-    git checkout hash
-    git checkout master # latest revision (unless you use different branches)
+  - list all changes in time: >
+        git reflog show HEAD@{now}
+<   lists lines like this: >
+        b8aee58 HEAD@{Wed Feb 15 03:22:53 2012 +0100}: commit: documentation improvements
+        ^^^^^ the hash
+<
+  - checkout older revision (thus put plugin back in time to older revision): >
+        git checkout hash
+        git checkout master # latest revision (unless you use different branches)
+<
 
   tip: hash~2 checks out two versions before hash.
   Thus master~10 checks 10 revisions before the most current one.
 
   If you know which hash is causing the bad behaviour you may want to have
-  look at changes using.
-  git show hash
+  look at changes using. >
+      git show hash
+<
 
   Of course #git on irc.freenode.net is willing to help if you have trouble
 
 MERCURIAL (hg): ~
-  TODO improve this.
+>
   hg log -l 500 # list last 500 changes of repositories
-  hg update -C hash_or_number
+  hg update hash_or_number
 
 SVN (svn)~
+>
   svn log -l 500
   svn up -rREVISION_NUMBER
 
-Eventually you want to sent a bug report to maintainers
+Eventually you want to sent a bug report to maintainers.
 
 ==============================================================================
 16. Making plugins work with VAM                       *VAM-adjusting-plugins*
@@ -1228,27 +1232,31 @@ everything should be fine.
 
 
 ==============================================================================
-50. VAM works around deficiencies in runtimepath         *VAM-fixes-rtp*
+17. VAM runtimepath handling tricks                           *VAM-rtp-tricks*
 
-create these directories:
+Create these directories: >
 
-~/.vim/after/plugin/1.vim
-~/.vim/ftdetect/2.vim
+    ~/.vim/after/plugin/after-vim.vim
+    ~/.vim/ftdetect/ftdetect-vim.vim
 
-~/my/after/plugin/3.vim
-~/my/ftdetect/4.vim
+    ~/my/after/plugin/after-foreign.vim
+    ~/my/ftdetect/ftdetect-foreign.vim
 
-and add a line like this:
-  echoe 'N.vim'
+and add the following line to the each of them: >
+    echomsg expand('<sfile>:t')
+<
 
-~/.vimrc contents:
-  filetype on
-  set rtp+=~/my
+~/.vimrc contents: >
+    filetype on
+    set rtp+=~/my
 
-Then you'll notice that you'll get two echoe lines only: 1.vim and 2.vim
-However some plugins use the 3.vim and 4.vim scheme, too
+You will now notice that you have only after-vim.vim and ftdetect-vim.vim 
+lines in messages. But being put into ~/.vim/vim-addons after/ and ftdetect/ 
+directories present in some plugins are equivalent to ~/my/after and 
+~/my/ftdetect from the example.
 
-VAM will source 3.vim and 4.vim for you, see vam#GlobThenSource usage
+VAM will source after-foreign.vim and ftdetect-foreign.vim for you, see 
+vam#GlobThenSource usage.
 
 Also see this line in source:
 " HACKS source files which Vim only sources at startup (before VimEnter)
