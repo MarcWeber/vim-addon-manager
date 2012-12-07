@@ -850,7 +850,11 @@ what's going to happen.
 ==============================================================================
 12. Troubleshooting and known bugs                      *VAM-trouble-shooting*
 
-  [BUG 10] Think about how to integrate ideas found in ipi http://www.vim.org/scripts/script.php?script_id=3809
+[BUG 101] Directories with commas are not supported.
+    Any discussion is here: https://github.com/MarcWeber/vim-addon-manager/issues/101
+
+[BUG 10] Think about how to integrate ideas found in ipi 
+http://www.vim.org/scripts/script.php?script_id=3809
 
   Runtimepath manipulation should be separated from installation / update
   logic. This way you can have different implementation for updating plugins
@@ -859,11 +863,6 @@ what's going to happen.
   - a VimL solution (eg for Windows users ?)
   - a python/ruby/perl/whatsoever commandline version
   (See thread "which plugin management system to use?" on vim_use)
-
-  ERROR: Vim(call):E117: Unknown function: vam#Activate
-
-  SOLUTION: set runtimepath (rtp) correctly. It must match the directory you
-            installed VAM into.
 
   ANY OTHER ERROR:
   Try commenting all your code in .vimrc and other plugins - does it work
