@@ -9,6 +9,8 @@ CONTENTS                                        *VAM-contents-getting-started*
         2.2 Names of addons and addon sources |VAM-addon-names|
         2.3 Example: configurable setup       |VAM-complex-setup-sample|
         2.4 unattended installation           |VAM-unattended-installation|
+
+        2.9 error messages you may see and what they mean
 In |vim-addon-manager-additional-documentation.txt|:
     3. Functionality provided                 |VAM-functionality|
         3.1. Commands                         |VAM-commands|
@@ -451,5 +453,18 @@ just use the log_buffer_name option which defaults to a value of
     \'log_buffer_name': '/tmp/vam_install.log',
     \}
 <
+
+------------------------------------------------------------------------------
+2.9 error messages you may see and what they mean
+>
+   unknown function: vam#ActivteAddons
+
+This means that Vim's |runtimepath| setting does not contain the path you
+cloned VAM to. Using the recommended setup this should not happen.
+Have a second glance at the minimal setup at 2.2 |VAM-install|
+
+The long description is that vam# functions are looked up in
+&runtimepath/autoload/vam.vim files. If Vim doesn't find such the error will
+happen
 
 vim: tw=78:ts=8:ft=help:norl
