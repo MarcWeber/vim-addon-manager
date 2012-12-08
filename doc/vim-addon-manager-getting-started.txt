@@ -9,6 +9,10 @@ CONTENTS                                        *VAM-contents-getting-started*
         2.2 Names of addons and addon sources |VAM-addon-names|
         2.3 Example: configurable setup       |VAM-complex-setup-sample|
         2.4 Unattended installation           |VAM-unattended-installation|
+
+        2.8 How to find the plugin getting your job done?
+        2.9 error messages you may see and what they mean
+        2.10 The perfect plugin
 In |vim-addon-manager-additional-documentation.txt|:
     3. Functionality provided                 |VAM-functionality|
         3.1. Commands                         |VAM-commands|
@@ -452,5 +456,97 @@ just use the log_buffer_name option which defaults to a value of
     \'log_buffer_name': '/tmp/vam_install.log',
     \}
 <
+------------------------------------------------------------------------------
+2.8 How to find the plugin getting your job done?
+
+its not the task of VAM telling you - I know about the following possibilities:
+1) use www.vim.org/search.php because still most plugins are also on
+  www.vim.org
+2) Try google and github search (this time including "vim" as keyword) because
+  most plugins are hosted @ github today
+3) There is vim.wikia.com Use its search
+4) of course there are google/bing/(any other web) search
+5) There are mailinglists
+
+Why doesn't VAM support a search?
+- Because we still want you to visit vim's website (its a charity project after all)
+- Because we like the linux philosophy: One tool should do one task well and
+  be responsible for that only. VAM is only responsible for isntaling and
+  activating plugins thus for recreating your work environment form scratch.
+  Thus this should be a "plugin" providing such a feature, not VAM.
+- Its not that easy. If you want to work on it get in touch, because there are
+  multiple sources today unfortunately.
+  Of course we could just dump the information from www.vim.org and allow you
+  to grep it. I just think the whole plugin system on www.vim.org should be
+  rewritten allowing github urls. I haven't had time to do it yet.
+  I've been trying to do it for more than 12 month and failed due to lack of time.
+  If you want to sponsor such an effort get in touch.
+
+------------------------------------------------------------------------------
+2.9 error messages you may see and what they mean
+>
+   unknown function: vam#ActivteAddons
+
+This means that Vim's |runtimepath| setting does not contain the path you
+cloned VAM to. Using the recommended setup this should not happen.
+Have a second glance at the minimal setup at 2.2 |VAM-install|
+
+The long description is that vam# functions are looked up in
+&runtimepath/autoload/vam.vim files. If Vim doesn't find such the error will
+happen
+
+
+------------------------------------------------------------------------------
+2.10 The perfect plugin
+
+
+Well - this should not be here either - and its only "my personal view on it".
+
+useful plugins for developing in VimL: vim-dev and reload.
+
+plugin/NAME.vim 
+
+  Is sourced always. Thus it should only contain the user interface
+  configuration and code which is always used anyway (auto commands etc)
+
+plugin/autoload/NAME.vim
+
+  Is loaded as needed. It should contain the remaining code
+
+syntax/
+  contains syntax files
+
+ftdetect/
+  contains rules to assign file types to files
+
+colors/
+  contains color schemes
+
+You may want to use :h plugin or :helpgrep to find details in the Vim help.
+
+I personally don't like globbering the golbal namespace with
+
+if !exists(g:my_plugin_width')
+  let g:my_plugin_width  = 20
+endif
+
+Because its harder to read (3 lines). Historically Vim did not support
+dictionaries, so using g:foo{'var'} = value was the only way. Today Vim
+supports dictionaries which is why I personally prefer the "bind global named
+dictionary to a short local s: var. VAM itself shows how to do it (grep for
+s:c) Almost of all of my plugins follow these rules.
+
+common rules:
+- rather be simple than complicated
+- follow the principle of least surprise
+- try to find an existing plugin, join.
+- if you have to write from scratch document why
+- consider referencing related projects which do similar things.
+  After all we're a community and our task is to keep it healthy
+  thus to provide value to each other.
+- ...
+
+TODO: think about moving this section to
+doc/vim-addon-manager-additional-documentation.txt
 
 vim: tw=78:ts=8:ft=help:norl
