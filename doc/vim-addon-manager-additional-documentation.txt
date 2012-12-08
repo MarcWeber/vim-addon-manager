@@ -3,29 +3,31 @@
 CONTENTS                                       *VAM-contents-additional*
 
 In |vim-addon-manager-getting-started.txt|:
-    1. Intro                                  |VAM-intro|
-    2. Installation & installing plugins      |VAM-installation|
-        2.2 Names of addons and addon sources |VAM-addon-names|
-        2.3 Example: configurable setup       |VAM-complex-setup-sample|
-        2.4 unattended installation           |VAM-unattended-installation|
+    1. Intro                                   |VAM-intro|
+    2. Installation & installing plugins       |VAM-installation|
+        2.2. Names of addons and addon sources |VAM-addon-names|
+        2.3. Example: configurable setup       |VAM-complex-setup-sample|
+        2.4. unattended installation           |VAM-unattended-installation|
+        2.5. Searching the plugins             |VAM-plugins-search|
 Here:
-    3. Functionality provided                 |VAM-functionality|
-        3.1. Commands                         |VAM-commands|
-        3.2. Functions                        |VAM-functions|
-    4. Options                                |VAM-options|
-    6. Uninstalling plugins                   |VAM-uninstall-plugins|
-    7. Addon-info file                        |VAM-addon-info|
-    8. Author, credits, some notes            |VAM-related|
-    9. Testing this plugin                    |VAM-testing|
-   10. Some notes for windows users           |VAM-windows|
-   11. Some notes for Gentoo users            |VAM-gentoo|
-   12. Troubleshooting and known bugs         |VAM-trouble-shooting|
-        12.1. Common error messages           |VAM-common-errors|
-   13. TODO notes                             |VAM-TODO|
-   14. VAM vs ...                             |VAM-comparison|
-   15. Tracking down errors                   |VAM-tracking-down-erros|
-   16. Making plugins work with VAM           |VAM-adjusting-plugins|
-   17. VAM runtimepath handling tricks        |VAM-rtp-tricks|
+    3. Functionality provided                  |VAM-functionality|
+        3.1. Commands                          |VAM-commands|
+        3.2. Functions                         |VAM-functions|
+    4. Options                                 |VAM-options|
+    6. Uninstalling plugins                    |VAM-uninstall-plugins|
+    7. Addon-info file                         |VAM-addon-info|
+    8. Author, credits, some notes             |VAM-related|
+    9. Testing this plugin                     |VAM-testing|
+   10. Some notes for windows users            |VAM-windows|
+   11. Some notes for Gentoo users             |VAM-gentoo|
+   12. Troubleshooting and known bugs          |VAM-trouble-shooting|
+        12.1. Common error messages            |VAM-common-errors|
+   13. TODO notes                              |VAM-TODO|
+   14. VAM vs ...                              |VAM-comparison|
+   15. Tracking down errors                    |VAM-tracking-down-erros|
+   16. Making plugins work with VAM            |VAM-adjusting-plugins|
+        16.1. The perfect plugin               |VAM-plugin-guide|
+   17. VAM runtimepath handling tricks         |VAM-rtp-tricks|
 
 ==============================================================================
 3. Functionality provided                                  *VAM-functionality*
@@ -851,10 +853,10 @@ what's going to happen.
 12. Troubleshooting and known bugs                      *VAM-trouble-shooting*
 
 [BUG 101] Directories with commas are not supported.
-    Any discussion is here: https://github.com/MarcWeber/vim-addon-manager/issues/101
+  Any discussion is here: https://github.com/MarcWeber/vim-addon-manager/issues/101
 
 [BUG 10] Think about how to integrate ideas found in ipi 
-http://www.vim.org/scripts/script.php?script_id=3809
+  http://www.vim.org/scripts/script.php?script_id=3809
 
   Runtimepath manipulation should be separated from installation / update
   logic. This way you can have different implementation for updating plugins
@@ -1228,6 +1230,57 @@ relative to s:parent_dir_of_this_file
 Filetype detection files (from ftdetect/ directory) are loaded if you set 
 "filetype on". Thus if you do it after last call to vam#ActivateAddons, 
 everything should be fine.
+
+------------------------------------------------------------------------------
+16.1. The perfect plugin                                    *VAM-plugin-guide*
+
+
+Well - this should not be here either - and its only "my personal view on it".
+
+useful plugins for developing in VimL: vim-dev and reload.
+
+plugin/NAME.vim 
+
+  is sourced always. Thus it should only contain the user interface 
+  configuration and code which is always used anyway (autocommands, mappings, 
+  commands).
+
+autoload/NAME.vim
+
+  is loaded as needed. It should contain the remaining code.
+
+syntax/
+  contains syntax files.
+
+ftdetect/
+  contains rules to assign file types to files.
+
+colors/
+  contains color schemes.
+
+You may want to use :h plugin or :helpgrep to find details in the Vim help.
+
+I personally don't like globbering the golbal namespace with >
+
+    if !exists(g:my_plugin_width')
+      let g:my_plugin_width  = 20
+    endif
+
+because it is harder to read (3 lines). Historically Vim did not support 
+dictionaries, so using g:foo{'var'} = value was the only way. Today Vim 
+supports dictionaries which is why I personally prefer the “bind global named 
+dictionary to a short local s: var”. VAM itself shows how to do it (grep for 
+s:c) Almost of all of my plugins follow these rules.
+
+common rules:
+- rather be simple than complicated
+- follow the principle of least surprise
+- try to find an existing plugin, join.
+- if you have to write from scratch document why
+- consider referencing related projects which do similar things.
+  After all we're a community and our task is to keep it healthy
+  thus to provide value to each other.
+- ...
 
 
 ==============================================================================
