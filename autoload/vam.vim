@@ -340,7 +340,7 @@ fun! vam#ActivateAddons(...) abort
       for [group, events] in items(newaugs)
         for event in events
           if has_key(event_to_groups, event)
-            call add(event_to_groups, group)
+            call add(event_to_groups[event], group)
           else
             let event_to_groups[event] = [group]
           endif
