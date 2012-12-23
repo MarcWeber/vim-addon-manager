@@ -396,32 +396,62 @@ fun! vam#DisplayAddonInfoLines(name, repository)
   return lines
 endfun
 
-fun! vam#DisplayAddonInfo(name)
-  let repository = get(g:vim_addon_manager.plugin_sources, a:name, {})
+fun! vam#ShowRepositoryInfo(label, name, repository)
+  call vam#Log('===== '.a:label.' '.repeat('=', &columns-10-len(a:label)), 'Comment')
+  call vam#Log(join(vam#DisplayAddonInfoLines(a:name, a:repository),"\n"), 'None')
+endf
+
+fun! vam#DisplayAddonInfo(name, fuzzy)
   let name = a:name
+  let found = 0
+
+  let repository = get(g:vim_addon_manager.plugin_sources, name, {})
+  if !empty(repository)
+    call vam#ShowRepositoryInfo("by-name", name, repository)
+    let found += 1
+  endif
+
+  " try to find by script-id
   if empty(repository) && a:name =~ '^\d\+$'
     " try to find by script id
     let dict = filter(copy(g:vim_addon_manager.plugin_sources), '+get(v:val,"vim_script_nr",-1) == '.(+a:name))
     if (empty(dict))
       throw "Unknown script ".a:name
     else
-      let repository = get(values(dict), 0, {})
       let name = keys(dict)[0]
+      call vam#ShowRepositoryInfo("by-id", keys(dict)[0], values(dict)[0])
+      let found += 1
     endif
   endif
-  if empty(repository)
+
+  if found == 0 && a:fuzzy
+
+    " try to find by comparing name against anything found in the dictionary.
+    " Thus you can also search for git://github/...
+
+    " normalize .git in git(hub) names:
+    let name = substitute(name, '\.git$','','g')
+
+    for [r,k] in items(g:vim_addon_manager.plugin_sources)
+      if string(k) =~ name
+        call vam#ShowRepositoryInfo("by-fuzzy-search", r, k)
+        let found += 1
+      endif
+      unlet r k
+    endfor
+  endif
+
+  if found == 0
     echo "Invalid plugin name: " . a:name
     return
   endif
 
-  call vam#Log(repeat('=', &columns-1), 'Comment')
-  call vam#Log(join(vam#DisplayAddonInfoLines(name, repository),"\n"), 'None')
 endfun
 
 fun! vam#DisplayAddonsInfo(names)
   call vam#install#LoadPool()
   for name in a:names
-    call vam#DisplayAddonInfo(name)
+    call vam#DisplayAddonInfo(name, 1)
   endfor
 endfun
 

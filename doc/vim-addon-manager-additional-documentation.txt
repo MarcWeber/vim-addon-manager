@@ -67,9 +67,14 @@ UninstallNotLoadedAddons {name} ...                *:UninstallNotLoadedAddons*
         Unistall addons with given names. See
         |vam#install#UninstallAddons()| for more details.
 
-AddonsInfo {id/name} ...                                         *:AddonsInfo*
+AddonsInfo {id/name/any-regex} ...                                         *:AddonsInfo*
         Shows addon information. Accepts both VAM script names and www.vim.org 
-        script numbers.
+        script numbers. If neither succeeds the any-regex is used and compared
+        against any field of the repository dictionaries. Thus you can use it
+        to find addons by github url etc. Its best to use the directhory part
+        of the url only. because github urls can be written using git:// or
+        https:// and with or without trailing ".git" in some cases.
+
                                                 *:OKVAMBisect* *:BADVAMBisect*
 AddonsBisect [vim] [arg1] ...                                  *:AddonsBisect*
         Command that helps find which one of the activated plugins is causing 

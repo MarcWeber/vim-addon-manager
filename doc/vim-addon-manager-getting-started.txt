@@ -313,11 +313,11 @@ plugin titles at www.vim.org. In case two titles resolve to identical names
 “%{scriptID}” string is appended (e.g. “gam%2559”).
 
 types of names:
-  1) Plugin name looked up in pool. Try |:AddonsInfo| NAME
+  1) Plugin name looked up in pool.
 
     Determining addon names ~
-    - From ID: |:AddonsInfo| SCRIPT_ID, pick the word right after string 
-      "Plugin: ".
+    -  by using  |:AddonsInfo| SCRIPT_ID/name/any-texet, pick the word right
+       after string "Plugin: ".
     - Use |:InstallAddons|' name completion by typing some chars then pressing 
       <C-d> then <Tab>. |c_CTRL-D|
     - Use <C-x><C-p> completion while editing your vimrc.
