@@ -10,7 +10,6 @@ CONTENTS                                        *VAM-contents-getting-started*
         2.3. Example: configurable setup       |VAM-complex-setup-sample|
         2.4. Unattended installation           |VAM-unattended-installation|
         2.5. Searching the plugins             |VAM-plugins-search|
-        2.9 error messages you may see and what they mean
 In |vim-addon-manager-additional-documentation.txt|:
     3. Functionality provided                  |VAM-functionality|
         3.1. Commands                          |VAM-commands|
@@ -63,7 +62,7 @@ WHY VAM?: ~
 ==============================================================================
 1. Intro                                                           *VAM-intro*
 
-VAM is a shortcut for vim-addon-manager. Its vision is: Make it easiest to
+VAM is a shortcut for vim-addon-manager. Its vision is: Make it easiest to 
 install plugin somewhat following the “20% of efforts yields 80% of value” 
 rule.
 >
@@ -482,18 +481,5 @@ VAM does not support a search …
   I haven't had time to do it yet. I've been trying to do it for more than 12 
   month and failed due to lack of time. If you want to sponsor such an effort 
   get in touch.
-
-------------------------------------------------------------------------------
-2.9 error messages you may see and what they mean
->
-   unknown function: vam#ActivteAddons
-
-This means that Vim's |runtimepath| setting does not contain the path you
-cloned VAM to. Using the recommended setup this should not happen.
-Have a second glance at the minimal setup at 2.2 |VAM-install|
-
-The long description is that vam# functions are looked up in
-&runtimepath/autoload/vam.vim files. If Vim doesn't find such the error will
-happen
 
 vim: tw=78:ts=8:ft=help:norl
