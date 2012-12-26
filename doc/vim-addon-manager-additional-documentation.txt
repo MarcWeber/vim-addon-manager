@@ -27,7 +27,7 @@ Here:
    15. Tracking down errors                    |VAM-tracking-down-erros|
    16. Making plugins work with VAM            |VAM-adjusting-plugins|
         16.1. The perfect plugin               |VAM-plugin-guide|
-   17. VAM runtimepath handling tricks         |VAM-rtp-tricks|
+   17. VAM runtimepath / autocommand handling tricks |VAM-rtp-tricks|
 
 ==============================================================================
 3. Functionality provided                                  *VAM-functionality*
@@ -1289,7 +1289,7 @@ common rules:
 
 
 ==============================================================================
-17. VAM runtimepath handling tricks                           *VAM-rtp-tricks*
+17. VAM runtimepath / autocommand handling tricks               *VAM-rtp-tricks*
 
 Create these directories: >
 
@@ -1317,6 +1317,10 @@ vam#GlobThenSource usage.
 
 Also see this line in source:
 " HACKS source files which Vim only sources at startup (before VimEnter)
+
+grep for this source line to learn about how VAM runs autocommand events for
+plugins loaded at runtime:
+let newaugs = filter(s:GetAuGroups(), '!has_key(oldaugs, v:key)')
 
 ==============================================================================
 The linux script is gone. Search for "unix based os" to learn about its
