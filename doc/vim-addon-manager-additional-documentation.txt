@@ -428,6 +428,14 @@ Follow these steps:
 7. Addon-info file                                            *VAM-addon-info*
                                             *addon-info.json* *addon-info.txt*
 
+Example:  >
+  {
+    dependencies : {
+      'dependency-1-name': {},
+      'dependency-2-name': {}
+    }
+  }
+
 Each plugin that intends to use vim-addon-manager for distributing itself
 needs to have addon-info.json [1] file in its root,
 that contains the JSON dictionary with the following keys (none of the keys
