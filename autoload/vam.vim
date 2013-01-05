@@ -634,7 +634,7 @@ endfun
 let s:sep=fnamemodify(expand('<sfile>:h', 1), ':p')[-1:]
 let s:sesep=escape(s:sep, '\&~')
 let s:resep='\V'.escape(s:sep, '\').'\+'
-fun! s:normpath(path)
+fun! vam#normpath(path)
   return substitute(expand(fnameescape(resolve(a:path)), 1), s:resep, s:sesep, 'g')
 endfun
 
@@ -651,9 +651,9 @@ fun! vam#SourceMissingPlugins()
   let fs = []
   let rtp = split(&runtimepath, '\v(\\@<!(\\.)*\\)@<!\,')
   for r in rtp | call extend(fs, vam#GlobInDir(r, 'plugin/**/*.vim')) | endfor
-  call map(fs, 's:normpath(v:val)')
+  call map(fs, 'vam#normpath(v:val)')
 
-  let scriptnames = map(vam#OutputAsList('scriptnames'), 's:normpath(v:val[(stridx(v:val,":")+2):-1])')
+  let scriptnames = map(vam#OutputAsList('scriptnames'), 'vam#normpath(v:val[(stridx(v:val,":")+2):-1])')
   call filter(fs, 'index(scriptnames,  v:val) == -1')
   call vam#SourceFiles(fs)
 endfun
