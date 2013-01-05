@@ -98,7 +98,7 @@ if s:c.create_addon_info_handlers
       \ setlocal ft=addon-info
       \ | setlocal syntax=json
       \ | syn match Error "^\s*'"
-    autocmd BufWritePost *-addon-info.txt,addon-info.json call vam#ReadAddonInfo(expand('%', 1))
+    autocmd BufWritePost *-addon-info.txt,addon-info.json call vam#ReadJSON(expand('%', 1))
   augroup END
 endif
 
@@ -117,7 +117,7 @@ endfun
 
 " use join so that you can break the dict into multiple lines. This makes
 " reading it much easier
-fun! vam#ReadAddonInfo(path)
+fun! vam#ReadJSON(path)
   if !filereadable(a:path)
     return {}
   endif
@@ -127,7 +127,7 @@ fun! vam#ReadAddonInfo(path)
   " versions with strange settings
 
   " using eval is evil!
-  let body = join(readfile(a:path),"")
+  let body = join(readfile(a:path), "")
 
   if vam#VerifyIsJSON(body)
     let true=1
@@ -136,7 +136,7 @@ fun! vam#ReadAddonInfo(path)
     " using eval is now safe!
     return eval(body)
   else
-    call vam#Log( "Invalid JSON in ".a:path."!")
+    call vam#Log("Invalid JSON in ".a:path."!")
     return {}
   endif
 
@@ -177,7 +177,7 @@ endfun
 fun! vam#AddonInfo(name)
   throw "deprecated"
   " use this code instead:
-  " vam#ReadAddonInfo(vam#AddonInfoFile(vam#PluginDirFromName(name), name))
+  " vam#ReadJSON(vam#AddonInfoFile(vam#PluginDirFromName(name), name))
 endfun
 
 

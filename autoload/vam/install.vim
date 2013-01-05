@@ -141,7 +141,7 @@ fun! vam#install#ReplaceAndFetchUrls(list)
       let t = n
     endif
     if exists('t')
-      let info = vam#ReadAddonInfo(t)
+      let info = vam#ReadJSON(t)
       unlet t
       if !has_key(info, 'name') || !has_key(info, 'repository')
         call vam#Log( n." is no valid addon-info file. It must contain both keys: name and repository")
