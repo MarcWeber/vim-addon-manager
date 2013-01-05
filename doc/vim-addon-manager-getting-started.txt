@@ -28,7 +28,7 @@ In |vim-addon-manager-additional-documentation.txt|:
    15. Tracking down errors                    |VAM-tracking-down-erros|
    16. Making plugins work with VAM            |VAM-adjusting-plugins|
         16.1. The perfect plugin               |VAM-plugin-guide|
-   17. VAM runtimepath / autocommand handling tricks |VAM-rtp-tricks|
+   17. VAM tricks and hacks                    |VAM-tricks|
 
 ==============================================================================
 

@@ -27,7 +27,7 @@ Here:
    15. Tracking down errors                    |VAM-tracking-down-erros|
    16. Making plugins work with VAM            |VAM-adjusting-plugins|
         16.1. The perfect plugin               |VAM-plugin-guide|
-   17. VAM runtimepath / autocommand handling tricks |VAM-rtp-tricks|
+   17. VAM tricks and hacks                    |VAM-tricks|
 
 ==============================================================================
 3. Functionality provided                                  *VAM-functionality*
@@ -67,7 +67,7 @@ UninstallNotLoadedAddons {name} ...                *:UninstallNotLoadedAddons*
         Unistall addons with given names. See
         |vam#install#UninstallAddons()| for more details.
 
-AddonsInfo {id/name/any-regex} ...                                         *:AddonsInfo*
+AddonsInfo {id/name/any-regex} ...                               *:AddonsInfo*
         Shows addon information. Accepts both VAM script names and www.vim.org 
         script numbers. If neither succeeds the any-regex is used and compared
         against any field of the repository dictionaries. Thus you can use it
@@ -459,10 +459,10 @@ repository                                             *addon-info-repository*
         Key      Description ~
         type     Required, must be either one of `hg', `git', `svn', `bzr' or
                  an empty string.
-        url      If `type' key contains a VCS name (`hg', `git', `bzr' or `svn'),
-                 then this key describes a url that will be passed to this
-                 VCS. If `type' key contains an empty string, then it should
-                 contain location of the archive.
+        url      If `type' key contains a VCS name (`hg', `git', `bzr' or 
+                 `svn'), then this key describes a url that will be passed to 
+                 this VCS. If `type' key contains an empty string, then it 
+                 should contain location of the archive.
         script-type
                  One of `plugin', `syntax', `color scheme', or `indent'. The 
                  .vim file will be moved into the specific subdirectory.
@@ -1297,7 +1297,7 @@ common rules:
 
 
 ==============================================================================
-17. VAM runtimepath / autocommand handling tricks               *VAM-rtp-tricks*
+17. VAM tricks and hacks                                          *VAM-tricks*
 
 Create these directories: >
 
@@ -1327,8 +1327,8 @@ Also see this line in source:
 " HACKS source files which Vim only sources at startup (before VimEnter)
 
 grep for this source line to learn about how VAM runs autocommand events for
-plugins loaded at runtime:
-let newaugs = filter(s:GetAuGroups(), '!has_key(oldaugs, v:key)')
+plugins loaded at runtime: >
+    let newaugs = filter(s:GetAuGroups(), '!has_key(oldaugs, v:key)')
 
 ==============================================================================
 The linux script is gone. Search for "unix based os" to learn about its
