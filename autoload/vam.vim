@@ -51,6 +51,7 @@ call map(s:c.additional_addon_dirs, 'expand(fnameescape(v:val), 1)')
 
 let s:c.dont_source          = get(s:c, 'dont_source',          0)
 let s:c.plugin_dir_by_name   = get(s:c, 'plugin_dir_by_name',   'vam#DefaultPluginDirFromName')
+let s:c.handle_runtimepaths  = get(s:c, 'handle_runtimepaths',  'vam#HandleRuntimepaths')
 let s:c.addon_completion_lhs = get(s:c, 'addon_completion_lhs', '<C-x><C-p>')
 let s:c.debug_activation     = get(s:c, 'debug_activation',     0)
 let s:c.pool_item_check_fun  = get(s:c, 'pool_item_check_fun',  'none')
@@ -464,7 +465,7 @@ fun! vam#ActivateAddons(...) abort
   call call('vam#ActivateRecursively', args)
 
   if topLevel
-    call vam#HandleRuntimepaths(opts)
+    call call(s:c.handle_runtimepaths, [opts], {})
   endif
 endfun
 

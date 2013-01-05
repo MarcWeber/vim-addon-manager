@@ -293,6 +293,27 @@ plugin_dir_by_name                                    *VAM-plugin_dir_by_name*
         absolute paths plugins are to be installed into. Function must return
         path without trailing path separators or |VAM-do_diff| will break.
         Default is "vam#DefaultPluginDirFromName".
+handle_runtimepaths                                  *VAM-handle_runtimepaths*
+        Function name or function reference that handles runtimepaths 
+        additions by |vam#ActivateAddons|. Receives options dictionary: 
+        dictionary second argument to |vam#ActivateAddons| with two additional 
+        internal usage keys:
+            Key                Description ~
+            new_runtime_paths  A list of directories containing additional 
+                               runtimepaths.
+            to_be_activated    Dictionary where keys are names of the plugins 
+                               which were requested to be activated. Used only 
+                               for checking whether function succeeded to 
+                               activate all of them.
+        Default value: vam#HandleRuntimepaths. It is supposed (but not 
+        necessary) that you use it this way: >
+            let s:old_handle_runtimepaths=get(g:vim_addon_manager,
+                                             \'handle_runtimepaths',
+                                             \'vam#HandleRuntimepaths')
+            function! g:vim_addon_manager.handle_runtimepaths(opts)
+                " Do something
+                return call(s:old_handle_runtimepaths, [a:opts], {})
+            endfunction
 scms                                                                *VAM-scms*
         This option determines how sources with supported SCM's should be
         checked out and updated. It is a dictionary where keys are known SCM's
