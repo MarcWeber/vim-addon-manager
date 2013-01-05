@@ -260,9 +260,14 @@ fun! s:GetAuGroups()
   silent autocmd VimEnter,BufEnter,TabEnter,BufWinEnter,WinEnter,GUIEnter
   redir END
   let augs = {}
-  for [group, event] in map(filter(split(aus, "\n"),
-        \                          'v:val=~#''\v^\w+\s+\w+$'''),
-        \                   'split(v:val)')
+  for line in filter(split(aus, "\n"), 'v:val=~#''\v^\S.*\ {2}''')
+    let idx=strridx(line, '  ')
+    let group=line[:(idx-1)]
+    let event=line[(idx+2):]
+    " You can’t launch group names with spaces using :au. So don’t try to do so
+    if stridx(group, ' ')!=-1
+      continue
+    endif
     if has_key(augs, group)
       call add(augs[group], event)
     else
