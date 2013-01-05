@@ -462,18 +462,15 @@ endfun
 
 " FIXME won't list hidden files as well
 if v:version>703 || (v:version==703 && has('patch465'))
-  fun! vam#GlobList(glob)
-    return glob(a:glob, 1, 1)
+  fun! vam#GlobInDir(dir, glob)
+    return glob(fnameescape(a:dir).'/'.a:glob, 1, 1)
   endfun
 else
-  fun! vam#GlobList(glob)
-    return split(glob(a:glob, 1), "\n")
+  fun! vam#GlobInDir(dir, glob)
+    return split(glob(fnameescape(a:dir).'/'.a:glob, 1), "\n")
   endfun
 endif
 
-fun! vam#GlobInDir(dir, glob)
-  return vam#GlobList(fnameescape(a:dir).'/'.a:glob)
-endfun
 fun! vam#GlobThenSource(dir, glob)
   if s:c.dont_source | return | endif
   call vam#SourceFiles(vam#GlobInDir(a:dir, a:glob))
