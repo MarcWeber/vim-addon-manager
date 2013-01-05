@@ -234,7 +234,6 @@ fun! s:GetAuGroups()
   return augs
 endfun
 
-let s:top_level = 0
 " see also ActivateRecursively
 " Activate activates the plugins and their dependencies recursively.
 " I sources both: plugin/*.vim and after/plugin/*.vim files when called after
@@ -315,7 +314,7 @@ fun! vam#ActivateAddons(...) abort
 
     for rtp in new_runtime_paths
       " filetype off/on would do the same ?
-      call vam#GlobThenSource(rtp.'/ftdetect/*.vim')
+      call vam#GlobThenSource(rtp, 'ftdetect/*.vim')
     endfor
 
     " HACKS source files which Vim only sources at startup (before VimEnter)
@@ -328,8 +327,8 @@ fun! vam#ActivateAddons(...) abort
       let oldaugs = s:GetAuGroups()
 
       for rtp in new_runtime_paths
-        call vam#GlobThenSource(rtp.'/plugin/**/*.vim')
-        call vam#GlobThenSource(rtp.'/after/plugin/**/*.vim')
+        call vam#GlobThenSource(rtp, 'plugin/**/*.vim')
+        call vam#GlobThenSource(rtp, 'after/plugin/**/*.vim')
       endfor
 
       " Now find out which au groups are new and run them manually, cause
@@ -475,9 +474,9 @@ endif
 fun! vam#GlobInDir(dir, glob)
   return vam#GlobList(fnameescape(a:dir).'/'.a:glob)
 endfun
-fun! vam#GlobThenSource(glob)
+fun! vam#GlobThenSource(dir, glob)
   if s:c.dont_source | return | endif
-  call vam#SourceFiles(vam#GlobList(a:glob))
+  call vam#SourceFiles(vam#GlobInDir(a:dir, a:glob))
 endfun
 
 if s:c.source_missing_files
