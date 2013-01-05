@@ -308,6 +308,93 @@ fun! vam#PreprocessScriptIdentifier(list, opts)
   " only be loaded when installations take place
 endf
 
+fun! vam#HandleRuntimepaths(opts)
+  " deferred tasks:
+  " - add addons to runtimepath
+  " - add source plugin/**/*.vim files in case Activate was called long
+  "   after .vimrc has been sourced
+
+  " add paths after ~/.vim but before $VIMRUNTIME
+  " don't miss the after directories if they exist and
+  " put them last! (Thanks to Oliver Teuliere)
+  let new_runtime_paths=a:opts.new_runtime_paths
+  let rtp = split(&runtimepath, '\v(\\@<!(\\.)*\\)@<!\,')
+  let escapeComma = 'escape(v:val, '','')'
+  let after = filter(map(copy(new_runtime_paths), 'v:val."/after"'), 'isdirectory(v:val)')
+  if !s:c.dont_source
+    " rtp[-1:-1] keep users /after directory last, see github issue #165
+    let list = rtp[:0] + map(copy(new_runtime_paths), escapeComma)
+                \                 + rtp[1:-2]
+                \                 + map(after, escapeComma)
+                \                 + rtp[-1:-1]
+    if s:c.rtp_list_hook isnot# ''
+      let list = call(s:c.rtp_list_hook, [list])
+    endif
+    let &runtimepath=join(list , ",")
+  endif
+  unlet rtp
+
+  for rtp in new_runtime_paths
+    " filetype off/on would do the same ?
+    call vam#GlobThenSource(rtp, 'ftdetect/*.vim')
+  endfor
+
+  " HACKS source files which Vim only sources at startup (before VimEnter)
+  "
+  " using force is very likely to cause the plugin to be sourced twice
+  " I hope the plugins don't mind
+  if (&loadplugins && !has('vim_starting')) || get(a:opts, 'force_loading_plugins_now', 0)
+    " get all au groups which have been defined before sourcing additional
+    " plugin files
+    let oldaugs = s:GetAuGroups()
+
+    for rtp in new_runtime_paths
+      call vam#GlobThenSource(rtp, 'plugin/**/*.vim')
+    endfor
+    for rtp in after
+      call vam#GlobThenSource(rtp, 'plugin/**/*.vim')
+    endfor
+
+    " Now find out which au groups are new and run them manually, cause
+    " Vim does so only when starting up. NerdTree and powerline are two
+    " plugins serving as sample. Both use VimEnter.
+    let newaugs = filter(s:GetAuGroups(), '!has_key(oldaugs, v:key)')
+    let event_to_groups = {}
+    for [group, events] in items(newaugs)
+      for event in events
+        if has_key(event_to_groups, event)
+          call add(event_to_groups[event], group)
+        else
+          let event_to_groups[event] = [group]
+        endif
+      endfor
+    endfor
+    for event in filter((has('gui_running')?['GUIEnter']:[])+['VimEnter',
+          \              'TabEnter', 'WinEnter', 'BufEnter', 'BufWinEnter'],
+          \             'has_key(event_to_groups, v:val)')
+      for group in event_to_groups[event]
+        execute 'doautocmd' group event
+      endfor
+    endfor
+
+    if !empty(new_runtime_paths)
+      " The purpose of this line is to "refresh" buffer local vars and syntax.
+      " (eg when loading a python plugin when opening a .py file)
+      " Maybe its the responsibility of plugins to "refresh" settings of
+      " buffers which are already open - I don't expect them to do so.
+      " Let's see how much this breaks.
+      call map(filter(range(1, bufnr('$')),
+            \         'bufexists(v:val)'),
+            \  's:ResetVars(v:val)')
+    endif
+  endif
+
+  let failed = filter(keys(a:opts.to_be_activated), '!has_key(s:c.activated_plugins, v:val)')
+  if !empty(failed)
+    throw 'These plugins could not be activated for some reason: '.string(failed)
+  endif
+endfun
+
 " see also ActivateRecursively
 " Activate activates the plugins and their dependencies recursively.
 " I sources both: plugin/*.vim and after/plugin/*.vim files when called after
@@ -366,12 +453,8 @@ fun! vam#ActivateAddons(...) abort
   endif
 
   " add new_runtime_paths state if not present in opts yet
-  let new_runtime_paths = get(opts, 'new_runtime_paths', [])
-  let to_be_activated   = get(opts, 'to_be_activated',   {})
-
-
-  let opts.new_runtime_paths = new_runtime_paths
-  let opts.to_be_activated   = to_be_activated
+  let opts.new_runtime_paths = get(opts, 'new_runtime_paths', [])
+  let opts.to_be_activated   = get(opts, 'to_be_activated', {})
 
   for a in args[0]
     let to_be_activated[has_key(a, 'name') ? a.name : 'rtp:'.a.activate_this_rtp] = a
@@ -381,87 +464,7 @@ fun! vam#ActivateAddons(...) abort
   call call('vam#ActivateRecursively', args)
 
   if topLevel
-    " deferred tasks:
-    " - add addons to runtimepath
-    " - add source plugin/**/*.vim files in case Activate was called long
-    "   after .vimrc has been sourced
-
-    " add paths after ~/.vim but before $VIMRUNTIME
-    " don't miss the after directories if they exist and
-    " put them last! (Thanks to Oliver Teuliere)
-    let rtp = split(&runtimepath, '\v(\\@<!(\\.)*\\)@<!\,')
-    let escapeComma = 'escape(v:val, '','')'
-    let after = filter(map(copy(new_runtime_paths), 'v:val."/after"'), 'isdirectory(v:val)')
-    if !s:c.dont_source
-      " rtp[-1:-1] keep users /after directory last, see github issue #165
-      let list = rtp[:0] + map(copy(new_runtime_paths), escapeComma)
-                  \                 + rtp[1:-2]
-                  \                 + map(after, escapeComma)
-                  \                 + rtp[-1:-1]
-      if s:c.rtp_list_hook != ''
-        let list = call(s:c.rtp_list_hook, [list])
-      endif
-      let &runtimepath=join(list , ",")
-    endif
-    unlet rtp
-
-    for rtp in new_runtime_paths
-      " filetype off/on would do the same ?
-      call vam#GlobThenSource(rtp, 'ftdetect/*.vim')
-    endfor
-
-    " HACKS source files which Vim only sources at startup (before VimEnter)
-    "
-    " using force is very likely to cause the plugin to be sourced twice
-    " I hope the plugins don't mind
-    if (&loadplugins && !has('vim_starting')) || get(opts, 'force_loading_plugins_now', 0)
-      " get all au groups which have been defined before sourcing additional
-      " plugin files
-      let oldaugs = s:GetAuGroups()
-
-      for rtp in new_runtime_paths
-        call vam#GlobThenSource(rtp, 'plugin/**/*.vim')
-        call vam#GlobThenSource(rtp, 'after/plugin/**/*.vim')
-      endfor
-
-      " Now find out which au groups are new and run them manually, cause
-      " Vim does so only when starting up. NerdTree and powerline are two
-      " plugins serving as sample. Both use VimEnter.
-      let newaugs = filter(s:GetAuGroups(), '!has_key(oldaugs, v:key)')
-      let event_to_groups = {}
-      for [group, events] in items(newaugs)
-        for event in events
-          if has_key(event_to_groups, event)
-            call add(event_to_groups[event], group)
-          else
-            let event_to_groups[event] = [group]
-          endif
-        endfor
-      endfor
-      for event in filter((has('gui_running')?['GUIEnter']:[])+['VimEnter',
-            \              'TabEnter', 'WinEnter', 'BufEnter', 'BufWinEnter'],
-            \             'has_key(event_to_groups, v:val)')
-        for group in event_to_groups[event]
-          execute 'doautocmd' group event
-        endfor
-      endfor
-
-      if !empty(new_runtime_paths)
-        " The purpose of this line is to "refresh" buffer local vars and syntax.
-        " (eg when loading a python plugin when opening a .py file)
-        " Maybe its the responsibility of plugins to "refresh" settings of
-        " buffers which are already open - I don't expect them to do so.
-        " Let's see how much this breaks.
-        call map(filter(range(1, bufnr('$')),
-              \         'bufexists(v:val)'),
-              \  's:ResetVars(v:val)')
-      endif
-    endif
-
-    let failed = filter(keys(to_be_activated), '!has_key(s:c.activated_plugins, v:val)')
-    if !empty(failed)
-      throw 'These plugins could not be activated for some reason: '.string(failed)
-    endif
+    call vam#HandleRuntimepaths(opts)
   endif
 endfun
 
