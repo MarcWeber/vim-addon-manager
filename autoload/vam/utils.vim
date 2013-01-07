@@ -133,7 +133,7 @@ fun s:post_unpack_hooks.fix_layout(opts, targetDir, fixDir)
     if (!isdirectory(a:fixDir))
       call mkdir(a:fixDir, 'p')
     endif
-    for f in map(split(rtpvimfiles, "\n"), 'fnamemodify(v:val, ":t")')
+    for f in map(rtpvimfiles, 'fnamemodify(v:val, ":t")')
       call rename(a:targetDir.'/'.f, a:fixDir.'/'.f)
     endfor
   endif
