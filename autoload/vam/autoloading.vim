@@ -103,11 +103,9 @@ fun! vam#autoloading#Setup()
         execute a:range.a:cmd.a:bang a:args
       endfun
 
-      if !exists('s:compcmds')
-        let s:compcmds = {}
-        let s:nextccid = 0
-        let s:recursing = 0
-      endif
+      let s:compcmds = {}
+      let s:nextccid = 0
+      let s:recursing = 0
 
       fun! s:comp(ccid, a, l, p)
         let cmddescr = s:compcmds[a:ccid]
@@ -161,6 +159,31 @@ fun! vam#autoloading#Setup()
               \                   '<count>':
               \                   '"<line1>,<line2>"')).', '.
               \              '<q-args>, '.string(a:cmddescr.file).')'
+      endfun
+
+      fun! AutoloadingAueRun(key)
+        for file in remove(s:events, a:key)
+          execute 'source' fnameescape(file)
+        endfor
+        augroup VAMAutoloading
+          execute 'autocmd!' matchstr(key, '[^#]\+') matchstr(key, '#\@<=.*')
+        augroup END
+      endfun
+
+      let s:events={}
+
+      fun! s:aug(audescr)
+        for pattern in a:audescr.patterns
+          let key = a:audescr.event.'#'.a:audescr.pattern
+          if !has_key(s:events, key)
+            let s:events[key]  = [a:audescr.file]
+            augroup VAMAutoloading
+              execute 'autocmd!' a:audescr.event pattern ':call AutoloadingAueRun('.string(key).')'
+            augroup END
+          else
+            let s:events[key] += [a:audescr.file]
+          endif
+        endfor
       endfun
     endif
 
@@ -283,11 +306,18 @@ fun! vam#autoloading#Setup()
             let idx=strridx(line, '  ')
             let augroup=line[:(idx-1)]
             let auevent=line[(idx+2):]
+            let key=augroup.'#'.auevent
           elseif line =~# '\v^\w+$'
             let augroup=0
             let auevent=line
+            let key='#'.auevent
+          elseif line[0] is# ' '
+            if !has_key(state.autocommands, key)
+              let state.autocommands[key]={'group': augroup, 'event': auevent, 'patterns': []}
+            endif
+            " XXX Pattern must be left escaped
+            let state.autocommands[key].patterns+=[matchstr(line, '\v(\\.|\S)+')]
           endif
-          let state.autocommands[(augroup is 0 ? '': augroup.'#').auevent]={'group': augroup, 'event': auevent}
         endfor
 
         return state
