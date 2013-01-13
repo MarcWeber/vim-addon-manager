@@ -196,23 +196,23 @@ fun! vam#autoloading#Setup()
     for rtp in s:toscan
       let dbitem={'ftplugins': {}, 'syntaxes': {}, 'mappings': {}, 'commands': {}, 'functions': {}, 'abbreviations': {},
             \     'autocommands': {}, 'ftdetects': []}
-      call map(vam#GlobInDir(rtp, 'plugin/**/*.vim'), 'extend(s:toscanfiles, {v:val : rtp})')
+      call map(vam#GlobInDir(rtp, '{,after/}plugin/**/*.vim'), 'extend(s:toscanfiles, {v:val : rtp})')
 
-      for file in vam#GlobInDir(rtp, 'ftplugin/{*/,}*.vim')
+      for file in vam#GlobInDir(rtp, '{,after/}ftplugin/{*/,}*.vim')
         let filetype=substitute(file, '.*ftplugin/\v([^/_]+%(%(_[^/]*)?\.vim$|\/[^/]+$)@=).*', '\1', 'g')
         let file=vam#normpath(file)
         call s:addlistitem(dbitem.ftplugins, filetype, file)
         call s:addlistitem(db.ftplugins, filetype, file)
       endfor
 
-      for file in vam#GlobInDir(rtp, 'syntax/{*/,}*.vim')
+      for file in vam#GlobInDir(rtp, '{,after/}syntax/{*/,}*.vim')
         let filetype=substitute(file, '.*syntax/\v([^/]+%(\.vim$|\/[^/]+$)@=).*', '\1', 'g')
         let file=vam#normpath(file)
         call s:addlistitem(dbitem.syntaxes, filetype, file)
         call s:addlistitem(db.syntaxes, filetype, file)
       endfor
 
-      let dbitem.ftdetects=map(vam#GlobInDir(rtp, 'ftdetect/*.vim'), 'vam#normpath(v:val)')
+      let dbitem.ftdetects=map(vam#GlobInDir(rtp, '{,after/}ftdetect/*.vim'), 'vam#normpath(v:val)')
 
       let db.paths[rtp]=dbitem
     endfor
