@@ -49,6 +49,127 @@ fun! vam#autoloading#Setup()
 
     call map(copy(new_runtime_paths), 'add(has_key(db.paths, v:val) ? s:toautoload : s:toscan, v:val)')
 
+    if !empty(s:toautoload) && !exists('*s:map')
+      fun! AutoloadingMapRun(lhs, file)
+        execute 'source' fnameescape(a:file)
+        return eval('"'.escape(a:lhs, '\"<').'"')
+      endfun
+
+      function s:hsescape(str, sid)
+        return substitute(substitute(substitute(substitute(substitute(a:str,
+              \      ' ', '<Space>',         'g'),
+              \      '|', '<Bar>',           'g'),
+              \'\c<SID>', '<SNR>'.a:sid.'_', 'g'),
+              \     "\n", '<CR>',            'g'),
+              \'\c^<\%(buffer\|silent\|expr\|special\)\@=', '<LT>', '')
+      endfunction
+
+      fun! s:map(mapdescr, mode)
+        let lhs=s:hsescape(a:mapdescr.lhs, a:mapdescr.sid)
+        let amrargs=s:hsescape(join(map([lhs, a:mapdescr.file], 'string(v:val)'), ','))
+        execute a:mode.'map' '<expr>' lhs 'AutoloadingMapRun('.amrargs.')'
+      endfun
+
+      function s:genTempMap(mapdescr, mode)
+        if a:mapdescr.expr>1
+          let rhs=printf(a:mapdescr.rhs, '"'.mode.'","'.escape(lhs, '"\').'"')
+        else
+          let rhs=s:hsescape(a:mapdescr.rhs, a:mapdescr.sid)
+        endif
+        execute a:mode.((a:mapdescr.noremap)?('nore'):('')).'map'
+              \ ((a:mapdescr.silent)?('<silent>'):(''))
+              \ '<special>'
+              \ ((a:mapdescr.expr)?('<expr>'):(''))
+              \ '<Plug>VAMAutoloadingTempMap' rhs
+      endfunction
+
+      fun! AutoloadingAbbRun(lhs, mode, file)
+        execute 'source' fnameescape(a:file)
+        let mapdescr=maparg(a:lhs, a:mode, 1, 1)
+        if !empty(mapdescr)
+          call s:genTempMap(mapdescr, a:mode)
+          return "\<Plug>VAMAutoloadingTempMap"
+        endif
+      endfun
+
+      fun! s:abb(mapdescr, mode, file)
+        let lhs=s:hsescape(a:mapdescr.lhs, a:mapdescr.sid)
+        let aarargs=s:hsescape(join(map([lhs, a:mode, a:mapdescr.file], 'string(v:val)'), ','))
+        execute a:mod.'abbrev <expr> <silent>' lhs 'AutoloadingAbbRun('.aarargs.')'
+      endfun
+
+      fun! AutoloadingCmdRun(cmd, bang, range, args, file)
+        execute 'source' fnameescape(a:file)
+        execute a:range.a:cmd.a:bang a:args
+      endfun
+
+      if !exists('s:compcmds')
+        let s:compcmds = {}
+        let s:nextccid = 0
+        let s:recursing = 0
+      endif
+
+      fun! s:comp(ccid, a, l, p)
+        let cmddescr = s:compcmds[a:ccid]
+        execute 'source' cmddescr.file
+        if s:recursing
+          return []
+        endif
+        let d = {}
+        let s:recursing += 1
+
+        try
+          execute 'silent normal! :'.a:l[:(a:p))]."\<C-a>\<C-\>eextend(d, {'cmdline':getcmdline()}).cmdline\n"
+        catch
+          let d = {}
+        finally
+          let s:recursing -= 1
+        endtry
+
+        if has_key(d, 'cmdline')
+          return split(d.cmdline[(a:p-len(a:a)):], '\\\@<! ')
+        else
+          return []
+        endif
+      endfun
+
+      fun! s:defcompl(cmd, cmddescr)
+        let ccid = s:nextccid
+        let s:nextccid += 1
+        let s:compcmds[ccid] = a:cmddescr
+        let sid = +(matchlist(expand('<sfile>'), '\v.*(\d+)')[1])
+        execute "fun! s:_comp_".ccid."(a, l, p)\n"
+              \ "    return s:comp(".ccid.", a:a, a:l, a:p)\n"
+              \ "endfun"
+        return 'customlist:<SNR>'.sid.'__comp_'.ccid
+      endfun
+
+      fun! s:cmd(cmd, cmddescr)
+        execute 'command' (a:cmddescr.bang ? '-bang' : '')
+              \           '-nargs='.a:cmddescr.nargs.
+              \           (empty(a:cmddescr.range) ? '' :
+              \             (a:cmddescr.range[-1:] is# 'c' ?
+              \               '-count='.str2nr(a:cmddescr.range):
+              \               '-range='.a:cmddescr.range))
+              \           (empty(a:cmddescr.complete) ? '' :
+              \             (a:cmddescr.complete[:5] is# 'custom' ?
+              \               s:defcompl(a:cmd, a:cmddescr) :
+              \               '-complete='.a:cmddescr.complete))
+              \           'call AutoloadingCmdRun('.string(a:cmd).', "<bang>", '.
+              \               (empty(a:cmddescr.range)? '""' :
+              \                 (a:cmddescr.range[-1:] is# 'c' ?
+              \                   '<count>':
+              \                   '"<line1>,<line2>"')).', '.
+              \              '<q-args>, '.string(a:cmddescr.file).')'
+      endfun
+    endif
+
+    for rtp in s:toautoload
+      let dbitem=db.paths[rtp]
+      for key in ['mappings', 'abbreviations']
+      endfor
+    endfor
+
     for rtp in s:toscan
       let dbitem={'ftplugins': {}, 'syntaxes': {}, 'mappings': {}, 'commands': {}, 'functions': {}, 'abbreviations': {},
             \     'autocommands': {}, 'ftdetects': []}
@@ -131,13 +252,13 @@ fun! vam#autoloading#Setup()
             continue
           endif
           let bang=(line[0] is# '!')
-          let [cmd, param, range]=matchlist(line, '\v(\S+)\ +([01*?+])\ {4}(\S*)', 3)[1:3]
+          let [cmd, nargs, range]=matchlist(line, '\v(\S+)\ +([01*?+])\ {4}(\S*)', 3)[1:3]
           "         ┌ bang field              ┌ nargs field
           "         │ ┌ command field         │     ┌ range field
           let start=3+(max([len(cmd), 11])+1)+(1+4)+(max([len(range), 5])+1)
-          let completion=matchstr(line, '\S\+', start)
-          let exe=matchstr(line, '\S.*', start+len(completion))
-          let state.commands[cmd]={'param': param, 'range': range, 'completion': completion, 'command': exe}
+          let complete=matchstr(line, '\S\+', start)
+          let exe=matchstr(line, '\S.*', start+len(complete))
+          let state.commands[cmd]={'nargs': nargs, 'range': range, 'complete': complete, 'command': exe}
         endfor
 
         redir => functions
