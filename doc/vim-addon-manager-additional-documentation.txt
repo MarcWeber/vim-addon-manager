@@ -808,6 +808,7 @@ small so its debatable whether its worth sharing.
 
 The overlay is accessible via mercurial, url:
 http://vimpluginloader.hg.sourceforge.net:8000/hgroot/vimpluginloader/pluginloader-overlay
+or https://bitbucket.org/ZyX_I/pluginloader-overlay (mirror).
 
 In order to use this overlay paludis users can add the pluginloader.conf file
 to /etc/paludis/repositories/ with the following contents: >
