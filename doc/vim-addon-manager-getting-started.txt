@@ -233,6 +233,17 @@ NOTES: ~
     au FileType * for l in values(filter(copy(ft_addons), string(expand('<amatch>')).' =~ v:key')) | call vam#ActivateAddons(l, {'force_loading_plugins_now':1}) | endfor
 <  Provide feedback about this. If it works we may add it as builtin
 
+  Also see this text which was sent to the mailinglist (TODO tidy up)
+  @skeept There are at least two projects that add extended autoloading support:
+  [tplugin](http://www.vim.org/scripts/script.php?script_id=2917) and
+  [AsNeeded](http://www.vim.org/scripts/script.php?script_id=915). They lack support from VAM though (to limit th
+  number of plugins to be autoloaded), but the former has limited (and currently outdated) support for
+  `addon-info` files. Neither will work for my own plugins though (they all use frawor API to define mappings and
+  commands and, sometimes, autocommands), and (at least in tplugin) I see a bunch of other problems (like not
+  supported short format for mapping commands, no support for mappings/commands defined in `:execute` and so on):
+  it is really not possible to construct such autoloading by statically analyzing plugins without executing them.
+
+
    experimental: setup VAM when GUI has started [E2] ~
    Depending on the option you choose to run ActivateAddons Vim may not be
    able to show the questions correctly asking you to install a plugin.
