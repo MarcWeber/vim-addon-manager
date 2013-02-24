@@ -478,7 +478,7 @@ endfun
 
 if s:c.source_missing_files
   augroup VIM_PLUGIN_MANAGER
-    autocmd! VimEnter * call  vam#SourceMissingPlugins()
+    autocmd! VimEnter * nested call  vam#SourceMissingPlugins()
   augroup END
 endif
 
