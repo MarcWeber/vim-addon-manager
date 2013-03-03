@@ -41,15 +41,15 @@ fun! vam#autoloading#Setup()
 
     let new_runtime_paths=map(copy(a:opts.new_runtime_paths), 'vam#normpath(v:val)')
 
-    if !exists('s:toscan')
-      let s:toscan=[]
-      let s:toautoload=[]
+    if !exists('s:toscanfiles')
       let s:toscanfiles={}
     endif
 
-    call map(copy(new_runtime_paths), 'add(has_key(db.paths, v:val) ? s:toautoload : s:toscan, v:val)')
+    let toscan = []
+    let toautoload = []
+    call map(copy(new_runtime_paths), 'add(has_key(db.paths, v:val) ? toautoload : toscan, v:val)')
 
-    if !empty(s:toautoload) && !exists('*s:map')
+    if !empty(toautoload) && !exists('*s:map')
       fun! AutoloadingMapRun(lhs, file)
         execute 'source' fnameescape(a:file)
         return eval('"'.escape(a:lhs, '\"<').'"')
@@ -92,7 +92,7 @@ fun! vam#autoloading#Setup()
         endif
       endfun
 
-      fun! s:abb(mapdescr, mode, file)
+      fun! s:abb(mapdescr, mode)
         let lhs=s:hsescape(a:mapdescr.lhs, a:mapdescr.sid)
         let aarargs=s:hsescape(join(map([lhs, a:mode, a:mapdescr.file], 'string(v:val)'), ','))
         execute a:mod.'abbrev <expr> <silent>' lhs 'AutoloadingAbbRun('.aarargs.')'
@@ -187,13 +187,31 @@ fun! vam#autoloading#Setup()
       endfun
     endif
 
-    for rtp in s:toautoload
+    fun! s:fun(fun, file)
+      call s:aug({'event': 'FuncUndefined', 'file': a:file, 'pattern': a:fun})
+    endfun
+
+    for rtp in toautoload
       let dbitem=db.paths[rtp]
       for key in ['mappings', 'abbreviations']
+        for [mode, value] in items(dbitem[key])
+          for desc in values(value)
+            call s:{key[:2]}(desc, mode)
+          endfor
+        endfor
+      endfor
+      for [cmd, cmddescr] in items(dbitem.commands)
+        call s:cmd(cmd, cmddescr)
+      endfor
+      for audescr in items(dbitem.audescr)
+        call s:aug(audescr)
+      endfor
+      for [func, fdescr] in items(dbitem.functions)
+        call s:fun(func, fdescr.file)
       endfor
     endfor
 
-    for rtp in s:toscan
+    for rtp in toscan
       let dbitem={'ftplugins': {}, 'syntaxes': {}, 'mappings': {}, 'commands': {}, 'functions': {}, 'abbreviations': {},
             \     'autocommands': {}, 'ftdetects': []}
       call map(vam#GlobInDir(rtp, '{,after/}plugin/**/*.vim'), 'extend(s:toscanfiles, {v:val : rtp})')
@@ -399,7 +417,7 @@ fun! vam#autoloading#Setup()
       augroup END
     endif
 
-    return call(s:old_handle_runtimepaths, [a:opts], {})
+    return call(s:old_handle_runtimepaths, [extend({'new_runtime_paths': toscan}, a:opts)], {})
   endfun
 
   fun! AutoloadingInvalidateHook(info, repository, pluginDir, hook_opts)
