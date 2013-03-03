@@ -1098,11 +1098,31 @@ URL: https://github.com/gmarik/vundle
   before “~/.vim/bundle/PLUGIN/ftplugin”. It is though unlikely that you run 
   into this issue.
 + Does not handle dependencies (though it is in TODO).
++ Does not allow changing installation directory.
++ No post-install and post-update hooks.
++ Allows only git sources.
 - Vundle has a command to clean unused plugins.
 - Vundle has “interactive mode” which speeds up certain workflows.
 
 ------------------------------------------------------------------------------
-14.4. VAM vs GetLatestVimScripts                                 *VAM-vs-GLVS*
+14.4. VAM vs Neobundle                                      *VAM-vs-neobundle*
+
+URL: https://github.com/Shougo/neobundle.vim
+
++ Dependencies are specified in the vimrc, not in the installed plugin.
+- Allows lazy loading of the plugins (autocommands, commands, mappings, 
+  functions and filetypes that trigger the load are specified in the vimrc).
+- Is able to check for presence of some executables (i.e. external commands 
+  dependencies). Is also specified in the vimrc though.
+- Supports revision lock.
+- Has a command to clean unused plugins.
+- Supports unite.vim for interaction (interactive updating, installing, 
+  updating, removing, previewing documentation, reinstalling, opening plugin 
+  directory and plugin page).
+- Supports unite.vim for searching.
+
+------------------------------------------------------------------------------
+14.5. VAM vs GetLatestVimScripts                                 *VAM-vs-GLVS*
 
 + VAM uses human-readable names instead of script IDs.
 + GLVS is able to handle only www.vim.org sources.
@@ -1110,6 +1130,7 @@ URL: https://github.com/gmarik/vundle
   one-directory-for-one-plugin approach.
 + GLVS does not seem to track which files belong to which plugin so is not 
   able to uninstall plugins.
++ No post-install and post-update hooks.
 - Unlike VAM GLVS is included in standart vim distribution.
 - GLVS was released (posted to www.vim.org) in Nov 2004, while VAM only in 
   Dec 2009, so it is likely that more plugins define dependencies using GLVS 
@@ -1121,7 +1142,7 @@ URL: https://github.com/gmarik/vundle
   has missing files), etc.
 
 ------------------------------------------------------------------------------
-14.5. VAM vs Vimana                                            *VAM-vs-Vimana*
+14.6. VAM vs Vimana                                            *VAM-vs-Vimana*
 
 URL: https://github.com/c9s/Vimana
 
@@ -1137,7 +1158,7 @@ URL: https://github.com/c9s/Vimana
 - Has support for Makefiles and Rakefiles.
 
 ------------------------------------------------------------------------------
-14.6. Some other similar projects                               *VAM-vs-other*
+14.7. Some other similar projects                               *VAM-vs-other*
 
 There are other projects known which are not so popular as the above:
 1. janus (https://github.com/carlhuda/janus)
