@@ -52,20 +52,34 @@ fun! vam#autoloading#Setup()
     if !empty(toautoload) && !exists('*s:map')
       fun! AutoloadingMapRun(lhs, file)
         execute 'source' fnameescape(a:file)
+        redir => plugins
+        silent scriptnames
+        redir END
+        let sids = reverse(map(split(plugins, "\n"), '[str2nr(v:val), v:val[stridx(v:val, ":")+2:]]'))
+        let found = 0
+        for [sid, file] in sids
+          if a:file is# vam#normpath(name)
+            let found = 1
+            break
+          endif
+        endfor
+        if !found
+          return
+        endif
+        let lhs=substitute(a:lhs, '<SID>', '<SNR>'.sid.'_', 'g')
         return eval('"'.escape(a:lhs, '\"<').'"')
       endfun
 
-      function s:hsescape(str, sid)
-        return substitute(substitute(substitute(substitute(substitute(a:str,
+      function s:hsescape(str)
+        return substitute(substitute(substitute(substitute(a:str,
               \      ' ', '<Space>',         'g'),
               \      '|', '<Bar>',           'g'),
-              \'\c<SID>', '<SNR>'.a:sid.'_', 'g'),
               \     "\n", '<CR>',            'g'),
               \'\c^<\%(buffer\|silent\|expr\|special\)\@=', '<LT>', '')
       endfunction
 
       fun! s:map(mapdescr, mode)
-        let lhs=s:hsescape(a:mapdescr.lhs, a:mapdescr.sid)
+        let lhs=s:hsescape(a:mapdescr.lhs)
         let amrargs=s:hsescape(join(map([lhs, a:mapdescr.file], 'string(v:val)'), ','))
         execute a:mode.'map' '<expr>' lhs 'AutoloadingMapRun('.amrargs.')'
       endfun
@@ -153,6 +167,7 @@ fun! vam#autoloading#Setup()
               \             (a:cmddescr.complete[:5] is# 'custom' ?
               \               s:defcompl(a:cmd, a:cmddescr) :
               \               '-complete='.a:cmddescr.complete))
+              \           a:cmd
               \           'call AutoloadingCmdRun('.string(a:cmd).', "<bang>", '.
               \               (empty(a:cmddescr.range)? '""' :
               \                 (a:cmddescr.range[-1:] is# 'c' ?
@@ -166,7 +181,7 @@ fun! vam#autoloading#Setup()
           execute 'source' fnameescape(file)
         endfor
         augroup VAMAutoloading
-          execute 'autocmd!' matchstr(key, '[^#]\+') matchstr(key, '#\@<=.*')
+          execute 'autocmd!' matchstr(a:key, '[^#]\+') matchstr(a:key, '#\@<=.*')
         augroup END
       endfun
 
@@ -174,7 +189,7 @@ fun! vam#autoloading#Setup()
 
       fun! s:aug(audescr)
         for pattern in a:audescr.patterns
-          let key = a:audescr.event.'#'.a:audescr.pattern
+          let key = a:audescr.event.'#'.pattern
           if !has_key(s:events, key)
             let s:events[key]  = [a:audescr.file]
             augroup VAMAutoloading
@@ -188,27 +203,29 @@ fun! vam#autoloading#Setup()
     endif
 
     fun! s:fun(fun, file)
-      call s:aug({'event': 'FuncUndefined', 'file': a:file, 'pattern': a:fun})
+      call s:aug({'event': 'FuncUndefined', 'file': a:file, 'patterns': [a:fun]})
     endfun
 
     for rtp in toautoload
       let dbitem=db.paths[rtp]
-      for key in ['mappings', 'abbreviations']
-        for [mode, value] in items(dbitem[key])
-          for desc in values(value)
-            call s:{key[:2]}(desc, mode)
+      try
+        for key in ['mappings', 'abbreviations']
+          for [mode, value] in items(dbitem[key])
+            for desc in values(value)
+              call s:{key[:2]}(desc, mode)
+            endfor
           endfor
         endfor
-      endfor
-      for [cmd, cmddescr] in items(dbitem.commands)
-        call s:cmd(cmd, cmddescr)
-      endfor
-      for audescr in items(dbitem.audescr)
-        call s:aug(audescr)
-      endfor
-      for [func, fdescr] in items(dbitem.functions)
-        call s:fun(func, fdescr.file)
-      endfor
+        for [cmd, cmddescr] in items(dbitem.commands)
+          call s:cmd(cmd, cmddescr)
+        endfor
+        for audescr in values(dbitem.autocommands)
+          call s:aug(audescr)
+        endfor
+        for [func, fdescr] in items(dbitem.functions)
+          call s:fun(func, fdescr.file)
+        endfor
+      endtry
     endfor
 
     for rtp in toscan
@@ -297,9 +314,9 @@ fun! vam#autoloading#Setup()
           "         ┌ bang field              ┌ nargs field
           "         │ ┌ command field         │     ┌ range field
           let start=3+(max([len(cmd), 11])+1)+(1+4)+(max([len(range), 5])+1)
-          let complete=matchstr(line, '\S\+', start)
+          let complete=matchstr(line, '^\S\+', start)
           let exe=matchstr(line, '\S.*', start+len(complete))
-          let state.commands[cmd]={'nargs': nargs, 'range': range, 'complete': complete, 'command': exe}
+          let state.commands[cmd]={'nargs': nargs, 'range': range, 'complete': complete, 'command': exe, 'bang': bang}
         endfor
 
         redir => functions
