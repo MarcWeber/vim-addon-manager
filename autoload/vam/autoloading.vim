@@ -47,46 +47,36 @@ fun! vam#autoloading#Setup()
     call map(copy(new_runtime_paths), 'add(has_key(db.paths, v:val) ? toautoload : toscan, v:val)')
 
     if !empty(toautoload) && !exists('*s:map')
+      fun! s:AddRuntimePaths(paths)
+        let &rtp .= ','.join(map(a:paths, 'escape(v:val, "\\,")'), ',')
+      endfun
+
       fun! s:SourceFile(file)
         for cmd in get(s:files, a:file, [])
           execute cmd
         endfor
-        call map(s:events, 'filter(v:val, "v:val isnot# a:file")')
+        call map(s:events, 'filter(v:val, "v:key isnot# a:file")')
         augroup VAMAutoloading
           for key in keys(filter(copy(s:events), 'empty(v:val)'))
             execute 'autocmd!' substitute(key, '#', ' ', '')
             unlet s:events[key]
           endfor
         augroup END
-        execute 'source' fnameescape(a:file)
+        if has('vim_starting')
+          let saved_rtp = &rtp
+          call s:AddRuntimePaths(s:omittedrtps)
+        endif
+        try
+          execute 'source' fnameescape(a:file)
+        finally
+          if exists('saved_rtp')
+            let &rtp = saved_rtp
+          endif
+        endtry
       endfun
 
       fun! s:AddFileCmd(file, cmd)
         let s:files[a:file] = add(get(s:files, a:file, []), a:cmd)
-      endfun
-
-      fun! s:GetSID(file)
-        redir => plugins
-        silent scriptnames
-        redir END
-        let sids = reverse(map(split(plugins, "\n"), '[str2nr(v:val), v:val[stridx(v:val, ":")+2:]]'))
-        let found = 0
-        for [sid, file] in sids
-          if a:file is# vam#normpath(file)
-            let found = 1
-            break
-          endif
-        endfor
-        if !found
-          throw 'Script ID not found'
-        endif
-      endfun
-
-      fun! AutoloadingMapRun(lhs, file)
-        call s:SourceFile(a:file)
-        let sid = s:GetSID(a:file)
-        let lhs = substitute(a:lhs, '<SID>', '<SNR>'.sid.'_', 'g')
-        return eval('"'.escape(a:lhs, '\"<').'"')
       endfun
 
       function s:hsescape(str)
@@ -100,8 +90,8 @@ fun! vam#autoloading#Setup()
       fun! s:map(lhs, file, mode)
         let lhs=s:hsescape(a:lhs)
         call s:AddFileCmd(a:file, a:mode.'unmap '.lhs)
-        let amrargs=s:hsescape(join(map([lhs, a:file], 'string(v:val)'), ','))
-        execute a:mode.'map' '<expr>' lhs 'AutoloadingMapRun('.amrargs.')'
+        let amrargs=s:hsescape(join(map([lhs, a:mode, 0, a:file], 'string(v:val)'), ','))
+        execute a:mode.'map' '<expr> <silent>' lhs 'AutoloadingMapRun('.amrargs.')'
       endfun
 
       function s:genTempMap(mapdescr, mode)
@@ -118,9 +108,9 @@ fun! vam#autoloading#Setup()
               \ '<Plug>VAMAutoloadingTempMap' rhs
       endfunction
 
-      fun! AutoloadingAbbRun(lhs, mode, file)
+      fun! AutoloadingMapRun(lhs, mode, abb, file)
         call s:SourceFile(a:file)
-        let mapdescr=maparg(a:lhs, a:mode, 1, 1)
+        let mapdescr=maparg(a:lhs, a:mode, a:abb, 1)
         if !empty(mapdescr)
           call s:genTempMap(mapdescr, a:mode)
           return "\<Plug>VAMAutoloadingTempMap"
@@ -130,8 +120,8 @@ fun! vam#autoloading#Setup()
       fun! s:abb(lhs, file, mode)
         let lhs=s:hsescape(a:lhs)
         call s:AddFileCmd(a:file, a:mode.'unabbrev '.lhs)
-        let aarargs=s:hsescape(join(map([lhs, a:mode, a:file], 'string(v:val)'), ','))
-        execute a:mode.'abbrev <expr> <silent>' lhs 'AutoloadingAbbRun('.aarargs.')'
+        let aarargs=s:hsescape(join(map([lhs, a:mode, 1, a:file], 'string(v:val)'), ','))
+        execute a:mode.'abbrev <expr> <silent>' lhs 'AutoloadingMapRun('.aarargs.')'
       endfun
 
       fun! AutoloadingCmdRun(cmd, bang, range, args, file)
@@ -204,12 +194,9 @@ fun! vam#autoloading#Setup()
       endfun
 
       fun! AutoloadingAueRun(key)
-        for file in remove(s:events, a:key)
+        for file in keys(remove(s:events, a:key))
           call s:SourceFile(file)
         endfor
-        augroup VAMAutoloading
-          execute 'autocmd!' substitute(a:key, '#', ' ', '')
-        augroup END
       endfun
 
       let s:events={}
@@ -218,18 +205,48 @@ fun! vam#autoloading#Setup()
         for pattern in a:audescr.patterns
           let key = a:audescr.event.'#'.pattern
           if !has_key(s:events, key)
-            let s:events[key]  = [a:audescr.file]
+            let s:events[key]  = {a:audescr.file : 1}
             augroup VAMAutoloading
               execute 'autocmd!' a:audescr.event pattern ':call AutoloadingAueRun('.string(key).')'
             augroup END
           else
-            let s:events[key] += [a:audescr.file]
+            let s:events[key][a:audescr.file] = 1
           endif
         endfor
       endfun
 
       fun! s:fun(fun, file)
         call s:aue({'event': 'FuncUndefined', 'file': a:file, 'patterns': [a:fun]})
+      endfun
+
+      fun! s:LoadFTFiles(files)
+        if has('vim_starting')
+          let saved_rtp = &rtp
+          call s:AddRuntimePaths(s:omittedrtps)
+        endif
+        try
+          for file in a:files
+            execute 'source' fnameescape(file)
+          endfor
+        finally
+          if exists('saved_rtp')
+            let &rtp = saved_rtp
+          endif
+        endtry
+      endfun
+
+      fun! s:DefineFTEvent(event, ft, files)
+        augroup VAMAutoloading
+          execute 'autocmd' a:event a:ft ':call s:LoadFTFile('.string(a:files).')'
+        augroup END
+      endfun
+
+      fun! s:ftp(ft, files)
+        return s:DefineFTEvent('FileType', a:ft, a:files)
+      endfun
+
+      fun! s:syn(ft, files)
+        return s:DefineFTEvent('Syntax', a:ft, a:files)
       endfun
     endif
 
@@ -252,13 +269,18 @@ fun! vam#autoloading#Setup()
         for [func, ffile] in items(dbitem.functions)
           call s:fun(func, ffile)
         endfor
+        for [key, event] in [['ftplugins', 'FileType'], ['syntaxes', 'Syntax']]
+          for [ft, files] in items(dbitem[key])
+            call s:{key[:2]}(ft, files)
+          endfor
+        endfor
       endtry
     endfor
 
     if has('vim_starting')
       let s:omittedrtps += toautoload
     else
-      let &rtp .= ','.join(map(toautoload, 'escape(v:val, "\\,")'), ',')
+      call s:AddRuntimePaths(toautoload)
     endif
 
     for rtp in toscan
@@ -460,11 +482,11 @@ fun! vam#autoloading#Setup()
         try
           execute 'source' fnameescape(a:path)
           if has_key(s:toscanfiles, file)
-            let newstate=s:RecordState()
+            let newstate = s:RecordState()
             call s:PopulateDbFromStateDiff(file, oldstate, newstate)
           endif
         finally
-          let &eventignore=saved_eventignore
+          let &eventignore = saved_eventignore
         endtry
       endfun
 
@@ -476,29 +498,55 @@ fun! vam#autoloading#Setup()
     if !exists('*s:VimEnter')
       fun! s:VimEnter()
         if !empty(s:omittedrtps)
-          let &rtp .= ','.join(map(s:omittedrtps, 'escape(v:val, "\\,")'), ',')
+          call s:AddRuntimePaths(s:omittedrtps)
           let s:omittedrtps = []
         endif
         if s:needs_write
           call s:WriteDB(s:db, s:c.autoloading_db_file)
           let s:needs_write = 0
         endif
+        augroup VAMAutoloading
+          autocmd! FuncUndefined *#*
+          autocmd! FileType
+          autocmd! Syntax
+        augroup END
       endfun
 
-      " Adding to runtimepath does not trigger loading plugins at this point 
-      " (and also when !has('vim_starting') above). Thus no need to bother with 
-      " autoloading autoload functions, autoloading ftplugins and syntaxes and 
-      " so on.
-      " TODO Check how it is likely that needed autoload function is requested 
-      " before VimEnter and probably fix this case.
-      " TODO Check whether FileType/Syntax events are triggered before or after 
-      " VImEnter.
-      " It looks like bothering with both functions and filetypes will be 
-      " needed, but events to be used to maintain this could be removed after 
-      " VimEnter.
-      augroup VAMAutoloading
-        autocmd! VimEnter * :call s:VimEnter()
-      augroup END
+      fun! s:AuFuncUndefined(func)
+        " Check first: it may have happened that one of the other 
+        " FuncUndefined events has loaded this function
+        if exists('*'.a:func)
+          return
+        endif
+        let fname = fnamemodify(tr(a:func, '#', '/'), ':h') . '.vim'
+        if !empty(s:omittedrtps)
+          let saved_rtp = &rtp
+          call s:AddRuntimePaths(s:omittedrtps)
+        endif
+        try
+          for path in filter(map(copy(s:omittedrtps), 'v:val."/".fname'), 'filereadable(v:val)')
+            execute 'source' fnameescape(path)
+            if exists('*'.a:func)
+              break
+            endif
+          endfor
+        finally
+          let &rtp = saved_rtp
+        endtry
+      endfun
+
+      if has('vim_starting')
+        augroup VAMAutoloading
+          autocmd! VimEnter      *   :call s:VimEnter()
+          autocmd! FuncUndefined *#* :call s:AuFuncUndefined(expand('<amatch>'))
+        augroup END
+      else
+        " Adding to runtimepath does not trigger loading plugins at this point 
+        " (and also after VimEnter above). Thus no need to bother with 
+        " autoloading autoload functions, autoloading ftplugins and syntaxes and 
+        " so on.
+        call s:VimEnter()
+      endif
     endif
 
     return call(s:old_handle_runtimepaths, [extend({'new_runtime_paths': toscan}, a:opts, 'keep')], {})
