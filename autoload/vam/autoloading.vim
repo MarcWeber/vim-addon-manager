@@ -7,20 +7,14 @@ fun! vam#autoloading#Setup()
   let s:old_handle_runtimepaths=s:c.handle_runtimepaths
 
   fun! s:LoadDB(path)
-    if filereadable(a:path)
-      return vam#ReadJSON(a:path)
-    else
-      return {
-            \'paths': {},
-            \'ftplugins': {},
-            \'syntaxes': {},
-            \'mappings': {},
-            \'abbreviations': {},
-            \'commands': {},
-            \'functions': {},
-            \'autocommands': {},
-          \}
+    if !exists('s:db')
+      if filereadable(a:path)
+        let s:db = vam#ReadJSON(a:path)
+      else
+        let s:db = {'paths': {}}
+      endif
     endif
+    return s:db
   endfun
 
   fun! s:WriteDB(db, path)
@@ -45,6 +39,7 @@ fun! vam#autoloading#Setup()
       let s:toscanfiles = {}
       let s:files = {}
       let s:omittedrtps = []
+      let s:needs_write = 0
     endif
 
     let toscan = []
@@ -53,7 +48,7 @@ fun! vam#autoloading#Setup()
 
     if !empty(toautoload) && !exists('*s:map')
       fun! s:SourceFile(file)
-        for cmd in get(s:files, a:file)
+        for cmd in get(s:files, a:file, [])
           execute cmd
         endfor
         call map(s:events, 'filter(v:val, "v:val isnot# a:file")')
@@ -77,7 +72,7 @@ fun! vam#autoloading#Setup()
         let sids = reverse(map(split(plugins, "\n"), '[str2nr(v:val), v:val[stridx(v:val, ":")+2:]]'))
         let found = 0
         for [sid, file] in sids
-          if a:file is# vam#normpath(name)
+          if a:file is# vam#normpath(file)
             let found = 1
             break
           endif
@@ -102,10 +97,10 @@ fun! vam#autoloading#Setup()
               \'\c^<\%(buffer\|silent\|expr\|special\)\@=', '<LT>', '')
       endfunction
 
-      fun! s:map(mapdescr, mode)
-        let lhs=s:hsescape(a:mapdescr.lhs)
-        call s:AddFileCmd(a:mapdescr.file, a:mode.'unmap '.lhs)
-        let amrargs=s:hsescape(join(map([lhs, a:mapdescr.file], 'string(v:val)'), ','))
+      fun! s:map(lhs, file, mode)
+        let lhs=s:hsescape(a:lhs)
+        call s:AddFileCmd(a:file, a:mode.'unmap '.lhs)
+        let amrargs=s:hsescape(join(map([lhs, a:file], 'string(v:val)'), ','))
         execute a:mode.'map' '<expr>' lhs 'AutoloadingMapRun('.amrargs.')'
       endfun
 
@@ -132,10 +127,10 @@ fun! vam#autoloading#Setup()
         endif
       endfun
 
-      fun! s:abb(mapdescr, mode)
-        let lhs=s:hsescape(a:mapdescr.lhs)
-        call s:AddFileCmd(a:mapdescr.file, a:mode.'unabbrev '.lhs)
-        let aarargs=s:hsescape(join(map([lhs, a:mode, a:mapdescr.file], 'string(v:val)'), ','))
+      fun! s:abb(lhs, file, mode)
+        let lhs=s:hsescape(a:lhs)
+        call s:AddFileCmd(a:file, a:mode.'unabbrev '.lhs)
+        let aarargs=s:hsescape(join(map([lhs, a:mode, a:file], 'string(v:val)'), ','))
         execute a:mode.'abbrev <expr> <silent>' lhs 'AutoloadingAbbRun('.aarargs.')'
       endfun
 
@@ -219,7 +214,7 @@ fun! vam#autoloading#Setup()
 
       let s:events={}
 
-      fun! s:aug(audescr)
+      fun! s:aue(audescr)
         for pattern in a:audescr.patterns
           let key = a:audescr.event.'#'.pattern
           if !has_key(s:events, key)
@@ -232,19 +227,19 @@ fun! vam#autoloading#Setup()
           endif
         endfor
       endfun
-    endif
 
-    fun! s:fun(fun, file)
-      call s:aug({'event': 'FuncUndefined', 'file': a:file, 'patterns': [a:fun]})
-    endfun
+      fun! s:fun(fun, file)
+        call s:aue({'event': 'FuncUndefined', 'file': a:file, 'patterns': [a:fun]})
+      endfun
+    endif
 
     for rtp in toautoload
       let dbitem=db.paths[rtp]
       try
         for key in ['mappings', 'abbreviations']
           for [mode, value] in items(dbitem[key])
-            for desc in values(value)
-              call s:{key[:2]}(desc, mode)
+            for [lhs, file] in items(value)
+              call s:{key[:2]}(lhs, file, mode)
             endfor
           endfor
         endfor
@@ -252,10 +247,10 @@ fun! vam#autoloading#Setup()
           call s:cmd(cmd, cmddescr)
         endfor
         for audescr in values(dbitem.autocommands)
-          call s:aug(audescr)
+          call s:aue(audescr)
         endfor
-        for [func, fdescr] in items(dbitem.functions)
-          call s:fun(func, fdescr.file)
+        for [func, ffile] in items(dbitem.functions)
+          call s:fun(func, ffile)
         endfor
       endtry
     endfor
@@ -275,27 +270,25 @@ fun! vam#autoloading#Setup()
         let filetype=substitute(file, '.*ftplugin/\v([^/_]+%(%(_[^/]*)?\.vim$|\/[^/]+$)@=).*', '\1', 'g')
         let file=vam#normpath(file)
         call s:addlistitem(dbitem.ftplugins, filetype, file)
-        call s:addlistitem(db.ftplugins, filetype, file)
       endfor
 
       for file in vam#GlobInDir(rtp, '{,after/}syntax/{*/,}*.vim')
         let filetype=substitute(file, '.*syntax/\v([^/]+%(\.vim$|\/[^/]+$)@=).*', '\1', 'g')
         let file=vam#normpath(file)
         call s:addlistitem(dbitem.syntaxes, filetype, file)
-        call s:addlistitem(db.syntaxes, filetype, file)
       endfor
 
       let dbitem.ftdetects=map(vam#GlobInDir(rtp, '{,after/}ftdetect/*.vim'), 'vam#normpath(v:val)')
 
       let db.paths[rtp]=dbitem
+      let s:needs_write = 1
     endfor
 
-    call s:WriteDB(db, s:c.autoloading_db_file)
-
     if !empty(s:toscanfiles) && !exists('*s:RecordState')
-      fun! s:FilterMAdict(madict)
-        return filter(a:madict, 'v:key isnot# "sid"')
-      endfun
+      "! fun! s:FilterMAdict(madict)
+      "!   unlet a:madict.sid
+      "!   return a:madict
+      "! endfun
 
       fun! s:RecordState()
         let state={'mappings': {}, 'abbreviations': {}, 'menus': {}, 'functions': {}, 'commands': {}, 'autocommands': {}}
@@ -308,10 +301,11 @@ fun! vam#autoloading#Setup()
           for line in split(mappings, "\n")
             let lhs=matchstr(line, '\S\+', 3)
             let madict=maparg(lhs, mode, 0, 1)
-            if madict.buffer
+            if empty(madict) || madict.buffer
               continue
             endif
-            let state.mappings[mode][lhs]=s:FilterMAdict(madict)
+            "! let state.mappings[mode][lhs] = s:FilterMAdict(madict)
+            let state.mappings[mode][lhs] = 1
           endfor
           unlet mappings
         endfor
@@ -329,7 +323,8 @@ fun! vam#autoloading#Setup()
           if !has_key(state.abbreviations, mode)
             let state.abbreviations[mode]={}
           endif
-          let state.abbreviations[mode][lhs]=s:FilterMAdict(madict)
+          "! let state.abbreviations[mode][lhs] = s:FilterMAdict(madict)
+          let state.abbreviations[mode][lhs] = 1
         endfor
         unlet abbreviations
 
@@ -353,8 +348,10 @@ fun! vam#autoloading#Setup()
           "         │ ┌ command field         │     ┌ range field
           let start=3+(max([len(cmd), 11])+1)+(1+4)+(max([len(range), 5])+1)
           let complete=matchstr(line, '^\S\+', start)
-          let exe=matchstr(line, '\S.*', start+len(complete))
-          let state.commands[cmd]={'nargs': nargs, 'range': range, 'complete': complete, 'command': exe, 'bang': bang}
+          "! let exe=matchstr(line, '\S.*', start+len(complete))
+          "!-
+          let state.commands[cmd]={'nargs': nargs, 'range': range, 'complete': complete, 'bang': bang}
+          "! let state.commands[cmd].command = exe
         endfor
 
         redir => functions
@@ -365,7 +362,9 @@ fun! vam#autoloading#Setup()
             " s: functions start with <SNR>
             continue
           endif
-          let state.functions[matchstr(line, '[^(]\+', 9)]=line[stridx(line, '('):]
+          "! let state.functions[matchstr(line, '[^(]\+', 9)]=line[stridx(line, '('):]
+          "!-
+          let state.functions[matchstr(line, '[^(]\+', 9)] = 1
         endfor
         unlet functions
 
@@ -377,16 +376,17 @@ fun! vam#autoloading#Setup()
         for line in split(autocommands, "\n")
           if line =~# '\v^\S.*\ {2}'
             let idx=strridx(line, '  ')
-            let augroup=line[:(idx-1)]
+            "! let augroup = line[:(idx-1)]
             let auevent=line[(idx+2):]
-            let key=augroup.'#'.auevent
+            let key = line
           elseif line =~# '\v^\w+$'
-            let augroup=0
-            let auevent=line
-            let key='#'.auevent
+            "! let augroup = 0
+            let auevent = line
+            let key = line
           elseif line[0] is# ' '
             if !has_key(state.autocommands, key)
-              let state.autocommands[key]={'group': augroup, 'event': auevent, 'patterns': []}
+              let state.autocommands[key] = {'event': auevent, 'patterns': []}
+              "! let state.autocommands[key].group = augroup
             endif
             " XXX Pattern must be left escaped
             let state.autocommands[key].patterns+=[matchstr(line, '\v(\\.|\S)+')]
@@ -409,15 +409,13 @@ fun! vam#autoloading#Setup()
               for [mode, newm] in items(newstate[key])
                 let oldm=get(oldstate[key], mode, {})
                 if oldm !=# newm
-                  if !has_key(db[key], mode)
-                    let db[key][mode]={}
-                  endif
                   if !has_key(dbitem[key], mode)
                     let dbitem[key][mode]={}
                   endif
                   for [lhs, m] in items(filter(copy(newm), '!has_key(oldm, v:key)'))
-                    let db[key][mode][lhs]=extend({'rtp': rtp, 'file': file}, m)
-                    let dbitem[key][mode][lhs]=db[key][mode][lhs]
+                    "! let dbitem[key][mode][lhs] = extend({'file': file}, m)
+                    "!-
+                    let dbitem[key][mode][lhs] = file
                   endfor
                 endif
               endfor
@@ -426,26 +424,29 @@ fun! vam#autoloading#Setup()
 
           if newstate.commands !=# oldstate.commands
             for [cmd, props] in items(filter(copy(newstate.commands), '!has_key(oldstate.commands, v:key)'))
-              let db.commands[cmd]=extend({'rtp': rtp, 'file': file}, props)
-              let dbitem.commands[cmd]=db.commands[cmd]
+              let dbitem.commands[cmd]=extend({'file': file}, props)
             endfor
           endif
 
           if newstate.functions !=# oldstate.functions
             for [function, fargs] in items(filter(copy(newstate.functions), '!has_key(oldstate.functions, v:key)'))
-              let db.functions[function]={'rtp': rtp, 'file': file, 'args': fargs}
-              let dbitem.functions[function]=db.functions[function]
+              "! let dbitem.functions[function] = {'file': file, 'args': fargs}
+              "!-
+              let dbitem.functions[function] = file
             endfor
           endif
 
           if newstate.autocommands !=# oldstate.autocommands
             for [key, aprops] in items(filter(copy(newstate.autocommands), '!has_key(oldstate.autocommands, v:key)'))
-              let db.autocommands[key]=extend({'rtp': rtp, 'file': file}, aprops)
-              let dbitem.autocommands[key]=db.autocommands[key]
+              let dbitem.autocommands[key]=extend({'file': file}, aprops)
             endfor
           endif
 
-          call s:WriteDB(db, s:c.autoloading_db_file)
+          if has('vim_starting')
+            let s:needs_write = 1
+          else
+            call s:WriteDB(db, s:c.autoloading_db_file)
+          endif
         endif
       endfun
 
@@ -472,10 +473,16 @@ fun! vam#autoloading#Setup()
       augroup END
     endif
 
-    if !empty(s:omittedrtps) && !exists('*s:AddOmittedRuntimepaths')
-      fun! s:AddOmittedRuntimepaths()
-        let &rtp .= ','.join(map(s:omittedrtps, 'escape(v:val, "\\,")'), ',')
-        let s:omittedrtps = []
+    if !exists('*s:VimEnter')
+      fun! s:VimEnter()
+        if !empty(s:omittedrtps)
+          let &rtp .= ','.join(map(s:omittedrtps, 'escape(v:val, "\\,")'), ',')
+          let s:omittedrtps = []
+        endif
+        if s:needs_write
+          call s:WriteDB(s:db, s:c.autoloading_db_file)
+          let s:needs_write = 0
+        endif
       endfun
 
       " Adding to runtimepath does not trigger loading plugins at this point 
@@ -490,7 +497,7 @@ fun! vam#autoloading#Setup()
       " needed, but events to be used to maintain this could be removed after 
       " VimEnter.
       augroup VAMAutoloading
-        autocmd! VimEnter * :call s:AddOmittedRuntimepaths()
+        autocmd! VimEnter * :call s:VimEnter()
       augroup END
     endif
 
@@ -502,19 +509,6 @@ fun! vam#autoloading#Setup()
     let rtp=vam#normpath(a:pluginDir)
     if has_key(db.paths, rtp)
       unlet db.paths[rtp]
-      for key in ['ftplugins', 'syntaxes']
-        if has_key(db[key], rtp)
-          unlet db[key][rtp]
-        endif
-      endfor
-      for key in ['commands', 'functions', 'autocommands']
-        call filter(db[key], 'v:val.rtp is# rtp')
-      endfor
-      for key in ['mappings', 'abbreviations']
-        for v in values(db[key])
-          call filter(v, 'v:val.rtp is# rtp')
-        endfor
-      endfor
     endif
     call s:WriteDB(db, s:c.autoloading_db_file)
   endfun
