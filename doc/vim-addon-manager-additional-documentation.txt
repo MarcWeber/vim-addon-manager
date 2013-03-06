@@ -200,9 +200,9 @@ vam#install#CompleteAddonName                *vam#install#CompleteAddonName()*
     Function suitable to be a completion function for omni completion 
     ('omnifunc'). Completes addon names. See also |VAM-addon_completion_lhs|.
 
-vam#vcs#GitCheckout                               *vam#vcs#GitCheckout*
-vam#vcs#MercurialCheckout                         *vam#vcs#MercurialCheckout*
-vam#vcs#SubversionCheckout                        *vam#vcs#SubversionCheckout*
+vam#vcs#GitCheckout                             *vam#vcs#GitCheckout()*
+vam#vcs#MercurialCheckout                       *vam#vcs#MercurialCheckout()*
+vam#vcs#SubversionCheckout                      *vam#vcs#SubversionCheckout()*
     Functions that do their best to checkout plugins, trying various 
     additional methods:
               SCM    Additional methods tried ~
@@ -215,6 +215,75 @@ vam#vcs#SubversionCheckout                        *vam#vcs#SubversionCheckout*
         let g:vim_addon_manager.scms.git.clone=['vam#vcs#GitCheckout']
         let g:vim_addon_manager.scms.hg.clone =['vam#vcs#MercurialCheckout']
         let g:vim_addon_manager.scms.svn.clone=['vam#vcs#SubversionCheckout']
+
+vam#autoloading#Setup()                              *vam#autoloading#Setup()*
+    Install hooks and autocommands that disable loading the plugins passed to 
+    |vam#ActivateAddons()|, making vim load them when one of the functions, 
+    commands, mappings, abbreviations or autocommands defined in the plugin 
+    (from this point all this list will be named “stuff”) is used instead 
+    (note: no menus, python/ruby/whatever packages or other stuff).
+
+    Adds the following configuration option:
+        autoloading_db_file                          *VAM-autoloading_db_file*
+            Path. Place where database will be saved to/looked for.
+            Defaults to |VAM-plugin_root_dir|/.autoloading_db.yml.
+            Note: not a real YAML file, but neither it is valid JSON. Holds 
+                  output of |string()| that was passed a complex structure.
+
+    Adds the following |vam#ActivateAddons()| option (key in {opts} argument):
+        no_lazy_loading
+            Boolean. Plugins that were passed to |vam#ActivateAddons()| during 
+            this call will not be subjected to lazy loading. Defaults to zero.
+
+    Downsides of the chosen implementation:
+    1. Determining diff of the state at runtime is _very_ slow. Function needs 
+       to do this only once at first start though, and then once per update or 
+       new plugin installation (state diff is determined only for updated/new 
+       plugins in this case).
+       Note: some other things like moving your plugins from their locations 
+             will also make the database useless for the next launch. It would 
+             be good if you remove the database (|VAM-autoloading_db_file|) in 
+             this case or there will be stale items.
+    2. No lazy loading at the initial startup. Though you won’t have this in 
+       most other solutions.
+    3. Reduced granularity due to absense of nesting (VimL limitation): file 
+       sourcing another file will be granted with entries referencing only the 
+       first file loaded for each of the stuff defined in any of the files. 
+       Under some circumstances it may be considered an advantage (e.g. when 
+       second file was never intended to be sourced not from the first one). 
+       Clever implementation is completely able to handle such cases though 
+       (if there were possible to write one) so that advantage is not big at 
+       all.
+    4. Changing options in vimrc may require invalidating database, and this 
+       is not possible to do automatically for random plugins.
+    5. During session where database update happened all uncaught errors 
+       emitted by plugins (|:echoerr| or regular non-fatal errors) are turned 
+       into exceptions and may break plugins loading. It does not matter 
+       whether some particular file belongs to the plugin that is the cause of 
+       database update or not; whether it belongs to some plugin at all and 
+       whether it is happenning before or after |VimEnter|. _Any_ sourcing is 
+       put into the |:try| block.
+
+    Upsides:
+    1. Handling of complicated ways of defining stuff: |:execute| expressions, 
+       delegation actual stuff-definition commands (e.g. |:command|) calls to 
+       a library/framework.
+       Both cases will fail a plugin using static analizying of the .vim files 
+       (like tplugin). Second case will fail a plugin that parses output of 
+       commands that were subjected to |:verbose| modifier.
+    2. Completely automatic. Unlike neobundle, vam/autoloading does not need 
+       the user to specify all the stuff that must trigger the load.
+    3. Changing of 'runtimepath' is delayed only until |VimEnter|, paths are 
+       immediately added after this. Thus |:runtime| calls, function/variable 
+       autoloading, ftplugins/syntaxes, documentation works as expected (there 
+       are some hacks to make function autoloading and ftplugins/syntaxes work 
+       before |VimEnter|, but this cannot possibly handle |:runtime| calls and 
+       variable autoloading).
+
+    Hooks installed:
+    - |VAM-handle_runtimepaths|
+    - |VAM-post_scms_update_hook_functions|
+    - |VAM-post_update_hook_functions|
 
 ==============================================================================
 4. Options                                                       *VAM-options*
@@ -314,6 +383,7 @@ handle_runtimepaths                                  *VAM-handle_runtimepaths*
                 " Do something
                 return call(s:old_handle_runtimepaths, [a:opts], {})
             endfunction
+<       See also |vam#autoloading#Setup()|.
 scms                                                                *VAM-scms*
         This option determines how sources with supported SCM's should be
         checked out and updated. It is a dictionary where keys are known SCM's
@@ -353,7 +423,7 @@ scms                                                                *VAM-scms*
             " “'clone': ['GitCheckout']” works as well
 <       Note: if some keys are missing, then VAM will use the defaults. So it 
               is safe to override just one “clone” key as it is shown in 
-              |vam#vcs#GitCheckout| example.
+              |vam#vcs#GitCheckout()| example.
 pool_fun                                                        *VAM-pool_fun*
         Name or reference of a function that must return dictionary contains 
         {{plugin-name}: {repository}} ({repository} is described under 
@@ -817,7 +887,7 @@ VCS:
     Mercurial: http://mercurial.selenic.com/
     Darcs: http://darcs.net/
 
-    See also |vam#vcs#GitCheckout|.
+    See also |vam#vcs#GitCheckout()|.
 
 
 We tried thinking about making using vim-addon-manager easier for Windows

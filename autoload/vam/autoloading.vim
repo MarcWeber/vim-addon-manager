@@ -1,7 +1,7 @@
 exec vam#DefineAndBind('s:c','g:vim_addon_manager','{}')
 
 fun! vam#autoloading#Setup()
-  let s:c.autoloading_db_file=get(s:c, 'autoloading_db_file', s:c.plugin_root_dir.'/.autoloading_db.json')
+  let s:c.autoloading_db_file=get(s:c, 'autoloading_db_file', s:c.plugin_root_dir.'/.autoloading_db.yml')
   let s:c.autoloading_db_file=expand(fnameescape(s:c.autoloading_db_file))
 
   let s:old_handle_runtimepaths=s:c.handle_runtimepaths
@@ -31,6 +31,10 @@ fun! vam#autoloading#Setup()
 
   unlet s:c.handle_runtimepaths
   fun! s:c.handle_runtimepaths(opts)
+    if get(a:opts, 'no_lazy_loading', 0)
+      return call(s:old_handle_runtimepaths, [a:opts], {})
+    endif
+
     let db = s:LoadDB(s:c.autoloading_db_file)
 
     let new_runtime_paths = map(copy(a:opts.new_runtime_paths), 'vam#normpath(v:val)')
@@ -39,16 +43,19 @@ fun! vam#autoloading#Setup()
       let s:toscanfiles = {}
       let s:files = {}
       let s:omittedrtps = []
+      let s:omittedafters = []
       let s:needs_write = 0
     endif
 
-    let toscan = []
-    let toautoload = []
-    call map(copy(new_runtime_paths), 'add(has_key(db.paths, v:val) ? toautoload : toscan, v:val)')
+    let rtstatus = map(copy(new_runtime_paths), 'has_key(db.paths, v:val) + !empty(get(db.paths, v:val))')
+    let toautoload = filter(copy(new_runtime_paths), 'rtstatus[v:key] == 2')
+    let toscan = filter(copy(new_runtime_paths), '!rtstatus[v:key]')
 
     if !empty(toautoload) && !exists('*s:map')
-      fun! s:AddRuntimePaths(paths)
-        let &rtp .= ','.join(map(a:paths, 'escape(v:val, "\\,")'), ',')
+      fun! s:AddRuntimePaths(rtps, afters)
+        let &rtp = join(map(copy(a:rtps), 'escape(v:val, "\\,")')
+              \        +(empty(&rtp) ? [] : [&rtp])
+              \        +map(copy(a:afters), 'escape(v:val, "\\,")'), ',')
       endfun
 
       fun! s:SourceFile(file)
@@ -64,7 +71,7 @@ fun! vam#autoloading#Setup()
         augroup END
         if has('vim_starting')
           let saved_rtp = &rtp
-          call s:AddRuntimePaths(s:omittedrtps)
+          call s:AddRuntimePaths(s:omittedrtps, s:omittedafters)
         endif
         try
           execute 'source' fnameescape(a:file)
@@ -88,15 +95,15 @@ fun! vam#autoloading#Setup()
       endfunction
 
       fun! s:map(lhs, file, mode)
-        let lhs=s:hsescape(a:lhs)
+        let lhs = s:hsescape(a:lhs)
         call s:AddFileCmd(a:file, a:mode.'unmap '.lhs)
-        let amrargs=s:hsescape(join(map([lhs, a:mode, 0, a:file], 'string(v:val)'), ','))
+        let amrargs = s:hsescape(join(map([lhs, a:mode, 0, a:file], 'string(v:val)'), ','))
         execute a:mode.'map' '<expr> <silent>' lhs 'AutoloadingMapRun('.amrargs.')'
       endfun
 
       function s:genTempMap(mapdescr, mode)
         if a:mapdescr.expr>1
-          let rhs=printf(a:mapdescr.rhs, '"'.mode.'","'.escape(lhs, '"\').'"')
+          let rhs = printf(a:mapdescr.rhs, '"'.mode.'","'.escape(lhs, '"\').'"')
         else
           let rhs = s:hsescape(a:mapdescr.rhs)
           let rhs = substitute(rhs, '<SID>', '<SNR>'.a:mapdescr.sid.'_', 'g')
@@ -222,7 +229,7 @@ fun! vam#autoloading#Setup()
       fun! s:LoadFTFiles(files)
         if has('vim_starting')
           let saved_rtp = &rtp
-          call s:AddRuntimePaths(s:omittedrtps)
+          call s:AddRuntimePaths(s:omittedrtps, s:omittedafters)
         endif
         try
           for file in a:files
@@ -279,14 +286,25 @@ fun! vam#autoloading#Setup()
 
     if has('vim_starting')
       let s:omittedrtps += toautoload
+      let s:omittedafters += filter(map(copy(toautoload), 'v:val."/after"'), 'isdirectory(v:val)')
     else
-      call s:AddRuntimePaths(toautoload)
+      call s:AddRuntimePaths(toautoload,
+            \filter(map(copy(toautoload), 'v:val."/after"'), 'isdirectory(v:val)'))
     endif
 
     for rtp in toscan
-      let dbitem={'ftplugins': {}, 'syntaxes': {}, 'mappings': {}, 'commands': {}, 'functions': {}, 'abbreviations': {},
+      let toscanfiles = {}
+      call map(vam#GlobInDir(rtp, '{,after/}plugin/**/*.vim'), 'extend(toscanfiles, {v:val : rtp})')
+      if empty(toscanfiles)
+        " No plugin files, do not bother with autoloading then
+        let db.paths[rtp] = 0
+        let s:needs_write = 1
+        continue
+      endif
+      call extend(s:toscanfiles, toscanfiles)
+
+      let dbitem = {'ftplugins': {}, 'syntaxes': {}, 'mappings': {}, 'commands': {}, 'functions': {}, 'abbreviations': {},
             \     'autocommands': {}, 'ftdetects': []}
-      call map(vam#GlobInDir(rtp, '{,after/}plugin/**/*.vim'), 'extend(s:toscanfiles, {v:val : rtp})')
 
       for file in vam#GlobInDir(rtp, '{,after/}ftplugin/{*/,}*.vim')
         let filetype=substitute(file, '.*ftplugin/\v([^/_]+%(%(_[^/]*)?\.vim$|\/[^/]+$)@=).*', '\1', 'g')
@@ -302,7 +320,7 @@ fun! vam#autoloading#Setup()
 
       let dbitem.ftdetects=map(vam#GlobInDir(rtp, '{,after/}ftdetect/*.vim'), 'vam#normpath(v:val)')
 
-      let db.paths[rtp]=dbitem
+      let db.paths[rtp] = dbitem
       let s:needs_write = 1
     endfor
 
@@ -472,6 +490,8 @@ fun! vam#autoloading#Setup()
         endif
       endfun
 
+      " TODO? Use “manual” sourcing instead? See downside 5 in the 
+      "       documentation.
       fun! s:SourceCmd(path)
         let file = vam#normpath(a:path)
         let saved_eventignore = &eventignore
@@ -498,7 +518,7 @@ fun! vam#autoloading#Setup()
     if !exists('*s:VimEnter')
       fun! s:VimEnter()
         if !empty(s:omittedrtps)
-          call s:AddRuntimePaths(s:omittedrtps)
+          call s:AddRuntimePaths(s:omittedrtps, s:omittedafters)
           let s:omittedrtps = []
         endif
         if s:needs_write
@@ -521,7 +541,7 @@ fun! vam#autoloading#Setup()
         let fname = fnamemodify(tr(a:func, '#', '/'), ':h') . '.vim'
         if !empty(s:omittedrtps)
           let saved_rtp = &rtp
-          call s:AddRuntimePaths(s:omittedrtps)
+          call s:AddRuntimePaths(s:omittedrtps, s:omittedafters)
         endif
         try
           for path in filter(map(copy(s:omittedrtps), 'v:val."/".fname'), 'filereadable(v:val)')
@@ -549,7 +569,7 @@ fun! vam#autoloading#Setup()
       endif
     endif
 
-    return call(s:old_handle_runtimepaths, [extend({'new_runtime_paths': toscan}, a:opts, 'keep')], {})
+    return call(s:old_handle_runtimepaths, [extend({'new_runtime_paths': filter(copy(new_runtime_paths), 'rtstatus[v:key] < 2')}, a:opts, 'keep')], {})
   endfun
 
   fun! AutoloadingInvalidateHook(info, repository, pluginDir, hook_opts)
@@ -566,4 +586,5 @@ fun! vam#autoloading#Setup()
   let s:c.post_scms_update_hook_functions = ['AutoloadingInvalidateHook']+
         \get(s:c, 'post_scms_update_hook_functions', ['vam#install#ShowShortLog'])
 endfun
+" TODO: clear up unused directories from the database.
 " vim: et ts=8 sts=2 sw=2
