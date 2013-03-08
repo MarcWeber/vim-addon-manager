@@ -244,7 +244,7 @@ fun! vam#autoloading#Setup()
 
       fun! s:DefineFTEvent(event, ft, files)
         augroup VAMAutoloading
-          execute 'autocmd' a:event a:ft ':call s:LoadFTFile('.string(a:files).')'
+          execute 'autocmd' a:event a:ft ':call s:LoadFTFiles('.string(a:files).')'
         augroup END
       endfun
 
