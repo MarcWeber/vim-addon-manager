@@ -950,6 +950,11 @@ what's going to happen.
   For windows users there is: http://mawercer.de/~marc/vam/index.php
   which will also work on sytems not having git but an unzip implementation.
 
+
+VAM does not support directories with commas:
+https://github.com/MarcWeber/vim-addon-manager/issues/101
+Won't fix unless there is a user depending on such a uncommon directory naming
+
 ------------------------------------------------------------------------------
 12.1. Common error messages                                *VAM-common-errors*
 
