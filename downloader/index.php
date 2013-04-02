@@ -1,7 +1,8 @@
 <?php
 
-// I just tried to make this downloadeer work.
-// Probably there are many ways to improve it.
+putenv('PATH=/var/run/current-system/sw/bin');
+
+set_time_limit(60*15);
 
 ob_start();
 
@@ -10,6 +11,9 @@ define('HISTORY_FILE', 'previous_downloads.txt');
 
 define('NAME_CACHE_FILE', 'name_cache');
 define('RECREATE_CACHE_HOURS', 48 * 2);
+
+
+$windows = (isset($_POST['target_os']) && $_POST['target_os']) == 'windows';
 
 function name_cache(){
   $a = json_decode(file_get_contents(NAME_CACHE_FILE), true);
@@ -73,8 +77,20 @@ function downloadFile( $fullPath, $name = '' ){
     throw new Exception("File $fullPath Not Found");
 } 
 
+function vimrc_win_hack(){
+global $windows;
+return $windows ? "
+  \" for windows users, see https://github.com/MarcWeber/vim-addon-manager/issues/111
+  fun MyPluginDirFromName(name)
+    let dir = vam#DefaultPluginDirFromName(a:name)
+    return substitute(dir,'%','_', 'g')
+  endf
+  let g:vim_addon_manager['plugin_dir_by_name'] = 'MyPluginDirFromName'
+": '';
+}
 
 function vimrc($names, $silent){
+global $windows;
 $c = $silent ? 'install#Install' : 'ActivateAddons';
 return "
 set nocompatible
@@ -88,17 +104,27 @@ let g:vim_addon_manager = {}
   let g:vim_addon_manager.dont_source = 1
   let g:vim_addon_manager.auto_install = 1
   let g:vim_addon_manager.log_to_buf = 1
+
   \" activation is disabled manually enabling VAM-kr
   exec 'set runtimepath+='.filter([\$HOME.'/.vim', \$HOME.'/vimfiles'],'isdirectory(v:val)')[0].'/vim-addons/vim-addon-manager-known-repositories'
-  " : "
-"
-)."
+  " : "")."
 
+".vimrc_win_hack()."
 
 \" use either windows or linux location - whichever exists
 exec 'set runtimepath+='.filter([\$HOME.'/.vim', \$HOME.'/vimfiles'],'isdirectory(v:val)')[0].'/vim-addons/vim-addon-manager'
 call vam#".$c."(".json_encode($names).", {'auto_install' : 1})
 ";
+}
+
+function wrap_vimrc($s){
+  return '
+try
+'.$s.'
+catch /.*/
+  call writefile([v:exception], "/tmp/vam-error")
+endtry
+  ';
 }
 
 function vimrc2(){
@@ -112,34 +138,34 @@ function vimrc2(){
    endif
   endfor
 
-  fun! Encode(thing, ...)
-    let nl = a:0 > 0 ? (a:1 ? "\\n" : "") : ""
-    if type(a:thing) == type("")
-      return \'"\'.escape(a:thing,\'"\\\').\'"\'
-    elseif type(a:thing) == type({}) && !has_key(a:thing, \'json_special_value\')
-      let pairs = []
-      for [Key, Value] in items(a:thing)
-        call add(pairs, Encode(Key).\':\'.Encode(Value))
-        unlet Key | unlet Value
-      endfor
-      return "{".nl.join(pairs, ",".nl)."}"
-    elseif type(a:thing) == type(0)
-      return a:thing
-    elseif type(a:thing) == type([])
-      return \'[\'.join(map(copy(a:thing), "Encode(v:val)"),",").\']\'
-    else
-      throw "unexpected new thing: ".string(a:thing)
-    endif
-  endfun
+fun! Encode(thing, ...)
+  let nl = a:0 > 0 ? (a:1 ? "\\n" : "") : ""
+  if type(a:thing) == type("")
+    return \'"\'.escape(a:thing,\'"\\\').\'"\'
+  elseif type(a:thing) == type({}) && !has_key(a:thing, \'json_special_value\')
+    let pairs = []
+    for [Key, Value] in items(a:thing)
+      call add(pairs, Encode(Key).\':\'.Encode(Value))
+      unlet Key | unlet Value
+    endfor
+    return "{".nl.join(pairs, ",".nl)."}"
+  elseif type(a:thing) == type(0)
+    return a:thing
+  elseif type(a:thing) == type([])
+    return \'[\'.join(map(copy(a:thing), "Encode(v:val)"),",").\']\'
+  else
+    throw "unexpected new thing: ".string(a:thing)
+  endif
+endf
 
   call writefile( [Encode(info)], "names")
   ';
 }
 
 function aszip($names){
+global $windows;
 
 set_time_limit(60*60);
-
 
 file_put_contents(HISTORY_FILE, date('Y-m-d H:m:s').'|'.json_encode($names)."\n", FILE_APPEND | LOCK_EX );
 $dir = TMP.'/'.rand(1000,9999);
@@ -150,22 +176,24 @@ file_put_contents($dir.'/_vimrc-fetch', vimrc($names, true));
 $cmd = '
   dir='.$dir.'
   cd $dir
-  exec 2>&1
   exec > log.txt
+  exec 2>&1
+  set -x
   mkdir -p .vim/vim-addons
-  PATH=/var/run/current-system/sw/bin
+  export PATH=/var/run/current-system/sw/bin
   git clone --depth 1 git://github.com/MarcWeber/vim-addon-manager.git .vim/vim-addons/vim-addon-manager
+  ( cd  vim-addon-manager; git chekout HEAD~20; )
   # git clone --depth 1 git://github.com/MarcWeber/vim-addon-manager-known-repositories.git .vim/vim-addons/vim-addon-manager-known-repositories
 
   export HOME=$dir
 
-  vim -u ~/_vimrc-fetch -U NONE -N -c "qa!" &>/dev/null
+  yes | vim -u ~/_vimrc-fetch -U NONE -N -c "qa!" &>/dev/null
+	echo done >> /tmp/done
 
-  mv .vim vimfiles
+  '.($windows ? 'mv .vim vimfiles' : 'mv _vimrc .vimrc').'
 
-  zip -r vam.zip *
+  zip -r vam.zip * .vim*
 ';
-echo $cmd;
   system("$cmd 2>&1");
   downloadFile( $dir.'/vam.zip', $name = 'vam.zip');
   system('rm -fr '.$dir);
@@ -266,13 +294,21 @@ Yes, from now one '"[] will be stripped so pasting a list is fine, also. This
 way you can update everyhting at once easily.<br/>
 <input type="text" name="names" value="tlib vim-addon-commenting"><br/>
 
+target operating system:<br/>
+<label for="windows">Windows</label><input id="windows" type="radio" name="target_os" value="windows" checked="checked"><br/>
+<label for="linux">Linux [1]</label><input id="linux" type="radio" name="target_os" value="linux"><br/>
+
 <input type="submit" name="go" value="download zip"><br/>
-Be patient. Fetching repositories by mercurial, svn or git can take some time.
+Be patient. Fetching repositories by mercurial, svn or git can take some time.<br/>
+[1] Linux users may want to use the <a href="https://raw.github.com/MarcWeber/vim-addon-manager/master/doc/vim-addon-manager-getting-started.txt">sample code (section 2)</a>.
+
 
 </form>
 
-If you have trouble contact Marc Weber by email (marco-oweber ATT gmx.de)
-or on irc.freenode.net (#vim).
+<b>
+	If you have trouble contact Marc Weber by email (marco-oweber ATT gmx.de)
+	or on irc.freenode.net (#vim).
+</b>
 
 <br/>
 <br/>
@@ -293,20 +329,24 @@ function known_names(){
     ob_end_flush();
     flush();
     $dir = TMP.'/'.rand(1000,9999);
-    system('mkdir -p '.$dir.'; chmod -R 777 '.$dir);
+    echo system('mkdir -p '.$dir.'; chmod -R 777 '.$dir);
+   if (!is_dir($dir)){
+		echo "error creating $dir\n";
+		exit();
+	}
 
-     file_put_contents($dir.'/_vimrc-fetch', vimrc2());
+     file_put_contents($dir.'/_vimrc-fetch', wrap_vimrc(vimrc2()));
     $cmd = '
   dir='.$dir.'
   cd $dir
-  exec 2>&1
   exec > log.txt
+  exec 2>&1
+  set -x
+  export PATH=/var/run/current-system/sw/bin
   mkdir -p .vim/vim-addons
-  PATH=/var/run/current-system/sw/bin
   git clone --depth 1 git://github.com/MarcWeber/vim-addon-manager.git .vim/vim-addons/vim-addon-manager
   export HOME=$dir
-
-  vim -u ~/_vimrc-fetch -U NONE -N -c "qa!" &>/dev/null
+  yes | vim -u ~/_vimrc-fetch -U NONE -N -c "qa!" &>/dev/null
     ';
     system("$cmd");
     file_put_contents(NAME_CACHE_FILE, file_get_contents($dir.'/names'));
