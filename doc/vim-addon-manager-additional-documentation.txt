@@ -866,6 +866,8 @@ what's going to happen.
 ==============================================================================
 12. Troubleshooting and known bugs                      *VAM-trouble-shooting*
 
+Using a $SHELL setting other than /bin/sh may not work on *nix like systems
+
 [BUG 101] Directories with commas are not supported.
   Any discussion is here: https://github.com/MarcWeber/vim-addon-manager/issues/101
 

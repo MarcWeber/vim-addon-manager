@@ -4,6 +4,12 @@ You declare a set of plugins. VAM will fetch & activate them at startup or
 runtime depending on your needs. Activating means handling runtimepath and
 making sure all .vim file get sourced.
 
+## If you believe in VAM's collaborative properties
+then you may also want to have a look at [vim-git-wiki](github.com/MarcWeber/vim-git-wiki)
+If you contribute to this git based wiki editable by Vim we have a chance
+making it official ot www.vim.org.
+
+
 ## MINIMAL setup (2 lines)
 
     set runtimepath+=/path/to/vam
