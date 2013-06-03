@@ -98,7 +98,8 @@ fun! s:WriteBundleDir(targetDir, url, archive)
   call mkdir(a:targetDir.'/._bundle')
   call writefile([a:url, a:archive], a:targetDir.'/._bundle/opts', 'b')
 endfun
-fun! vam#vcs#GetBundle(repository, targetDir)
+
+fun! vam#vcs#UrlFromRepository(repository)
   let [dummystr, protocol, user, domain, port, path; dummylst]=
               \matchlist(a:repository.url, '\v^%(([^:]+)\:\/\/)?'.
               \                               '%(([^@/:]+)\@)?'.
@@ -117,7 +118,12 @@ fun! vam#vcs#GetBundle(repository, targetDir)
   else
     throw 'Don’t know how to get bundle from '.domain
   endif
-  call vam#install#Checkout(a:targetDir, {'type': 'archive', 'url': url, 'archive_name': archive})
+  return {'archive': archive, 'url': url}
+endfun
+
+fun! vam#vcs#GetBundle(repository, targetDir)
+  let x = vam#vcs#UrlFromRepository(a:repository)
+  call vam#install#Checkout(a:targetDir, {'type': 'archive', 'url': x.url, 'archive_name': x.archive})
   call s:WriteBundleDir(a:targetDir, url, archive)
   return 0
 endfun
