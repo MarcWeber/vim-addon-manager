@@ -55,7 +55,10 @@ fun! s:ShellDSL(special, cmd, ...) abort
       endfor
     endif
     if list[2] == 'p'
-      let p = expand(fnameescape(p))
+      let temp = expand(fnameescape(p))
+      if temp != ''
+        let p = temp
+      endif
     endif
     let r .= shellescape(p, a:special).x[len(list[0]):]
     unlet p
