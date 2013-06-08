@@ -153,7 +153,7 @@ endfun
 " create directory for files before Vim tries writing them:
 augroup CREATE_MISSING_DIR_ON_BUF_WRITE
   au!
-  autocmd BufWritePre * if !isdirectory(expand('%:h')) | call mkdir(expand('%:h'),'p') | endif
+  autocmd BufWritePre * if !isdirectory(expand('%:h', 1)) | call mkdir(expand('%:h', 1),'p') | endif
 augroup end
 
 finish

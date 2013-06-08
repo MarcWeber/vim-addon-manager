@@ -55,7 +55,7 @@ fun! s:ShellDSL(special, cmd, ...) abort
       endfor
     endif
     if list[2] == 'p'
-      let p = expand(fnameescape(p))
+      let p = expand(fnameescape(p), 1)
     endif
     let r .= shellescape(p, a:special).x[len(list[0]):]
     unlet p
@@ -421,7 +421,7 @@ fun! vam#utils#TempDir(name)
     let s:tmpDir = fnamemodify(tempname(), ":h".(g:is_win ? '': ':h'))
   endif
   " expand make \ out of / on Windows
-  return expand(s:tmpDir.'/'.a:name)
+  return expand(s:tmpDir.'/'.a:name, 1)
 endfun
 
 " tries finding a new name if a plugin was renamed.

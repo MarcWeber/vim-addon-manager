@@ -926,7 +926,7 @@ Using a $SHELL setting other than /bin/sh may not work on *nix like systems
 
   " slow performance. This could be optimized some more - I do no longer
   " care about such old Vim versions. Think about upgrading.
-  for f in split(glob(vam_install_path.'/vim-addon-manager*/**/*.vim'),"\n")
+  for f in split(glob(vam_install_path.'/vim-addon-manager*/**/*.vim', 1),"\n")
     if f =~ 'plugin/vim-addon-manager-known-repositories.vim' | continue | endif
     exec 'source '.fnameescape(f)
   endfor
@@ -1258,7 +1258,7 @@ code: >
 
   " this is ~/.vim/vim-addons/foo/autoload/x.vim
   " does not work inside a function!
-  let s:plugin_base_dir = expand('<sfile>:p:h:h')
+  let s:plugin_base_dir = expand('<sfile>:p:h:h', 1)
   " now s:plugin_base_dir contains ~/.vim/vim-addons/foo
 <
 Then plugins can find additional resources (templates, python files, ..)
@@ -1332,7 +1332,7 @@ Create these directories: >
     ~/my/ftdetect/ftdetect-foreign.vim
 
 and add the following line to the each of them: >
-    echomsg expand('<sfile>:t')
+    echomsg expand('<sfile>:t', 1)
 <
 
 ~/.vimrc contents: >

@@ -32,11 +32,11 @@ let s:c.activated_plugins          = get(s:c,'activated_plugins',           {})
 let s:c.create_addon_info_handlers = get(s:c, 'create_addon_info_handlers', 1)
 
 " Users may install VAM system wide. In that case s:d is not writeable.
-let s:d = expand('<sfile>:h:h:h')
+let s:d = expand('<sfile>:h:h:h', 1)
 let s:c.plugin_root_dir = get(s:c, 'plugin_root_dir', filewritable(s:d) ? s:d : '~/.vim/vim-addons')
 unlet s:d
 
-if s:c.plugin_root_dir is# expand('~')
+if s:c.plugin_root_dir is# expand('~', 1)
   echohl Error
   echomsg "VAM: Don't install VAM into ~/.vim the normal way. See docs -> SetupVAM function. Put it int ~/.vim/vim-addons/vim-addon-manager for example."
   echohl None
@@ -44,10 +44,10 @@ if s:c.plugin_root_dir is# expand('~')
 endif
 
 " ensure we have absolute paths (windows doesn't like ~/.. ) :
-let s:c.plugin_root_dir = expand(fnameescape(s:c.plugin_root_dir))
+let s:c.plugin_root_dir = expand(fnameescape(s:c.plugin_root_dir), 1)
 
 let s:c.additional_addon_dirs = get(s:c, 'additional_addon_dirs', [])
-call map(s:c.additional_addon_dirs, 'expand(fnameescape(v:val))')
+call map(s:c.additional_addon_dirs, 'expand(fnameescape(v:val), 1)')
 
 let s:c.dont_source          = get(s:c, 'dont_source',          0)
 let s:c.plugin_dir_by_name   = get(s:c, 'plugin_dir_by_name',   'vam#DefaultPluginDirFromName')
@@ -91,7 +91,7 @@ if s:c.create_addon_info_handlers
       \ setlocal ft=addon-info
       \ | setlocal syntax=json
       \ | syn match Error "^\s*'"
-    autocmd BufWritePost *-addon-info.txt,addon-info.json call vam#ReadAddonInfo(expand('%'))
+    autocmd BufWritePost *-addon-info.txt,addon-info.json call vam#ReadAddonInfo(expand('%', 1))
   augroup END
 endif
 
@@ -491,7 +491,7 @@ fun! vam#OutputAsList(command) "{{{3
     return split(lines, '\n')
 endfun
 
-let s:sep=fnamemodify(expand('<sfile>:h'), ':p')[-1:]
+let s:sep=fnamemodify(expand('<sfile>:h', 1), ':p')[-1:]
 let s:sesep=escape(s:sep, '\&~')
 let s:resep='\V'.escape(s:sep, '\').'\+'
 fun! s:normpath(path)
