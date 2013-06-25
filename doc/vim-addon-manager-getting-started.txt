@@ -180,6 +180,7 @@ commented version ~
           " Tell VAM which plugins to fetch & load:
           call vam#ActivateAddons([], {'auto_install' : 0})
           " sample: call vam#ActivateAddons(['pluginA','pluginB', ...], {'auto_install' : 0})
+          " Also See "plugins-per-line" below
 
           " Addons are put into plugin_root_dir/plugin-name directory
           " unless those directories exist. Then they are activated.
@@ -219,6 +220,7 @@ minimal version ~
                         \       shellescape(c.plugin_root_dir.'/vim-addon-manager', 1)
           endif
           call vam#ActivateAddons([the plugin names], {'auto_install' : 0})
+          " Also See "plugins-per-line" below
         endfun
         call SetupVAM()
 
@@ -243,6 +245,21 @@ NOTES: ~
   supported short format for mapping commands, no support for mappings/commands defined in `:execute` and so on):
   it is really not possible to construct such autoloading by statically analyzing plugins without executing them.
 
+
+  plugins-per-line ~
+    way 1: >
+          call vam#ActivateAddons([])
+          ActivateAddons pluginA pluginB
+          ActivateAddons pluginC
+<   way 2: >
+          let list = ""
+          let list .= ",aplugin"
+          let list .= ",anotherplugin"
+          call vam#ActivateAddons(split(list,',')[1:], {'auto_install' : 0})
+<   way 3: >
+          " You can use # to comment plugins in plugin-list.txt
+          call vam#ActivateAddons(filter(readfile('plugin-list.txt'), 'v:val !~ '^#'), {'auto_install' : 0})
+<   of course there are many more ..
 
    experimental: setup VAM when GUI has started [E2] ~
    Depending on the option you choose to run ActivateAddons Vim may not be
