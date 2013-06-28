@@ -33,7 +33,7 @@ fun! vam#vcs#GitCheckoutFixDepth(repository, targetDir)
     \ (executable('git') && stridx(system('git clone --help'), '--depth')!=-1)
     \ && a:repository.url !~ 'code\.google\.com'
 
-  let git_checkout='git clone '.(shallow_clone ? '--depth 1' : '').' $.url $p'
+  let git_checkout='git clone --recursive '.(shallow_clone ? '--depth 1' : '').' $.url $p'
   return vam#utils#RunShell(git_checkout, a:repository, a:targetDir)
 endf
 
