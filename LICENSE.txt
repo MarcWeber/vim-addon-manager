@@ -1,0 +1,3 @@
+Same as Vim.
+
+If any of the contributors till Tue Jul 30 2013 thinks differently talk to me.
