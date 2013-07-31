@@ -80,7 +80,7 @@ noremap \ip :set invpaste<bar>echo &paste ? 'pasting is on' : 'pasting is off'
 
 " for windows: make backspace work. Doesn't hurt on linux. This should be
 " default!
-set bs=indent,eol,star
+set bs=indent,eol,start
 " (deprecated:) set bs=2
 
 " foreign plugin vim-addon-manager {{{1
