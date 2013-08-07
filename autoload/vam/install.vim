@@ -556,7 +556,7 @@ fun! vam#install#UninstallAddons(list)
 endfun
 
 fun! vam#install#HelpTags(name)
-  let d=vam#PluginDirFromName(a:name).'/doc'
+  let d=vam#PluginRuntimePath(a:name).'/doc'
   if isdirectory(d) | exec 'helptags '.fnameescape(d) | endif
 endfun
 
