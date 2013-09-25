@@ -253,6 +253,11 @@ NOTES: ~
       ActivateAddons pluginC
 <
 
+  bundle emulation ~
+>
+   " after SetupVAM() add:
+   call vam#bundle#ProvideVundlesBundleCommand({'info': 1})
+<
    experimental: setup VAM when GUI has started [E2] ~
    Depending on the option you choose to run ActivateAddons Vim may not be
    able to show the questions correctly asking you to install a plugin.
