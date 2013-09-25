@@ -8,27 +8,27 @@ exec vam#DefineAndBind('s:c','g:vim_addon_manager','{}')
 "   call vundle#rc()
 " else
 "
-" fun SetupVAM()
-"   let c = get(g:, 'vim_addon_manager', {})
-"   let g:vim_addon_manager = c
-"   let c.plugin_root_dir = expand('$HOME', 1) . '/.vim/bundle'
-"   let &rtp.=(empty(&rtp)?'':',').c.plugin_root_dir.'/vim-addon-manager'
-"   " let g:vim_addon_manager = { your config here see "commented version" example and help
-"   if !isdirectory(c.plugin_root_dir.'/vim-addon-manager/autoload')
-"     execute '!git clone --depth=1 git://github.com/MarcWeber/vim-addon-manager '
-"                 \       shellescape(c.plugin_root_dir.'/vim-addon-manager', 1)
-"   endif
-"   call vam#ActivateAddons([], {'auto_install' : 0})
-" endfun
+"   fun SetupVAM()
+"     let c = get(g:, 'vim_addon_manager', {})
+"     let g:vim_addon_manager = c
+"     let c.plugin_root_dir = expand('$HOME', 1) . '/.vim/bundle'
+"     let &rtp.=(empty(&rtp)?'':',').c.plugin_root_dir.'/vim-addon-manager'
+"     " let g:vim_addon_manager = { your config here see "commented version" example and help
+"     if !isdirectory(c.plugin_root_dir.'/vim-addon-manager/autoload')
+"       execute '!git clone --depth=1 git://github.com/MarcWeber/vim-addon-manager '
+"                   \       shellescape(c.plugin_root_dir.'/vim-addon-manager', 1)
+"     endif
+"     call vam#ActivateAddons([], {'auto_install' : 0})
+"   endfun
 "   call SetupVAM()
-"   call vam#bundle#ProvideVundlesBundleCommand({'info': 1})
+"   call vam#bundle_emulation#ProvideVundlesBundleCommand({'info': 1})
 "
 " endif
 "
 " Bundle ABC/FOO
 " Bundle Z
 
-fun! vam#bundle#BundleToVamName(name)
+fun! vam#bundle_emulation#BundleToVamName(name)
   if a:name =~ '/'
     " assume github
     return 'github:'.a:name
@@ -38,7 +38,7 @@ fun! vam#bundle#BundleToVamName(name)
   endif
 endfun
 
-fun! vam#bundle#Bundle(...)
+fun! vam#bundle_emulation#Bundle(...)
   let args = a:000
   if a:0 != 1
     throw "VAM's bundle emulation only supports simple arguments
@@ -48,10 +48,10 @@ fun! vam#bundle#Bundle(...)
     " don't activate vundle
     return
   endif
-  call vam#ActivateAddons([vam#bundle#BundleToVamName(stripped)], {'auto_install': 0})
+  call vam#ActivateAddons([vam#bundle_emulation#BundleToVamName(stripped)], {'auto_install': 0})
 endfun
 
-fun! vam#bundle#PluginDirFromName(name)
+fun! vam#bundle_emulation#PluginDirFromName(name)
   if a:name =~ '/'
     " VAM uses github-name-repo to avoid collisions, bundle only uses
     " repository name
@@ -66,8 +66,8 @@ fun! vam#bundle#PluginDirFromName(name)
   return (empty(existing) ? dirs[0] : existing[0]).'/'.name
 endfun
 
-fun vam#bundle#ProvideVundlesBundleCommand(opts)
-  command! -nargs=* Bundle call vam#bundle#Bundle(<f-args>)
+fun vam#bundle_emulation#ProvideVundlesBundleCommand(opts)
+  command! -nargs=* Bundle call vam#bundle_emulation#Bundle(<f-args>)
 
   if get(a:opts, 'info', 1)
     sp
@@ -82,6 +82,6 @@ fun vam#bundle#ProvideVundlesBundleCommand(opts)
 
   if get(a:opts, 'default-bundle-locations', 1)
     " VAM by default gives different names .. change this
-    let s:c.plugin_dir_by_name = 'vam#bundle#PluginDirFromName'
+    let s:c.plugin_dir_by_name = 'vam#bundle_emulation#PluginDirFromName'
   endif
 endfun

@@ -256,7 +256,7 @@ NOTES: ~
   bundle emulation ~
 >
    " after SetupVAM() add:
-   call vam#bundle#ProvideVundlesBundleCommand({'info': 1})
+   call vam#bundle_emulation#ProvideVundlesBundleCommand({'info': 1})
 <
    experimental: setup VAM when GUI has started [E2] ~
    Depending on the option you choose to run ActivateAddons Vim may not be
