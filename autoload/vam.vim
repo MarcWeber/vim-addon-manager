@@ -4,7 +4,7 @@
 " code which is used for installing / updating etc should go into vam/install.vim
 
 " if people use VAM they also want nocompatible
-if &compatible | set nocomptable  | endif
+if &compatible | set nocompatible | endif
 
 
 " don't need a plugin. If you want to use this plugin you call Activate once
