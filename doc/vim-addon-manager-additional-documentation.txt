@@ -466,8 +466,6 @@ repository                                             *addon-info-repository*
         script-type
                  One of `plugin', `syntax', `color scheme', or `indent'. The 
                  .vim file will be moved into the specific subdirectory.
-                 Also accepts `after/syntax' which is a hack that makes VAM 
-                 move source into after/syntax directory.
         archive_name
                  If `type' key contains an empty string, then archive which
                  location is described by the `url' key will be saved in file
@@ -476,14 +474,18 @@ repository                                             *addon-info-repository*
                  installed no other archive tools are required):
                  Extension     How it is handled ~
                  .vim          This extension designates that plugin is
-                               a single file. So, if exists key `script-type'
-                               and it is equal to `syntax' or `indent', then
-                               this file is put under {plugname}/syntax or
-                               under {plugname}/indent, otherwise it is put
-                               under directory described by
-                               {plugname}/{target_dir} (where {target_dir} is
-                               a value of `target_dir' key if it is present
-                               and `plugin' otherwise).
+                               a single file. Depending on `script-type' and 
+                               `target_dir' keys this file will be put 
+                               under:
+                               1. {root}/{target_dir} if `target_dir' key 
+                                  exists.
+                               2. {root}/syntax, {root}/indent, 
+                                  {root}/ftplugin if `script-type' is equal to 
+                                  "syntax", "indent" or "ftplugin" 
+                                  respectively.
+                               3. {root}/colors if `script-type' is equal to 
+                                  "color scheme".
+                               4. {root}/plugin otherwise.
                 .tar.gz, .tgz  This extension designates that plugin is
                                contained inside tar archive compressed by
                                gzip. In this case, archive is uncompressed by
