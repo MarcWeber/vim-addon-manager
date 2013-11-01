@@ -595,10 +595,14 @@ fun! vam#install#Checkout(targetDir, repository) abort
 
     call vam#utils#Download(a:repository.url, archiveFile)
 
-    call vam#utils#Unpack(archiveFile, a:targetDir,
-                \                  {'strip-components': get(a:repository,'strip-components',-1),
+    let opts = {'strip-components': get(a:repository,'strip-components',-1),
                 \                   'script-type': tolower(get(a:repository, 'script-type', 'plugin')),
-                \                   'unix_ff': get(a:repository, 'unix_ff', get(s:c, 'change_to_unix_ff')) })
+                \                   'unix_ff': get(a:repository, 'unix_ff', get(s:c, 'change_to_unix_ff')) }
+    if (has_key(a:repository, 'target_dir'))
+      let opts.target_dir = a:repository.target_dir
+    endif
+
+    call vam#utils#Unpack(archiveFile, a:targetDir, opts)
 
     call writefile([get(a:repository, 'version', '?')], a:targetDir.'/version', 'b')
   endif
