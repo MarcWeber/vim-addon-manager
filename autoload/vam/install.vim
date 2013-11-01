@@ -266,7 +266,7 @@ fun! vam#install#CreatePatch(info, repository, pluginDir, hook_opts)
       call mkdir(a:pluginDir.'/archive', 'p')
 
       let rep_copy = deepcopy(a:repository)
-      let rep_copy.url = 'file://'.expand(archiveFileBackup)
+      let rep_copy.url = 'file://'.expand(archiveFileBackup, 1)
       call vam#install#Checkout(a:pluginDir, rep_copy)
       silent! call delete(a:pluginDir.'/version')
       try
@@ -556,7 +556,7 @@ fun! vam#install#UninstallAddons(list)
 endfun
 
 fun! vam#install#HelpTags(name)
-  let d=vam#PluginDirFromName(a:name).'/doc'
+  let d=vam#PluginRuntimePath(a:name).'/doc'
   if isdirectory(d) | exec 'helptags '.fnameescape(d) | endif
 endfun
 
@@ -838,7 +838,7 @@ if g:is_win
       echo "__ its your turn: __"
       echom "__ move all files of the zip directory into ".s:c.binary_utils.'/dist . Close the Explorer window and the shell window to continue. Press any key'
       call getchar()
-      exec "!".expand(s:c.binary_utils.'/'. tools.zip[1])
+      exec "!".expand(s:c.binary_utils.'/'. tools.zip[1], 1)
       let $PATH=$PATH.';'.s:c.binary_utils_bin
       if !executable('unzip')
         throw "can't execute unzip. Something failed!"

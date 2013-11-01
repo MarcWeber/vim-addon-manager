@@ -4,17 +4,22 @@ You declare a set of plugins. VAM will fetch & activate them at startup or
 runtime depending on your needs. Activating means handling runtimepath and
 making sure all .vim file get sourced.
 
+## If you believe in VAM's collaborative properties
+then you may also want to have a look at [vim-git-wiki](https://github.com/MarcWeber/vim-git-wiki)
+If you contribute to this git based wiki editable by Vim we have a chance
+making it official ot www.vim.org.
+
+
 ## MINIMAL setup (2 lines)
 
     set runtimepath+=/path/to/vam
     call vam#ActivateAddons([list of addon names])
 
-Keep reading to get an overview about VAM.
+Keep reading to get an overview about VAM by
+- skimming this README.md file
+- looking at [doc/\*getting-started.txt](https://raw.github.com/MarcWeber/vim-addon-manager/master/doc/vim-addon-manager-getting-started.txt).
+  Section 2 talks about recommended ways to install VAM
 
-## NEED MORE INFO?
-
-Skim this README.md file, look at the documentation at doc/ which will tell you
-how to contact us.
 
 ## FEATURES
 - Declarative: The behaviour of Vim is determined by your .vimrc only. [1]
@@ -64,9 +69,6 @@ Pool is made up of
 ## SUPPORT
 VAM is well supported by at least 2 maintainers. Try github tickets or Vim irc
 channel on freenode.
-
-However the “self install” alternative is recommended, see 
-[section 2 of GETTING STARTED](https://raw.github.com/MarcWeber/vim-addon-manager/master/doc/vim-addon-manager-getting-started.txt)
 
 ## Let me see all docs!
 Here you go:

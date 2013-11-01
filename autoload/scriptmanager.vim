@@ -3,7 +3,7 @@ fun! s:UpdateVimrc()
   " for you. I'd like to ask the user. But not all are using shells so the
   " question can get lost.
   let cmd='%s@scriptmanager#Activate(@vam#ActivateAddons(@g | %s/\<vim_script_manager\>/vim_addon_manager/g'
-  let files = filter([expand("~/.vimrc"), expand('~/_vimrc')], 'filewritable(v:val)==1')
+  let files = filter([expand("~/.vimrc", 1), expand('~/_vimrc', 1)], 'filewritable(v:val)==1')
   if len(files) == 1
     call vam#Log( "scriptmanager#Activate and g:vim_script_manager were renamed to vam#ActivateAddons and g:vim_addon_manager.")
     if confirm("Replace given names in ".files[0]."?", "&No\n&Yes")==2

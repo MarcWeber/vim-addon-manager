@@ -1,5 +1,5 @@
 
-let s:plugin_root_dir = fnamemodify(expand('<sfile>'),':h:h:h')
+let s:plugin_root_dir = fnamemodify(expand('<sfile>', 1),':h:h:h')
 
 " called by vim-addon-manager-test.sh
 fun! vam#test#Test()

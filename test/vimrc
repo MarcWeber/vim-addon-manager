@@ -35,7 +35,7 @@ endfunction
 command -bar -nargs=1 W :call WriteFile(<q-args>)
 function WriteGlob()
     cd `="vam-".g:curtest`
-    call WriteFile(split(glob('./**'), "\n"))
+    call WriteFile(split(glob('./**', 1), "\n"))
     cd ..
 endfunction
 function Try(cmd)

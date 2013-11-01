@@ -170,7 +170,7 @@ commented version ~
           " VAM install location:
           let c = get(g:, 'vim_addon_manager', {})
           let g:vim_addon_manager = c
-          let c.plugin_root_dir = expand('$HOME/.vim/vim-addons')
+          let c.plugin_root_dir = expand('$HOME/.vim/vim-addons', 1)
           if !EnsureVamIsOnDisk(c.plugin_root_dir)
             echohl ErrorMsg | echomsg "No VAM found!" | echohl NONE
             return
@@ -180,6 +180,7 @@ commented version ~
           " Tell VAM which plugins to fetch & load:
           call vam#ActivateAddons([], {'auto_install' : 0})
           " sample: call vam#ActivateAddons(['pluginA','pluginB', ...], {'auto_install' : 0})
+          " Also See "plugins-per-line" below
 
           " Addons are put into plugin_root_dir/plugin-name directory
           " unless those directories exist. Then they are activated.
@@ -211,7 +212,7 @@ minimal version ~
         fun SetupVAM()
           let c = get(g:, 'vim_addon_manager', {})
           let g:vim_addon_manager = c
-          let c.plugin_root_dir = expand('$HOME') . '/.vim/vim-addons'
+          let c.plugin_root_dir = expand('$HOME', 1) . '/.vim/vim-addons'
           let &rtp.=(empty(&rtp)?'':',').c.plugin_root_dir.'/vim-addon-manager'
           " let g:vim_addon_manager = { your config here see "commented version" example and help
           if !isdirectory(c.plugin_root_dir.'/vim-addon-manager/autoload')
@@ -219,6 +220,7 @@ minimal version ~
                         \       shellescape(c.plugin_root_dir.'/vim-addon-manager', 1)
           endif
           call vam#ActivateAddons([the plugin names], {'auto_install' : 0})
+          " Also See "plugins-per-line" below
         endfun
         call SetupVAM()
 
@@ -230,7 +232,7 @@ NOTES: ~
       \ '^\%(c\|cpp\)$': [ 'plugin-for-c-development' ],
       \ 'javascript': [ 'plugin-for-javascript' ]
     \ }
-    au FileType * for l in values(filter(copy(ft_addons), string(expand('<amatch>')).' =~ v:key')) | call vam#ActivateAddons(l, {'force_loading_plugins_now':1}) | endfor
+    au FileType * for l in values(filter(copy(ft_addons), string(expand('<amatch>', 1)).' =~ v:key')) | call vam#ActivateAddons(l, {'force_loading_plugins_now':1}) | endfor
 <  Provide feedback about this. If it works we may add it as builtin
 
   Also see this text which was sent to the mailinglist (TODO tidy up)
@@ -244,6 +246,18 @@ NOTES: ~
   it is really not possible to construct such autoloading by statically analyzing plugins without executing them.
 
 
+  plugins-per-line ~
+  >
+      call vam#ActivateAddons([])
+      ActivateAddons pluginA pluginB
+      ActivateAddons pluginC
+<
+
+  bundle emulation ~
+>
+   " after SetupVAM() add:
+   call vam#bundle_emulation#ProvideVundlesBundleCommand({'info': 1})
+<
    experimental: setup VAM when GUI has started [E2] ~
    Depending on the option you choose to run ActivateAddons Vim may not be
    able to show the questions correctly asking you to install a plugin.

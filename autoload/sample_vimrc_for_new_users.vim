@@ -80,7 +80,7 @@ noremap \ip :set invpaste<bar>echo &paste ? 'pasting is on' : 'pasting is off'
 
 " for windows: make backspace work. Doesn't hurt on linux. This should be
 " default!
-set bs=indent,eol,star
+set bs=indent,eol,start
 " (deprecated:) set bs=2
 
 " foreign plugin vim-addon-manager {{{1
@@ -153,7 +153,7 @@ endfun
 " create directory for files before Vim tries writing them:
 augroup CREATE_MISSING_DIR_ON_BUF_WRITE
   au!
-  autocmd BufWritePre * if !isdirectory(expand('%:h')) | call mkdir(expand('%:h'),'p') | endif
+  autocmd BufWritePre * if !isdirectory(expand('%:h', 1)) | call mkdir(expand('%:h', 1),'p') | endif
 augroup end
 
 finish
