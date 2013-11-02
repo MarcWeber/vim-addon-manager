@@ -670,7 +670,7 @@ What features are missing?
 
 Run (assuming you installed it in ~/.vim/vim-addons) >
     cd ~/.vim/vim-addons
-    hg clone http://vimpluginloader.hg.sourceforge.net:8000/hgroot/vimpluginloader/dev-tools
+    hg clone http://hg.code.sf.net/p/vimpluginloader/dev-tools
     cd dev-tools
     ./test.zsh -a vim-addon-manager
 . If test fails test.zsh prints out a list of failed tests and exits with 
@@ -809,14 +809,14 @@ SetupVAM because it works on any unix like system - and its files are that
 small so its debatable whether its worth sharing.
 
 The overlay is accessible via mercurial, url:
-http://vimpluginloader.hg.sourceforge.net:8000/hgroot/vimpluginloader/pluginloader-overlay
-or https://bitbucket.org/ZyX_I/pluginloader-overlay (mirror).
+http://hg.code.sf.net/p/vimpluginloader/pluginloader-overlay or 
+https://bitbucket.org/ZyX_I/pluginloader-overlay (mirror).
 
 In order to use this overlay paludis users can add the pluginloader.conf file
 to /etc/paludis/repositories/ with the following contents: >
     location = /var/paludis/repositories/pluginloader
     format = e
-    sync = hg+http://vimpluginloader.hg.sourceforge.net:8000/hgroot/vimpluginloader/pluginloader-overlay
+    sync = hg+http://hg.code.sf.net/p/vimpluginloader/pluginloader-overlay
 
     master_repository = gentoo
     names_cache = ${location}/.cache/names
@@ -837,7 +837,7 @@ For portage+layman users:
           <repo quality="experimental" status="unofficial">
             <name>pluginloader-overlay</name>
             <description>Overlay that contains some additional vim plugins</description>
-            <source type="mercurial">http://vimpluginloader.hg.sourceforge.net:8000/hgroot/vimpluginloader/pluginloader-overlay</source>
+            <source type="mercurial">http://hg.code.sf.net/p/vimpluginloader/pluginloader-overlay</source>
           </repo>
         </repositories>
 2. Add the following line to /etc/layman/layman.cfg just after the line that
