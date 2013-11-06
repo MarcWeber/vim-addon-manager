@@ -149,7 +149,7 @@ endfun
 
 fun! vam#vcs#GitCheckout(repository, targetDir)
   if executable('git')
-    return vam#vcs#GitCheckoutFixDepth(repository, targetDir)
+    return vam#vcs#GitCheckoutFixDepth(a:repository, a:targetDir)
   elseif executable('hg') && !s:TryCmdSilent('hg help gexport')
     call vam#Log('Trying to checkout git source '.a:repository.url.' using mercurial.', 'None')
     return s:TryCmd('hg clone $ $p', ((a:repository.url[:2] is# 'git')?
