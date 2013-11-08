@@ -29,11 +29,15 @@ fun! vam#vcs#GitCheckoutFixDepth(repository, targetDir)
   " output
   "
   " Neither does google code support it (yet)
-  let shallow_clone =
-    \ (executable('git') && stridx(system('git clone --help'), '--depth')!=-1)
-    \ && a:repository.url !~ 'code\.google\.com'
+  let use_shallow_clone = s:c.scms.git.supports_shallow_clone
 
-  let git_checkout='git clone --recursive '.(shallow_clone ? '--depth 1' : '').' $.url $p'
+  if (use_shallow_clone == "auto")
+    unlet use_shallow_clone
+    let use_shallow_clone = g:is_win ? 1 : (executable('git') && stridx(system('git clone --help'), '--depth')!=-1)
+  endif
+  let use_shallow_clone = use_shallow_clone && a:repository.url !~ 'code\.google\.com'
+
+  let git_checkout='git clone --recursive '.(use_shallow_clone ? '--depth 1' : '').' $.url $p'
   return vam#utils#RunShell(git_checkout, a:repository, a:targetDir)
 endf
 
@@ -41,7 +45,9 @@ let s:scm_defaults={
       \  'git': {'clone': ['vam#vcs#GitCheckoutFixDepth', []],
       \         'update': ['vam#utils#RunShell', ['cd $p && git pull'        ]],
       \          'wdrev': ['vam#utils#System',   ['git --git-dir=$p/.git rev-parse HEAD']],
-      \            'log': ['vam#utils#System',   ['git --git-dir=$2p/.git log $1 $[3]..$[4]', '--pretty=format:%s%n']],},
+      \            'log': ['vam#utils#System',   ['git --git-dir=$2p/.git log $1 $[3]..$[4]', '--pretty=format:%s%n']],
+      \           'supports_shallow_clone': 'auto',
+      \          },
       \   'hg': {'clone': ['vam#utils#RunShell', ['hg clone $.url $p'        ]],
       \         'update': ['vam#utils#RunShell', ['hg pull -u -R $p'         ]],
       \          'wdrev': ['vam#utils#System',   ['hg log --template $ -R $p -r .', '{rev}']],
