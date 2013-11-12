@@ -66,6 +66,8 @@ fun! vam#install#RewriteName(name)
     return {'type' : 'git', 'url' : a:name[len('git:'):]}
   elseif a:name[:2]==#'hg:'
     return {'type' : 'hg', 'url' : a:name[len('hg:'):]}
+  elseif a:name[:2]==#'darcs:'
+    return {'type' : 'darcs', 'url' : a:name[len('darcs:'):]}
   endif
 
 endfun
