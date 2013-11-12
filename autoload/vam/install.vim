@@ -56,20 +56,21 @@ fun! vam#install#CheckPoolItem(key, i)
 endfun
 
 fun! vam#install#RewriteName(name)
-  if a:name[:6]==#'github:'
+  let match = matchlist(a:name, '^\(github\|git\|darcs\|hg\):\(.*\)$')
+  if empty(match)
+    return 0
+  endif
+  if match[1] ==# 'github'
     " github:{Name}      {"type": "git", "url": "git://github.com/{Name}/vim-addon-{Name}}
     " github:{N}/{Repo}  {"type": "git", "url": "git://github.com/{N}/{Repo}"}
-    let rest = a:name[len('github:'):]
-    return {'type' : 'git', 'url' : 'git://github.com/'.(rest =~ '/' ? rest : rest.'/vim-addon-'.rest)}
-  elseif a:name[:3]==#'git:'
-    " git:{URL}          {"type": "git", "url": {URL}}
-    return {'type' : 'git', 'url' : a:name[len('git:'):]}
-  elseif a:name[:2]==#'hg:'
-    return {'type' : 'hg', 'url' : a:name[len('hg:'):]}
-  elseif a:name[:2]==#'darcs:'
-    return {'type' : 'darcs', 'url' : a:name[len('darcs:'):]}
+    return {'type' : 'git', 'url' : 'git://github.com/'.(match[2] =~ '/' ? match[2] : match[2].'/vim-addon-'.match[2])}
+  else
+    " hg:{URL}
+    " svn:{URL}
+    " darcs:{URL}
+    " -> {"type" : "hg/svn/darcs", url : URL}
+    return {'type' : match[1], 'url' : match[2]}
   endif
-
 endfun
 
 fun! vam#install#GetRepo(name, opts)
