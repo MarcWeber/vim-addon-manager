@@ -63,6 +63,9 @@ UpdateActivatedAddons                                 *:UpdateActivatedAddons*
         Like |:UpdateAdons| with a list of all activated plugins in place of 
         its arguments.
 
+ListActivatedAddons                                     *:ListActivatedAddons*
+        List all currently activated addons.
+
 UninstallNotLoadedAddons {name} ...                *:UninstallNotLoadedAddons*
         Unistall addons with given names. See
         |vam#install#UninstallAddons()| for more details.
