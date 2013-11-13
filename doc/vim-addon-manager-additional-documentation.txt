@@ -64,7 +64,7 @@ UpdateActivatedAddons                                 *:UpdateActivatedAddons*
         its arguments.
 
 ListActivatedAddons                                     *:ListActivatedAddons*
-        List all currently activated Addons.
+        List all currently activated addons.
 
 UninstallNotLoadedAddons {name} ...                *:UninstallNotLoadedAddons*
         Unistall addons with given names. See
