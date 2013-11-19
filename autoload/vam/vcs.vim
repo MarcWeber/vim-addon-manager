@@ -31,11 +31,11 @@ fun! vam#vcs#GitCheckoutFixDepth(repository, targetDir)
   " Neither does google code support it (yet)
   let use_shallow_clone = s:c.scms.git.supports_shallow_clone
 
-  if (use_shallow_clone == "auto")
+  if (use_shallow_clone is# 'auto')
     unlet use_shallow_clone
-    let use_shallow_clone = g:is_win ? 1 : (executable('git') && stridx(system('git clone --help'), '--depth')!=-1)
+    let use_shallow_clone = g:is_win ? 1 : (executable('git') && stridx(system('git help --man clone'), '--depth')!=-1)
   endif
-  let use_shallow_clone = use_shallow_clone && a:repository.url !~ 'code\.google\.com'
+  let use_shallow_clone = use_shallow_clone && a:repository.url !~? 'code\.google\.com'
 
   let git_checkout='git clone --recursive '.(use_shallow_clone ? '--depth 1' : '').' $.url $p'
   return vam#utils#RunShell(git_checkout, a:repository, a:targetDir)
