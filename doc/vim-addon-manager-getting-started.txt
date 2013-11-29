@@ -230,9 +230,9 @@ NOTES: ~
 >
     let ft_addons = {
       \ '^\%(c\|cpp\)$': [ 'plugin-for-c-development' ],
-      \ 'javascript': [ 'plugin-for-javascript' ]
+      \ 'javascript$': [ 'plugin-for-javascript' ]
     \ }
-    au FileType * for l in values(filter(copy(ft_addons), string(expand('<amatch>', 1)).' =~ v:key')) | call vam#ActivateAddons(l, {'force_loading_plugins_now':1}) | endfor
+    au BufNew,BufRead * for l in values(filter(copy(ft_addons), string(expand('<amatch>', 1)).' =~ v:key')) | call vam#ActivateAddons(l, {'force_loading_plugins_now':1}) | endfor
 <  Provide feedback about this. If it works we may add it as builtin
 
   Also see this text which was sent to the mailinglist (TODO tidy up)
