@@ -234,6 +234,15 @@ fun! s:GetAuGroups()
   return augs
 endfun
 
+fun! s:ResetVars(buf)
+  let filetype = getbufvar(a:buf, '&filetype')
+  let syntax   = getbufvar(a:buf, '&syntax')
+  call setbufvar(a:buf, '&filetype', filetype)
+  if filetype isnot# syntax
+    call setbufvar(a:buf, '&syntax', syntax)
+  endif
+endfun
+
 " see also ActivateRecursively
 " Activate activates the plugins and their dependencies recursively.
 " I sources both: plugin/*.vim and after/plugin/*.vim files when called after
@@ -361,7 +370,7 @@ fun! vam#ActivateAddons(...) abort
         " Let's see how much this breaks.
         call map(filter(range(1, bufnr('$')),
               \         'bufexists(v:val)'),
-              \  'setbufvar(v:val, "&filetype", getbufvar(v:val, "&filetype"))')
+              \  's:ResetVars(v:val)')
       endif
     endif
 
