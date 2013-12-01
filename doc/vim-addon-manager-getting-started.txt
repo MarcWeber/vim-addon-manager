@@ -228,11 +228,22 @@ minimal version ~
 NOTES: ~
    experimental: load plugins lazily depending on filetype [E1]~
 >
-    let ft_addons = {
-      \ '^\%(c\|cpp\)$': [ 'plugin-for-c-development' ],
-      \ 'javascript': [ 'plugin-for-javascript' ]
-    \ }
-    au FileType * for l in values(filter(copy(ft_addons), string(expand('<amatch>', 1)).' =~ v:key')) | call vam#ActivateAddons(l, {'force_loading_plugins_now':1}) | endfor
+    " on_ft: If Vim knows the filetype
+    " on_name: If Vim does not know about the filetype (eg if the plugin you
+    " want to load contains the ftdetect/* support code
+    let ft_addons = [
+      \ {'on_ft': '^\%(c\|cpp\)$', 'activate': [ 'plugin-for-c-development' ]},
+      \ {'on_ft': 'javascript', 'activate': [ 'plugin-for-javascript' ]}
+      \ {'on_name': '\.scad$', 'activate': [ 'plugin-for-javascript' ]}
+    \ ]
+    au FileType * for l in filter(copy(ft_addons), 'has_key(v:val, "on_ft") && '.string(expand('<amatch>')).' =~ v:val.on_ft') | call vam#ActivateAddons(l.activate, {'force_loading_plugins_now':1}) | endfor
+    au BufNewFile,BufRead * for l in filter(copy(ft_addons), 'has_key(v:val, "on_name") && '.string(expand('<amatch>')).' =~ v:val.on_name') | call vam#ActivateAddons(l.activate, {'force_loading_plugins_now':1}) | endfor
+
+    " Vim does not autodetect scad files, thus no filetype event gets
+    " triggered. BufNewFile and BufRead solve this, but they would not work
+    " for files without extension such as ".bashrc" which have filetype "sh"
+    " usually.
+
 <  Provide feedback about this. If it works we may add it as builtin
 
   Also see this text which was sent to the mailinglist (TODO tidy up)
