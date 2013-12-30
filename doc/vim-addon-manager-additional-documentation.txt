@@ -1056,8 +1056,34 @@ Its not a bug. You can get remaining versions by git fetch --depth=9999999
 or such. This speeds up installation very much and should be still be
 sufficient to prepare patches.
 
+
+What about parallel installation, fetching, activation, ... ~
+Possible problems:
+
+- activation order could be important, the plugin manager eventually does not
+  know (yet)
+
+- Vim itself does not allow parallel processing, thus this make VAM depend on
+  external tools such as parallel, python or the like. It has been a design
+  choice to keep things simple (VimL only).
+
+- While loading plugins at runtime works mostly it does not work always, thus
+  installing a plugin and activating it later might change behaviour. And that
+  has been a design choice that you can trust (as much as possible) that the
+  result of a VAM installation behaves the same. (no version locking yet, I
+  know - if you need it create a github bug)
+
+- parallel updating can be implemented trivially, eg using shell scripting:
+
+  for git in ~/.vim/vim-addons/*/*.git; do
+    cd $(dirname $git); git pull &
+  done
+
 ==============================================================================
 14. VAM vs ...                                               *VAM-comparison*
+
+Up to date information will be found on this wiki:
+See http://vim-wiki.mawercer.de/wiki/topic/vim%20plugin%20managment.html
 
 ------------------------------------------------------------------------------
 14.1. VAM vs pathogen                                        *VAM-vs-pathogen*
