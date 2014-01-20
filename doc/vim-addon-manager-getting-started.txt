@@ -75,7 +75,7 @@ Features:
     - Dependency resolution
     - Popular VCS support: plugin supports fetching from Git, Mercurial,
       Subversion, Bazaar and Darcs repositories
-    - maintained pool of addons (vim-addon-manager-known-repositories)
+    - maintained pool of addons (vim-pi)
       which warns you if you try to install an outdated plugin
       (have a look at it online : http://mawercer.de/~marc/vam/index.php)
     - replicate your Vim setup by copying your .vimrc (See SetupVAM)
@@ -368,23 +368,23 @@ types of names:
        github:{N}/{Repo}  =>  {"type": "git", "url": "git://github.com/{N}/{Repo}"}
        git:{GIT_URL}      =>  {"type": "git", "url": "GIT_URL"}
 <   Don't use if you expect others to create plugins depending on yours. Add 
-    your plugin to |VAM-kr| instead.
+    your plugin to |vim-pi| instead.
 
 
-Instead of telling us to add your plugin to |VAM-kr| you can also patch 
+Instead of telling us to add your plugin to |vim-pi| you can also patch 
 the pool easily: |VAM-kr-patching| - however if you contribute to |VAM-kr| 
 the community will benefit much more.
 
-*VAM-kr*  is the default pool. VAM checks it out by default. Its long name is 
-*vim-addon-manager-known-repositories*  (stored in |VAM-known| option).
+*vim-pi*  is the default pool. VAM checks it out by default. Its long name is 
+“vim plugin index”.
 
-*VAM-kr-patching*
-VAM-kr merges both sources (scm and www.vim.org ones), see |VAM-MergeSources|.
+*vim-pi-patching*
+vim-pi merges both sources (scm and www.vim.org ones), see |VAM-MergeSources|.
 The result is provided by vam_known_repositories#Pool() which is the only pool
 used by default. See example and default implementation of vam#install#Pool().
 
 If you want to add your own sources consider submitting them to
-VAM-kr as patch. If you don't there are two ways:
+vim-pi as patch. If you don't there are two ways:
 
 WAY 1: (still supported) add to your .vimrc before activating VAM (BUG/TODO [5]): >
   let g:vim_addon_manager = {}
@@ -402,7 +402,7 @@ WAY 2: define your own Pool function: >
 
 Plugin dictionaries are described in |addon-info-repository|.
 
-Example: overwriting the MergeSources function (VAM-kr pool implementation): >
+Example: overwriting the MergeSources function (vim-pi pool implementation): >
 Yes, you can do this in MyPoolFun shown above as well >
     fun! MyMergeSources(plugin_sources, www_vim_org, scm_plugin_sources, patch_function, snr_to_name)
 

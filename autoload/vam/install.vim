@@ -4,7 +4,7 @@ exec vam#DefineAndBind('s:c','g:vim_addon_manager','{}')
 
 let s:c.change_to_unix_ff               = get(s:c, 'change_to_unix_ff', (g:os=~#'unix'))
 let s:c.do_diff                         = get(s:c, 'do_diff',           1)
-let s:c.known                           = get(s:c, 'known', 'vim-addon-manager-known-repositories')
+let s:c.known                           = get(s:c, 'known', 'vim-pi')
 let s:c.MergeSources                    = get(s:c, 'MergeSources', 'vam_known_repositories#MergeSources')
 let s:c.pool_fun                        = get(s:c, 'pool_fun', 'vam#install#Pool')
 let s:c.name_rewriting                  = get(s:c, 'name_rewriting',    {})
@@ -97,13 +97,13 @@ fun! vam#install#GetRepo(name, opts)
           call add(maybe_fixes, a:name.' might be a typo, did you mean: '.x.' ?')
         endif
       endfor
-      " try finding new name (VAM-kr only)
+      " try finding new name (vim-pi only)
       try
-        " using try because pool implementations other then VAM-kr could be
+        " using try because pool implementations other then vim-pi could be
         " used
         call extend(maybe_fixes, vamkr#SuggestNewName(a:name))
       catch /Vim(call):E117:/
-        " If VAM-kr activation policy is never, then the above will yield 
+        " If vim-pi activation policy is never, then the above will yield 
         " unknown function error
       endtry
       call vam#Log(join(["No repository location info known for plugin ".a:name."."] + maybe_fixes,"\n"))
@@ -788,7 +788,7 @@ fun! vam#install#LoadKnownRepos()
   endif
 endfun
 
-" The default pool of know plugins for VAM: vim-addon-manager-known-repositories
+" The default pool of know plugins for VAM: vim-pi
 fun! vam#install#Pool()
   if vam#install#LoadKnownRepos()
     return vam_known_repositories#Pool()

@@ -268,7 +268,7 @@ known_repos_activation_policy
         won't get asked.
 known                                                              *VAM-known*
         String, specifies the name of plugin which provides list of
-        repositories. Default is vim-addon-manager-known-repositories.
+        repositories. Default is vim-pi.
 change_to_unix_ff                                      *VAM-change_to_unix_ff*
         Remove CR symbols before LF symbols in any vim files (changes dos and
         mixed dos/unix line endings to unix line endings). Is on by default if
@@ -381,9 +381,8 @@ source_missing_files                                *VAM-source_missing_files*
         for instance
 
 
-The following options are used by vim-addon-manager-known-repositories, not by
-VAM itself. So if you set |vim-addon-manager-known| to another value they may
-have no effect.
+The following options are used by vim-pi, not by VAM itself. So if you set 
+|vim-addon-manager-known| to another value they may have no effect.
                                                         *VAM-drop_SCM_sources*
 drop_git_sources                                        *VAM-drop_git_sources*
 drop_hg_sources                                         *VAM-drop_hg_sources*
@@ -400,15 +399,15 @@ scm_merge_strategy                                    *VAM-scm_merge_strategy*
         www.vim.org, `never' means that SCM sources will be never used.
 MergeSources                                                *VAM-MergeSources*
         Function reference, defines a function that will be used to merge
-        user, |VAM-kr| and SCM sources.
+        user, |vim-pi| and SCM sources.
         Overrides |VAM-scm_merge_strategy| and |VAM-drop_SCM_sources|. Will be 
         called with five arguments: user sources (most of time it is an empty 
-        dictionary), non-SCM sources defined in |VAM-kr|, SCM sources also 
+        dictionary), non-SCM sources defined in |vim-pi|, SCM sources also 
         defined there, patch function name and snr_to_name dictionary. Patch 
         function is a function that being given sources dictionary (like one 
         of first three arguments) and snr_to_name dictionary patches first 
         adding missing information (like missing dependencies). Last 
-        dictionary is a map of vim.org script numbers to VAM-kr names.
+        dictionary is a map of www.vim.org script numbers to |vim-pi| names.
 
         If MergeSources function is a dictionary function, it will be provided 
         an empty dictionary as |self| dictionary.
@@ -938,7 +937,7 @@ Using a $SHELL setting other than /bin/sh may not work on *nix like systems
 <
 
 [4]: VAM depends on git. Why does it?
-  VAM-kr is checked out by git which contains the default merge function.
+  |vim-pi| is checked out by git which contains the default merge function.
   As advanced user you can define your own sources and define your own merge
   function trivially - that somehow defeats the idea of having one working
   maitained pool of sources though.
@@ -973,7 +972,7 @@ Using a $SHELL setting other than /bin/sh may not work on *nix like systems
   git repositories only. I think the general idea is great. However we have to
   take care to keep patches which were written for git/hg in sync.
 
-  If you want this feature tell me. I'll add the sources to |VAM-kr| then.
+  If you want this feature tell me. I'll add the sources to |vim-pi| then.
 
 [5]
 - full update must be done by

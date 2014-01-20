@@ -77,11 +77,11 @@ if g:is_win && has_key(s:c, 'binary_utils')
 endif
 
 " additional plugin sources should go into your .vimrc or into the repository
-" called "vim-addon-manager-known-repositories" referenced here:
+" called "vim-pi" referenced here:
 if executable('git')
-  let s:c.plugin_sources["vim-addon-manager-known-repositories"] = {'type' : 'git', 'url': 'git://github.com/MarcWeber/vim-addon-manager-known-repositories'}
+  let s:c.plugin_sources['vim-pi'] = {'type' : 'git', 'url': 'https://bitbucket.org/vimcommunity/vim-pi'}
 else
-  let s:c.plugin_sources["vim-addon-manager-known-repositories"] = {'type' : 'archive', 'url': 'http://github.com/MarcWeber/vim-addon-manager-known-repositories/tarball/master', 'archive_name': 'vim-addon-manager-known-repositories-tip.tar.gz'}
+  let s:c.plugin_sources['vim-pi'] = {'type' : 'archive', 'url': 'https://bitbucket.org/vimcommunity/vim-pi/get/master.tar.bz2', 'archive_name': 'vim-pi.tar.gz'}
 endif
 
 if s:c.create_addon_info_handlers
