@@ -49,20 +49,6 @@ Keep reading to get an overview about VAM by
 [3]: Yes — there are some special cases where it does not work correctly because 
      some autocommands don’t get triggered
 
-## THE POOL
-Pool is made up of
-
-- [Plugins found on 
-  www.vim.org](https://raw.github.com/MarcWeber/vim-addon-manager-known-repositories/master/db/vimorgsources.json).
-  List is updated by a cron job.
-- [Version controlled and non-www.vim.org 
-  sources](https://raw.github.com/MarcWeber/vim-addon-manager-known-repositories/master/db/scmsources.vim). 
-  They are added manually, you can file a pull request if you want to add one.
-- [File with additional 
-  information](https://github.com/MarcWeber/vim-addon-manager-known-repositories/blob/master/db/patchinfo.vim)
-  augmenting sources: it has information with dependencies [4], corrects addon 
-  types and contains deprecations.
-
 [4]: Plugin authors should use addon-info file instead. patchinfo.vim is for 
      addons not supporting VAM.
 
