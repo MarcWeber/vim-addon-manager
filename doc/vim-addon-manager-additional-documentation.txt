@@ -931,7 +931,7 @@ Using a $SHELL setting other than /bin/sh may not work on *nix like systems
   " slow performance. This could be optimized some more - I do no longer
   " care about such old Vim versions. Think about upgrading.
   for f in split(glob(vam_install_path.'/vim-addon-manager*/**/*.vim', 1),"\n")
-    if f =~ 'plugin/vim-addon-manager-known-repositories.vim' | continue | endif
+    if f =~ '/db/' | continue | endif
     exec 'source '.fnameescape(f)
   endfor
 <
