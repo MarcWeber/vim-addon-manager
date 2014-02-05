@@ -182,7 +182,7 @@ $cmd = '
   mkdir -p .vim/vim-addons
   export PATH=/var/run/current-system/sw/bin
   git clone --depth 1 git://github.com/MarcWeber/vim-addon-manager.git .vim/vim-addons/vim-addon-manager
-  ( cd  vim-addon-manager; git chekout HEAD~20; )
+  # ( cd  vim-addon-manager; git chekout HEAD~20; )
   # git clone --depth 1 https://bitbucket.org/vimcommunity/vim-pi .vim/vim-addons/vim-pi
 
   export HOME=$dir
