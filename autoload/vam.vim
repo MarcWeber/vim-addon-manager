@@ -21,7 +21,7 @@ endfor
 let g:is_win = g:os[:2] == 'win'
 
 exec vam#DefineAndBind('s:c','g:vim_addon_manager','{}')
-let s:c.auto_install               = get(s:c,'auto_install',                0)
+let s:c.auto_install               = get(s:c,'auto_install',                1)
 " repository locations:
 let s:c.plugin_sources             = get(s:c,'plugin_sources',              {})
 " if a plugin has an item here the dict value contents will be written as plugin info file

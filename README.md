@@ -13,12 +13,16 @@ making it official ot www.vim.org.
 ## MINIMAL setup (2 lines)
 
     set runtimepath+=/path/to/vam
-    call vam#ActivateAddons([list of addon names])
+    call vam#ActivateAddons([])
+    ActivateAddons tlib matchit.zip
+    " find plugins by :AddonsInfo NAME and completion
+
 
 Keep reading to get an overview about VAM by
 - skimming this README.md file
-- looking at [doc/\*getting-started.txt](https://raw.github.com/MarcWeber/vim-addon-manager/master/doc/vim-addon-manager-getting-started.txt).
-  Section 2 talks about recommended ways to install VAM
+- Read about how to make your .vimrc bootstrap VAM (check it out)
+  by looking at the minimal install example (Section 2)
+[doc/\*getting-started.txt](https://raw.github.com/MarcWeber/vim-addon-manager/master/doc/vim-addon-manager-getting-started.txt).
 
 
 ## FEATURES
