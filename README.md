@@ -10,13 +10,13 @@ If you contribute to this git based wiki editable by Vim we have a chance
 making it official ot www.vim.org.
 
 
-## MINIMAL setup (2 lines)
+## MINIMAL setup (3 lines)
 
     set runtimepath+=/path/to/vam
     call vam#ActivateAddons([])
-    ActivateAddons tlib matchit.zip
-    " find plugins by :AddonsInfo NAME and completion
-
+    VAMActivate tlib matchit.zip
+    " find plugins by :VAMPluginInfo NAME and completion
+    " VAMActivateInstalled (this is like pathogens "infect"
 
 Keep reading to get an overview about VAM by
 - skimming this README.md file
@@ -79,11 +79,8 @@ find a different solution — because VAM also supports other VCS and installin
 from archives.
 
 ## Related work
-Also very famous:
 
-- [vundle](https://github.com/gmarik/vundle)
-- [pathogen](https://github.com/tpope/vim-pathogen)
-- [vim-scripts](http://vim-scripts.org)
+[vim-wiki's list of alternatives](http://vim-wiki.mawercer.de/wiki/topic/vim%20plugin%20managment.html)
 
 [debian’s vim plugin manager](http://packages.debian.org/sid/vim-addon-manager)
 The author (Jamessan) is fine with this project sharing the same name.
