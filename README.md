@@ -5,12 +5,13 @@ runtime depending on your needs. Activating means handling runtimepath and
 making sure all .vim file get sourced.
 
 ## If you believe in VAM's collaborative properties
-then you may also want to have a look at [vim-git-wiki](https://github.com/MarcWeber/vim-git-wiki)
-If you contribute to this git based wiki editable by Vim we have a chance
-making it official ot www.vim.org.
+then you may also want to have a look at [vim-git-wiki](vim-wiki.mawercer.de).
 
+## SUPPORT / HELP / ISSUES / TROUBLE
+VAM is well supported by at least 2 maintainers. Try github tickets or Vim irc
+channel on freenode.
 
-## fdinding plugin names
+## finding plugin names
 
     :VAMPluginInfo NAME or script-id
     " or completion:
@@ -81,10 +82,6 @@ the doc/ directory you'll find additional information. https (self signed certif
 
 [4]: Plugin authors should use addon-info file instead. patchinfo.vim is for 
      addons not supporting VAM.
-
-## SUPPORT
-VAM is well supported by at least 2 maintainers. Try github tickets or Vim irc
-channel on freenode.
 
 ## Let me see all docs!
 Here you go:
