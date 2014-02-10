@@ -10,27 +10,53 @@ If you contribute to this git based wiki editable by Vim we have a chance
 making it official ot www.vim.org.
 
 
+## fdinding plugin names
+
+    :VAMPluginInfo NAME or script-id
+    " or completion:
+    :VAMActivate chars<c-d>
+
 ## MINIMAL setup (3 lines)
 
     set runtimepath+=/path/to/vam
     call vam#ActivateAddons([])
     VAMActivate tlib matchit.zip
-    " find plugins by :VAMPluginInfo NAME and completion
-    " VAMActivateInstalled (this is like pathogens "infect"
 
-Keep reading to get an overview about VAM by
-- skimming this README.md file
-- Read about how to make your .vimrc bootstrap VAM (check it out)
-  by looking at the minimal install example (Section 2)
-[doc/\*getting-started.txt](https://raw.github.com/MarcWeber/vim-addon-manager/master/doc/vim-addon-manager-getting-started.txt).
+## Recommended setup (checking out VAM ..):
 
+    " put this line first in ~/.vimrc
+    set nocompatible | filetype indent plugin on | syn on
+
+    fun SetupVAM()
+      let c = get(g:, 'vim_addon_manager', {})
+      let g:vim_addon_manager = c
+      let c.plugin_root_dir = expand('$HOME', 1) . '/.vim/vim-addons'
+      let &rtp.=(empty(&rtp)?'':',').c.plugin_root_dir.'/vim-addon-manager'
+      if !isdirectory(c.plugin_root_dir.'/vim-addon-manager/autoload')
+        execute '!git clone --depth=1 git://github.com/MarcWeber/vim-addon-manager '
+                    \       shellescape(c.plugin_root_dir.'/vim-addon-manager', 1)
+      endif
+      call vam#ActivateAddons([], {'auto_install' : 0})
+    endfun
+    call SetupVAM()
+    VAMActivate matchit.zip vim-addon-commenting
+    " use VAMPluginInfo name<c-d> to find out about all names
+
+## easy setup windows users:
+Give the [downloader](http://vam.mawercer.de/) a try if you're too lazy to install supporting tools. In
+the doc/ directory you'll find additional information. https (self signed certificate) can be used, too.
+
+## learn more
+- by skimming this README.md file
+- by looking at headlines at [doc/\*getting-started.txt](https://raw.github.com/MarcWeber/vim-addon-manager/master/doc/vim-addon-manager-getting-started.txt).
+  (Note: this is best read in Vim with :set ft=help)
 
 ## FEATURES
 - Declarative: The behaviour of Vim is determined by your .vimrc only. [1]
 - Automatic runtimepath handling: install/ update/ use manually installed addons 
   on startup or load them lazily as needed when you feel that way. [3]
 - Builtin dependency management. [2]
-- Based on a [pool](http://mawercer.de/~marc/vam/index.php) of addons which is 
+- Based on a [pool](http://vam.mawercer.de) of addons which is 
   maintained by the community. This allows warning you if you’re going to 
   install outdated packages. Of course you can opt-out and use your own pool 
   easily.
