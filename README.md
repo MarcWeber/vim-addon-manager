@@ -71,7 +71,6 @@ the doc/ directory you'll find additional information. https (self signed certif
     VAMUninstallNotLoadedPlugins P1 P2
 
     " [UE]: unless the directory exists
-    " Of course all commands provide plugin name completion
     " P1 P2 represents arbitrary plugin names, use <c-x><c-p> to complete in .vim files
 
     " If you need a plugin to be activated immediately. Example: You require a command in your .vimrc:
