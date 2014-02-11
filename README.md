@@ -4,6 +4,14 @@ You declare a set of plugins. VAM will fetch & activate them at startup or
 runtime depending on your needs. Activating means handling runtimepath and
 making sure all .vim file get sourced.
 
+![VAM](http://vam.mawercer.de/screenshot.png)
+
+This screenshot shows:
+- The log buffer
+- The plugin name completion
+- That vim-pi knows about plugins which are neither known by vim-scripts.org
+  nor by vim.sf.net (marked by NA)
+
 ## If you believe in VAM's collaborative properties
 then you may also want to have a look at [vim-git-wiki](vim-wiki.mawercer.de).
 
