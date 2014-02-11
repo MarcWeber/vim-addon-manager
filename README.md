@@ -169,6 +169,13 @@ from archives. We have implemented experiemntal setup, but because VAM may add
 additional files such as addon-info.json in some cases repositories look dirty
 usually.
 
+VAM does not support parallel installation yet (Like NeoBundle) - we think
+dependencies are more important. If you feel strongly about this create a issue.
+This would require rewriting quite a lot of code.
+
+Each call of VAMActivate takes about 1ms - if that's too much pass many plugin
+names at once.
+
 ## Related work
 
 [vim-wiki's list of alternatives](http://vim-wiki.mawercer.de/wiki/topic/vim%20plugin%20managment.html)
