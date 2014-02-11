@@ -372,7 +372,7 @@ types of names:
 
 
 Instead of telling us to add your plugin to |vim-pi| you can also patch 
-the pool easily: |VAM-kr-patching| - however if you contribute to |VAM-kr| 
+the pool easily: vim-pi-patching| - however if you contribute to vim-pi
 the community will benefit much more.
 
 *vim-pi*  is the default pool. VAM checks it out by default. Its long name is 

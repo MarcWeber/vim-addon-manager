@@ -105,7 +105,7 @@ let g:vim_addon_manager = {}
   let g:vim_addon_manager.auto_install = 1
   let g:vim_addon_manager.log_to_buf = 1
 
-  \" activation is disabled manually enabling VAM-kr
+  \" activation is disabled manually enabling vim-pi
   exec 'set runtimepath+='.filter([\$HOME.'/.vim', \$HOME.'/vimfiles'],'isdirectory(v:val)')[0].'/vim-addons/vim-pi'
   " : "")."
 

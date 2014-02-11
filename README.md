@@ -32,6 +32,9 @@ channel on freenode.
       let c = get(g:, 'vim_addon_manager', {})
       let g:vim_addon_manager = c
       let c.plugin_root_dir = expand('$HOME', 1) . '/.vim/vim-addons'
+      " most used options you may want to use:
+      " let c.log_to_buf = 1
+      " let c.auto_install = 0
       let &rtp.=(empty(&rtp)?'':',').c.plugin_root_dir.'/vim-addon-manager'
       if !isdirectory(c.plugin_root_dir.'/vim-addon-manager/autoload')
         execute '!git clone --depth=1 git://github.com/MarcWeber/vim-addon-manager '
@@ -46,6 +49,38 @@ channel on freenode.
 ## easy setup windows users:
 Give the [downloader](http://vam.mawercer.de/) a try if you're too lazy to install supporting tools. In
 the doc/ directory you'll find additional information. https (self signed certificate) can be used, too.
+
+## all important commands in a flash
+
+Note: All commands support completion (<c-d> or <tab>)
+
+    " install [UE] without activating for reviewing
+    VAMInstall P1 P2 github:user/repo git://path...
+
+    " install [UE], then activate
+    VAMActivate P1 P2 ...
+    VAMActivateInstalled (same, but completion is limited to installed plugins)
+
+    " find plugins by name github url or script id and display all information
+    VAMPluginInfo script_id or characters to match any description against
+
+    " update plugins (by name or all you're using right now) - you should restart Vim afterwards:
+    VAMUpdate vim-pi P1 P2
+    VAMUpdateActivated
+
+    VAMListActivated
+    VAMUninstallNotLoadedPlugins P1 P2
+
+    " [UE]: unless the directory exists
+    " Of course all commands provide plugin name completion
+    " P1 P2 represents arbitrary plugin names
+
+    " If you need a plugin to be activated immediately. Example: You require a command in your .vimrc:
+    call vam#ActivateAddons(['P1', P2'], {'force_loading_plugins_now': 1})
+    " (should we create a special command for this?)
+
+Also: Of course VAM allows using subdirectories as rtp and the like. Just add
+'runtimepath' to the repository dictionary. (Lookup vim-pi-patching in docs)
 
 ## learn more
 - by skimming this README.md file

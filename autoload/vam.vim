@@ -606,8 +606,8 @@ command! -nargs=* -bar -complete=customlist,vam#install#AddonCompletion VAMActiv
 command! -nargs=* -bar -complete=customlist,vam#install#AddonCompletion VAMPluginInfo :call vam#DisplayAddonsInfo([<f-args>])
 command! -nargs=* -bar -complete=customlist,vam#install#InstalledAddonCompletion VAMActivateInstalled :call vam#ActivateAddons([<f-args>])
 command! -nargs=* -bar -complete=customlist,vam#install#UpdateCompletion VAMUpdate :call vam#install#Update([<f-args>])
-command! -nargs=0 -bar UpdateActivatedAddons exec 'UpdateAddons '.join(keys(g:vim_addon_manager.activated_plugins),' ')
-command! -nargs=0 -bar ListActivatedAddons :echo join(keys(g:vim_addon_manager.activated_plugins))
+command! -nargs=0 -bar VAMUpdateActivated exec 'UpdateAddons '.join(keys(g:vim_addon_manager.activated_plugins),' ')
+command! -nargs=0 -bar VAMListActivated :echo join(keys(g:vim_addon_manager.activated_plugins))
 command! -nargs=* -bar -complete=customlist,vam#install#UninstallCompletion VAMUninstallNotLoadedPlugins :call vam#install#UninstallAddons([<f-args>])
 command! -nargs=* -complete=customlist,vam#bisect#BisectCompletion VAMBisect :call vam#bisect#Bisect(<f-args>)
 
