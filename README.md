@@ -38,7 +38,7 @@ VAMActivate tlib matchit.zip
 " put this line first in ~/.vimrc
 set nocompatible | filetype indent plugin on | syn on
 
-fun SetupVAM()
+fun! SetupVAM()
   let c = get(g:, 'vim_addon_manager', {})
   let g:vim_addon_manager = c
   let c.plugin_root_dir = expand('$HOME', 1) . '/.vim/vim-addons'
