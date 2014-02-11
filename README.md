@@ -116,6 +116,19 @@ Plugins ship with addon-info.json files listing the dependencies as names
 Only mandatory dependencies should be forced this way. Optional dependencies
 should still be installed/activated by you.
 
+
+## emulating vundle
+Just like vundle, but use vim-addon-manager
+```vim
+set rtp+=~/.vim/bundle/vim-addon-manager/
+call vundle#rc()
+Bundle fugitive
+VAMActivate by-name-and-pull-depenedencies
+```
+Emulation is not complete yet.
+If you want us to complete create a github issue.
+Most options such as {rtp: ..} are obsolete, because vim-pi knows about it.
+
 ## learn more
 - by skimming this README.md file
 - by looking at headlines at [doc/\*getting-started.txt](https://raw.github.com/MarcWeber/vim-addon-manager/master/doc/vim-addon-manager-getting-started.txt).
