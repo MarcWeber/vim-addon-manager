@@ -26,32 +26,37 @@ channel on freenode.
 
 ## MINIMAL setup (3 lines)
 
-    set runtimepath+=/path/to/vam
-    call vam#ActivateAddons([])
-    VAMActivate tlib matchit.zip
+```vim
+set runtimepath+=/path/to/vam
+call vam#ActivateAddons([])
+VAMActivate tlib matchit.zip
+```
 
 ## Recommended setup (checking out VAM ..):
 
-    " put this line first in ~/.vimrc
-    set nocompatible | filetype indent plugin on | syn on
+```vim
+" put this line first in ~/.vimrc
+set nocompatible | filetype indent plugin on | syn on
 
-    fun SetupVAM()
-      let c = get(g:, 'vim_addon_manager', {})
-      let g:vim_addon_manager = c
-      let c.plugin_root_dir = expand('$HOME', 1) . '/.vim/vim-addons'
-      " most used options you may want to use:
-      " let c.log_to_buf = 1
-      " let c.auto_install = 0
-      let &rtp.=(empty(&rtp)?'':',').c.plugin_root_dir.'/vim-addon-manager'
-      if !isdirectory(c.plugin_root_dir.'/vim-addon-manager/autoload')
-        execute '!git clone --depth=1 git://github.com/MarcWeber/vim-addon-manager '
-                    \       shellescape(c.plugin_root_dir.'/vim-addon-manager', 1)
-      endif
-      call vam#ActivateAddons([], {'auto_install' : 0})
-    endfun
-    call SetupVAM()
-    VAMActivate matchit.zip vim-addon-commenting
-    " use <c-x><c-p> to complete plugin names
+fun SetupVAM()
+  let c = get(g:, 'vim_addon_manager', {})
+  let g:vim_addon_manager = c
+  let c.plugin_root_dir = expand('$HOME', 1) . '/.vim/vim-addons'
+  " most used options you may want to use:
+  " let c.log_to_buf = 1
+  " let c.auto_install = 0
+  let &rtp.=(empty(&rtp)?'':',').c.plugin_root_dir.'/vim-addon-manager'
+  if !isdirectory(c.plugin_root_dir.'/vim-addon-manager/autoload')
+    execute '!git clone --depth=1 git://github.com/MarcWeber/vim-addon-manager '
+        \       shellescape(c.plugin_root_dir.'/vim-addon-manager', 1)
+  endif
+  call vam#ActivateAddons([], {'auto_install' : 0})
+endfun
+
+call SetupVAM()
+VAMActivate matchit.zip vim-addon-commenting
+" use <c-x><c-p> to complete plugin names
+```
 
 ## easy setup windows users:
 Give the [downloader](http://vam.mawercer.de/) a try if you're too lazy to install supporting tools. In
@@ -59,32 +64,33 @@ the doc/ directory you'll find additional information. https (self signed certif
 
 ## all commands
 
-    " Note: All commands support completion (<c-d> or <tab>)
+```vim
+" Note: All commands support completion (<c-d> or <tab>)
 
-    " install [UE] without activating for reviewing
-    VAMInstall P1 P2 github:user/repo git://path...
+" install [UE] without activating for reviewing
+VAMInstall P1 P2 github:user/repo git://path...
 
-    " install [UE], then activate
-    VAMActivate P1 P2 ...
-    VAMActivateInstalled (same, but completion is limited to installed plugins)
+" install [UE], then activate
+VAMActivate P1 P2 ...
+VAMActivateInstalled (same, but completion is limited to installed plugins)
 
-    " find plugins by name github url or script id and display all information
-    VAMPluginInfo script_id or characters to match any description against
+" find plugins by name github url or script id and display all information
+VAMPluginInfo script_id or characters to match any description against
 
-    " update plugins (by name or all you're using right now) - you should restart Vim afterwards:
-    VAMUpdate vim-pi P1 P2
-    VAMUpdateActivated
+" update plugins (by name or all you're using right now) - you should restart Vim afterwards:
+VAMUpdate vim-pi P1 P2
+VAMUpdateActivated
 
-    VAMListActivated
-    VAMUninstallNotLoadedPlugins P1 P2
+VAMListActivated
+VAMUninstallNotLoadedPlugins P1 P2
 
-    " [UE]: unless the directory exists
-    " P1 P2 represents arbitrary plugin names, use <c-x><c-p> to complete in .vim files
+" [UE]: unless the directory exists
+" P1 P2 represents arbitrary plugin names, use <c-x><c-p> to complete in .vim files
 
-    " If you need a plugin to be activated immediately. Example: You require a command in your .vimrc:
-    call vam#ActivateAddons(['P1', P2'], {'force_loading_plugins_now': 1})
-    " (should we create a special command for this?)
-
+" If you need a plugin to be activated immediately. Example: You require a command in your .vimrc:
+call vam#ActivateAddons(['P1', P2'], {'force_loading_plugins_now': 1})
+" (should we create a special command for this?)
+```
 Also: Of course VAM allows using subdirectories of repositories as runtimepath.
 Eg See vim-pi-patching.
 
@@ -92,15 +98,16 @@ Eg See vim-pi-patching.
 Yes - if you start using a lot of languages / plugins startuptime does matter.
 Try such in your .vimrc:
 
-    let ft_addons = [
-      \ {'on_ft': '^\%(c\|cpp\)$', 'activate': [ 'plugin-for-c-development' ]},
-      \ {'on_ft': 'javascript', 'activate': [ 'plugin-for-javascript' ]}
-      \ {'on_name': '\.scad$', 'activate': [ 'plugin-for-scad' ]}
-    \ ]
-    au FileType * for l in filter(copy(ft_addons), 'has_key(v:val, "on_ft") && '.string(expand('<amatch>')).' =~ v:val.on_ft') | call vam#ActivateAddons(l.activate, {'force_loading_plugins_now':1}) | endfor
-    au BufNewFile,BufRead * for l in filter(copy(ft_addons), 'has_key(v:val, "on_name") && '.string(expand('<amatch>')).' =~ v:val.on_name') | call vam#ActivateAddons(l.activate, {'force_loading_plugins_now':1}) | endfor
-    " additional comments see doc/vim-addon-manager-getting-started.txt
-
+```vim
+let ft_addons = [
+  \ {'on_ft': '^\%(c\|cpp\)$', 'activate': [ 'plugin-for-c-development' ]},
+  \ {'on_ft': 'javascript', 'activate': [ 'plugin-for-javascript' ]}
+  \ {'on_name': '\.scad$', 'activate': [ 'plugin-for-scad' ]}
+  \ ]
+au FileType * for l in filter(copy(ft_addons), 'has_key(v:val, "on_ft") && '.string(expand('<amatch>')).' =~ v:val.on_ft') | call vam#ActivateAddons(l.activate, {'force_loading_plugins_now':1}) | endfor
+au BufNewFile,BufRead * for l in filter(copy(ft_addons), 'has_key(v:val, "on_name") && '.string(expand('<amatch>')).' =~ v:val.on_name') | call vam#ActivateAddons(l.activate, {'force_loading_plugins_now':1}) | endfor
+" additional comments see doc/vim-addon-manager-getting-started.txt
+```
 
 ## How does VAM know about dependencies?
 Plugins ship with addon-info.json files listing the dependencies as names
