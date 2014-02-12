@@ -118,16 +118,21 @@ should still be installed/activated by you.
 
 
 ## emulating vundle
-Just like vundle, but use vim-addon-manager
+NOTE: VAM is declarative. Thus Bundle behavel like VAMActivate:
+1) checkout plugin unless directory exists
+2) activate it
+Thus there is no reason to run BundleInstall or such (what for anyway?)
+
 ```vim
 set rtp+=~/.vim/bundle/vim-addon-manager/
 call vundle#rc()
 Bundle fugitive
 VAMActivate by-name-and-pull-depenedencies
 ```
-Emulation is not complete yet.
-If you want us to complete create a github issue.
-Most options such as {rtp: ..} are obsolete, because vim-pi knows about it.
+
+Emulation is not complete yet. If you want us to complete it (eg implement the
+second {rtp: ..} create a github issue. Its obsolete, because vim-pi is very
+likely to know about it if you install by name.
 
 ## learn more
 - by skimming this README.md file
