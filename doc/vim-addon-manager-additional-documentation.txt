@@ -74,7 +74,7 @@ AddonsInfo {id/name/any-regex} ...                               *:AddonsInfo*
         Shows addon information. Accepts both VAM script names and www.vim.org 
         script numbers. If neither succeeds the any-regex is used and compared
         against any field of the repository dictionaries. Thus you can use it
-        to find addons by github url etc. Its best to use the directhory part
+        to find addons by github url etc. Its best to use the directory part
         of the url only. because github urls can be written using git:// or
         https:// and with or without trailing ".git" in some cases.
 

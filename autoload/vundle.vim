@@ -29,10 +29,13 @@ endf
 
 fun! vundle#BundleToVamName(name)
   " TODO file:// syntax and the like ?
+  " TODO gh: syntax
 
   if a:name =~ '/'
     " assume github
     return 'github:'.a:name
+  elseif a:name =~ '^gh:'
+    return substitute(a:name, '^gh:','github:','')
   else
     " asume directory in bundle
     return a:name
