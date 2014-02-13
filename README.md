@@ -94,19 +94,25 @@ call vam#ActivateAddons(['P1', P2'], {'force_loading_plugins_now': 1})
 Also: Of course VAM allows using subdirectories of repositories as runtimepath.
 Eg See vim-pi-patching.
 
-## lazily loading plugins
-Yes - if you start using a lot of languages / plugins startuptime does matter.
-Try such in your .vimrc:
+## lazily loading plugins / tag plugins by topic
+You can tag plugins and load them lazily
 
 ```vim
-let ft_addons = [
-  \ {'on_ft': '^\%(c\|cpp\)$', 'activate': [ 'plugin-for-c-development' ]},
-  \ {'on_ft': 'javascript', 'activate': [ 'plugin-for-javascript' ]}
-  \ {'on_name': '\.scad$', 'activate': [ 'plugin-for-scad' ]}
-  \ ]
-au FileType * for l in filter(copy(ft_addons), 'has_key(v:val, "on_ft") && '.string(expand('<amatch>')).' =~ v:val.on_ft') | call vam#ActivateAddons(l.activate, {'force_loading_plugins_now':1}) | endfor
-au BufNewFile,BufRead * for l in filter(copy(ft_addons), 'has_key(v:val, "on_name") && '.string(expand('<amatch>')).' =~ v:val.on_name') | call vam#ActivateAddons(l.activate, {'force_loading_plugins_now':1}) | endfor
-" additional comments see doc/vim-addon-manager-getting-started.txt
+let scripts = []
+call add(scripts, {'name': 'plugin_c', 'tag': 'c-dev'})
+call add(scripts, {'name': 'plugin_ruby', 'tag': 'ruby-dev'})
+" must activate by filename because .pov filetype is known after the script
+" script-povray got activated
+call add(scripts, {'name': 'script-povray', 'filename_regex':'\.pov$'})
+" for others ft_regex can be used:
+call add(scripts, {'name': 'script-php', 'ft_regex':'^\.php$'})
+
+" tell VAM about all scripts, and immediately activate plugins having the c-dev tag:
+call vam#Script(scripts, {'tag_regex', 'c-dev'})
+
+" activate all tagged scripts immediately
+call vam#Script([], {'flavour_regex', '.*'})
+
 ```
 
 ## How does VAM know about dependencies?

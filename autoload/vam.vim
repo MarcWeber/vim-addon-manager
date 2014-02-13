@@ -55,6 +55,8 @@ let s:c.addon_completion_lhs = get(s:c, 'addon_completion_lhs', '<C-x><C-p>')
 let s:c.debug_activation     = get(s:c, 'debug_activation',     0)
 let s:c.pool_item_check_fun  = get(s:c, 'pool_item_check_fun',  'none')
 let s:c.source_missing_files = get(s:c, 'source_missing_files', &loadplugins)
+let s:c.activate_on = get(s:c, 'activate_on', {'tag': [], 'ft_regex': [], 'filename_regex': []})
+let s:c.lazy_loading_au_commands = get(s:c, 'lazy_loading_au_commands', 1)
 
 " experimental: will be documented when its tested
 " don't echo lines, add them to a buffer to prevent those nasty "Press Enter"
@@ -409,6 +411,49 @@ fun! vam#ActivateAddons(...) abort
   endif
 endfun
 
+" intended usage:
+"
+" argument scripts:
+" Either
+" * a list of scripts
+" * a file of which each line will be turned into a script
+"
+" A script is either a name or a repository dictionary
+"
+" Example usage:
+" call vam#ActivateFromFile(expand('<sfile>:h').'/.vim-scripts', " {'tag_regex':'.*'})
+"
+" call vam#ActivateFromFile([dict1, dict2])
+"
+" Sample contents of a file:
+"   {'name': 'syntastic', 'on_ft': '\.c$"}
+"   {'name': 'povray', 'on_name': '.pov$'}
+"   {'name': 'snippets', 'tag': 'java ruby'}
+fun! vam#Scripts(scripts, opts) abort
+  let activate = []
+  let keys_ = keys(s:c.activate_on)
+  let scripts = (type(a:scripts) == type([])) ? a:scripts : map(readfile(a:scripts), 'eval(v:val)')
+  call vam#PreprocessScriptIdentifier(scripts)
+  for x in scripts
+    for k in keys_
+      if has_key(x, k)
+        call add(s:c.activate_on[k], x)
+        let added = 1
+      endif
+    endfor
+    if exists('added')
+      unlet added
+    else
+      call add(activate, x)
+    endif
+  endfor
+
+  if has_key(a:opts, 'tag_regex')
+    call extend(activate, filter(copy(s:c.activate_on.tag), 'v:val.tag =~ '.string(a:opts.tag_regex)))
+  endif
+  call vam#ActivateAddons(activate, a:opts)
+endfun
+
 fun! vam#DisplayAddonInfoLines(name, repository)
   let name = a:name
   let repository = a:repository
@@ -653,6 +698,11 @@ if !empty(s:c.addon_completion_lhs)
     autocmd!
     execute 'autocmd FileType vim inoremap <buffer> <expr> '.s:c.addon_completion_lhs.' vam#utils#CompleteWith("vam#install#CompleteAddonName")'
   augroup END
+endif
+
+if s:c.lazy_loading_au_commands
+  au FileType *           call vam#ActivateAddons(filter(copy(s:c.activate_on.ft_regex      ), string(expand('<amatch>')).' =~ v:val.ft_regex'      ), {'force_loading_plugins_now':1})
+  au BufNewFile,BufRead * call vam#ActivateAddons(filter(copy(s:c.activate_on.filename_regex), string(expand('<amatch>')).' =~ v:val.filename_regex'), {'force_loading_plugins_now':1})
 endif
 
 " vim: et ts=8 sts=2 sw=2

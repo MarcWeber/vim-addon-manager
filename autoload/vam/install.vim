@@ -181,7 +181,7 @@ fun! vam#install#Install(toBeInstalledList, ...)
   let installed = []
   for to_install in filter(copy(toBeInstalledList), '!vam#IsPluginInstalled(v:val.name)')
     let repository = vam#install#CompleteRepoData(to_install, opts)
-    let name = repository.name
+    let name = repository['name']
     " make sure all sources are known
     if repository is 0
       continue
