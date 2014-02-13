@@ -73,49 +73,61 @@ fun! vam#install#RewriteName(name)
   endif
 endfun
 
-fun! vam#install#GetRepo(name, opts)
-  if a:name isnot# s:c.known | call vam#install#LoadPool() |endif
+fun! vam#install#CompleteRepoData(repository, opts)
+  if has_key(a:repository, 'type')
+    " looks like repository is already complete ..
+    return a:repository
+  endif
 
-  let repository = get(s:c.plugin_sources, a:name, get(get(a:opts, 'plugin_sources', {}), a:name, 0))
+  " add missing information by
+  " 1) lookup in pool
+  " 2) try turning name into source by s:c.name_rewriting
+  let name = a:repository.name
+  if name isnot# s:c.known | call vam#install#LoadPool() |endif
+
+  let repository = get(s:c.plugin_sources, name, get(get(a:opts, 'plugin_sources', {}), name, 0))
   if repository is 0
     unlet repository
     for key in sort(keys(s:c.name_rewriting))
-      let repository=call(s:c.name_rewriting[key], [a:name], {})
+      let repository=call(s:c.name_rewriting[key], [name], {})
       if type(repository) == type({})
         break
       endif
       unlet repository
     endfor
     if exists('repository')
-      echom 'Name '.a:name.' expanded to :'.string(repository)
+      echom 'Name '.name.' expanded to :'.string(repository)
     else
       " try to find typos and renamings. Tell user about failure
       let maybe_fixes = []
-      let name_ = vam#utils#TypoFix(a:name)
+      let name_ = vam#utils#TypoFix(name)
       for x in keys(s:c.plugin_sources)
         if vam#utils#TypoFix(x) == name_
-          call add(maybe_fixes, a:name.' might be a typo, did you mean: '.x.' ?')
+          call add(maybe_fixes, name.' might be a typo, did you mean: '.x.' ?')
         endif
       endfor
       " try finding new name (vim-pi only)
       try
         " using try because pool implementations other then vim-pi could be
         " used
-        call extend(maybe_fixes, vimpi#SuggestNewName(a:name))
+        call extend(maybe_fixes, vimpi#SuggestNewName(name))
       catch /Vim(call):E117:/
         " If vim-pi activation policy is never, then the above will yield 
         " unknown function error
       endtry
-      call vam#Log(join(["No repository location info known for plugin ".a:name."."] + maybe_fixes,"\n"))
+      call vam#Log(join(["No repository location info known for plugin ".name."."] + maybe_fixes,"\n"))
       return 0
     endif
   endif
+  call extend(repository, a:repository)
   return repository
 endfun
 
 " Install let's you install plugins by passing the url of a addon-info file
 " This preprocessor replaces the urls by the plugin-names putting the
 " repository information into the global dict
+"
+" TODO: Does anybody use this? Is it worth keeping?
 fun! vam#install#ReplaceAndFetchUrls(list)
   let l = a:list
   let idx = 0
@@ -139,7 +151,6 @@ fun! vam#install#ReplaceAndFetchUrls(list)
       let l[idx] = info.name
     endif
   endfor
-  return l
 endfun
 
 fun! vam#install#RunHook(hook, info, repository, pluginDir, opts)
@@ -162,12 +173,15 @@ endfun
 
 " opts: same as ActivateAddons
 fun! vam#install#Install(toBeInstalledList, ...)
-  let toBeInstalledList = vam#install#ReplaceAndFetchUrls(a:toBeInstalledList)
+  let toBeInstalledList = a:toBeInstalledList
+  call vam#PreprocessScriptIdentifier(toBeInstalledList)
+  call vam#install#ReplaceAndFetchUrls(map(copy(a:toBeInstalledList),'v:val.name'))
   let opts = a:0 == 0 ? {} : a:1
   let auto_install = get(opts, 'auto_install', s:c.auto_install)
   let installed = []
-  for name in filter(copy(toBeInstalledList), '!vam#IsPluginInstalled(v:val)')
-    let repository = vam#install#GetRepo(name, opts)
+  for to_install in filter(copy(toBeInstalledList), '!vam#IsPluginInstalled(v:val.name)')
+    let repository = vam#install#CompleteRepoData(to_install, opts)
+    let name = repository.name
     " make sure all sources are known
     if repository is 0
       continue

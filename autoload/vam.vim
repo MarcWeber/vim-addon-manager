@@ -172,17 +172,18 @@ endfun
 "   'auto_install': when 1 overrides global setting, so you can autoinstall
 "   trusted repositories only
 " }
-fun! vam#ActivateRecursively(list_of_names, ...)
+fun! vam#ActivateRecursively(list_of_scripts, ...)
   let opts = extend({'run_install_hooks': 1}, a:0 == 0 ? {} : a:1)
 
-  for name in a:list_of_names
+  for script_ in a:list_of_scripts
+    let name = script_.name
     if !has_key(s:c.activated_plugins,  name)
       " break circular dependencies..
       let s:c.activated_plugins[name] = 0
 
       let infoFile = vam#AddonInfoFile(name)
       if !filereadable(infoFile) && !vam#IsPluginInstalled(name)
-        if empty(vam#install#Install([name], opts))
+        if empty(vam#install#Install([script_], opts))
           unlet s:c.activated_plugins[name]
           continue
         endif
@@ -243,10 +244,33 @@ fun! s:ResetVars(buf)
   endif
 endfun
 
+fun! vam#PreprocessScriptIdentifier(list)
+  " turn name into dictionary
+  for i in range(0, len(a:list)-1)
+    " 1 is string
+    if type(a:list[i]) == 1
+      let a:list[i] = {'name': a:list[i]}
+    endif
+  endfor
+
+  " Merging with the pool will be done in install.vim because that's only
+  " sourced when installations take place
+  " only be loaded when installations take place
+endf
+
 " see also ActivateRecursively
 " Activate activates the plugins and their dependencies recursively.
 " I sources both: plugin/*.vim and after/plugin/*.vim files when called after
 " .vimrc has been sourced which happens when you activate plugins manually.
+"
+" The script names will be turned into {'name': name}. Dictionaries can
+" contain additional keys. Which ones depends also on future usage. Use cases
+"  - vundle emualtion ('rtp' key)
+"  - version locking
+"
+" Additional keys from pool or name rewriting will be merged unless keys exist
+" and unless 'type' key exists (which signals that the data is already complete)
+" This happens in vam#install#CompleteRepoData
 fun! vam#ActivateAddons(...) abort
   let args = copy(a:000)
   if a:0 == 0 | return | endif
@@ -283,8 +307,12 @@ fun! vam#ActivateAddons(...) abort
   let opts = args[1]
   let topLevel = !has_key(opts, 'new_runtime_paths')
 
+  let to_activate = args[0]
+
+  call vam#PreprocessScriptIdentifier(args[0])
+
   if exists('g:vam_plugin_whitelist') && topLevel
-    call filter(args[0],   'index(g:vam_plugin_whitelist, v:val) != -1')
+    call filter(args[0],   'index(g:vam_plugin_whitelist, v:val.name) != -1')
   endif
 
   " add new_runtime_paths state if not present in opts yet
@@ -296,7 +324,7 @@ fun! vam#ActivateAddons(...) abort
   let opts.to_be_activated   = to_be_activated
 
   for a in args[0]
-    let to_be_activated[a] = 1
+    let to_be_activated[a.name] = a
   endfor
 
   call call('vam#ActivateRecursively', args)
