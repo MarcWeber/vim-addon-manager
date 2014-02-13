@@ -200,3 +200,7 @@ names at once.
 
 [debian’s vim plugin manager](http://packages.debian.org/sid/vim-addon-manager)
 The author (Jamessan) is fine with this project sharing the same name.
+
+[vundle](http://github.com/gmarik/Vundle.vim) Referencing it here because
+gmarik taught us how important it is to have both: A simple nice user interface
+and a short descriptive, complete README.md - Other managers see link above.
