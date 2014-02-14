@@ -15,7 +15,7 @@ This screenshot shows:
 ## If you believe in VAM's collaborative properties
 then you may also want to have a look at [vim-git-wiki](vim-wiki.mawercer.de).
 
-## SUPPORT / HELP / ISSUES / TROUBLE / CONTACT / EMAIL / REPORT BUGS, ENHANCEMENTS, FEATURES REQUESTS
+## SUPPORT / HELP
 VAM is well supported by at least 2 maintainers. Try github tickets or Vim irc
 channel on freenode.
 
@@ -163,6 +163,9 @@ likely to know about it if you install by name.
 - Tries to preserve user modifications by using diff/patch tools on unix like
   environments (for non-version-controlled sources).
 - 100 % VimL (is this really that good?..)
+- The VimL code which gets started each time is contained in one file: vam.vim
+  (700 loc). Everything else has carefully been put into additional supporting
+  files.
 
 [1]: assuming you always use latest versions
 
