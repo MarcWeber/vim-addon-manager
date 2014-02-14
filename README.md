@@ -108,10 +108,10 @@ call add(scripts, {'name': 'script-povray', 'filename_regex':'\.pov$'})
 call add(scripts, {'name': 'script-php', 'ft_regex':'^\.php$'})
 
 " tell VAM about all scripts, and immediately activate plugins having the c-dev tag:
-call vam#Script(scripts, {'tag_regex', 'c-dev'})
+call vam#Scripts(scripts, {'tag_regex': 'c-dev'})
 
 " activate all tagged scripts immediately
-call vam#Script([], {'flavour_regex', '.*'})
+call vam#Scripts([], {'flavour_regex': '.*'})
 
 ```
 
