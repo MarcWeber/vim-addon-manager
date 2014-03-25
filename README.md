@@ -111,7 +111,7 @@ call add(scripts, {'name': 'script-php', 'ft_regex':'^\.php$'})
 call vam#Scripts(scripts, {'tag_regex': 'c-dev'})
 
 " activate all tagged scripts immediately
-call vam#Scripts([], {'flavour_regex': '.*'})
+call vam#Scripts([], {'tag_regex': '.*'})
 
 ```
 
