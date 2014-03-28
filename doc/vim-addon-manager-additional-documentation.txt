@@ -430,6 +430,9 @@ Follow these steps:
 7. Addon-info file                                            *VAM-addon-info*
                                             *addon-info.json* *addon-info.txt*
 
+Some documentation will be moved to vim-wiki:
+http://vim-wiki.mawercer.de/wiki/topic/addon-info.json.html
+
 Example:  >
   {
     dependencies : {
