@@ -13,7 +13,7 @@ This screenshot shows:
   nor by vim.sf.net (marked by NA)
 
 ## If you believe in VAM's collaborative properties
-then you may also want to have a look at [vim-git-wiki](vim-wiki.mawercer.de).
+then you may also want to have a look at [vim-git-wiki](http://vim-wiki.mawercer.de).
 
 ## SUPPORT / HELP
 VAM is well supported by at least 2 maintainers. Try github tickets or Vim irc
