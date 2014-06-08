@@ -58,6 +58,10 @@ VAMActivate matchit.zip vim-addon-commenting
 " use <c-x><c-p> to complete plugin names
 ```
 
+If you need more control continue reading below "lazy loading plugins/ tag plugins by regex"
+which tells you how to pass dictionaries instead of names so that you can pass
+additional options such as runtimepath. We still recommend you contributing to vim-pi
+
 ## easy setup windows users:
 Give the [downloader](http://vam.mawercer.de/) a try if you're too lazy to install supporting tools. In
 the doc/ directory you'll find additional information. https (self signed certificate) can be used, too.
@@ -94,7 +98,7 @@ call vam#ActivateAddons(['P1', P2'], {'force_loading_plugins_now': 1})
 Also: Of course VAM allows using subdirectories of repositories as runtimepath.
 Eg See vim-pi-patching.
 
-## lazily loading plugins / tag plugins by topic
+## lazily loading plugins / tag plugins by topic / pass dictionaries for adding arbitrary options
 You can tag plugins and load them lazily
 
 ```vim
@@ -107,13 +111,22 @@ call add(scripts, {'name': 'script-povray', 'filename_regex':'\.pov$'})
 " for others ft_regex can be used:
 call add(scripts, {'name': 'script-php', 'ft_regex':'^\.php$'})
 
+" always activate this color scheme, and set runtimepath
+call add(scripts, {'name': 'github:daylerees/colour-schemes', 'addon-info': {'runtimepath': 'vim'} })
+
 " tell VAM about all scripts, and immediately activate plugins having the c-dev tag:
 call vam#Scripts(scripts, {'tag_regex': 'c-dev'})
 
 " activate all tagged scripts immediately
 call vam#Scripts([], {'tag_regex': '.*'})
-
 ```
+Instead of adding dictionaries to a local list you can make VAM read them from a file
+as show at [vim-wiki's plugin management article](http://vim-wiki.mawercer.de/wiki/topic/vim%20plugin%20managment.html)
+
+Having a declarative list of plugins you might be using allows
+  * implementing a garbage collector
+  * implementing third party update/checkout scripts which run checkout in parallel
+  * reusing such interface by other plugin managers
 
 ## How does VAM know about dependencies?
 Plugins ship with addon-info.json files listing the dependencies as names
