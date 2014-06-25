@@ -114,6 +114,10 @@ call add(scripts, {'name': 'script-php', 'ft_regex':'^\.php$'})
 " always activate this color scheme, and set runtimepath
 call add(scripts, {'name': 'github:daylerees/colour-schemes', 'addon-info': {'runtimepath': 'vim'} })
 
+" just activate a rtp (also works at runtime with all hooks such as sourcing ftdetect/*.vim files)
+call add(scripts, {'activate_this_rtp': 'absolute-rtp-path'})
+
+
 " tell VAM about all scripts, and immediately activate plugins having the c-dev tag:
 call vam#Scripts(scripts, {'tag_regex': 'c-dev'})
 
