@@ -29,7 +29,7 @@ channel on freenode.
 ```vim
 set runtimepath+=/path/to/vam
 call vam#ActivateAddons([])
-VAMActivate plugin-list-to-be-installed-or-activated tlib matchit.zip
+VAMActivate plugin-list-to-be-installed-or-activated name-of-plugin github:user/repo
 ```
 
 ## Recommended setup (checking out VAM ..):
@@ -54,7 +54,7 @@ fun! SetupVAM()
 endfun
 
 call SetupVAM()
-VAMActivate plugin-list-to-be-installed-or-activated matchit.zip vim-addon-commenting
+VAMActivate plugin-list-to-be-installed-or-activated name-of-plugin github:user/repo
 " use <c-x><c-p> to complete plugin names
 ```
 
