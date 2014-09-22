@@ -173,9 +173,8 @@ endfun
 
 " opts: same as ActivateAddons
 fun! vam#install#Install(toBeInstalledList, ...)
-  let toBeInstalledList = a:toBeInstalledList
-  call vam#PreprocessScriptIdentifier(toBeInstalledList)
-  call vam#install#ReplaceAndFetchUrls(map(copy(a:toBeInstalledList),'v:val.name'))
+  let toBeInstalledList = vam#PreprocessScriptIdentifier(a:toBeInstalledList, {'rewrite_names': 1})
+  call vam#install#ReplaceAndFetchUrls(map(copy(toBeInstalledList),'v:val.name'))
   let opts = a:0 == 0 ? {} : a:1
   let auto_install = get(opts, 'auto_install', s:c.auto_install)
   let installed = []
