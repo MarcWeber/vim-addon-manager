@@ -270,14 +270,28 @@ fun! s:ResetVars(buf)
   endif
 endfun
 
-fun! vam#PreprocessScriptIdentifier(list)
+" turn name into {'name': ...}
+" turn {'names': ...} into {'name': name1}, {'name': name2}
+fun! vam#PreprocessScriptIdentifier(list, opts)
+  let r = []
   " turn name into dictionary
-  for i in range(0, len(a:list)-1)
+  for x in a:list
     " 1 is string
-    if type(a:list[i]) == 1
-      let a:list[i] = {'name': a:list[i]}
+    if type(x) == 1
+      call add(r, {'name': x})
+    elseif has_key(x, 'names') && a:opts.rewrite_names
+      for n in x.names
+        let y = extend({}, x)
+        let y.name = n
+        call remove(y, 'names')
+        call add(r, y)
+      endfor
+    else
+      call add(r, x)
     endif
   endfor
+
+  return r
 
   " Merging with the pool will be done in install.vim because that's only
   " sourced when installations take place
@@ -335,7 +349,7 @@ fun! vam#ActivateAddons(...) abort
 
   let to_activate = args[0]
 
-  call vam#PreprocessScriptIdentifier(args[0])
+  let args[0] = vam#PreprocessScriptIdentifier(args[0], {'rewrite_names': 1})
 
   if exists('g:vam_plugin_whitelist') && topLevel
     call filter(args[0],   'index(g:vam_plugin_whitelist, v:val.name) != -1')
@@ -458,7 +472,7 @@ fun! vam#Scripts(scripts, opts) abort
   let activate = []
   let keys_ = keys(s:c.activate_on)
   let scripts = (type(a:scripts) == type([])) ? a:scripts : map(readfile(a:scripts), 'eval(v:val)')
-  call vam#PreprocessScriptIdentifier(scripts)
+  let scripts = vam#PreprocessScriptIdentifier(scripts, {'rewrite_names': 0})
   for x in scripts
     for k in keys_
       if has_key(x, k)

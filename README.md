@@ -2,7 +2,7 @@
 “VAM” is short name for vim-addon-manager.
 You declare a set of plugins. VAM will fetch & activate them at startup or
 runtime depending on your needs. Activating means handling runtimepath and
-making sure all .vim file get sourced.
+making sure all .vim file get sourced. The FEATURES to learn more.
 
 ![VAM](http://vam.mawercer.de/screenshot.png)
 
@@ -19,20 +19,28 @@ then you may also want to have a look at [vim-git-wiki](http://vim-wiki.mawercer
 VAM is well supported by at least 2 maintainers. Try github tickets or Vim irc
 channel on freenode.
 
-## finding plugin names
+## PLUGIN_NAME - What is a plugin ?
+A plugin is set of files having Vim's rtp directory layout (plugin/, ftplugin/, ...).
+It is identified by name which will be looked up by vim-pi or a url such as
+git:url, github:user/repo, ...
 
-    Simply use <c-x><c-p> in .vim files (buffer completion)
-    (or use VAMActivate, VAMPluginInfo command completion ..)
+Plugin names can be found by using <c-x><c-p> completion in .vim files.
+VAMActivate & VAMPluginInfo commands also offer name completion by <tab> or <c-d>.
+
+In most cases you activate plugins by using its name. Wrapping the name
+in a dictionary {'name': 'name'} allows attaching additional information
+which could be used by checkout functions ...
 
 ## MINIMAL setup (3 lines)
 
 ```vim
+set nocompatible | filetype indent plugin on | syn on
 set runtimepath+=/path/to/vam
-call vam#ActivateAddons([])
-VAMActivate plugin-list-to-be-installed-or-activated name-of-plugin github:user/repo
+call vam#ActivateAddons([PLUGIN_NAME])
 ```
 
-## Recommended setup (checking out VAM ..):
+## Recommended setup
+This setup will checkout VAM and all plugins on its own unless they exist:
 
 ```vim
 " put this line first in ~/.vimrc
@@ -50,17 +58,26 @@ fun! SetupVAM()
     execute '!git clone --depth=1 git://github.com/MarcWeber/vim-addon-manager '
         \       shellescape(c.plugin_root_dir.'/vim-addon-manager', 1)
   endif
-  call vam#ActivateAddons([], {'auto_install' : 0})
+
+  " This provides the VAMActivate command, you could be passing plugin names, too
+  call vam#ActivateAddons([], {})
 endfun
-
 call SetupVAM()
-VAMActivate plugin-list-to-be-installed-or-activated name-of-plugin github:user/repo
-" use <c-x><c-p> to complete plugin names
-```
 
-If you need more control continue reading below "lazy loading plugins/ tag plugins by regex"
-which tells you how to pass dictionaries instead of names so that you can pass
-additional options such as runtimepath. We still recommend you contributing to vim-pi
+" ACTIVATING PLUGINS
+
+" OPTION 1, use VAMActivate
+VAMActivate PLUGIN_NAME PLUGIN_NAME ..
+
+" OPTION 2: use call vam#ActivateAddons
+call vam#ActivateAddons([PLUGIN_NAME], {})
+" use <c-x><c-p> to complete plugin names
+
+" OPTION 3: Create a file ~/.vim-srcipts putting a PLUGIN_NAME into each line
+" See lazy loading plugins section in README.md for details
+call vam#Scripts('~/.vim-scripts', {'tag_regex': '.*'})
+
+```
 
 ## easy setup windows users:
 Give the [downloader](http://vam.mawercer.de/) a try if you're too lazy to install supporting tools. In
@@ -72,7 +89,7 @@ the doc/ directory you'll find additional information. https (self signed certif
 " Note: All commands support completion (<c-d> or <tab>)
 
 " install [UE] without activating for reviewing
-VAMInstall P1 P2 github:user/repo git://path...
+VAMInstall PLUGIN_NAME PLUGIN_NAME
 
 " install [UE], then activate
 VAMActivate P1 P2 ...
@@ -103,7 +120,7 @@ You can tag plugins and load them lazily
 
 ```vim
 let scripts = []
-call add(scripts, {'name': 'plugin_c', 'tag': 'c-dev'})
+call add(scripts, {'names': ['plugin_for_c_1', 'plugin_for_c_2'], 'tag': 'c-dev'})
 call add(scripts, {'name': 'plugin_ruby', 'tag': 'ruby-dev'})
 " must activate by filename because .pov filetype is known after the script
 " script-povray got activated
