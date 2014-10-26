@@ -13,7 +13,7 @@ fun! nix#NixDerivation(path_to_nixpkgs, name, repository) abort
     let sha256 = matchstr(s, 'hash is \zs[^\n\r]\+\ze')
 
     return join([
-          \ '  "'.a:name.'" = simpleDerivation {',
+          \ '  "'.a:name.'" = buildVimPlugin {',
           \ '    name = "'.a:name.'";',
           \ '    src = fetchgit {',
           \ '      url = "'. a:repository.url .'";',
