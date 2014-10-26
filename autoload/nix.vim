@@ -20,6 +20,7 @@ fun! nix#NixDerivation(path_to_nixpkgs, name, repository) abort
           \ '      rev = "'.rev.'";',
           \ '      sha256 = "'.sha256.'";',
           \ '    };',
+          \ '    dependencies = ['.join(map(get(a:repository, 'dependencies', []), "'\"'.v:val.'\"'")).'];',
           \ '  };',
           \ '',
           \ ], "\n")
@@ -40,16 +41,21 @@ fun! nix#AddNixDerivation(path_to_nixpkgs, derivations, name, ...) abort
       throw "repository ".a:name." unkown!"
     end
   endif
-  let a:derivations[a:name] = nix#NixDerivation(a:path_to_nixpkgs, a:name, repository)
 
   " check for dependencies
   let info = vam#ReadAddonInfo(vam#AddonInfoFile(vam#PluginDirFromName(a:name), a:name))
-  for dep in keys(get(info, 'dependencies', {}))
+  let dependencies = keys(get(info, 'dependencies', {}))
+  for dep in dependencies
     call nix#AddNixDerivation(a:path_to_nixpkgs, a:derivations, dep)
   endfor
+
+  if len(dependencies) > 0
+    let repository.dependencies = dependencies
+  endif
+  let a:derivations[a:name] = nix#NixDerivation(a:path_to_nixpkgs, a:name, repository)
 endf
 
-" with deps
+" with dependencies
 fun! nix#ExportPluginsForNix(opts) abort
   let path_to_nixpkgs = a:opts.path_to_nixpkgs
   let cache_file = get(a:opts, 'cache_file', '')
