@@ -14,7 +14,7 @@ fun! nix#NixDerivation(path_to_nixpkgs, name, repository) abort
 
     return join([
           \ '  "'.a:name.'" = simpleDerivation {',
-          \ '    name = "vim-addon-manager";',
+          \ '    name = "'.a:name.'";',
           \ '    src = fetchgit {',
           \ '      url = "'. a:repository.url .'";',
           \ '      rev = "'.rev.'";',
