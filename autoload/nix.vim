@@ -8,7 +8,7 @@ fun! nix#NixDerivation(path_to_nixpkgs, name, repository) abort
   if type == 'git'
     " should be using shell abstraction ..
     echo 'fetching '. a:repository.url
-    let s = vam#utils#System(a:path_to_nixpkgs.'/pkgs/build-support/fetchgit/nix-prefetch-git '. a:repository.url)
+    let s = vam#utils#System(a:path_to_nixpkgs.'/pkgs/build-support/fetchgit/nix-prefetch-git $', a:repository.url)
     let rev = matchstr(s, 'git revision is \zs[^\n\r]\+\ze')
     let sha256 = matchstr(s, 'hash is \zs[^\n\r]\+\ze')
 
@@ -21,6 +21,45 @@ fun! nix#NixDerivation(path_to_nixpkgs, name, repository) abort
           \ '      sha256 = "'.sha256.'";',
           \ '    };',
           \ '    dependencies = ['.join(map(get(a:repository, 'dependencies', []), "'\"'.v:val.'\"'")).'];',
+          \ '  };',
+          \ '',
+          \ ], "\n")
+
+  elseif type == 'hg'
+    " should be using shell abstraction ..
+    echo 'fetching '. a:repository.url
+    let s = vam#utils#System(a:path_to_nixpkgs.'/pkgs/build-support/fetchgit/nix-prefetch-git $', a:repository.url)
+    let rev = matchstr(s, 'git revision is \zs[^\n\r]\+\ze')
+    let sha256 = matchstr(s, 'hash is \zs[^\n\r]\+\ze')
+
+    return join([
+          \ '  "'.a:name.'" = buildVimPlugin {',
+          \ '    name = "'.a:name.'";',
+          \ '    src = fetchgit {',
+          \ '      url = "'. a:repository.url .'";',
+          \ '      rev = "'.rev.'";',
+          \ '      sha256 = "'.sha256.'";',
+          \ '    };',
+          \ '    dependencies = ['.join(map(get(a:repository, 'dependencies', []), "'\"'.v:val.'\"'")).'];',
+          \ '  };',
+          \ '',
+          \ ], "\n")
+
+  elseif type == 'archive'
+    let sha256 = split(vam#utils#System('nix-prefetch-url $ 2>/dev/null', a:repository.url), "\n")[0]
+    return join([
+          \ '  "'.a:name.'" = buildVimPlugin {',
+          \ '    name = "'.a:name.'";',
+          \ '    src = fetchurl {',
+          \ '      url = "'. a:repository.url .'";',
+          \ '      name = "'. a:repository.archive_name .'";',
+          \ '      sha256 = "'.sha256.'";',
+          \ '    };',
+          \ '    buildInputs = [ unzip ];',
+          \ '    dependencies = ['.join(map(get(a:repository, 'dependencies', []), "'\"'.v:val.'\"'")).'];',
+          \ '    meta = {',
+          \ '       url = "http://www.vim.org/scripts/script.php?script_id='.a:repository.vim_script_nr.'";',
+          \ '    };',
           \ '  };',
           \ '',
           \ ], "\n")
@@ -62,9 +101,17 @@ fun! nix#ExportPluginsForNix(opts) abort
   let names = a:opts.names
 
   let derivations = (cache_file == '' || !filereadable(cache_file)) ? {} : eval(readfile(cache_file)[0])
+  let failed = {}
   for name in names
-    call nix#AddNixDerivation(path_to_nixpkgs, derivations, name)
+    try
+      call nix#AddNixDerivation(path_to_nixpkgs, derivations, name)
+    catch /.*/
+      echom 'failed : '.name.' '.v:exception
+      let failed[name] = v:exception
+    endtry
   endfor
+  echom join(keys(failed), ", ")
+  echom string(failed)
 
   if cache_file != ''
     call writefile([string(derivations)], cache_file)
