@@ -58,6 +58,10 @@ let s:c.source_missing_files = get(s:c, 'source_missing_files', &loadplugins)
 let s:c.activate_on = get(s:c, 'activate_on', {'tag': [], 'ft_regex': [], 'filename_regex': []})
 let s:c.lazy_loading_au_commands = get(s:c, 'lazy_loading_au_commands', 1)
 
+" example: vam#ForceUsersAfterDirectoriesToBeLast
+let s:c.rtp_list_hook = get(s:c, 'rtp_list_hook', '')
+
+
 " experimental: will be documented when its tested
 " don't echo lines, add them to a buffer to prevent those nasty "Press Enter"
 " to show more requests by Vim
@@ -102,6 +106,12 @@ fun! vam#VerifyIsJSON(s)
   " adds missing addon information to work
   let scalarless_body = substitute(a:s, '\v\"%(\\.|[^"\\])*\"|\''%(\''{2}|[^''])*\''|true|false|null|[+-]?\d+%(\.\d+%([Ee][+-]?\d+)?)?', '', 'g')
   return scalarless_body !~# "[^,:{}[\\] \t]"
+endfun
+
+fun! vam#ForceUsersAfterDirectoriesToBeLast(list)
+  let regex_last = '^'.escape($HOME, '/').'/[._]vim\/after$'
+  return filter(copy(a:list), 'v:val !~ '.string(regex_last))
+     \ + filter(copy(a:list), 'v:val =~ '.string(regex_last))
 endfun
 
 " use join so that you can break the dict into multiple lines. This makes
@@ -383,10 +393,15 @@ fun! vam#ActivateAddons(...) abort
     let escapeComma = 'escape(v:val, '','')'
     let after = filter(map(copy(new_runtime_paths), 'v:val."/after"'), 'isdirectory(v:val)')
     if !s:c.dont_source
-      let &runtimepath=join(rtp[:0] + map(copy(new_runtime_paths), escapeComma)
-                  \                 + rtp[1:]
-                  \                 + map(after, escapeComma),
-                  \         ",")
+      " rtp[-1:-1] keep users /after directory last, see github issue #165
+      let list = rtp[:0] + map(copy(new_runtime_paths), escapeComma)
+                  \                 + rtp[1:-2]
+                  \                 + map(after, escapeComma)
+                  \                 + rtp[-1:-1]
+      if s:c.rtp_list_hook != ''
+        let list = call(s:c.rtp_list_hook, [list])
+      endif
+      let &runtimepath=join(list , ",")
     endif
     unlet rtp
 
