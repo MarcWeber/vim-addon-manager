@@ -12,7 +12,7 @@ endf
 
 fun! s:System(...)
   let args = a:000
-  let r = call call('vam#utils#System', args)
+  let r = call('vam#utils#System', args)
   if r is 0
     throw "command ".join(args, '').' failed'
   else
@@ -34,6 +34,7 @@ fun! nix#NixDerivation(path_to_nixpkgs, name, repository) abort
     let rev = matchstr(s, 'git revision is \zs[^\n\r]\+\ze')
     let sha256 = matchstr(s, 'hash is \zs[^\n\r]\+\ze')
 
+    " should be reading dependencies from addon-info.json of checkout
     return join([
           \ '  "'.n_a_name.'" = buildVimPlugin {'.created_notice,
           \ '    name = "'.n_n_name.'";',
@@ -50,14 +51,15 @@ fun! nix#NixDerivation(path_to_nixpkgs, name, repository) abort
   elseif type == 'hg'
     " should be using shell abstraction ..
     echo 'fetching '. a:repository.url
-    let s = s:System(a:path_to_nixpkgs.'/pkgs/build-support/fetchgit/nix-prefetch-git $', a:repository.url)
-    let rev = matchstr(s, 'git revision is \zs[^\n\r]\+\ze')
+    let s = s:System(a:path_to_nixpkgs.'/pkgs/build-support/fetchhg/nix-prefetch-hg $', a:repository.url)
+    let rev = matchstr(s, 'hg revision is \zs[^\n\r]\+\ze')
     let sha256 = matchstr(s, 'hash is \zs[^\n\r]\+\ze')
 
+    " should be reading dependencies from addon-info.json of checkout
     return join([
           \ '  "'.n_a_name.'" = buildVimPlugin {'.created_notice,
           \ '    name = "'.n_n_name.'";',
-          \ '    src = fetchgit {',
+          \ '    src = fetchhg {',
           \ '      url = "'. a:repository.url .'";',
           \ '      rev = "'.rev.'";',
           \ '      sha256 = "'.sha256.'";',
