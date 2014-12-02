@@ -21,7 +21,7 @@ fun! s:System(...)
 endf
 
 " without deps
-fun! nix#NixDerivation(path_to_nixpkgs, name, repository) abort
+fun! nix#NixDerivation(opts, name, repository) abort
   let n_a_name = nix#ToNixAttrName(a:name)
   let n_n_name = nix#ToNixName(a:name)
   let type = get(a:repository, 'type', '')
@@ -30,7 +30,7 @@ fun! nix#NixDerivation(path_to_nixpkgs, name, repository) abort
   if type == 'git'
     " should be using shell abstraction ..
     echo 'fetching '. a:repository.url
-    let s = s:System(a:path_to_nixpkgs.'/pkgs/build-support/fetchgit/nix-prefetch-git $', a:repository.url)
+    let s = s:System('$ $',a:opts.nix_prefetch_git, a:repository.url)
     let rev = matchstr(s, 'git revision is \zs[^\n\r]\+\ze')
     let sha256 = matchstr(s, 'hash is \zs[^\n\r]\+\ze')
 
@@ -51,7 +51,7 @@ fun! nix#NixDerivation(path_to_nixpkgs, name, repository) abort
   elseif type == 'hg'
     " should be using shell abstraction ..
     echo 'fetching '. a:repository.url
-    let s = s:System(a:path_to_nixpkgs.'/pkgs/build-support/fetchhg/nix-prefetch-hg $', a:repository.url)
+    let s = s:System('$ $',a:opts.nix_prefetch_hg, a:repository.url)
     let rev = matchstr(s, 'hg revision is \zs[^\n\r]\+\ze')
     let sha256 = matchstr(s, 'hash is \zs[^\n\r]\+\ze')
 
@@ -93,7 +93,7 @@ fun! nix#NixDerivation(path_to_nixpkgs, name, repository) abort
 endf
 
 " also tries to handle dependencies
-fun! nix#AddNixDerivation(path_to_nixpkgs, derivations, name, ...) abort
+fun! nix#AddNixDerivation(opts, derivations, name, ...) abort
   if has_key(a:derivations, a:name) | return | endif
   let repository = a:0 > 0 ? a:1 : {}
 
@@ -118,13 +118,13 @@ fun! nix#AddNixDerivation(path_to_nixpkgs, derivations, name, ...) abort
   let info = vam#ReadAddonInfo(vam#AddonInfoFile(vam#PluginDirFromName(a:name), a:name))
   let dependencies = keys(get(info, 'dependencies', {}))
   for dep in dependencies
-    call nix#AddNixDerivation(a:path_to_nixpkgs, a:derivations, dep)
+    call nix#AddNixDerivation(a:opts, a:derivations, dep)
   endfor
 
   if len(dependencies) > 0
     let repository.dependencies = dependencies
   endif
-  let a:derivations[a:name] = nix#NixDerivation(a:path_to_nixpkgs, a:name, repository)
+  let a:derivations[a:name] = nix#NixDerivation(a:opts, a:name, repository)
 endf
 
 fun! nix#TopNixOptsByParent(parents)
@@ -177,8 +177,15 @@ endf
 "     - dictionary having key name or names
 " This is so that plugin script files can be loaded/ merged
 fun! nix#ExportPluginsForNix(opts) abort
-  let path_to_nixpkgs = a:opts.path_to_nixpkgs
   let cache_file = get(a:opts, 'cache_file', '')
+
+  let opts = a:opts
+
+  for scm in ['git', 'hg']
+    if !has_key(opts, 'nix_prefetch_'.scm)
+      let opts['nix_prefetch_'.scm] = a:opts.path_to_nixpkgs.'/pkgs/build-support/fetch'.scm.'/nix-prefetch-'.scm
+    endif
+  endfor
 
   let names = []
   for x in a:opts.names
@@ -197,7 +204,7 @@ fun! nix#ExportPluginsForNix(opts) abort
   let failed = {}
   for name in names
     try
-      call nix#AddNixDerivation(path_to_nixpkgs, derivations, name)
+      call nix#AddNixDerivation(opts, derivations, name)
     catch /.*/
       echom 'failed : '.name.' '.v:exception
       let failed[name] = v:exception
