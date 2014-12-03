@@ -36,7 +36,7 @@ fun! nix#NixDerivation(opts, name, repository) abort
 
     " should be reading dependencies from addon-info.json of checkout
     return join([
-          \ '  "'.n_a_name.'" = buildVimPlugin {'.created_notice,
+          \ '  "'.n_a_name.'" = buildVimPluginFrom2Nix {'.created_notice,
           \ '    name = "'.n_n_name.'";',
           \ '    src = fetchgit {',
           \ '      url = "'. a:repository.url .'";',
@@ -57,7 +57,7 @@ fun! nix#NixDerivation(opts, name, repository) abort
 
     " should be reading dependencies from addon-info.json of checkout
     return join([
-          \ '  "'.n_a_name.'" = buildVimPlugin {'.created_notice,
+          \ '  "'.n_a_name.'" = buildVimPluginFrom2Nix {'.created_notice,
           \ '    name = "'.n_n_name.'";',
           \ '    src = fetchhg {',
           \ '      url = "'. a:repository.url .'";',
@@ -72,7 +72,7 @@ fun! nix#NixDerivation(opts, name, repository) abort
   elseif type == 'archive'
     let sha256 = split(s:System('nix-prefetch-url $ 2>/dev/null', a:repository.url), "\n")[0]
     return join([
-          \ '  "'.n_a_name.'" = buildVimPlugin {'.created_notice,
+          \ '  "'.n_a_name.'" = buildVimPluginFrom2Nix {'.created_notice,
           \ '    name = "'.n_n_name.'";',
           \ '    src = fetchurl {',
           \ '      url = "'. a:repository.url .'";',
