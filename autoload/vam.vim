@@ -299,6 +299,7 @@ fun! vam#PreprocessScriptIdentifier(list, opts)
     else
       call add(r, x)
     endif
+    unlet x
   endfor
 
   return r
