@@ -348,11 +348,6 @@ fun! vam#autoloading#Setup()
     endfor
 
     if !empty(s:toscanfiles) && !exists('*s:RecordState')
-      "! fun! s:FilterMAdict(madict)
-      "!   unlet a:madict.sid
-      "!   return a:madict
-      "! endfun
-
       fun! s:RecordState()
         let state={'mappings': {}, 'abbreviations': {}, 'menus': {}, 'functions': {}, 'commands': {}, 'autocommands': {}}
 
@@ -361,35 +356,17 @@ fun! vam#autoloading#Setup()
             execute 'silent' mode.'map'
           redir END
           let state.mappings[mode]={}
-          for line in split(mappings, "\n")
-            let lhs=matchstr(line, '\S\+', 3)
-            let madict=maparg(lhs, mode, 0, 1)
-            if empty(madict) || madict.buffer
-              continue
-            endif
-            "! let state.mappings[mode][lhs] = s:FilterMAdict(madict)
-            let state.mappings[mode][lhs] = 1
-          endfor
-          unlet mappings
+          call map(map(split(mappings, "\n"),
+                \'maparg(matchstr(v:val, ''\v\C\S+'', 3), mode, 0, 1)'),
+                \'empty(v:val) || v:val.buffer? 0 : extend(state.mappings[mode], {v:val.lhs: 1})')
         endfor
 
         redir => abbreviations
           silent abbrev
         redir END
-        for line in split(abbreviations, "\n")
-          let mode=line[0]
-          let lhs=matchstr(line, '\S\+', 3)
-          let madict=maparg(lhs, mode, 1, 1)
-          if empty(madict) || madict.buffer
-            continue
-          endif
-          if !has_key(state.abbreviations, mode)
-            let state.abbreviations[mode]={}
-          endif
-          "! let state.abbreviations[mode][lhs] = s:FilterMAdict(madict)
-          let state.abbreviations[mode][lhs] = 1
-        endfor
-        unlet abbreviations
+        call map(map(split(abbreviations, "\n"),
+              \'maparg(matchstr(v:val, ''\v\C\S+'', 3), mode, 1, 1)'),
+              \'empty(v:val) || v:val.buffer? 0 : extend(state.abbreviations, {v:val.mode : extend(get(state.abbreviations, v:val.mode, {}), {v:val.lhs : 1})})')
 
         " TODO
         " for mode in ['a', 'n', 'o', 'x', 's', 'i', 'c']
@@ -401,60 +378,56 @@ fun! vam#autoloading#Setup()
         redir => commands
           silent command
         redir END
-        for line in split(commands, "\n")[1:]
-          if line[2] is# 'b'
-            continue
-          endif
-          let bang=(line[0] is# '!')
-          let [cmd, nargs, range]=matchlist(line, '\v(\S+)\ +([01*?+])\ {4}(\S*)', 3)[1:3]
-          "         ┌ bang field              ┌ nargs field
-          "         │ ┌ command field         │     ┌ range field
-          let start=3+(max([len(cmd), 11])+1)+(1+4)+(max([len(range), 5])+1)
-          let complete=matchstr(line, '^\S\+', start)
-          "! let exe=matchstr(line, '\S.*', start+len(complete))
-          "!-
-          let state.commands[cmd]={'nargs': nargs, 'range': range, 'complete': complete, 'bang': bang}
-          "! let state.commands[cmd].command = exe
-        endfor
+        call map(map(filter(split(commands, "\n")[1:], 'v:val[2] isnot# "b"'),
+              \'
+              \ {
+              \   "cmd": v:val,
+              \   "bang": v:val[0] is# "!",
+              \   "cnr": matchlist(v:val, "\\v(\\S+)\\ +([01*?+])\\ {4}(\\S*)", 3)[1:3]
+              \ }
+              \'),
+              \'
+              \ extend(state.commands, {v:val.cnr[0] : {
+              \   "nargs": v:val.cnr[1],
+              \   "range": v:val.cnr[2],
+              \   "complete": matchstr(v:val.cmd, "^\\S\\+", 3+(max([len(v:val.cmd), 11])+1)+(1+4)+(max([len(v:val.cnr[2]), 5])+1)),
+              \   "bang": v:val.bang,
+              \ }})
+              \')
 
         redir => functions
           silent function /.*
         redir END
-        for line in split(functions, "\n")
-          if line[9] is# '<'
-            " s: functions start with <SNR>
-            continue
-          endif
-          "! let state.functions[matchstr(line, '[^(]\+', 9)]=line[stridx(line, '('):]
-          "!-
-          let state.functions[matchstr(line, '[^(]\+', 9)] = 1
-        endfor
-        unlet functions
+        call map(split(functions, "\n"),
+              \'
+              \ v:val[9] is# "<"
+              \ ? 0
+              \ : extend(state.functions, {matchstr(v:val, "[^(]\\+", 9): 1})
+              \')
 
         redir => autocommands
           silent autocmd
         redir END
         let augroup=0
         let auevent=0
-        for line in split(autocommands, "\n")
-          if line =~# '\v^\S.*\ {2}'
-            let idx=strridx(line, '  ')
-            "! let augroup = line[:(idx-1)]
-            let auevent=line[(idx+2):]
-            let key = line
-          elseif line =~# '\v^\w+$'
-            "! let augroup = 0
-            let auevent = line
-            let key = line
-          elseif line[0] is# ' '
-            if !has_key(state.autocommands, key)
-              let state.autocommands[key] = {'event': auevent, 'patterns': []}
-              "! let state.autocommands[key].group = augroup
-            endif
-            " XXX Pattern must be left escaped
-            let state.autocommands[key].patterns+=[matchstr(line, '\v(\\.|\S)+')]
-          endif
-        endfor
+        let d={}
+        call map(split(autocommands, "\n"), '
+              \v:val =~# "\\v^\\S.*\\ {2}"
+              \?extend(d, {"auevent": v:val[strridx(v:val, "  ")+2 :], "key": v:val})
+              \:(v:val =~# "\\v^\\w+"
+              \  ?extend(d, {"auevent": v:val, "key": v:val})
+              \  :(v:val[0] is# " "
+              \    ?extend(state.autocommands, {
+              \       d.key : get(state.autocommands, d.key, {
+              \         "event": d.auevent,
+              \         "patterns": add(get(get(state.autocommands, d.key, {}), "patterns", []),
+              \                         matchstr(v:val, "\\v(\\.|\\S)+"))
+              \       }),
+              \     })
+              \    : 0
+              \  )
+              \)
+              \')
 
         return state
       endfun
