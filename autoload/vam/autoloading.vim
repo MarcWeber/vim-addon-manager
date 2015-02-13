@@ -551,7 +551,9 @@ fun! vam#autoloading#Setup()
             endif
           endfor
         finally
-          let &rtp = saved_rtp
+          if exists('saved_rtp')
+            let &rtp = saved_rtp
+          endif
         endtry
       endfun
 
