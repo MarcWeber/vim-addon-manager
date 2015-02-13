@@ -11,7 +11,7 @@ fun! vam#autoloading#Setup()
       if filereadable(a:path)
         let s:db = vam#ReadJSON(a:path)
       else
-        let s:db = {'paths': {}}
+        let s:db = {'plugins': {}}
       endif
     endif
     return s:db
@@ -45,13 +45,16 @@ fun! vam#autoloading#Setup()
       let s:omittedrtps = []
       let s:omittedafters = []
       let s:needs_write = 0
+      let s:ftfiles = {'syntax': {}, 'filetype': {}}
     endif
 
-    let rtstatus = map(copy(new_runtime_paths), 'has_key(db.paths, v:val) + !empty(get(db.paths, v:val))')
+    let rtstatus = map(copy(new_runtime_paths), 'has_key(db.plugins, v:val) + !empty(get(db.plugins, v:val))')
     let toautoload = filter(copy(new_runtime_paths), 'rtstatus[v:key] == 2')
     let toscan = filter(copy(new_runtime_paths), '!rtstatus[v:key]')
 
     if !empty(toautoload) && !exists('*s:map')
+      let s:loaded_files = {}
+
       fun! s:AddRuntimePaths(rtps, afters)
         let &rtp = join(map(copy(a:rtps), 'escape(v:val, "\\,")')
               \        +(empty(&rtp) ? [] : [&rtp])
@@ -59,11 +62,12 @@ fun! vam#autoloading#Setup()
       endfun
 
       fun! s:SourceFile(file)
+        let s:loaded_files[a:file] = 1
         for cmd in get(s:files, a:file, [])
           execute cmd
         endfor
         call map(s:events, 'filter(v:val, "v:key isnot# a:file")')
-        augroup VAMAutoloading
+        augroup VAMAutoloadingAueRun
           for key in keys(filter(copy(s:events), 'empty(v:val)'))
             execute 'autocmd!' substitute(key, '#', ' ', '')
             unlet s:events[key]
@@ -204,6 +208,9 @@ fun! vam#autoloading#Setup()
         for file in keys(remove(s:events, a:key))
           call s:SourceFile(file)
         endfor
+        augroup VAMAutoloadingAueRun
+          execute 'autocmd!' substitute(a:key, '#', ' ', '')
+        augroup END
       endfun
 
       let s:events={}
@@ -213,8 +220,8 @@ fun! vam#autoloading#Setup()
           let key = a:audescr.event.'#'.pattern
           if !has_key(s:events, key)
             let s:events[key]  = {a:audescr.file : 1}
-            augroup VAMAutoloading
-              execute 'autocmd!' a:audescr.event pattern ':call AutoloadingAueRun('.string(key).')'
+            augroup VAMAutoloadingAueRun
+              execute 'autocmd' a:audescr.event pattern ':call AutoloadingAueRun('.string(key).')'
             augroup END
           else
             let s:events[key][a:audescr.file] = 1
@@ -226,14 +233,24 @@ fun! vam#autoloading#Setup()
         call s:aue({'event': 'FuncUndefined', 'file': a:file, 'patterns': [a:fun]})
       endfun
 
-      fun! s:LoadFTFiles(files)
+      fun! s:LoadFTFiles(type, ft)
+        if !has_key(s:ftfiles[a:type], a:ft)
+          return
+        endif
         if has('vim_starting')
           let saved_rtp = &rtp
           call s:AddRuntimePaths(s:omittedrtps, s:omittedafters)
         endif
         try
-          for file in a:files
-            execute 'source' fnameescape(file)
+          for [rtp, files] in s:ftfiles[a:type][a:ft]
+            for file in s:db.plugins[rtp].files.plugin
+              if !has_key(s:loaded_files, file)
+                call s:SourceFile(file)
+              endif
+            endfor
+            for file in files
+              call s:SourceFile(file)
+            endfor
           endfor
         finally
           if exists('saved_rtp')
@@ -242,23 +259,18 @@ fun! vam#autoloading#Setup()
         endtry
       endfun
 
-      fun! s:DefineFTEvent(event, ft, files)
-        augroup VAMAutoloading
-          execute 'autocmd' a:event a:ft ':call s:LoadFTFiles('.string(a:files).')'
-        augroup END
-      endfun
+      augroup VAMAutoloading
+        autocmd! FileType * :call s:LoadFTFiles('filetype', expand('<amatch>'))
+        autocmd! Syntax   * :call s:LoadFTFiles('syntax', expand('<amatch>'))
+      augroup END
 
-      fun! s:ftp(ft, files)
-        return s:DefineFTEvent('FileType', a:ft, a:files)
-      endfun
-
-      fun! s:syn(ft, files)
-        return s:DefineFTEvent('Syntax', a:ft, a:files)
+      fun! s:DefineFTEvent(type, ft, files, rtp)
+        let s:ftfiles[a:type][a:ft] = add(get(s:ftfiles[a:type], a:ft, []), [a:rtp, a:files])
       endfun
     endif
 
     for rtp in toautoload
-      let dbitem=db.paths[rtp]
+      let dbitem=db.plugins[rtp]
       try
         for key in ['mappings', 'abbreviations']
           for [mode, value] in items(dbitem[key])
@@ -276,9 +288,9 @@ fun! vam#autoloading#Setup()
         for [func, ffile] in items(dbitem.functions)
           call s:fun(func, ffile)
         endfor
-        for [key, event] in [['ftplugins', 'FileType'], ['syntaxes', 'Syntax']]
+        for [key, type] in [['ftplugins', 'filetype'], ['indents', 'filetype'], ['syntaxes', 'syntax']]
           for [ft, files] in items(dbitem[key])
-            call s:{key[:2]}(ft, files)
+            call s:DefineFTEvent(type, ft, files, rtp)
           endfor
         endfor
       endtry
@@ -294,33 +306,44 @@ fun! vam#autoloading#Setup()
 
     for rtp in toscan
       let toscanfiles = {}
-      call map(vam#GlobInDir(rtp, '{,after/}plugin/**/*.vim'), 'extend(toscanfiles, {v:val : rtp})')
+      call map(vam#GlobInDir(rtp, '{,after/}plugin/**/*.vim'), 'extend(toscanfiles, {vam#normpath(v:val) : rtp})')
       if empty(toscanfiles)
         " No plugin files, do not bother with autoloading then
-        let db.paths[rtp] = 0
+        let db.plugins[rtp] = 0
         let s:needs_write = 1
         continue
       endif
       call extend(s:toscanfiles, toscanfiles)
 
-      let dbitem = {'ftplugins': {}, 'syntaxes': {}, 'mappings': {}, 'commands': {}, 'functions': {}, 'abbreviations': {},
-            \     'autocommands': {}, 'ftdetects': []}
+      let dbitem = {'ftplugins': {}, 'syntaxes': {}, 'indents': {},
+            \       'mappings': {}, 'commands': {}, 'functions': {}, 'abbreviations': {},
+            \       'autocommands': {}, 'ftdetects': [],
+            \       'files': {'plugin': keys(toscanfiles), 'ftplugin': [], 'syntax': [], 'indent': []}}
 
       for file in vam#GlobInDir(rtp, '{,after/}ftplugin/{*/,}*.vim')
         let filetype=substitute(file, '.*ftplugin/\v([^/_]+%(%(_[^/]*)?\.vim$|\/[^/]+$)@=).*', '\1', 'g')
         let file=vam#normpath(file)
         call s:addlistitem(dbitem.ftplugins, filetype, file)
+        call add(dbitem.files.ftplugin, file)
+      endfor
+
+      for file in vam#GlobInDir(rtp, '{,after/}indent/{*/,}*.vim')
+        let filetype=substitute(file, '.*indent/\v([^/_]+%(%(_[^/]*)?\.vim$|\/[^/]+$)@=).*', '\1', 'g')
+        let file=vam#normpath(file)
+        call s:addlistitem(dbitem.indents, filetype, file)
+        call add(dbitem.files.indent, file)
       endfor
 
       for file in vam#GlobInDir(rtp, '{,after/}syntax/{*/,}*.vim')
         let filetype=substitute(file, '.*syntax/\v([^/]+%(\.vim$|\/[^/]+$)@=).*', '\1', 'g')
         let file=vam#normpath(file)
         call s:addlistitem(dbitem.syntaxes, filetype, file)
+        call add(dbitem.files.syntax, file)
       endfor
 
       let dbitem.ftdetects=map(vam#GlobInDir(rtp, '{,after/}ftdetect/*.vim'), 'vam#normpath(v:val)')
 
-      let db.paths[rtp] = dbitem
+      let db.plugins[rtp] = dbitem
       let s:needs_write = 1
     endfor
 
@@ -442,7 +465,7 @@ fun! vam#autoloading#Setup()
         let newstate=a:newstate
         let rtp=s:toscanfiles[file]
         let db=s:LoadDB(s:c.autoloading_db_file)
-        let dbitem=db.paths[rtp]
+        let dbitem=db.plugins[rtp]
         if newstate !=# oldstate
           for key in ['mappings', 'abbreviations']
             if newstate[key] !=# oldstate[key]
@@ -527,6 +550,8 @@ fun! vam#autoloading#Setup()
         endif
         augroup VAMAutoloading
           autocmd! FuncUndefined *#*
+        augroup END
+        augroup VAMAutoloadingAueRun
           autocmd! FileType
           autocmd! Syntax
         augroup END
@@ -577,8 +602,8 @@ fun! vam#autoloading#Setup()
   fun! AutoloadingInvalidateHook(info, repository, pluginDir, hook_opts)
     let db=s:LoadDB(s:c.autoloading_db_file)
     let rtp=vam#normpath(a:pluginDir)
-    if has_key(db.paths, rtp)
-      unlet db.paths[rtp]
+    if has_key(db.plugins, rtp)
+      unlet db.plugins[rtp]
     endif
     call s:WriteDB(db, s:c.autoloading_db_file)
   endfun
