@@ -347,38 +347,63 @@ fun! vam#autoloading#Setup()
       let s:needs_write = 1
     endfor
 
-    if !empty(s:toscanfiles) && !exists('*s:RecordState')
-      fun! s:RecordState()
-        let state={'mappings': {}, 'abbreviations': {}, 'menus': {}, 'functions': {}, 'commands': {}, 'autocommands': {}}
-
+    if !empty(s:toscanfiles) && !exists('*s:RecordPreState')
+      fun! s:RecordPreState()
+        let prestate = {'mappings': {}}
         for mode in ['n', 'x', 's', 'o', 'i', 'c', 'l']
-          redir => mappings
+          redir => prestate.mappings[mode]
             execute 'silent' mode.'map'
           redir END
-          let state.mappings[mode]={}
-          call map(map(split(mappings, "\n"),
-                \'maparg(matchstr(v:val, ''\v\C\S+'', 3), mode, 0, 1)'),
-                \'empty(v:val) || v:val.buffer? 0 : extend(state.mappings[mode], {v:val.lhs: 1})')
         endfor
-
-        redir => abbreviations
-          silent abbrev
+        redir => prestate.abbreviations
+          silent abbreviate
         redir END
-        call map(map(split(abbreviations, "\n"),
-              \'maparg(matchstr(v:val, ''\v\C\S+'', 3), mode, 1, 1)'),
-              \'empty(v:val) || v:val.buffer? 0 : extend(state.abbreviations, {v:val.mode : extend(get(state.abbreviations, v:val.mode, {}), {v:val.lhs : 1})})')
 
         " TODO
         " for mode in ['a', 'n', 'o', 'x', 's', 'i', 'c']
-          " redir => {mode}menus
+          " redir => prestate.menus[mode]
             " execute 'silent' mode.'menu'
           " redir END
         " endfor
 
-        redir => commands
+        redir => prestate.commands
           silent command
         redir END
-        call map(map(filter(split(commands, "\n")[1:], 'v:val[2] isnot# "b"'),
+
+        redir => prestate.functions
+          silent function /.*
+        redir END
+
+        redir => prestate.autocommands
+          silent autocmd
+        redir END
+
+        return prestate
+      endfun
+      fun! s:PreStateToState_mappings(mappings)
+        return {}
+      endfun
+      fun! s:PreStateToState_mappings_one(mode, mappings)
+        let ret={}
+        call map(map(split(a:mappings, "\n"),
+              \'maparg(matchstr(v:val, ''\v\C\S+'', 3), a:mode, 0, 1)'),
+              \'empty(v:val) || v:val.buffer? 0 : extend(ret, {v:val.lhs: 1})')
+        return ret
+      endfun
+      fun! s:PreStateToState_abbreviations(abbreviations)
+        let ret={}
+        call map(map(split(a:abbreviations, "\n"),
+              \'maparg(matchstr(v:val, ''\v\C\S+'', 3), mode, 1, 1)'),
+              \'
+              \ empty(v:val) || v:val.buffer
+              \ ? 0
+              \ : extend(ret, {v:val.mode : extend(get(ret, v:val.mode, {}), {v:val.lhs : 1})})
+              \')
+        return ret
+      endfun
+      fun! s:PreStateToState_commands(commands)
+        let ret={}
+        call map(map(filter(split(a:commands, "\n")[1:], 'v:val[2] isnot# "b"'),
               \'
               \ {
               \   "cmd": v:val,
@@ -387,40 +412,38 @@ fun! vam#autoloading#Setup()
               \ }
               \'),
               \'
-              \ extend(state.commands, {v:val.cnr[0] : {
+              \ extend(ret, {v:val.cnr[0] : {
               \   "nargs": v:val.cnr[1],
               \   "range": v:val.cnr[2],
               \   "complete": matchstr(v:val.cmd, "^\\S\\+", 3+(max([len(v:val.cmd), 11])+1)+(1+4)+(max([len(v:val.cnr[2]), 5])+1)),
               \   "bang": v:val.bang,
               \ }})
               \')
-
-        redir => functions
-          silent function /.*
-        redir END
-        call map(split(functions, "\n"),
+        return ret
+      endfun
+      fun! s:PreStateToState_functions(functions)
+        let ret={}
+        call map(split(a:functions, "\n"),
               \'
               \ v:val[9] is# "<"
               \ ? 0
-              \ : extend(state.functions, {matchstr(v:val, "[^(]\\+", 9): 1})
+              \ : extend(ret, {matchstr(v:val, "[^(]\\+", 9): 1})
               \')
-
-        redir => autocommands
-          silent autocmd
-        redir END
-        let augroup=0
-        let auevent=0
-        let d={}
-        call map(split(autocommands, "\n"), '
+        return ret
+      endfun
+      fun! s:PreStateToState_autocommands(autocommands)
+        let d={'augroup': 0, 'auevent': 0}
+        let ret={}
+        call map(split(a:autocommands, "\n"), '
               \v:val =~# "\\v^\\S.*\\ {2}"
               \?extend(d, {"auevent": v:val[strridx(v:val, "  ")+2 :], "key": v:val})
               \:(v:val =~# "\\v^\\w+"
               \  ?extend(d, {"auevent": v:val, "key": v:val})
               \  :(v:val[0] is# " "
-              \    ?extend(state.autocommands, {
-              \       d.key : get(state.autocommands, d.key, {
+              \    ?extend(ret, {
+              \       d.key : get(ret, d.key, {
               \         "event": d.auevent,
-              \         "patterns": add(get(get(state.autocommands, d.key, {}), "patterns", []),
+              \         "patterns": add(get(get(ret, d.key, {}), "patterns", []),
               \                         matchstr(v:val, "\\v(\\.|\\S)+"))
               \       }),
               \     })
@@ -428,61 +451,76 @@ fun! vam#autoloading#Setup()
               \  )
               \)
               \')
+        return ret
+      endfun
+      fun! s:DiffingPreStateToState(oldprestate, newprestate)
+        let oldstate={'mappings': {}, 'abbreviations': {}, 'menus': {}, 'functions': {}, 'commands': {}, 'autocommands': {}}
+        let newstate=deepcopy(oldstate)
+        for key in keys(a:oldprestate)
+          if a:oldprestate[key] ==# a:newprestate[key]
+            let oldstate[key]=0
+            let newstate[key]=0
+          else
+            let oldstate[key]=s:PreStateToState_{key}(a:oldprestate[key])
+            let newstate[key]=s:PreStateToState_{key}(a:newprestate[key])
+          endif
+        endfor
 
-        return state
+        for [mode, mappings] in items(a:oldprestate.mappings)
+          if a:oldprestate.mappings[mode] !=# a:newprestate.mappings[mode]
+            let oldstate.mappings[mode]=s:PreStateToState_mappings_one(mode, a:oldprestate.mappings[mode])
+            let newstate.mappings[mode]=s:PreStateToState_mappings_one(mode, a:newprestate.mappings[mode])
+          endif
+        endfor
+        return [oldstate, newstate]
       endfun
 
       fun! s:PopulateDbFromStateDiff(file, oldstate, newstate)
         let file=a:file
-        let oldstate=a:oldstate
-        let newstate=a:newstate
+        let [oldstate, newstate]=s:DiffingPreStateToState(a:oldstate, a:newstate)
         let rtp=s:toscanfiles[file]
         let db=s:LoadDB(s:c.autoloading_db_file)
         let dbitem=db.plugins[rtp]
-        if newstate !=# oldstate
-          for key in ['mappings', 'abbreviations']
-            if newstate[key] !=# oldstate[key]
-              for [mode, newm] in items(newstate[key])
-                let oldm=get(oldstate[key], mode, {})
-                if oldm !=# newm
-                  if !has_key(dbitem[key], mode)
-                    let dbitem[key][mode]={}
-                  endif
-                  for [lhs, m] in items(filter(copy(newm), '!has_key(oldm, v:key)'))
-                    "! let dbitem[key][mode][lhs] = extend({'file': file}, m)
-                    "!-
-                    let dbitem[key][mode][lhs] = file
-                  endfor
-                endif
+        for key in ['mappings', 'abbreviations']
+          if newstate[key] isnot# 0
+            for [mode, newm] in items(newstate[key])
+              let oldm=oldstate[key][mode]
+              if !has_key(dbitem[key], mode)
+                let dbitem[key][mode]={}
+              endif
+              for [lhs, m] in items(filter(copy(newm), '!has_key(oldm, v:key)'))
+                "! let dbitem[key][mode][lhs] = extend({'file': file}, m)
+                "!-
+                let dbitem[key][mode][lhs] = file
               endfor
-            endif
+            endfor
+          endif
+        endfor
+
+        if newstate.commands isnot# 0
+          for [cmd, props] in items(filter(copy(newstate.commands), '!has_key(oldstate.commands, v:key)'))
+            let dbitem.commands[cmd]=extend({'file': file}, props)
           endfor
+        endif
 
-          if newstate.commands !=# oldstate.commands
-            for [cmd, props] in items(filter(copy(newstate.commands), '!has_key(oldstate.commands, v:key)'))
-              let dbitem.commands[cmd]=extend({'file': file}, props)
-            endfor
-          endif
+        if newstate.functions isnot# 0
+          for [function, fargs] in items(filter(copy(newstate.functions), '!has_key(oldstate.functions, v:key)'))
+            "! let dbitem.functions[function] = {'file': file, 'args': fargs}
+            "!-
+            let dbitem.functions[function] = file
+          endfor
+        endif
 
-          if newstate.functions !=# oldstate.functions
-            for [function, fargs] in items(filter(copy(newstate.functions), '!has_key(oldstate.functions, v:key)'))
-              "! let dbitem.functions[function] = {'file': file, 'args': fargs}
-              "!-
-              let dbitem.functions[function] = file
-            endfor
-          endif
+        if newstate.autocommands isnot# 0
+          for [key, aprops] in items(filter(copy(newstate.autocommands), '!has_key(oldstate.autocommands, v:key)'))
+            let dbitem.autocommands[key]=extend({'file': file}, aprops)
+          endfor
+        endif
 
-          if newstate.autocommands !=# oldstate.autocommands
-            for [key, aprops] in items(filter(copy(newstate.autocommands), '!has_key(oldstate.autocommands, v:key)'))
-              let dbitem.autocommands[key]=extend({'file': file}, aprops)
-            endfor
-          endif
-
-          if has('vim_starting')
-            let s:needs_write = 1
-          else
-            call s:WriteDB(db, s:c.autoloading_db_file)
-          endif
+        if has('vim_starting')
+          let s:needs_write = 1
+        else
+          call s:WriteDB(db, s:c.autoloading_db_file)
         endif
       endfun
 
@@ -493,13 +531,15 @@ fun! vam#autoloading#Setup()
         let saved_eventignore = &eventignore
         set eventignore+=SourceCmd
         if has_key(s:toscanfiles, file)
-          let oldstate = s:RecordState()
+          let oldprestate = s:RecordPreState()
         endif
         try
           execute 'source' fnameescape(a:path)
           if has_key(s:toscanfiles, file)
-            let newstate = s:RecordState()
-            call s:PopulateDbFromStateDiff(file, oldstate, newstate)
+            let newprestate = s:RecordPreState()
+            if oldprestate !=# newprestate
+              call s:PopulateDbFromStateDiff(file, oldprestate, newprestate)
+            endif
           endif
         finally
           let &eventignore = saved_eventignore
