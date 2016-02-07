@@ -77,7 +77,7 @@ VAMActivate PLUGIN_NAME PLUGIN_NAME ..
 call vam#ActivateAddons([PLUGIN_NAME], {})
 " use <c-x><c-p> to complete plugin names
 
-" OPTION 3: Create a file ~/.vim-srcipts putting a PLUGIN_NAME into each line
+" OPTION 3: Create a file ~/.vim-scripts putting a PLUGIN_NAME into each line
 " See lazy loading plugins section in README.md for details
 call vam#Scripts('~/.vim-scripts', {'tag_regex': '.*'})
 
