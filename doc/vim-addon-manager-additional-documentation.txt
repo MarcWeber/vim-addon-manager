@@ -1192,8 +1192,17 @@ URL: https://github.com/c9s/Vimana
 - Is able to do online searches on www.vim.org.
 - Has support for Makefiles and Rakefiles.
 
+
 ------------------------------------------------------------------------------
-14.7. Some other similar projects                               *VAM-vs-other*
+14.7. VAM vs vim-plug *VAM-vs-vimplug*
+
+URL: https://github.com/c9s/Vimana
+
+vim-plug allows lazy loading and parallel installation/updating.
+I don't know much about it
+
+------------------------------------------------------------------------------
+14.17. Some other similar projects                               *VAM-vs-other*
 
 There are other projects known which are not so popular as the above:
 1. janus (https://github.com/carlhuda/janus)
