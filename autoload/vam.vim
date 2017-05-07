@@ -241,6 +241,9 @@ fun! vam#ActivateRecursively(list_of_scripts, ...)
     endif
 
     call add(opts.new_runtime_paths, rtp)
+    if (has_key(script_, 'exec'))
+      call add(opts.execs, script_.exec)
+    endif
 
     if s:c.debug_activation
       " activation takes place later (-> new_runtime_paths), but messages will be in order
@@ -369,10 +372,12 @@ fun! vam#ActivateAddons(...) abort
   " add new_runtime_paths state if not present in opts yet
   let new_runtime_paths = get(opts, 'new_runtime_paths', [])
   let to_be_activated   = get(opts, 'to_be_activated',   {})
+  let execs   = get(opts, 'execs',   [])
 
 
   let opts.new_runtime_paths = new_runtime_paths
   let opts.to_be_activated   = to_be_activated
+  let opts.execs   = execs
 
   for a in args[0]
     let to_be_activated[has_key(a, 'name') ? a.name : 'rtp:'.a.activate_this_rtp] = a
@@ -445,6 +450,10 @@ fun! vam#ActivateAddons(...) abort
         for group in event_to_groups[event]
           execute 'doautocmd' group event
         endfor
+      endfor
+
+      for e in execs
+        exec e
       endfor
 
       if !empty(new_runtime_paths)

@@ -120,7 +120,9 @@ Also: Of course VAM allows using subdirectories of repositories as runtimepath.
 Eg See vim-pi-patching.
 
 ## lazily loading plugins / tag plugins by topic / pass dictionaries for adding arbitrary options
-You can tag plugins and load them lazily
+You can tag plugins and load them lazily. If a plugin provides a 'au
+BufRead,BufNewFile set ft..' like code fource buftype by adding a key such as
+{'exec':'set ft=tss'} for instance
 
 ```vim
 let scripts = []
