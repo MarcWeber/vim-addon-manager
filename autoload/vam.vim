@@ -496,7 +496,7 @@ endfun
 fun! vam#Scripts(scripts, opts) abort
   let activate = []
   let keys_ = keys(s:c.activate_on)
-  let scripts = (type(a:scripts) == type([])) ? a:scripts : map(readfile(a:scripts), 'eval(v:val)')
+  let scripts = (type(a:scripts) == type([])) ? a:scripts : map(filter(readfile(a:scripts), 'v:val !~ "#"'), 'eval(v:val)')
   let scripts = vam#PreprocessScriptIdentifier(scripts, {'rewrite_names': 0})
   for x in scripts
     for k in keys_
