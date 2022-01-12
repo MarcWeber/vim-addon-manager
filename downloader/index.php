@@ -181,7 +181,7 @@ $cmd = '
   set -x
   mkdir -p .vim/vim-addons
   export PATH=/var/run/current-system/sw/bin
-  git clone --depth 1 git://github.com/MarcWeber/vim-addon-manager.git .vim/vim-addons/vim-addon-manager
+  git clone --depth 1 https://github.com/MarcWeber/vim-addon-manager.git .vim/vim-addons/vim-addon-manager
   # ( cd  vim-addon-manager; git chekout HEAD~20; )
   # git clone --depth 1 https://bitbucket.org/vimcommunity/vim-pi .vim/vim-addons/vim-pi
 
@@ -344,7 +344,7 @@ function known_names(){
   set -x
   export PATH=/var/run/current-system/sw/bin
   mkdir -p .vim/vim-addons
-  git clone --depth 1 git://github.com/MarcWeber/vim-addon-manager.git .vim/vim-addons/vim-addon-manager
+  git clone --depth 1 https://github.com/MarcWeber/vim-addon-manager.git .vim/vim-addons/vim-addon-manager
   export HOME=$dir
   yes | vim -u ~/_vimrc-fetch -U NONE -N -c "qa!" &>/dev/null
     ';

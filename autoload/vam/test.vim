@@ -20,7 +20,7 @@ fun! vam#test#Test()
 
   " test git
   call feedkeys("y")
-  let plugin_sources['vim-addon-views'] = { 'type' : 'git', 'url' : 'git://github.com/MarcWeber/vim-addon-views.git' }
+  let plugin_sources['vim-addon-views'] = { 'type' : 'git', 'url' : 'https://github.com/MarcWeber/vim-addon-views.git' }
   call vam#ActivateAddons(["vim-addon-views"])
 
   " test subversion

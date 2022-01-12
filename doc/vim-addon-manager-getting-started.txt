@@ -145,7 +145,7 @@ commented version ~
                           \"the info you're looking for in reasonable ".
                           \"time ask maintainers to improve documentation")
               call mkdir(a:plugin_root_dir, 'p')
-              execute '!git clone --depth=1 git://github.com/MarcWeber/vim-addon-manager '.
+              execute '!git clone --depth=1 https://github.com/MarcWeber/vim-addon-manager '.
                           \       shellescape(a:plugin_root_dir, 1).'/vim-addon-manager'
               " VAM runs helptags automatically when you install or update 
               " plugins
@@ -216,7 +216,7 @@ minimal version ~
           let &rtp.=(empty(&rtp)?'':',').c.plugin_root_dir.'/vim-addon-manager'
           " let g:vim_addon_manager = { your config here see "commented version" example and help
           if !isdirectory(c.plugin_root_dir.'/vim-addon-manager/autoload')
-            execute '!git clone --depth=1 git://github.com/MarcWeber/vim-addon-manager '
+            execute '!git clone --depth=1 https://github.com/MarcWeber/vim-addon-manager '
                         \       shellescape(c.plugin_root_dir.'/vim-addon-manager', 1)
           endif
           call vam#ActivateAddons([the plugin names], {'auto_install' : 0})
@@ -293,7 +293,7 @@ NOTES: ~
    and need to checkout github urls by http://): >
      let g:vim_addon_manager = {'scms': {'git': {}}}
      fun! MyGitCheckout(repository, targetDir)
-         let a:repository.url = substitute(a:repository.url, '^git://github', 'http://github', '')
+         let a:repository.url = substitute(a:repository.url, '^https://github', 'http://github', '')
          return vam#utils#RunShell('git clone --depth=1 $.url $p', a:repository, a:targetDir)
      endfun
      let g:vim_addon_manager.scms.git.clone=['MyGitCheckout']
@@ -364,8 +364,8 @@ types of names:
       idea.
 
   2) Name which gets rewritten internally (see |VAM-name_rewriting|) >
-       github:{Name}      =>  {"type": "git", "url": "git://github.com/{Name}/vim-addon-{Name}}
-       github:{N}/{Repo}  =>  {"type": "git", "url": "git://github.com/{N}/{Repo}"}
+       github:{Name}      =>  {"type": "git", "url": "https://github.com/{Name}/vim-addon-{Name}}
+       github:{N}/{Repo}  =>  {"type": "git", "url": "https://github.com/{N}/{Repo}"}
        git:{GIT_URL}      =>  {"type": "git", "url": "GIT_URL"}
 <   Don't use if you expect others to create plugins depending on yours. Add 
     your plugin to |vim-pi| instead.

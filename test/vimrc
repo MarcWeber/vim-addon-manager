@@ -3,7 +3,7 @@ let g:vim_addon_manager.known='vam-test-known'
 if executable('git')
     let g:vim_addon_manager.plugin_sources={
                 \'vam-test-known': {'type': 'git',
-                \                    'url': 'git://vimpluginloader.git.sourceforge.net/gitroot/vimpluginloader/vam-test-repository/',},
+                \                    'url': 'https://vimpluginloader.git.sourceforge.net/gitroot/vimpluginloader/vam-test-repository/',},
             \}
 else
     let g:vim_addon_manager.plugin_sources={
