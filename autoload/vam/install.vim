@@ -119,6 +119,11 @@ fun! vam#install#CompleteRepoData(repository, opts)
       return 0
     endif
   endif
+
+  if has_key(repository, 'url') && repository.url =~# 'git://github.com'
+          let repository.url = substitute(repository.url, '^git:\/\/', 'https://', '')
+  end
+
   call extend(repository, a:repository)
   return repository
 endfun
