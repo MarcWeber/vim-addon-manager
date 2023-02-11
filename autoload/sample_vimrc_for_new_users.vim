@@ -23,6 +23,8 @@
 " or .gvimrc exists. Explicitly listing it here for completness.
 set nocompatible
 
+" for YouCompleteMe etc
+set encoding=utf-8
 
 " You should have this in your .vimrc: 
 " (The {{ { starts a fold.
