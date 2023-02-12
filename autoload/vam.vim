@@ -428,7 +428,7 @@ fun! vam#ActivateAddons(...) abort
       for rtp in new_runtime_paths
         call vam#GlobThenSource(rtp, 'plugin/**/*.vim')
         call vam#GlobThenSource(rtp, 'after/plugin/**/*.vim')
-        call vam#GlobThenSource(rtp, 'lua/*.lua')
+        call vam#GlobThenSource(rtp, 'plugin/**/*.lua')
       endfor
 
       " Now find out which au groups are new and run them manually, cause
