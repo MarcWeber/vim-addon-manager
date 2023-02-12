@@ -428,6 +428,7 @@ fun! vam#ActivateAddons(...) abort
       for rtp in new_runtime_paths
         call vam#GlobThenSource(rtp, 'plugin/**/*.vim')
         call vam#GlobThenSource(rtp, 'after/plugin/**/*.vim')
+        call vam#GlobThenSource(rtp, 'lua/*.lua')
       endfor
 
       " Now find out which au groups are new and run them manually, cause
@@ -497,6 +498,8 @@ fun! vam#Scripts(scripts, opts) abort
   let activate = []
   let keys_ = keys(s:c.activate_on)
   let scripts = (type(a:scripts) == type([])) ? a:scripts : map(filter(readfile(a:scripts), 'v:val !~ "#"'), 'eval(v:val)')
+  " filter expr - is eval evil ? You trust code anyway
+  call filter(scripts, 'type(v:val) != 4 || !has_key(v:val, "expr") || eval(v:val["expr"])')
   let scripts = vam#PreprocessScriptIdentifier(scripts, {'rewrite_names': 0})
   for x in scripts
     for k in keys_
@@ -602,7 +605,11 @@ endfun
 
 fun! vam#SourceFiles(fs)
   for file in a:fs
-    exec 'source '.fnameescape(file)
+    if file =~ '.vim$'
+      exec 'source '.fnameescape(file)
+    else
+      exec 'luafile '.fnameescape(file)
+    endif
   endfor
 endfun
 
