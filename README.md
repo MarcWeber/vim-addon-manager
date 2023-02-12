@@ -19,6 +19,9 @@ then you may also want to have a look at [vim-git-wiki](http://vim-wiki.mawercer
 VAM is well supported by at least 2 maintainers. Try github tickets or Vim irc
 channel on freenode.
 
+## NEOVIM SUPPORT
+VAMActivate after startup does load plugin/\*\*/\*.lua files.
+
 ## PLUGIN_NAME - What is a plugin ?
 A plugin is set of files having Vim's rtp directory layout (plugin/, ftplugin/, ...).
 It is identified by name which will be looked up by vim-pi or a url such as
@@ -243,6 +246,36 @@ This would require rewriting quite a lot of code.
 
 Each call of VAMActivate takes about 1ms - if that's too much pass many plugin
 names at once.
+
+## FUTURE
+VAM suffers from installing one plugin after the other which is slowing down.
+It should install in parallel/in the background.
+Some plugins like YouCompleteMe might even depend on the Python interpreter to
+be used (conda env)
+
+Not all people use VAM.
+VAMActivate can be used on demand.
+So how should this all move into the future?
+using neovim's async/await? or sync'd install
+allowing users to 'plug' or whatever install a plugin?
+
+install_activate_plugin_wait('github:foo/bar')
+install_activate_plugin('github:foo/bar', clb)
+user could choose whether he wants to be asked before getting new code and
+activate it - there could be security issues.
+
+Then people could use the plugin manager they want and locations they want
+and they could rewrtite foo/bar by baz/bar if there is need ?
+
+[... TODO ... ]
+
+A totally different approach would be a cross language/cross platform package
+manager with a declarative dependency file {"requires": [...]} like.
+Then an external tool could be taking care of.
+Then updating all would be like conda ..
+
+This would also allow linux systems to package everything automatically.
+So I somewhat like this idea
 
 ## Related work
 
