@@ -21,6 +21,7 @@ channel on freenode.
 
 ## NEOVIM SUPPORT
 VAMActivate after startup does load plugin/\*\*/\*.lua files.
+lazy.nvim plugin manager might be worth looking at, too
 
 ## PLUGIN_NAME - What is a plugin ?
 A plugin is set of files having Vim's rtp directory layout (plugin/, ftplugin/, ...).
