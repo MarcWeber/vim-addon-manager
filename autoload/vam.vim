@@ -504,7 +504,7 @@ endfun
 fun! vam#Scripts(scripts, opts) abort
   let activate = []
   let keys_ = keys(s:c.activate_on)
-  let scripts = (type(a:scripts) == type([])) ? a:scripts : map(filter(readfile(a:scripts), 'v:val !~ "#"'), 'eval(v:val)')
+  let scripts = (type(a:scripts) == type([])) ? a:scripts : ( get(a:opts, "optional_file", 0) && !file_readable(a:scripts) ? [] : map(filter(readfile(a:scripts), 'v:val !~ "#"'), 'eval(v:val)'))
   " filter expr - is eval evil ? You trust code anyway
   call filter(scripts, 'type(v:val) != 4 || !has_key(v:val, "expr") || eval(v:val["expr"])')
   let scripts = vam#PreprocessScriptIdentifier(scripts, {'rewrite_names': 0})
@@ -776,5 +776,13 @@ if s:c.lazy_loading_au_commands
   au FileType *           call vam#ActivateAddons(filter(copy(s:c.activate_on.ft_regex      ), string(expand('<amatch>')).' =~ v:val.ft_regex'      ), {'force_loading_plugins_now':1})
   au BufNewFile,BufRead * call vam#ActivateAddons(filter(copy(s:c.activate_on.filename_regex), string(expand('<amatch>')).' =~ v:val.filename_regex'), {'force_loading_plugins_now':1})
 endif
+
+let s:file_cache = {}
+fun! vam#FileContains(file, regex)
+  if !has_key(a:file, s:file_cache)
+    let s:file_cache[a:file] = file_readable(a:file) ? join(readfile(a:file), "\n") : ""
+  endif
+  return s:file_cache[a:file] =~ a:regex
+endf
 
 " vim: et ts=8 sts=2 sw=2
