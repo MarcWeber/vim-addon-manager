@@ -441,7 +441,7 @@ Follow these steps:
                                             *addon-info.json* *addon-info.txt*
 
 Some documentation will be moved to vim-wiki:
-http://vim-wiki.mawercer.de/wiki/topic/addon-info.json.html
+https://web.archive.org/web/20230203235330/http://vim-wiki.mawercer.de/wiki/topic/addon-info.json.html
 
 Example:  >
   {
