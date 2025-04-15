@@ -509,6 +509,7 @@ fun! vam#Scripts(scripts, opts) abort
   call filter(scripts, 'type(v:val) != 4 || !has_key(v:val, "expr") || eval(v:val["expr"])')
   let scripts = vam#PreprocessScriptIdentifier(scripts, {'rewrite_names': 0})
   for x in scripts
+    if type(x) == 2 && trim(x) == "" | continue | endif
     for k in keys_
       if has_key(x, k)
         call add(s:c.activate_on[k], x)
