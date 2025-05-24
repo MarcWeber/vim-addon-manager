@@ -504,7 +504,7 @@ endfun
 fun! vam#Scripts(scripts, opts) abort
   let activate = []
   let keys_ = keys(s:c.activate_on)
-  let scripts = (type(a:scripts) == type([])) ? a:scripts : ( get(a:opts, "optional_file", 0) && !file_readable(a:scripts) ? [] : map(filter(readfile(a:scripts), 'v:val !~ "#"'), 'eval(v:val)'))
+  let scripts = (type(a:scripts) == type([])) ? a:scripts : ( get(a:opts, "optional_file", 0) && !file_readable(a:scripts) ? [] : map(filter(readfile(a:scripts), 'v:val !~ "^\\s*#\\|^\\s*$"'), 'eval(v:val)'))
   " filter expr - is eval evil ? You trust code anyway
   call filter(scripts, 'type(v:val) != 4 || !has_key(v:val, "expr") || eval(v:val["expr"])')
   let scripts = vam#PreprocessScriptIdentifier(scripts, {'rewrite_names': 0})
@@ -780,7 +780,7 @@ endif
 
 let s:file_cache = {}
 fun! vam#FileContains(file, regex)
-  if !has_key(a:file, s:file_cache)
+  if !has_key(s:file_cache, a:file)
     let s:file_cache[a:file] = file_readable(a:file) ? join(readfile(a:file), "\n") : ""
   endif
   return s:file_cache[a:file] =~ a:regex
