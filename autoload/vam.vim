@@ -483,6 +483,13 @@ fun! vam#ActivateAddons(...) abort
   endif
 endfun
 
+" TODO: Maybe merge with old experimental shimming code ?
+fun! vam#LoadAndRun(cmd, shim_code, args) abort
+  execute 'delcommand ' . a:cmd
+  execute a:shim_code
+  execute a:cmd . ' ' . a:args
+endf
+
 " intended usage:
 "
 " argument scripts:
@@ -501,6 +508,7 @@ endfun
 "   {'name': 'syntastic', 'on_ft': '\.c$"}
 "   {'name': 'povray', 'on_name': '.pov$'}
 "   {'name': 'snippets', 'tag': 'java ruby'}
+"   {'name': 'mason', 'shim': {"commands": ['Mason', 'MasonLog', 'MasonUninstallAll', 'MasonInstall', 'MasonUninstall', 'MasonUpdate'], " load": "lua require(\"mason\").setup({ ui = { icons = { package_installed = \"✓\", package_pending = \"➜\", package_uninstalled = \"✗\" } } })" } }
 fun! vam#Scripts(scripts, opts) abort
   let activate = []
   let keys_ = keys(s:c.activate_on)
@@ -521,6 +529,13 @@ fun! vam#Scripts(scripts, opts) abort
     else
       call add(activate, x)
     endif
+    if type(x) == 4 && has_key(x, 'shim')
+      if has_key(x.shim, 'commands')
+        for cmd_name in x.shim.commands
+          execute 'command! -nargs=* ' . cmd_name . ' call vam#LoadAndRun("' . cmd_name . '", ' . string(x.shim.load) . ', <q-args>)'
+        endfor
+      endif
+    end
   endfor
 
   if has_key(a:opts, 'tag_regex')
