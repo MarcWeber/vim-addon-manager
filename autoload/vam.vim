@@ -794,11 +794,18 @@ if s:c.lazy_loading_au_commands
 endif
 
 let s:file_cache = {}
-fun! vam#FileContains(file, regex)
+
+fun! vam#FileContains(file, ...)
   if !has_key(s:file_cache, a:file)
     let s:file_cache[a:file] = file_readable(a:file) ? join(readfile(a:file), "\n") : ""
   endif
-  return s:file_cache[a:file] =~ a:regex
+  let l:content = s:file_cache[a:file]
+  for l:regex in a:000
+    if l:content !~ l:regex
+      return 0
+    endif
+  endfor
+  return 1
 endf
 
 " vim: et ts=8 sts=2 sw=2
