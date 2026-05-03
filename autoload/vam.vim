@@ -236,6 +236,15 @@ fun! vam#ActivateRecursively(list_of_scripts, ...)
       call vam#ActivateDependencies(opts, get(info, 'dependencies', {}), name)
 
       let s:c.activated_plugins[name] = 1
+      " Run init_lua code for Neovim plugins (executes on activation, including lazy-loaded)
+      if has_key(script_, 'init_lua') && !empty(script_.init_lua) && has('nvim')
+        call add(opts.init_lua, script_.init_lua)
+      endif
+      if has_key(script_, 'init_viml') && !empty(script_.init_viml)
+        if type(script_.init_viml) == type('')
+          call add(opts.init_viml, script_.init_viml)
+        endif
+      endif
       " source plugin/* files ?
       let rtp = vam#PluginRuntimePath(pluginRoot, info)
     endif
@@ -389,11 +398,15 @@ fun! vam#ActivateAddons(...) abort
 
   " add new_runtime_paths state if not present in opts yet
   let new_runtime_paths = get(opts, 'new_runtime_paths', [])
+  let init_viml = get(opts, 'init_viml', [])
+  let init_lua = get(opts, 'init_lua', [])
   let to_be_activated   = get(opts, 'to_be_activated',   {})
   let execs   = get(opts, 'execs',   [])
 
 
   let opts.new_runtime_paths = new_runtime_paths
+  let opts.init_viml = init_viml
+  let opts.init_lua = init_lua
   let opts.to_be_activated   = to_be_activated
   let opts.execs   = execs
 
@@ -420,6 +433,13 @@ fun! vam#ActivateAddons(...) abort
     for rtp in new_runtime_paths
       " filetype off/on would do the same ?
       call vam#GlobThenSource(rtp, 'ftdetect/*.vim')
+    endfor
+
+    for lua in init_lua
+      call luaeval("(function() \n". lua ."\nend)()")
+    endfor
+    for viml in init_viml
+      execute viml
     endfor
 
     " HACKS source files which Vim only sources at startup (before VimEnter)
