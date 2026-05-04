@@ -79,4 +79,7 @@ TODO
 - ft_regex
 - filename_regex
 - make sure lazy = true opts etc can be passed
+- When lazy loading a plugin with plugin/*.vim files
+  after startup must those files be sourced like
+  vam#Activate does ?
 -> https://github.com/MarcWeber/nvim.lazy-vam-compat-layer

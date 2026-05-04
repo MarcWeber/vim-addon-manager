@@ -152,6 +152,9 @@ call add(scripts, {'activate_this_rtp': 'absolute-rtp-path'})
 call vam#Scripts(scripts, {'tag_regex': 'c-dev'})
 
 " activate all tagged scripts immediately
+" mind ./CO_EXISTING_WITH_LAZY_NVIM.md
+" recommend way now is to write the list of plugins
+" into a .lua file
 call vam#Scripts([], {'tag_regex': '.*'})
 ```
 Instead of adding dictionaries to a local list you can make VAM read them from a file
@@ -282,6 +285,10 @@ So I somewhat like this idea
 
 ## Related work
 
+[vim.pack](https://github.com/neovim/neovim/issues/34763)
+
+[lazy.nvim](https://github.com/folke/lazy.nvim) See ./CO_EXISTING_WITH_LAZY_NVIM.md
+
 [vim-wiki's list of alternatives](http://vim-wiki.mawercer.de/wiki/topic/vim%20plugin%20managment.html)
 
 [debian’s vim plugin manager](http://packages.debian.org/sid/vim-addon-manager)
@@ -290,3 +297,7 @@ The author (Jamessan) is fine with this project sharing the same name.
 [vundle](http://github.com/gmarik/Vundle.vim) Referencing it here because
 gmarik taught us how important it is to have both: A simple nice user interface
 and a short descriptive, complete README.md - Other managers see link above.
+
+loosely related: brew, chocolately, scoop, winget apt, brew, buck2,
+bazel, [nixpkgs](https://github.com/nixos/nixpkgs),
+[libsolv](https://github.com/opensuse/libsolv), ...
