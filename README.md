@@ -53,7 +53,7 @@ set nocompatible | filetype indent plugin on | syn on
 fun! SetupVAM()
   let c = get(g:, 'vim_addon_manager', {})
   let g:vim_addon_manager = c
-  let c.plugin_root_dir = expand('$HOME', 1) . '/.vim/vim-addons'
+  let c.plugin_root_dir = get(c, 'plugin_root_dir', expand('$HOME', 1) . '/.vim/vim-addons')
 
   " Force your ~/.vim/after directory to be last in &rtp always:
   " let g:vim_addon_manager.rtp_list_hook = 'vam#ForceUsersAfterDirectoriesToBeLast'
