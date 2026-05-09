@@ -301,3 +301,8 @@ and a short descriptive, complete README.md - Other managers see link above.
 loosely related: brew, chocolately, scoop, winget apt, brew, buck2,
 bazel, [nixpkgs](https://github.com/nixos/nixpkgs),
 [libsolv](https://github.com/opensuse/libsolv), ...
+
+[packspec](https://github.com/neovim/packspec)
+Similar ideas like vim-addon-manager and maybe one steps towards a unified package manager .. :) YEAH
+So I guess upstream of addon-info.json like files should be
+discussed there.
